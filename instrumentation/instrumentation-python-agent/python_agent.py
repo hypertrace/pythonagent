@@ -1,4 +1,4 @@
-# flask_telemetry_agent.py
+# python_agent.py
 import flask
 import requests
 
