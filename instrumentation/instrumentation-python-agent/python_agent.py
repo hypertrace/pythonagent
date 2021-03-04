@@ -1,4 +1,5 @@
 # flask_telemetry_agent.py
+# Issue2 - Working example of python opentelemetry agent.
 import flask
 import requests
 
