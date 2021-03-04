@@ -1,5 +1,5 @@
-# pythonagent
-Hypertrace Python agent
+# Architecture
+![diagram](images/HyperTrace%20Agent%20Architecture.jpeg)
 
 # Notes
 
