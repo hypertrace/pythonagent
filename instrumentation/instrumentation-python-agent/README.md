@@ -4,12 +4,12 @@
 
 
 
-* Create working example of python opentelemetry agent. feature
-* Add  trace
-* Add python agent startup code.
-* Configure Agent to track HTTP request and responses to / from web services.
-* Create a instrumentation package designed for python 
-* Activate  each instrumentation during its initialization.
+* A working Python opentelemetry agent. 
+* Added  trace
+* Added python agent at startup code.
+* Configured Agent to track HTTP request and responses to / from web services.
+* Created a instrumentation package designed for python 
+* Activated  each instrumentation during its initialization.
 
 ## Walkthrough
 
