@@ -1,5 +1,5 @@
 # Architecture
-![diagram](images/HyperTrace%20Agent%20Architecture.jpeg)
+![diagram](images/HyperTrace%20Agent%20Architecture.jpg)
 
 # Notes
 
