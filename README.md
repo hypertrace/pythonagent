@@ -9,6 +9,7 @@
 * Initially extend the [flask framework](https://flask.palletsprojects.com/en/1.1.x/) instrumentation module to capture request and response headers and message bodies. Other instrumentation modules will be done later.
 * The span data object for the extended isntrumentation module must match the [Hypertrace specification](https://github.com/hypertrace/specification).
 * The Hypertrace Python Agent configuration must match [Agent Configurtion schema](https://github.com/hypertrace/agent-config).
+* Use existing test framework in opentelmetry agent to the greatest extent possible.
 
 # Important Links
 * [DJango Python Instrumentation Entrypoint](https://github.com/open-telemetry/opentelemetry-python-contrib/blob/main/instrumentation/opentelemetry-instrumentation-django/src/opentelemetry/instrumentation/django/__init__.py#L59)
