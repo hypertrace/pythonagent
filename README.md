@@ -1,6 +1,10 @@
 # Architecture
 ![diagram](images/HyperTrace%20Agent%20Architecture.jpg)
 
+# Assumptions
+* Tested with [Python v3.7.9](https://www.python.org/downloads/release/python-379/).
+
+
 # Requirements
 * [Python OTel Python Agent](https://github.com/open-telemetry/opentelemetry-python) must not be modified.
 * [Python OTel Python Agent](https://github.com/open-telemetry/opentelemetry-python) must be installed (and usable) through pip.
