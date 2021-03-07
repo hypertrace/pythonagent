@@ -32,3 +32,8 @@ class AgentInit:
     )
     FlaskInstrumentorWrapper().instrument_app(app)
     RequestsInstrumentor().instrument()
+
+  def flaskRequest(self, name, url):
+    tracer = trace.get_tracer('tester')
+    with tracer.start_as_current_span(name):
+      requests.get(url)

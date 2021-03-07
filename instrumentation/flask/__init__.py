@@ -13,4 +13,5 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
 
   def instrument_app(self, app):
     logging.debug('Entering FlaskInstrumentorWrapper.instument_app().')
+    super().introspect(app)
     super().instrument_app(app)
