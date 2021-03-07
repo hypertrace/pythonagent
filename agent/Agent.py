@@ -1,19 +1,21 @@
-# File: Agent.py
-# Author: Nitin Sahai
-# Date: 03/04/2021
-# Notes
-#
 import sys
 import os.path
 sys.path.append(
     os.path.abspath(os.path.join(os.path.dirname(__file__))))
 from init import AgentInit
+import logging
 
 class Agent:
   def __init__(self):
-    print('Initializing Agent.');
+    logging.basicConfig(filename='agent.log', level=logging.DEBUG)
+    logging.debug('Initializing Agent.');
     self._init = AgentInit.AgentInit()
 
   def registerFlaskApp(self, app):
-    print('Calling registerFlaskApp.')
+    logging.debug('Calling registerFlaskApp.')
     self._init.flaskInit(app)
+    self._init.dumpConfig()
+
+  def flaskRequest(self, name, url):
+    logging.debug('Calling flaskRequest().')
+    self._init.flaskRequest(name,url)
