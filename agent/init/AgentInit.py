@@ -1,29 +1,34 @@
-# File: AgentInit.py
-# Author: Nitin Sahai
-# Date: 03/04/2021
-# Notes
-#
 from opentelemetry import trace
-from opentelemetry.instrumentation.flask import FlaskInstrumentor
+#from opentelemetry.instrumentation.flask import FlaskInstrumentor
+# The HyperTrace wrapper around the opentelementry flask instrumentation wrapper
+from instrumentation.flask import FlaskInstrumentorWrapper
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import (
     ConsoleSpanExporter,
     SimpleExportSpanProcessor,
 )
+import logging
 
 class AgentInit:
   def __init__(self):
-    print('Initializing AgentInit object.')
-  def dumpConfig():
-    print('Calling DumpConfig().')
-    print('RCBJ0001') 
+    logging.debug('Initializing AgentInit object.')
+    self._moduleInitialized = {
+      "flask": False,
+      "grpc": False 
+    }
+
+  def dumpConfig(self):
+    logging.debug('Calling DumpConfig().')
+    for m in self._moduleInitialized:
+      logging.debug(m + ':' + str(self._moduleInitialized[m]))
 
   def flaskInit(self, app):
-    print('Calling flaskInit().')
+    logging.debug('Calling AgentInit.flaskInit().')
+    self._moduleInitialized['flask'] = True
     trace.set_tracer_provider(TracerProvider())
     trace.get_tracer_provider().add_span_processor(
       SimpleExportSpanProcessor(ConsoleSpanExporter())
     )
-    FlaskInstrumentor().instrument_app(app)
+    FlaskInstrumentorWrapper().instrument_app(app)
     RequestsInstrumentor().instrument()
