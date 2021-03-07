@@ -26,10 +26,7 @@ logging.info('Agent initialized.')
 @app.route("/")
 def hello():
   logging.info('Serving request for /.')
-#    tracer = trace.get_tracer(__name__)
-#    with tracer.start_as_current_span("demo-request"):
-#        requests.get("https://httpbin.org/anything")
+#  agent.flaskRequest('flask-test-request', 'http://localhost/')
   return "hello"
-
 
 app.run(debug=True, port=5000)
