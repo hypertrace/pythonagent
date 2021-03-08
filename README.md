@@ -97,3 +97,6 @@ Calling flaskInit().
 * [Otel Python Contributor](https://github.com/open-telemetry/opentelemetry-python-contrib )
 * [Java Agent](https://github.com/hypertrace/javaagent)
 * [golang Agent](https://github.com/hypertrace/goagent)
+
+# Instrumented Modules Documentation
+* [Flask](https://flask.palletsprojects.com/en/1.1.x/api)
