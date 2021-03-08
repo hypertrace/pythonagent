@@ -6,6 +6,6 @@
 #
 # This runs the flask test on the demo HyperTrace Python Agent
 #
-curl -X GET http://localhost:5000/
+curl -X GET http://localhost:5000/ -H "tester1:tester1" -H "tester2:tester2" -v
 echo ""
 exit 0
