@@ -21,10 +21,11 @@ def introspect(obj):
 def _hypertrace_before_request(app):
   def hypertrace_before_request():
     logging.debug('Entering _hypertrace_before_request().');
-    logging.debug('Dumping _app.')
-    introspect(app)
+#    logging.debug('Dumping _app.')
+#    introspect(app)
     for h in flask.request.headers:
       logging.debug(str(h))
+    logging.debug('Request Body: ' + str(flask.request.data))
 
   return hypertrace_before_request
 
@@ -35,13 +36,14 @@ def _hypertrace_teardown_request(app):
     logging.debug('Dumping response.')
     introspect(response)
     logging.debug('Dumping app.')
-    introspect(app)
-    introspect(response)
+#    introspect(app)
 #    print(type(response.status_code))
 #    print(type(response.headers))
 #    introspect(str(flask.Response.get_data()))
-#    for h in response.headers:
-#      logging.debug(str(h))
+    for h in response.headers:
+      logging.debug(str(h))
+    logging.debug('Response Body: ' + str(response.data))
+    return response
 
   return hypertrace_teardown_request
 
@@ -57,7 +59,7 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
     super().introspect(app)
     self._app = app
     app.before_request(_hypertrace_before_request(self._app))
-    app.teardown_request(_hypertrace_teardown_request(self._app))
+    app.after_request(_hypertrace_teardown_request(self._app))
 
   def _uninstrument(self, **kwargs):
     logging.debug('Entering FlaskInstrumentorWrapper._uninstrument()');
