@@ -78,6 +78,8 @@ Calling flaskInit().
 }
 127.0.0.1 - - [04/Mar/2021 17:54:44] "GET / HTTP/1.1" 200 -
 ```
+The python agent output is now written to a log file managed by the logging module. This can currently be found in ${REPO_HOME}/test/agent.log.
+
 # Requirements
 * [Python OTel Python Agent](https://github.com/open-telemetry/opentelemetry-python) must not be modified.
 * [Python OTel Python Agent](https://github.com/open-telemetry/opentelemetry-python) must be installed (and usable) through pip.
