@@ -30,12 +30,17 @@ message AgentConfig {
 
     // javaagent has the configs specific to javaagent
     JavaAgent javaagent = 6;
+
+    // resource_attributes map define the static list of resources which is configured on the tracer
+    map<string, string> resource_attributes = 7;
 }
 
 // Reporting covers the options related to the mechanics for sending data to the
 // tracing server o collector.
 message Reporting {
-    // endpoint represents the endpoint for reporting the traces e.g. http://api.traceable.ai:9411/api/v2/spans
+    // endpoint represents the endpoint for reporting the traces
+    // For ZIPKIN reporter type use http://api.traceable.ai:9411/api/v2/spans
+    // For OTLP reporter type use http://api.traceable.ai:4317
     google.protobuf.StringValue endpoint = 1;
 
     // when `true`, connects to endpoints over TLS.
