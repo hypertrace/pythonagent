@@ -1,9 +1,11 @@
 from opentelemetry import trace
 #from opentelemetry.instrumentation.flask import FlaskInstrumentor
 # The HyperTrace wrapper around the opentelementry flask instrumentation wrapper
-from instrumentation.flask import FlaskInstrumentorWrapper
+# from instrumentation.flask import FlaskInstrumentorWrapper
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
 from opentelemetry.sdk.trace import TracerProvider
+from config import HypertraceConfig
+from config import EnvironmentConfig
 from opentelemetry.sdk.trace.export import (
     ConsoleSpanExporter,
     SimpleExportSpanProcessor,
