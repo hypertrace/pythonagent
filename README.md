@@ -107,3 +107,4 @@ The python agent output is now written to a log file managed by the logging modu
 
 # Build agent-config config.proto
 * run: ```protoc --python_out=../agent-config-python -Itools/env-vars-generator/protobuf/src -I. config.proto```
+* Python protobuf [example](https://developers.google.com/protocol-buffers/docs/pythontutorial)
