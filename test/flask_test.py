@@ -17,7 +17,7 @@ logging.info('Initializing agent.')
 # Code snippet here represents the current initialization logic
 #
 logging.info('Initializing agent.')
-agent = Agent.Agent()
+agent = Agent()
 agent.registerFlaskApp(app)
 #
 # End initialization logic for Python Agent
