@@ -108,3 +108,23 @@ The python agent output is now written to a log file managed by the logging modu
 # Build agent-config config.proto
 * run: ```protoc --python_out=../agent-config-python -Itools/env-vars-generator/protobuf/src -I. config.proto```
 * Python protobuf [example](https://developers.google.com/protocol-buffers/docs/pythontutorial)
+
+# Sample Agent config file
+```
+reporting:
+  endpoint: "http://localhost:9411/api/v2/spans"
+  secure: false
+data_capture:
+  http_headers:
+    request: true
+    response: true
+  http_body:
+    request: true
+    response: true
+  rpc_metadata:
+    request: true
+    response: true
+  rpc_body:
+    request: true
+    response: true
+```
