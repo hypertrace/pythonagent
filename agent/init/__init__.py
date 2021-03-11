@@ -40,10 +40,10 @@ class AgentInit:
     )
     self._flaskInstrumentorWrapper = FlaskInstrumentorWrapper()
     self._flaskInstrumentorWrapper.instrument_app(app)
-    self._flaskInstrumentorWrapper.setProcessRequestHeaders(str(hypertraceConfig.DATA_CAPTURE_HTTP_HEADERS_REQUEST))
-    self._flaskInstrumentorWrapper.setProcessResponseHeaders(str(hypertraceConfig.DATA_CAPTURE_HTTP_HEADERS_RESPONSE))
-    self._flaskInstrumentorWrapper.setProcessRequestBody(str(hypertraceConfig.DATA_CAPTURE_HTTP_BODY_REQUEST))
-    self._flaskInstrumentorWrapper.setProcessResponseBody(str(hypertraceConfig.DATA_CAPTURE_HTTP_BODY_REQUEST))
+    self._flaskInstrumentorWrapper.setProcessRequestHeaders(hypertraceConfig.DATA_CAPTURE_HTTP_HEADERS_REQUEST)
+    self._flaskInstrumentorWrapper.setProcessResponseHeaders(hypertraceConfig.DATA_CAPTURE_HTTP_HEADERS_RESPONSE)
+    self._flaskInstrumentorWrapper.setProcessRequestBody(hypertraceConfig.DATA_CAPTURE_HTTP_BODY_REQUEST)
+    self._flaskInstrumentorWrapper.setProcessResponseBody(hypertraceConfig.DATA_CAPTURE_HTTP_BODY_REQUEST)
     RequestsInstrumentor().instrument()
 
   def flaskRequest(self, name, url):
