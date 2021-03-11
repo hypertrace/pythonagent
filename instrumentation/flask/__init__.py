@@ -50,10 +50,6 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
   def __init__(self):
     logging.debug('Entering FlaskInstrumentorWrapper constructor.');
     super().__init__() 
-    self._processRequestHeaders = False
-    self._processResponseHeaders = False
-    self._processRequestBody = False
-    self._processResponseBody = False
 
   def instrument_app(self, app, name_callback=get_default_span_name):
     logging.debug('Entering FlaskInstrumentorWrapper.instument_app().')
@@ -75,31 +71,3 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
 
   def getApp():
     return self._app
-
-  def getProcessRequestHeaders(self):
-    return self._processRequestHeaders
-
-  def getProcessResponseHeaders(self):
-    return self._processResponseHeaders
-
-  def getProcessRequestBody(self):
-    return self._processRequestBody
-
-  def getProcessResponseBody(self):
-    return self._processResponseBody
-
-  def setProcessRequestHeaders(self, processRequestHeaders):
-    logging.debug('Setting self._processRequestHeaders.')
-    self._processRequestHeaders = processRequestHeaders
-
-  def setProcessResponseHeaders(self, processResponseHeaders):
-    logging.debug('Setting self._processResponseHeaders.');
-    self._processResponseHeaders = processResponseHeaders
-
-  def setProcessRequestBody(self, processRequestBody):
-    logging.debug('Setting self._processRequestBody.');
-    self._processRequestBody = processRequestBody
-
-  def setProcessResponseBody(self, processResponseBody):
-    logging.debug('Setting self._processResponseBody.');
-    self._processResponseBody = processResponseBody
