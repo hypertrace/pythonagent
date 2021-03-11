@@ -2,6 +2,8 @@
 ![diagram](images/HyperTrace%20Agent%20Architecture.jpg)
 # Wrapping OpenTelemetry Instrumentation Modules
 ![diagram](images/OpenTelemetry%20Instrumentation%20Module%20Wrapper.jpg)
+# Flask Instrumentation Wrapper Architecture
+![diagram](images/FlaskInsrumentationWrapper.jpg
 
 # Assumptions
 * Tested with [Python v3.7.9](https://www.python.org/downloads/release/python-379/).
