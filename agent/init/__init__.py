@@ -17,6 +17,12 @@ class AgentInit:
     }
     self._hypertraceConfig = HypertraceConfig()
     self._flaskInstrumentorWrapper = None
+    self._tracerProvider = TracerProvider()
+    trace.set_tracer_provider(self._tracerProvider)
+    self._consoleSpanExporter = ConsoleSpanExporter()
+    self._simpleExportSpanProcessor = SimpleExportSpanProcessor(self._consoleSpanExporter)
+    trace.get_tracer_provider().add_span_processor(self._simpleExportSpanProcessor)
+    self._requestsInstrumentor = RequestsInstrumentor()
 
   def dumpConfig(self):
     logging.debug('Calling DumpConfig().')
@@ -27,14 +33,13 @@ class AgentInit:
     logging.debug('Calling AgentInit.flaskInit().')
     logging.debug("Dump config inside flaskInit :"+ str(self._hypertraceConfig.DATA_CAPTURE_HTTP_BODY_REQUEST));
     self._moduleInitialized['flask'] = True
-    trace.set_tracer_provider(TracerProvider())
-    trace.get_tracer_provider().add_span_processor(
-      SimpleExportSpanProcessor(ConsoleSpanExporter())
-    )
     self._flaskInstrumentorWrapper = FlaskInstrumentorWrapper()
     self._flaskInstrumentorWrapper.instrument_app(app)
     self._flaskInstrumentorWrapper.setProcessRequestHeaders(self._hypertraceConfig.DATA_CAPTURE_HTTP_HEADERS_REQUEST)
     self._flaskInstrumentorWrapper.setProcessResponseHeaders(self._hypertraceConfig.DATA_CAPTURE_HTTP_HEADERS_RESPONSE)
     self._flaskInstrumentorWrapper.setProcessRequestBody(self._hypertraceConfig.DATA_CAPTURE_HTTP_BODY_REQUEST)
     self._flaskInstrumentorWrapper.setProcessResponseBody(self._hypertraceConfig.DATA_CAPTURE_HTTP_BODY_REQUEST)
-    RequestsInstrumentor().instrument()
+    self._requestsInstrumentor.instrument()
+
+  def grpcInit(self):
+    logging.debug('Calling AgentInit.grpcInit')
