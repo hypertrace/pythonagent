@@ -4,17 +4,21 @@ from opentelemetry import trace
 from instrumentation.flask import FlaskInstrumentorWrapper
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
 from opentelemetry.sdk.trace import TracerProvider
-#from config import HypertraceConfig
+from config import HypertraceConfig
 #from config import EnvironmentConfig
 from opentelemetry.sdk.trace.export import (
     ConsoleSpanExporter,
     SimpleExportSpanProcessor,
 )
 import logging
-
+import yaml
+hypertraceConfig = HypertraceConfig()
 class AgentInit:
+  
   def __init__(self):
+    
     logging.debug('Initializing AgentInit object.')
+    
     self._moduleInitialized = {
       "flask": False,
       "grpc": False 
@@ -28,6 +32,7 @@ class AgentInit:
 
   def flaskInit(self, app):
     logging.debug('Calling AgentInit.flaskInit().')
+    logging.debug("Dump config inside flaskInit :"+ str(hypertraceConfig.DATA_CAPTURE_HTTP_BODY_REQUEST));
     self._moduleInitialized['flask'] = True
     trace.set_tracer_provider(TracerProvider())
     trace.get_tracer_provider().add_span_processor(
@@ -35,10 +40,10 @@ class AgentInit:
     )
     self._flaskInstrumentorWrapper = FlaskInstrumentorWrapper()
     self._flaskInstrumentorWrapper.instrument_app(app)
-    self._flaskInstrumentorWrapper.setProcessRequestHeaders(True)
-    self._flaskInstrumentorWrapper.setProcessResponseHeaders(True)
-    self._flaskInstrumentorWrapper.setProcessRequestBody(True)
-    self._flaskInstrumentorWrapper.setProcessResponseBody(True)
+    self._flaskInstrumentorWrapper.setProcessRequestHeaders(str(hypertraceConfig.DATA_CAPTURE_HTTP_HEADERS_REQUEST))
+    self._flaskInstrumentorWrapper.setProcessResponseHeaders(str(hypertraceConfig.DATA_CAPTURE_HTTP_HEADERS_RESPONSE))
+    self._flaskInstrumentorWrapper.setProcessRequestBody(str(hypertraceConfig.DATA_CAPTURE_HTTP_BODY_REQUEST))
+    self._flaskInstrumentorWrapper.setProcessResponseBody(str(hypertraceConfig.DATA_CAPTURE_HTTP_BODY_REQUEST))
     RequestsInstrumentor().instrument()
 
   def flaskRequest(self, name, url):
