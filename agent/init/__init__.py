@@ -4,8 +4,8 @@ from opentelemetry import trace
 from instrumentation.flask import FlaskInstrumentorWrapper
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
 from opentelemetry.sdk.trace import TracerProvider
-from config import HypertraceConfig
-from config import EnvironmentConfig
+#from config import HypertraceConfig
+#from config import EnvironmentConfig
 from opentelemetry.sdk.trace.export import (
     ConsoleSpanExporter,
     SimpleExportSpanProcessor,
@@ -19,6 +19,7 @@ class AgentInit:
       "flask": False,
       "grpc": False 
     }
+    self._flaskInstrumentorWrapper = None
 
   def dumpConfig(self):
     logging.debug('Calling DumpConfig().')
@@ -32,7 +33,12 @@ class AgentInit:
     trace.get_tracer_provider().add_span_processor(
       SimpleExportSpanProcessor(ConsoleSpanExporter())
     )
-    FlaskInstrumentorWrapper().instrument_app(app)
+    self._flaskInstrumentorWrapper = FlaskInstrumentorWrapper()
+    self._flaskInstrumentorWrapper.instrument_app(app)
+    self._flaskInstrumentorWrapper.setProcessRequestHeaders(True)
+    self._flaskInstrumentorWrapper.setProcessResponseHeaders(True)
+    self._flaskInstrumentorWrapper.setProcessRequestBody(True)
+    self._flaskInstrumentorWrapper.setProcessResponseBody(True)
     RequestsInstrumentor().instrument()
 
   def flaskRequest(self, name, url):
