@@ -15,7 +15,3 @@ class Agent:
     logging.debug('Calling registerFlaskApp.')
     self._init.flaskInit(app)
     self._init.dumpConfig()
-
-  def flaskRequest(self, name, url):
-    logging.debug('Calling flaskRequest().')
-    self._init.flaskRequest(name,url)
