@@ -12,6 +12,15 @@ class Agent:
     self._init = AgentInit()
 
   def registerFlaskApp(self, app):
-    logging.debug('Calling registerFlaskApp.')
+    logging.debug('Calling Agent.registerFlaskApp.')
     self._init.flaskInit(app)
     self._init.dumpConfig()
+
+  def registerGrpc(self):
+    logging.debug('Calling Agent.registerGrpc().')
+    self._init.grpcInit()
+    self._init.dumpConfig()
+
+  def globalInit(self):
+    logging.debug('Calling Agent.globalInit().')
+    self._init.globalInit()

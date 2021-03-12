@@ -6,6 +6,7 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import ConsoleSpanExporter, SimpleExportSpanProcessor
 from config import HypertraceConfig
 from instrumentation.flask import FlaskInstrumentorWrapper
+from instrumentation.grpc import GrpcInstrumentorServerWrapper,GrpcInstrumentorClientWrapper
 
 class AgentInit:
   
@@ -16,13 +17,15 @@ class AgentInit:
       "grpc": False 
     }
     self._hypertraceConfig = HypertraceConfig()
-    self._flaskInstrumentorWrapper = None
     self._tracerProvider = TracerProvider()
     trace.set_tracer_provider(self._tracerProvider)
     self._consoleSpanExporter = ConsoleSpanExporter()
     self._simpleExportSpanProcessor = SimpleExportSpanProcessor(self._consoleSpanExporter)
     trace.get_tracer_provider().add_span_processor(self._simpleExportSpanProcessor)
     self._requestsInstrumentor = RequestsInstrumentor()
+    self._flaskInstrumentorWrapper = None
+    self._grpcInstrumentorClientWrapper = None
+    self._grpcInstrumentorServerWrapper = None
 
   def dumpConfig(self):
     logging.debug('Calling DumpConfig().')
@@ -39,7 +42,15 @@ class AgentInit:
     self._flaskInstrumentorWrapper.setProcessResponseHeaders(self._hypertraceConfig.DATA_CAPTURE_HTTP_HEADERS_RESPONSE)
     self._flaskInstrumentorWrapper.setProcessRequestBody(self._hypertraceConfig.DATA_CAPTURE_HTTP_BODY_REQUEST)
     self._flaskInstrumentorWrapper.setProcessResponseBody(self._hypertraceConfig.DATA_CAPTURE_HTTP_BODY_REQUEST)
-    self._requestsInstrumentor.instrument()
 
   def grpcInit(self):
     logging.debug('Calling AgentInit.grpcInit')
+    self._moduleInitialized['grpc'] = True
+    self._grpcInstrumentorClientWrapper = GrpcInstrumentorClientWrapper()
+    self._grpcInstrumentorServerWrapper = GrpcInstrumentorServerWrapper()
+    self._grpcInstrumentorClientWrapper.instrument()
+    self._grpcInstrumentorServerWrapper.instrument()
+
+  def globalInit(self):
+    logging.debug('Calling AgentInit.globalInit().')
+    self._requestsInstrumentor.instrument()

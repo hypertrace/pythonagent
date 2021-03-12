@@ -106,6 +106,7 @@ The python agent output is now written to a log file managed by the logging modu
 
 # Instrumented Modules Documentation
 * [Flask](https://flask.palletsprojects.com/en/1.1.x/api)
+* [grpc](https://grpc.github.io/grpc/python/)
 
 # Build agent-config config.proto
 * run: ```protoc --python_out=../agent-config-python -Itools/env-vars-generator/protobuf/src -I. config.proto```

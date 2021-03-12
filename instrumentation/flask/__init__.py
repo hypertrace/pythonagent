@@ -60,9 +60,9 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
     app.before_request(_hypertrace_before_request(self, self._app))
     app.after_request(_hypertrace_after_request(self, self._app))
 
-  def _uninstrument(self, **kwargs):
-    logging.debug('Entering FlaskInstrumentorWrapper._uninstrument()');
-    super()._uninstrument(self, kwargs)
+#  def _uninstrument(self, **kwargs):
+#    logging.debug('Entering FlaskInstrumentorWrapper._uninstrument()');
+#    super()._uninstrument(self, kwargs)
  
   def uninstrument_app(self, app):
     logging.debug('Entering FlaskInstrumentorWrapper.uninstrument_app()');

@@ -48,4 +48,3 @@ class BaseInstrumentorWrapper:
   def setProcessResponseBody(self, processResponseBody):
     logging.debug('Setting self._processResponseBody.');
     self._processResponseBody = processResponseBody
-
