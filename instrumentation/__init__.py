@@ -3,9 +3,11 @@ import os.path
 import logging
 import inspect
 
+logger = logging.getLogger(__name__)
+
 class BaseInstrumentorWrapper:
   def __init__(self):
-    logging.debug('Entering BaseInstrumentorWrapper constructor.');
+    logger.debug('Entering BaseInstrumentorWrapper constructor.');
     super().__init__() 
     self._processRequestHeaders = False
     self._processResponseHeaders = False
@@ -13,13 +15,13 @@ class BaseInstrumentorWrapper:
     self._processResponseBody = False
 
   def introspect(self, obj):
-    logging.debug('Describing object.')
+    logger.debug('Describing object.')
     for func in [type, id, dir, vars, callable]:
       try:
-        logging.debug("%s(%s):\t\t%s" % (func.__name__, self.introspect.__code__.co_varnames[0], func(obj)))
-        logging.debug("%s: %s" % (func.__name__, inspect.getmembers(obj)))
+        logger.debug("%s(%s):\t\t%s" % (func.__name__, self.introspect.__code__.co_varnames[0], func(obj)))
+        logger.debug("%s: %s" % (func.__name__, inspect.getmembers(obj)))
       except Exception:
-        logging.error("No data to display");
+        logger.error("No data to display");
 
   def getProcessRequestHeaders(self):
     return self._processRequestHeaders
@@ -34,17 +36,17 @@ class BaseInstrumentorWrapper:
     return self._processResponseBody
 
   def setProcessRequestHeaders(self, processRequestHeaders):
-    logging.debug('Setting self._processRequestHeaders.')
+    logger.debug('Setting self._processRequestHeaders.')
     self._processRequestHeaders = processRequestHeaders
 
   def setProcessResponseHeaders(self, processResponseHeaders):
-    logging.debug('Setting self._processResponseHeaders.');
+    logger.debug('Setting self._processResponseHeaders.');
     self._processResponseHeaders = processResponseHeaders
 
   def setProcessRequestBody(self, processRequestBody):
-    logging.debug('Setting self._processRequestBody.');
+    logger.debug('Setting self._processRequestBody.');
     self._processRequestBody = processRequestBody
 
   def setProcessResponseBody(self, processResponseBody):
-    logging.debug('Setting self._processResponseBody.');
+    logger.debug('Setting self._processResponseBody.');
     self._processResponseBody = processResponseBody

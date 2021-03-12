@@ -8,10 +8,12 @@ from config import HypertraceConfig
 from instrumentation.flask import FlaskInstrumentorWrapper
 from instrumentation.grpc import GrpcInstrumentorServerWrapper,GrpcInstrumentorClientWrapper
 
+logger = logging.getLogger(__name__)
+
 class AgentInit:
   
   def __init__(self):
-    logging.debug('Initializing AgentInit object.')
+    logger.debug('Initializing AgentInit object.')
     self._moduleInitialized = {
       "flask": False,
       "grpc": False 
@@ -28,13 +30,13 @@ class AgentInit:
     self._grpcInstrumentorServerWrapper = None
 
   def dumpConfig(self):
-    logging.debug('Calling DumpConfig().')
+    logger.debug('Calling DumpConfig().')
     for m in self._moduleInitialized:
-      logging.debug(m + ':' + str(self._moduleInitialized[m]))
+      logger.debug(m + ':' + str(self._moduleInitialized[m]))
 
   def flaskInit(self, app):
-    logging.debug('Calling AgentInit.flaskInit().')
-    logging.debug("Dump config inside flaskInit :"+ str(self._hypertraceConfig.DATA_CAPTURE_HTTP_BODY_REQUEST));
+    logger.debug('Calling AgentInit.flaskInit().')
+    logger.debug("Dump config inside flaskInit :"+ str(self._hypertraceConfig.DATA_CAPTURE_HTTP_BODY_REQUEST));
     self._moduleInitialized['flask'] = True
     self._flaskInstrumentorWrapper = FlaskInstrumentorWrapper()
     self._flaskInstrumentorWrapper.instrument_app(app)
@@ -44,7 +46,7 @@ class AgentInit:
     self._flaskInstrumentorWrapper.setProcessResponseBody(self._hypertraceConfig.DATA_CAPTURE_HTTP_BODY_REQUEST)
 
   def grpcInit(self):
-    logging.debug('Calling AgentInit.grpcInit')
+    logger.debug('Calling AgentInit.grpcInit')
     self._moduleInitialized['grpc'] = True
     self._grpcInstrumentorClientWrapper = GrpcInstrumentorClientWrapper()
     self._grpcInstrumentorServerWrapper = GrpcInstrumentorServerWrapper()
@@ -52,5 +54,5 @@ class AgentInit:
     self._grpcInstrumentorServerWrapper.instrument()
 
   def globalInit(self):
-    logging.debug('Calling AgentInit.globalInit().')
+    logger.debug('Calling AgentInit.globalInit().')
     self._requestsInstrumentor.instrument()

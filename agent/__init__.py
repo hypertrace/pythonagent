@@ -5,22 +5,24 @@ sys.path.append(
 from init import AgentInit
 import logging
 
+logger = logging.getLogger(__name__)
+
 class Agent:
   def __init__(self):
     logging.basicConfig(filename='agent.log', level=logging.DEBUG)
-    logging.debug('Initializing Agent.');
+    logger.debug('Initializing Agent.');
     self._init = AgentInit()
 
   def registerFlaskApp(self, app):
-    logging.debug('Calling Agent.registerFlaskApp.')
+    logger.debug('Calling Agent.registerFlaskApp.')
     self._init.flaskInit(app)
     self._init.dumpConfig()
 
   def registerGrpc(self):
-    logging.debug('Calling Agent.registerGrpc().')
+    logger.debug('Calling Agent.registerGrpc().')
     self._init.grpcInit()
     self._init.dumpConfig()
 
   def globalInit(self):
-    logging.debug('Calling Agent.globalInit().')
+    logger.debug('Calling Agent.globalInit().')
     self._init.globalInit()
