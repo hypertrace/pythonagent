@@ -131,3 +131,54 @@ data_capture:
     request: true
     response: true
 ```
+# Sample Hypertrace Extended Span for Flask Framework
+```
+{
+    "name": "/",
+    "context": {
+        "trace_id": "0x33b5ed7d2425b50544e30b00ab2940f1",
+        "span_id": "0x178b481b3e8d0be1",
+        "trace_state": "[]"
+    },
+    "kind": "SpanKind.SERVER",
+    "parent_id": null,
+    "start_time": "2021-03-12T01:30:25.440868Z",
+    "end_time": "2021-03-12T01:30:25.454422Z",
+    "status": {
+        "status_code": "UNSET"
+    },
+    "attributes": {
+        "http.method": "GET",
+        "http.server_name": "127.0.0.1",
+        "http.scheme": "http",
+        "net.host.port": 5000,
+        "http.host": "localhost:5000",
+        "http.target": "/",
+        "net.peer.ip": "127.0.0.1",
+        "http.user_agent": "curl/7.66.0",
+        "net.peer.port": 50096,
+        "http.flavor": "1.1",
+        "http.route": "/",
+        "http.request.header.Host": "localhost:5000",
+        "http.request.header.User-Agent": "curl/7.66.0",
+        "http.request.header.Accept": "*/*",
+        "http.request.header.Tester1": "tester1",
+        "http.request.header.Tester2": "tester2",
+        "http.request.body": "b''",
+        "http.response.header.Content-Type": "text/html; charset=utf-8",
+        "http.response.header.tester3": "tester3",
+        "http.response.header.Content-Length": "24",
+        "http.response.body": "b\"{'a': 'a', 'xyz': 'xyz'}\"",
+        "http.status_text": "OK",
+        "http.status_code": 200
+    },
+    "events": [],
+    "links": [],
+    "resource": {
+        "telemetry.sdk.language": "python",
+        "telemetry.sdk.name": "opentelemetry",
+        "telemetry.sdk.version": "1.0.0rc1",
+        "service.name": "unknown_service"
+    }
+}
+```
