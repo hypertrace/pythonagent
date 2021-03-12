@@ -103,7 +103,8 @@ The python agent output is now written to a log file managed by the logging modu
 * [Otel Python Contributor](https://github.com/open-telemetry/opentelemetry-python-contrib )
 * [Java Agent](https://github.com/hypertrace/javaagent)
 * [golang Agent](https://github.com/hypertrace/goagent)
-
+* [Python 3 Documentation](https://docs.python.org/3)
+* 
 # Instrumented Modules Documentation
 * [Flask](https://flask.palletsprojects.com/en/1.1.x/api)
 * [grpc](https://grpc.github.io/grpc/python/)
