@@ -84,9 +84,10 @@ The python agent output is now written to a log file managed by the logging modu
 
 # Configure OTEL Collector
 Hypertrace python agent will use Jaeger backend as OpenTelemetry collector. HyperTrace Python Agent will export OpenTelemetry traces to Jaeger. 
- $ docker run -p 16686:16686 -p 6831:6831/udp jaegertracing/all-in-one
-Launch Jaeger UI :
-http://localhost:16686/search
+* To run the Jaeger UI docker container, run:
+``` $ docker run -p 16686:16686 -p 6831:6831/udp jaegertracing/all-in-one```
+* To Launch Jaeger UI, open a browser and go to:
+```http://localhost:16686/search```
 
 # Requirements
 * [Python OTel Python Agent](https://github.com/open-telemetry/opentelemetry-python) must not be modified.
