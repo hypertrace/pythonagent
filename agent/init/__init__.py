@@ -52,6 +52,14 @@ class AgentInit:
     self._grpcInstrumentorServerWrapper = GrpcInstrumentorServerWrapper()
     self._grpcInstrumentorClientWrapper.instrument()
     self._grpcInstrumentorServerWrapper.instrument()
+    self._grpcInstrumentorClientWrapper.setProcessRequestHeaders(self._hypertraceConfig.DATA_CAPTURE_RPC_METADATA_REQUEST)
+    self._grpcInstrumentorClientWrapper.setProcessResponseHeaders(self._hypertraceConfig.DATA_CAPTURE_RPC_METADATA_RESPONSE)
+    self._grpcInstrumentorClientWrapper.setProcessRequestBody(self._hypertraceConfig.DATA_CAPTURE_RPC_BODY_REQUEST)
+    self._grpcInstrumentorClientWrapper.setProcessResponseBody(self._hypertraceConfig.DATA_CAPTURE_RPC_BODY_REQUEST)
+    self._grpcInstrumentorServerWrapper.setProcessRequestHeaders(self._hypertraceConfig.DATA_CAPTURE_RPC_METADATA_REQUEST)
+    self._grpcInstrumentorServerWrapper.setProcessResponseHeaders(self._hypertraceConfig.DATA_CAPTURE_RPC_METADATA_RESPONSE)
+    self._grpcInstrumentorServerWrapper.setProcessRequestBody(self._hypertraceConfig.DATA_CAPTURE_RPC_BODY_REQUEST)
+    self._grpcInstrumentorServerWrapper.setProcessResponseBody(self._hypertraceConfig.DATA_CAPTURE_RPC_BODY_REQUEST)
 
   def globalInit(self):
     logger.debug('Calling AgentInit.globalInit().')

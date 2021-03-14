@@ -29,6 +29,8 @@ class HypertraceConfig:
           self.DATA_CAPTURE_HTTP_BODY_REQUEST = configs_list['data_capture']['http_body']['response'];
           self.DATA_CAPTURE_RPC_METADATA_REQUEST = configs_list['data_capture']['rpc_metadata']['request'];
           self.DATA_CAPTURE_RPC_METADATA_RESPONSE = configs_list['data_capture']['rpc_metadata']['response'];
+          self.DATA_CAPTURE_RPC_BODY_REQUEST = configs_list['data_capture']['rpc_body']['request'];
+          self.DATA_CAPTURE_RPC_BODY_RESPONSE = configs_list['data_capture']['rpc_body']['response'];
     
       except ImportError:
         logger.error('An error occurred while parsing the agent-config file.')

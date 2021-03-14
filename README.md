@@ -88,6 +88,12 @@ http://localhost:16686/search
 
 The python agent output is now written to a log file managed by the logging module. This can currently be found in ${REPO_HOME}/test/agent.log.
 
+# Configure OTEL Collector
+Hypertrace python agent will use Jaeger backend as OpenTelemetry collector. HyperTrace Python Agent will export OpenTelemetry traces to Jaeger. 
+ $ docker run -p 16686:16686 -p 6831:6831/udp jaegertracing/all-in-one
+Launch Jaeger UI :
+http://localhost:16686/search
+
 # Requirements
 * [Python OTel Python Agent](https://github.com/open-telemetry/opentelemetry-python) must not be modified.
 * [Python OTel Python Agent](https://github.com/open-telemetry/opentelemetry-python) must be installed (and usable) through pip.
@@ -104,6 +110,7 @@ The python agent output is now written to a log file managed by the logging modu
 * [GRPC Python Instrumentation Endpoint](https://github.com/open-telemetry/opentelemetry-python-contrib/blob/7159372e3b381119715c99a37603b3d2d6b9ea46/instrumentation/opentelemetry-instrumentation-grpc/src/opentelemetry/instrumentation/grpc/__init__.py)
 * [MySQL Python Instrumentation Entrypoint](https://github.com/open-telemetry/opentelemetry-python-contrib/blob/main/instrumentation/opentelemetry-instrumentation-mysql/src/opentelemetry/instrumentation/mysql/__init__.py)
 * [Hypertrace specification](https://github.com/hypertrace/specification)
+* [Hypertrace RPC structure(https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/rpc.md)
 * [Agent Configurtion schema](https://github.com/hypertrace/agent-config)
 * [Main OTel Python Agent](https://github.com/open-telemetry/opentelemetry-python) - This is the main otel python agent which we would extend
 * [Otel Python Contributor](https://github.com/open-telemetry/opentelemetry-python-contrib )
