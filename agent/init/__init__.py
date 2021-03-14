@@ -1,5 +1,4 @@
 import logging
-import yaml
 from opentelemetry import trace
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
 from opentelemetry.sdk.trace import TracerProvider
@@ -16,14 +15,18 @@ class AgentInit:
     logger.debug('Initializing AgentInit object.')
     self._moduleInitialized = {
       "flask": False,
-      "grpc": False 
+      "grpc": False,
+      "mysql": False,
+      "postgresql": False
     }
     self._hypertraceConfig = HypertraceConfig()
     self._tracerProvider = TracerProvider()
+#    self._tracerProvider = trace.get_tracer('tester')
     trace.set_tracer_provider(self._tracerProvider)
-    self._consoleSpanExporter = ConsoleSpanExporter()
+    self._consoleSpanExporter = ConsoleSpanExporter(service_name='tester')
     self._simpleExportSpanProcessor = SimpleExportSpanProcessor(self._consoleSpanExporter)
     trace.get_tracer_provider().add_span_processor(self._simpleExportSpanProcessor)
+#    self._tracerProvider.add_span_processor(self._simpleExportSpanProcessor)
     self._requestsInstrumentor = RequestsInstrumentor()
     self._flaskInstrumentorWrapper = None
     self._grpcInstrumentorClientWrapper = None
@@ -40,6 +43,7 @@ class AgentInit:
     self._moduleInitialized['flask'] = True
     self._flaskInstrumentorWrapper = FlaskInstrumentorWrapper()
     self._flaskInstrumentorWrapper.instrument_app(app)
+    self._flaskInstrumentorWrapper.setServiceName(self._hypertraceConfig.DATA_CAPTURE_SERVICE_NAME)
     self._flaskInstrumentorWrapper.setProcessRequestHeaders(self._hypertraceConfig.DATA_CAPTURE_HTTP_HEADERS_REQUEST)
     self._flaskInstrumentorWrapper.setProcessResponseHeaders(self._hypertraceConfig.DATA_CAPTURE_HTTP_HEADERS_RESPONSE)
     self._flaskInstrumentorWrapper.setProcessRequestBody(self._hypertraceConfig.DATA_CAPTURE_HTTP_BODY_REQUEST)
