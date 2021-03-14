@@ -18,7 +18,6 @@ import logging
 import grpc
 import helloworld_pb2
 import helloworld_pb2_grpc
-sys.path.append('..')
 from agent import Agent
 
 logging.basicConfig(filename='agent.log', level=logging.DEBUG,)

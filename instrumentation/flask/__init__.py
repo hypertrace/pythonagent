@@ -3,10 +3,8 @@ import os.path
 import logging
 import inspect
 import flask;
-from opentelemetry.instrumentation.flask import FlaskInstrumentor, get_default_span_name, _teardown_request, _ENVIRON_STARTTIME_KEY, _ENVIRON_SPAN_KEY, _ENVIRON_ACTIVATION_KEY, _ENVIRON_TOKEN
-sys.path.append(
-    os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from instrumentation import BaseInstrumentorWrapper
+from opentelemetry.instrumentation.flask import FlaskInstrumentor, get_default_span_name, _teardown_request, _ENVIRON_STARTTIME_KEY, _ENVIRON_SPAN_KEY, _ENVIRON_ACTIVATION_KEY, _ENVIRON_TOKEN
 
 logger = logging.getLogger(__name__)
 
