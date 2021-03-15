@@ -1,5 +1,6 @@
 import yaml
 import logging
+import traceback
 from configparser import ConfigParser
 
 logger = logging.getLogger(__name__)
@@ -37,7 +38,7 @@ class HypertraceConfig:
     
       except ImportError:
         logger.error('An error occurred while parsing the agent-config file.')
-        from ConfigParser import ConfigParser  # ver. < 3.0
+        traceback.print_exc()
 
     # getter method 
     def get_DATA_CAPTURE_HTTP_HEADERS_REQUEST(self): 

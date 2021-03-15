@@ -2,7 +2,8 @@ import sys
 import os.path
 import logging
 import inspect
-import flask;
+import flask
+import traceback
 from instrumentation import BaseInstrumentorWrapper
 from opentelemetry.instrumentation.flask import FlaskInstrumentor, get_default_span_name, _teardown_request, _ENVIRON_STARTTIME_KEY, _ENVIRON_SPAN_KEY, _ENVIRON_ACTIVATION_KEY, _ENVIRON_TOKEN
 
@@ -15,7 +16,8 @@ def introspect(obj):
       logger.debug("%s(%s):\t\t%s" % (func.__name__, introspect.__code__.co_varnames[0], func(obj)))
     logger.debug("%s: %s" % (func.__name__, inspect.getmembers(obj)))
   except Exception:
-    logger.error("No data to display");
+    logger.error("No data to display")
+    traceback.print_exc()
 
 # Per request pre-handler
 def _hypertrace_before_request( flaskWrapper, app):

@@ -4,12 +4,11 @@ import logging
 import inspect
 import flask
 import grpc
+import traceback
 from contextlib import contextmanager
 from opentelemetry import trace
 from opentelemetry.instrumentation.grpc import GrpcInstrumentorServer, GrpcInstrumentorClient, _server, _client
 from opentelemetry.instrumentation.grpc.version import __version__
-sys.path.append(
-    os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from instrumentation import BaseInstrumentorWrapper
 
 logger = logging.getLogger(__name__)
@@ -22,6 +21,7 @@ def introspect(obj):
     logger.debug("%s: %s" % (func.__name__, inspect.getmembers(obj)))
   except Exception:
     logger.error("No data to display");
+    traceback.print_exc()
 
 class GrpcInstrumentorServerWrapper(GrpcInstrumentorServer, BaseInstrumentorWrapper):
   def __init__(self):
