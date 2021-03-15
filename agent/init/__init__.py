@@ -19,18 +19,23 @@ class AgentInit:
       "mysql": False,
       "postgresql": False
     }
-    self._hypertraceConfig = HypertraceConfig()
-    self._tracerProvider = TracerProvider()
-#    self._tracerProvider = trace.get_tracer('tester')
-    trace.set_tracer_provider(self._tracerProvider)
-    self._consoleSpanExporter = ConsoleSpanExporter(service_name='tester')
-    self._simpleExportSpanProcessor = SimpleExportSpanProcessor(self._consoleSpanExporter)
-    trace.get_tracer_provider().add_span_processor(self._simpleExportSpanProcessor)
-#    self._tracerProvider.add_span_processor(self._simpleExportSpanProcessor)
-    self._requestsInstrumentor = RequestsInstrumentor()
-    self._flaskInstrumentorWrapper = None
-    self._grpcInstrumentorClientWrapper = None
-    self._grpcInstrumentorServerWrapper = None
+    try:
+      self._hypertraceConfig = HypertraceConfig()
+      self._tracerProvider = TracerProvider()
+#      self._tracerProvider = trace.get_tracer('tester')
+      trace.set_tracer_provider(self._tracerProvider)
+      self._consoleSpanExporter = ConsoleSpanExporter(service_name='tester')
+      self._simpleExportSpanProcessor = SimpleExportSpanProcessor(self._consoleSpanExporter)
+      trace.get_tracer_provider().add_span_processor(self._simpleExportSpanProcessor)
+#      self._tracerProvider.add_span_processor(self._simpleExportSpanProcessor)
+      self._requestsInstrumentor = RequestsInstrumentor()
+      self._flaskInstrumentorWrapper = None
+      self._grpcInstrumentorClientWrapper = None
+      self._grpcInstrumentorServerWrapper = None
+    except e:
+      logger.error('Failed to initialize opentelemetry.')
+      traceback.print_exc()
+      raise e 
 
   def dumpConfig(self):
     logger.debug('Calling DumpConfig().')
@@ -39,32 +44,47 @@ class AgentInit:
 
   def flaskInit(self, app):
     logger.debug('Calling AgentInit.flaskInit().')
-    logger.debug("Dump config inside flaskInit :"+ str(self._hypertraceConfig.DATA_CAPTURE_HTTP_BODY_REQUEST));
-    self._moduleInitialized['flask'] = True
-    self._flaskInstrumentorWrapper = FlaskInstrumentorWrapper()
-    self._flaskInstrumentorWrapper.instrument_app(app)
-    self._flaskInstrumentorWrapper.setServiceName(self._hypertraceConfig.DATA_CAPTURE_SERVICE_NAME)
-    self._flaskInstrumentorWrapper.setProcessRequestHeaders(self._hypertraceConfig.DATA_CAPTURE_HTTP_HEADERS_REQUEST)
-    self._flaskInstrumentorWrapper.setProcessResponseHeaders(self._hypertraceConfig.DATA_CAPTURE_HTTP_HEADERS_RESPONSE)
-    self._flaskInstrumentorWrapper.setProcessRequestBody(self._hypertraceConfig.DATA_CAPTURE_HTTP_BODY_REQUEST)
-    self._flaskInstrumentorWrapper.setProcessResponseBody(self._hypertraceConfig.DATA_CAPTURE_HTTP_BODY_REQUEST)
+    try:
+      logger.debug('Dump config inside flaskInit :' + str(self._hypertraceConfig.DATA_CAPTURE_HTTP_BODY_REQUEST));
+      self._moduleInitialized['flask'] = True
+      self._flaskInstrumentorWrapper = FlaskInstrumentorWrapper()
+      self._flaskInstrumentorWrapper.instrument_app(app)
+      self._flaskInstrumentorWrapper.setServiceName(self._hypertraceConfig.DATA_CAPTURE_SERVICE_NAME)
+      self._flaskInstrumentorWrapper.setProcessRequestHeaders(self._hypertraceConfig.DATA_CAPTURE_HTTP_HEADERS_REQUEST)
+      self._flaskInstrumentorWrapper.setProcessResponseHeaders(self._hypertraceConfig.DATA_CAPTURE_HTTP_HEADERS_RESPONSE)
+      self._flaskInstrumentorWrapper.setProcessRequestBody(self._hypertraceConfig.DATA_CAPTURE_HTTP_BODY_REQUEST)
+      self._flaskInstrumentorWrapper.setProcessResponseBody(self._hypertraceConfig.DATA_CAPTURE_HTTP_BODY_REQUEST)
+    except e:
+      logger.debug('Failed to initialize flask instrumentation wrapper.')
+      traceback.print_exc()
+      raise e
 
   def grpcInit(self):
     logger.debug('Calling AgentInit.grpcInit')
-    self._moduleInitialized['grpc'] = True
-    self._grpcInstrumentorClientWrapper = GrpcInstrumentorClientWrapper()
-    self._grpcInstrumentorServerWrapper = GrpcInstrumentorServerWrapper()
-    self._grpcInstrumentorClientWrapper.instrument()
-    self._grpcInstrumentorServerWrapper.instrument()
-    self._grpcInstrumentorClientWrapper.setProcessRequestHeaders(self._hypertraceConfig.DATA_CAPTURE_RPC_METADATA_REQUEST)
-    self._grpcInstrumentorClientWrapper.setProcessResponseHeaders(self._hypertraceConfig.DATA_CAPTURE_RPC_METADATA_RESPONSE)
-    self._grpcInstrumentorClientWrapper.setProcessRequestBody(self._hypertraceConfig.DATA_CAPTURE_RPC_BODY_REQUEST)
-    self._grpcInstrumentorClientWrapper.setProcessResponseBody(self._hypertraceConfig.DATA_CAPTURE_RPC_BODY_REQUEST)
-    self._grpcInstrumentorServerWrapper.setProcessRequestHeaders(self._hypertraceConfig.DATA_CAPTURE_RPC_METADATA_REQUEST)
-    self._grpcInstrumentorServerWrapper.setProcessResponseHeaders(self._hypertraceConfig.DATA_CAPTURE_RPC_METADATA_RESPONSE)
-    self._grpcInstrumentorServerWrapper.setProcessRequestBody(self._hypertraceConfig.DATA_CAPTURE_RPC_BODY_REQUEST)
-    self._grpcInstrumentorServerWrapper.setProcessResponseBody(self._hypertraceConfig.DATA_CAPTURE_RPC_BODY_REQUEST)
+    try:
+      self._moduleInitialized['grpc'] = True
+      self._grpcInstrumentorClientWrapper = GrpcInstrumentorClientWrapper()
+      self._grpcInstrumentorServerWrapper = GrpcInstrumentorServerWrapper()
+      self._grpcInstrumentorClientWrapper.instrument()
+      self._grpcInstrumentorServerWrapper.instrument()
+      self._grpcInstrumentorClientWrapper.setProcessRequestHeaders(self._hypertraceConfig.DATA_CAPTURE_RPC_METADATA_REQUEST)
+      self._grpcInstrumentorClientWrapper.setProcessResponseHeaders(self._hypertraceConfig.DATA_CAPTURE_RPC_METADATA_RESPONSE)
+      self._grpcInstrumentorClientWrapper.setProcessRequestBody(self._hypertraceConfig.DATA_CAPTURE_RPC_BODY_REQUEST)
+      self._grpcInstrumentorClientWrapper.setProcessResponseBody(self._hypertraceConfig.DATA_CAPTURE_RPC_BODY_REQUEST)
+      self._grpcInstrumentorServerWrapper.setProcessRequestHeaders(self._hypertraceConfig.DATA_CAPTURE_RPC_METADATA_REQUEST)
+      self._grpcInstrumentorServerWrapper.setProcessResponseHeaders(self._hypertraceConfig.DATA_CAPTURE_RPC_METADATA_RESPONSE)
+      self._grpcInstrumentorServerWrapper.setProcessRequestBody(self._hypertraceConfig.DATA_CAPTURE_RPC_BODY_REQUEST)
+      self._grpcInstrumentorServerWrapper.setProcessResponseBody(self._hypertraceConfig.DATA_CAPTURE_RPC_BODY_REQUEST)
+    except e:
+      logger.debug('Failed to initialize grpc instrumentation wrapper.')
+      traceback.print_exc()
+      raise e
 
   def globalInit(self):
     logger.debug('Calling AgentInit.globalInit().')
-    self._requestsInstrumentor.instrument()
+    try:
+      self._requestsInstrumentor.instrument()
+    except e:
+      logger.debug('Failed global init.')
+      traceback.print_exc()
+      raise e
