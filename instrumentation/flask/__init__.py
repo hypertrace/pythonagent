@@ -96,9 +96,9 @@ def _hypertrace_after_request(flaskWrapper, app):
             if isInterestingContentType(contentTypeHeaderTuple[0][1]):
               logger.debug('This is an interesting content-type.')
               if contentTypeHeaderTuple[0][1] == 'application/json':
-                span.set_attribute('http.request.body', json.dumps(json.loads(response.data.decode('UTF8').replace("'", '"'))))
+                span.set_attribute('http.response.body', json.dumps(json.loads(response.data.decode('UTF8').replace("'", '"'))))
               else:
-                span.set_attribute('http.request.body', str(response.data.decode('UTF8')))
+                span.set_attribute('http.response.body', str(response.data.decode('UTF8')))
       return response
     except:
       logger.error('An error occurred in flask after_request handler: exception=%s, stacktrace=%s', sys.exc_info()[0], traceback.format_exc())
