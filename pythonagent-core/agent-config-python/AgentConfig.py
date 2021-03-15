@@ -37,7 +37,10 @@ print("**** Agent Config  fields ****")
 for i in range(len(agent_config_list)): 
     print(agent_config_list[i])
 
-
+#Following attributes need to be set 
+agent_config  = config_pb2.AgentConfig()
+agent_config.data_capture.http_headers = 'false';
+agent_config.reporting.endpoint = "https://test"
 
 
 # DataCapture describes the elements to be captured by the agent instrumentation
