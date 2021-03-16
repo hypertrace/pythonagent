@@ -90,9 +90,10 @@ The python agent output is now written to a log file managed by the logging modu
 
 # Configure OTEL Collector
 Hypertrace python agent will use Jaeger backend as OpenTelemetry collector. HyperTrace Python Agent will export OpenTelemetry traces to Jaeger. 
- $ docker run -p 16686:16686 -p 6831:6831/udp jaegertracing/all-in-one
-Launch Jaeger UI :
-http://localhost:16686/search
+* To run the Jaeger UI docker container, run:
+``` $ docker run -p 16686:16686 -p 6831:6831/udp jaegertracing/all-in-one```
+* To Launch Jaeger UI, open a browser and go to:
+```http://localhost:16686/search```
 
 # Requirements
 * [Python OTel Python Agent](https://github.com/open-telemetry/opentelemetry-python) must not be modified.
@@ -109,8 +110,9 @@ http://localhost:16686/search
 * [Flask Python Instrumentation Endpoint](https://github.com/open-telemetry/opentelemetry-python-contrib/blob/main/instrumentation/opentelemetry-instrumentation-flask/src/opentelemetry/instrumentation/flask/__init__.py#L175)
 * [GRPC Python Instrumentation Endpoint](https://github.com/open-telemetry/opentelemetry-python-contrib/blob/7159372e3b381119715c99a37603b3d2d6b9ea46/instrumentation/opentelemetry-instrumentation-grpc/src/opentelemetry/instrumentation/grpc/__init__.py)
 * [MySQL Python Instrumentation Entrypoint](https://github.com/open-telemetry/opentelemetry-python-contrib/blob/main/instrumentation/opentelemetry-instrumentation-mysql/src/opentelemetry/instrumentation/mysql/__init__.py)
+* [Postgresql Python Instrumentation Entrypoint](https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation/opentelemetry-instrumentation-psycopg2)
 * [Hypertrace specification](https://github.com/hypertrace/specification)
-* [Hypertrace RPC structure(https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/rpc.md)
+* [Hypertrace RPC structure](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/rpc.md)
 * [Agent Configurtion schema](https://github.com/hypertrace/agent-config)
 * [Main OTel Python Agent](https://github.com/open-telemetry/opentelemetry-python) - This is the main otel python agent which we would extend
 * [Otel Python Contributor](https://github.com/open-telemetry/opentelemetry-python-contrib )
@@ -125,6 +127,8 @@ http://localhost:16686/search
 # Build agent-config config.proto
 * run: ```protoc --python_out=../agent-config-python -Itools/env-vars-generator/protobuf/src -I. config.proto```
 * Python protobuf [example](https://developers.google.com/protocol-buffers/docs/pythontutorial)
+* [mysql-connector-python v8.0.5](https://dev.mysql.com/doc/connector-python/en/)
+* [postgresql modules - don't have specifics yet](https://wiki.postgresql.org/wiki/Python)
 
 # Sample Agent config file
 ```
