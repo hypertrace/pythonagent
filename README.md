@@ -200,3 +200,6 @@ data_capture:
     }
 }
 ```
+
+# Testing tools
+* [tox](https://tox.readthedocs.io/en/latest/)
