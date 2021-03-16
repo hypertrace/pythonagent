@@ -1,4 +1,6 @@
 import logging
+import sys
+import os
 from opentelemetry import trace
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
 from opentelemetry.sdk.trace import TracerProvider
@@ -6,6 +8,7 @@ from opentelemetry.sdk.trace.export import ConsoleSpanExporter, SimpleExportSpan
 from config import HypertraceConfig
 from instrumentation.flask import FlaskInstrumentorWrapper
 from instrumentation.grpc import GrpcInstrumentorServerWrapper,GrpcInstrumentorClientWrapper
+from opentelemetry.sdk.resources import Resource
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +24,12 @@ class AgentInit:
     }
     try:
       self._hypertraceConfig = HypertraceConfig()
-      self._tracerProvider = TracerProvider()
+      self._tracerProvider = TracerProvider(
+        resource=Resource.create({
+            "service.name": self._hypertraceConfig.DATA_CAPTURE_SERVICE_NAME,
+            "service.instance.id": os.getpid(),
+        })
+      )
 #      self._tracerProvider = trace.get_tracer('tester')
       trace.set_tracer_provider(self._tracerProvider)
       self._consoleSpanExporter = ConsoleSpanExporter(service_name='tester')
