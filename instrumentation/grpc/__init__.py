@@ -4,12 +4,11 @@ import logging
 import inspect
 import flask
 import grpc
+import traceback
 from contextlib import contextmanager
 from opentelemetry import trace
 from opentelemetry.instrumentation.grpc import GrpcInstrumentorServer, GrpcInstrumentorClient, _server, _client
 from opentelemetry.instrumentation.grpc.version import __version__
-sys.path.append(
-    os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from instrumentation import BaseInstrumentorWrapper
 
 logger = logging.getLogger(__name__)
@@ -22,40 +21,41 @@ def introspect(obj):
     logger.debug("%s: %s" % (func.__name__, inspect.getmembers(obj)))
   except Exception:
     logger.error("No data to display");
+    traceback.print_exc()
 
 class GrpcInstrumentorServerWrapper(GrpcInstrumentorServer, BaseInstrumentorWrapper):
   def __init__(self):
     logger.debug('Entering GrpcInstrumentorServerWrapper constructor.');
-    super().__init__() 
+#    super().__init__() 
 
-  def instrument(self):
-    logger.debug('Entering GrpcInstrumentorServerWrapper.instument().')
-    super().instrument()
+#  def instrument(self):
+#    logger.debug('Entering GrpcInstrumentorServerWrapper.instument().')
+#    super().instrument()
+#
+#  def uninstrument(self):
+#    logger.debug('Entering GrpcInstrumentorServerWrapper.uninstrument()')
+#    super().uninstrument()
+#
+#  def _instrument(self, **kwargs):
+#    logger.debug('Entering GrpcInstrumentorServerWrapper._instument().')
+##    super()._instrument(**kwargs)
+#    self._original_wrapper_func = grpc.server
 
-  def uninstrument(self):
-    logger.debug('Entering GrpcInstrumentorServerWrapper.uninstrument()')
-    super().uninstrument()
-
-  def _instrument(self, **kwargs):
-    logger.debug('Entering GrpcInstrumentorServerWrapper._instument().')
-#    super()._instrument(**kwargs)
-    self._original_wrapper_func = grpc.server
-
-    def server(*args, **kwargs):
-      logger.debug('Entering wrapper interceptors set')
-      if "interceptors" in kwargs:
-        # add our interceptor as the first
-        logger.debug('Setting server_interceptor_wrapper() as interceptor')
-        kwargs["interceptors"].insert(1, server_interceptor_wrapper())
-      else:
-        kwargs["interceptors"] = [server_interceptor_wrapper()]
-      return self._original_wrapper_func(*args, **kwargs)
-
-    grpc.server = server
-    
-  def _uninstrument(self, **kwargs):
-    logger.debug('Entering GrpcInstrumentorServerWrapper._uninstrument()')
-    super()._uninstrument(**kwargs)
+#    def server(*args, **kwargs):
+#      logger.debug('Entering wrapper interceptors set')
+#      if "interceptors" in kwargs:
+#        # add our interceptor as the first
+#        logger.debug('Setting server_interceptor_wrapper() as interceptor')
+#        kwargs["interceptors"].insert(1, server_interceptor_wrapper())
+#      else:
+#        kwargs["interceptors"] = [server_interceptor_wrapper()]
+#      return self._original_wrapper_func(*args, **kwargs)
+#
+#    grpc.server = server
+#    
+#  def _uninstrument(self, **kwargs):
+#    logger.debug('Entering GrpcInstrumentorServerWrapper._uninstrument()')
+#    super()._uninstrument(**kwargs)
 
 class GrpcInstrumentorClientWrapper(GrpcInstrumentorClient, BaseInstrumentorWrapper):
   def __init__(self):
@@ -86,21 +86,21 @@ class OpenTelemetryServerInterceptorWrapper(_server.OpenTelemetryServerIntercept
     super().__init__(tracer)
 
 #  @contextmanager
-  def _set_remote_context(self, servicer_context):
-    logger.debug('Entering OpenTelemetryServerInterceptorWrapper._set_remote_context().')
-    super()._set_remote_context(servicer_context)
-
-  def _start_span(self, handler_call_details, context):
-    logger.debug('Entering OpenTelemetryServerInterceptorWrapper._start_span().')
-    super()._start_span(handler_call_details, context)
-
-  def intercept_service(self, continuation, handler_call_details):
-    logger.debug('Entering OpenTelemetryServerInterceptorWrapper.intercept_service().')
-    super().intercept_service(continuation, handler_call_details)
-
-  def _intercept_server_stream(self, behavior, handler_call_details, request_or_iterator, context):
-    logger.debug('Entering OpenTelemetryServerInterceptorWrapper.intercept_server_stream().')
-    super()._intercept_server_stream(behavior, handler_call_details, request_or_iterator, context)
+#  def _set_remote_context(self, servicer_context):
+#    logger.debug('Entering OpenTelemetryServerInterceptorWrapper._set_remote_context().')
+#    super()._set_remote_context(servicer_context)
+#
+#  def _start_span(self, handler_call_details, context):
+#    logger.debug('Entering OpenTelemetryServerInterceptorWrapper._start_span().')
+#    super()._start_span(handler_call_details, context)
+#
+#  def intercept_service(self, continuation, handler_call_details):
+#    logger.debug('Entering OpenTelemetryServerInterceptorWrapper.intercept_service().')
+#    super().intercept_service(continuation, handler_call_details)
+#
+#  def _intercept_server_stream(self, behavior, handler_call_details, request_or_iterator, context):
+#    logger.debug('Entering OpenTelemetryServerInterceptorWrapper.intercept_server_stream().')
+#    super()._intercept_server_stream(behavior, handler_call_details, request_or_iterator, context)
 
 class OpenTelemetryClientInterceptorWrapper(_client.OpenTelemetryClientInterceptor):
   def __init(self, tracer):
