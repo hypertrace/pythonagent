@@ -13,9 +13,7 @@ class Agent:
     try:
       self._init = AgentInit()
     except:
-      e = sys.exc_info()[0]
-      logger.error('Failed to initialize Agent.')
-      traceback.print_exc()
+      logger.error('Failed to initialize Agent: exception=%s, stacktrace=%s', sys.exc_info()[0], traceback.format_exc())
 
   def registerFlaskApp(self, app):
     logger.debug('Calling Agent.registerFlaskApp.')
@@ -23,9 +21,7 @@ class Agent:
       self._init.flaskInit(app)
       self._init.dumpConfig()
     except:
-      e = sys.exc_info()[0]
-      logger.error('Failed to initialize flask instrumentation wrapper.')
-      traceback.print_exc()
+      logger.error('Failed to initialize flask instrumentation wrapper: exception=%s, stacktrace=%s', sys.exc_info()[0], traceback.format_exc())
 
   def registerGrpc(self):
     logger.debug('Calling Agent.registerGrpc().')
@@ -33,15 +29,11 @@ class Agent:
       self._init.grpcInit()
       self._init.dumpConfig()
     except:
-      e = sys.exc_info()[0]
-      logger.error('Failed to initialize grpc instrumentation wrapper')
-      traceback.print_exc()
+      logger.error('Failed to initialize grpc instrumentation wrapper: exception=%s, stacktrace=%s', sys.exc_info()[0], traceback.format_exc())
 
   def globalInit(self):
     logger.debug('Calling Agent.globalInit().')
     try:
       self._init.globalInit()
     except:
-      e = sys.exc_info()[0]
-      logger.error('Failed to initialize global.')
-      traceback.print_exc()      
+      logger.error('Failed to initialize global: exception=%s, stacktrace=%s', sys.exc_info()[0], traceback.format_exc())

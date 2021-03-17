@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import print_function
 from concurrent import futures
 import sys
 import os
 import logging
 import grpc
 import threading
+import traceback
 import helloworld_pb2
 import helloworld_pb2_grpc
 from agent import Agent
@@ -40,8 +40,11 @@ logger.info('Agent initialized.')
 
 class Greeter(helloworld_pb2_grpc.GreeterServicer):
     def SayHello(self, request, context):
+        logger.debug('Received request.')
         metadata = ( ('tester', 'tester'), ('tester2', 'tester2'))
+        logger.debug('Setting custom headers.')
         context.set_trailing_metadata(metadata)
+        logger.debug('Returning response.')
         return helloworld_pb2.HelloReply(message='Hello, %s!' % request.name)
 
 def serve():
@@ -60,14 +63,18 @@ def exit_callback():
     # NOTE(gRPC Python Team): .close() is possible on a channel and should be
     # used in circumstances in which the with statement does not fit the needs
     # of the code.
-    with grpc.insecure_channel('localhost:50051') as channel:
+    try:
+      with grpc.insecure_channel('localhost:50051') as channel:
         stub = helloworld_pb2_grpc.GreeterStub(channel)
         response = stub.SayHello(helloworld_pb2.HelloRequest(name='you'))
-    print("Greeter client received: " + response.message)
-    os._exit(0)
+      logger.info("Greeter client received: " + response.message)
+      os._exit(0)
+    except:
+      logger.error('An error occurred while calling greeter client: exception=%s, stacktrace=%s', sys.exc_info()[0], traceback.format_exc())
+      os._exit(1)
 
 if __name__ == '__main__':
     logger.info('Starting Test Run.')
-    timer = threading.Timer(2.0, exit_callback)
+    timer = threading.Timer(4.0, exit_callback)
     timer.start()
     serve()

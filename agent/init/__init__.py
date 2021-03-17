@@ -41,9 +41,7 @@ class AgentInit:
       self._grpcInstrumentorClientWrapper = None
       self._grpcInstrumentorServerWrapper = None
     except:
-      e = sys.exc_info()[0]
-      logger.error('Failed to initialize opentelemetry.')
-      traceback.print_exc()
+      logger.error('Failed to initialize opentelemetry: exception=%s, stacktrace=%s', sys.exc_info()[0], traceback.format_exc())
       raise e 
 
   def dumpConfig(self):
@@ -64,9 +62,7 @@ class AgentInit:
       self._flaskInstrumentorWrapper.setProcessRequestBody(self._hypertraceConfig.DATA_CAPTURE_HTTP_BODY_REQUEST)
       self._flaskInstrumentorWrapper.setProcessResponseBody(self._hypertraceConfig.DATA_CAPTURE_HTTP_BODY_REQUEST)
     except:
-      e = sys.exc_info()[0]
-      logger.debug('Failed to initialize flask instrumentation wrapper.')
-      traceback.print_exc()
+      logger.debug('Failed to initialize flask instrumentation wrapper: exception=%s, stacktrace=%s', sys.exc_info()[0], traceback.format_exc())
       raise e
 
   def grpcInit(self):
@@ -86,9 +82,7 @@ class AgentInit:
       self._grpcInstrumentorServerWrapper.setProcessRequestBody(self._hypertraceConfig.DATA_CAPTURE_RPC_BODY_REQUEST)
       self._grpcInstrumentorServerWrapper.setProcessResponseBody(self._hypertraceConfig.DATA_CAPTURE_RPC_BODY_REQUEST)
     except:
-      e = sys.exc_info()[0]
-      logger.debug('Failed to initialize grpc instrumentation wrapper.')
-      traceback.print_exc()
+      logger.debug('Failed to initialize grpc instrumentation wrapper: exception=%s, stacktrace=%s', sys.exc_info()[0], traceback.format_exc())
       raise e
 
   def globalInit(self):
@@ -96,7 +90,5 @@ class AgentInit:
     try:
       self._requestsInstrumentor.instrument()
     except:
-      e = sys.exc_info()[0]
-      logger.debug('Failed global init.')
-      traceback.print_exc()
+      logger.debug('Failed global init: exception=%s, stacktrace=%s', sys.exc_info()[0], traceback.format_exc())
       raise e

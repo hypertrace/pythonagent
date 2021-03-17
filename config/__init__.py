@@ -37,8 +37,7 @@ class HypertraceConfig:
           self.DATA_CAPTURE_RPC_BODY_RESPONSE = configs_list['data_capture']['rpc_body']['response'];
     
       except ImportError:
-        logger.error('An error occurred while parsing the agent-config file.')
-        traceback.print_exc()
+        logger.error('An error occurred while parsing the agent-config file: exception=%s, stacktrace=%s', sys.exc_info()[0], traceback.format_exc())
 
     # getter method 
     def get_DATA_CAPTURE_HTTP_HEADERS_REQUEST(self): 
