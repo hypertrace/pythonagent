@@ -1,5 +1,6 @@
 import config_pb2 as config_pb2
 import yaml
+import traceback
 from google.protobuf import json_format as jf
 
 import logging
@@ -37,7 +38,7 @@ class HypertraceConfig:
           self.DATA_CAPTURE_RPC_BODY_RESPONSE = configs_list['data_capture']['rpc_body']['response'];
     
       except ImportError:
-        logger.error('An error occurred while parsing the agent-config file.')
+        logger.error('An error occurred while parsing the agent-config file: exception=%s, stacktrace=%s', sys.exc_info()[0], traceback.format_exc())
         from ConfigParser import ConfigParser  # ver. < 3.0
 
 aHypertraceConfig = HypertraceConfig();

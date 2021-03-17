@@ -80,6 +80,12 @@ Calling flaskInit().
 }
 127.0.0.1 - - [04/Mar/2021 17:54:44] "GET / HTTP/1.1" 200 -
 ```
+# Configure OTEL Collector
+Hypertrace python agent will use Jaeger backend as OpenTelemetry collector. HyperTrace Python Agent will export OpenTelemetry traces to Jaeger. 
+ $ docker run -p 16686:16686 -p 6831:6831/udp jaegertracing/all-in-one
+Launch Jaeger UI :
+http://localhost:16686/search
+
 The python agent output is now written to a log file managed by the logging module. This can currently be found in ${REPO_HOME}/test/agent.log.
 
 # Configure OTEL Collector
@@ -194,3 +200,6 @@ data_capture:
     }
 }
 ```
+
+# Testing tools
+* [tox](https://tox.readthedocs.io/en/latest/)
