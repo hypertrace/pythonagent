@@ -8,6 +8,7 @@ from opentelemetry.sdk.trace.export import ConsoleSpanExporter, SimpleExportSpan
 from config import HypertraceConfig
 from instrumentation.flask import FlaskInstrumentorWrapper
 from instrumentation.grpc import GrpcInstrumentorServerWrapper,GrpcInstrumentorClientWrapper
+from opentelemetry.instrumentation.grpc import GrpcInstrumentorServer
 from opentelemetry.sdk.resources import Resource
 
 logger = logging.getLogger(__name__)
@@ -69,18 +70,18 @@ class AgentInit:
     logger.debug('Calling AgentInit.grpcInit')
     try:
       self._moduleInitialized['grpc'] = True
-      self._grpcInstrumentorClientWrapper = GrpcInstrumentorClientWrapper()
+#      self._grpcInstrumentorClientWrapper = GrpcInstrumentorClientWrapper()
       self._grpcInstrumentorServerWrapper = GrpcInstrumentorServerWrapper()
-      self._grpcInstrumentorClientWrapper.instrument()
+#      self._grpcInstrumentorClientWrapper.instrument()
       self._grpcInstrumentorServerWrapper.instrument()
-      self._grpcInstrumentorClientWrapper.setProcessRequestHeaders(self._hypertraceConfig.DATA_CAPTURE_RPC_METADATA_REQUEST)
-      self._grpcInstrumentorClientWrapper.setProcessResponseHeaders(self._hypertraceConfig.DATA_CAPTURE_RPC_METADATA_RESPONSE)
-      self._grpcInstrumentorClientWrapper.setProcessRequestBody(self._hypertraceConfig.DATA_CAPTURE_RPC_BODY_REQUEST)
-      self._grpcInstrumentorClientWrapper.setProcessResponseBody(self._hypertraceConfig.DATA_CAPTURE_RPC_BODY_REQUEST)
-      self._grpcInstrumentorServerWrapper.setProcessRequestHeaders(self._hypertraceConfig.DATA_CAPTURE_RPC_METADATA_REQUEST)
-      self._grpcInstrumentorServerWrapper.setProcessResponseHeaders(self._hypertraceConfig.DATA_CAPTURE_RPC_METADATA_RESPONSE)
-      self._grpcInstrumentorServerWrapper.setProcessRequestBody(self._hypertraceConfig.DATA_CAPTURE_RPC_BODY_REQUEST)
-      self._grpcInstrumentorServerWrapper.setProcessResponseBody(self._hypertraceConfig.DATA_CAPTURE_RPC_BODY_REQUEST)
+#      self._grpcInstrumentorClientWrapper.setProcessRequestHeaders(self._hypertraceConfig.DATA_CAPTURE_RPC_METADATA_REQUEST)
+#      self._grpcInstrumentorClientWrapper.setProcessResponseHeaders(self._hypertraceConfig.DATA_CAPTURE_RPC_METADATA_RESPONSE)
+#      self._grpcInstrumentorClientWrapper.setProcessRequestBody(self._hypertraceConfig.DATA_CAPTURE_RPC_BODY_REQUEST)
+#      self._grpcInstrumentorClientWrapper.setProcessResponseBody(self._hypertraceConfig.DATA_CAPTURE_RPC_BODY_REQUEST)
+#      self._grpcInstrumentorServerWrapper.setProcessRequestHeaders(self._hypertraceConfig.DATA_CAPTURE_RPC_METADATA_REQUEST)
+#      self._grpcInstrumentorServerWrapper.setProcessResponseHeaders(self._hypertraceConfig.DATA_CAPTURE_RPC_METADATA_RESPONSE)
+#      self._grpcInstrumentorServerWrapper.setProcessRequestBody(self._hypertraceConfig.DATA_CAPTURE_RPC_BODY_REQUEST)
+#      self._grpcInstrumentorServerWrapper.setProcessResponseBody(self._hypertraceConfig.DATA_CAPTURE_RPC_BODY_REQUEST)
     except:
       logger.debug('Failed to initialize grpc instrumentation wrapper: exception=%s, stacktrace=%s', sys.exc_info()[0], traceback.format_exc())
       raise e
