@@ -11,6 +11,8 @@ from opentelemetry import trace
 from opentelemetry.instrumentation.grpc import GrpcInstrumentorServer, GrpcInstrumentorClient, _server, _client, server_interceptor
 from opentelemetry.instrumentation.grpc.version import __version__
 from instrumentation import BaseInstrumentorWrapper
+from opentelemetry.instrumentation.grpc.grpcext import intercept_channel
+from wrapt import wrap_function_wrapper as _wrap
 
 logger = logging.getLogger(__name__)
 
@@ -53,10 +55,42 @@ class GrpcInstrumentorServerWrapper(GrpcInstrumentorServer, BaseInstrumentorWrap
     logger.debug('Entering GrpcInstrumentorServerWrapper._uninstrument()')
     super()._uninstrument(**kwargs)
 
-class GrpcInstrumentorClientWrapper(GrpcInstrumentorServer, BaseInstrumentorWrapper):
+class GrpcInstrumentorClientWrapper(GrpcInstrumentorClient, BaseInstrumentorWrapper):
   def __init__(self):
     logger.debug('Entering GrpcInstrumentorClientWrapper constructor.');
     super().__init__()
+
+  def _which_channel(self, kwargs):
+        # handle legacy argument
+        if "channel_type" in kwargs:
+            if kwargs.get("channel_type") == "secure":
+                return ("secure_channel",)
+            return ("insecure_channel",)
+
+        # handle modern arguments
+        types = []
+        for ctype in ("secure_channel", "insecure_channel"):
+            if kwargs.get(ctype, True):
+                types.append(ctype)
+
+        return tuple(types)
+
+  def _instrument(self, **kwargs):
+        for ctype in self._which_channel(kwargs):
+            _wrap(
+                "grpc", ctype, self.wrapper_fn,
+            )
+
+  def _uninstrument(self, **kwargs):
+        for ctype in self._which_channel(kwargs):
+            unwrap(grpc, ctype)
+
+  def wrapper_fn(self, original_func, instance, args, kwargs):
+        channel = original_func(*args, **kwargs)
+        tracer_provider = kwargs.get("tracer_provider")
+        return intercept_channel(
+            channel, client_interceptor_wrapper(tracer_provider=tracer_provider),
+        )
 
 def server_interceptor_wrapper(tracer_provider=None):
   logger.debug('Entering server_interceptor_wrapper().')
@@ -65,17 +99,25 @@ def server_interceptor_wrapper(tracer_provider=None):
   logger.debug('Calling OpenTelemetryServerInterceptorWrapper(tracer).')
   return OpenTelemetryServerInterceptorWrapper(tracer)
 
-class _OpenTelemetryWrapperServicerContext(_server._OpenTelemetryServicerContext):
-    def __init__(self, servicer_context, active_span):
-      super().__init__(servicer_context, active_span)
+def client_interceptor_wrapper(tracer_provider=None):
+    logger.debug('Entering client_interceptor_wrapper().')
+    from . import _client
+    tracer = trace.get_tracer(__name__, __version__, tracer_provider)
+    return _client.OpenTelemetryClientInterceptor(tracer)
 
-    def set_trailing_metadata(self, *args, **kwargs):
-        logger.debug('RCBJ0204a: ' + str(self._active_span))
-        logger.debug('RCBJ0204b: ' + str(args))
-        for h in args[0]:
-           logger.debug(str(h))
-           self._active_span.set_attribute('rpc.response.metadata.' + h[0].lower(), h[1])
-        return self._servicer_context.set_trailing_metadata(*args, **kwargs)
+class _OpenTelemetryWrapperServicerContext(_server._OpenTelemetryServicerContext):
+  def __init__(self, servicer_context, active_span):
+    logger.debug('Entering _OpenTelemetryWrapperServicerContext.__init__().')
+    super().__init__(servicer_context, active_span)
+
+  def set_trailing_metadata(self, *args, **kwargs):
+    logger.debug('Entering _OpenTelemetryWrapperServicerContext.set_trailing_metadata().')
+    logger.debug('Span Object: ' + str(self._active_span))
+    logger.debug('Response Headers: ' + str(args))
+    for h in args[0]:
+      logger.debug(str(h))
+      self._active_span.set_attribute('rpc.response.metadata.' + h[0].lower(), h[1])
+    return self._servicer_context.set_trailing_metadata(*args, **kwargs)
 
 class OpenTelemetryServerInterceptorWrapper(_server.OpenTelemetryServerInterceptor):
   def __init__(self, tracer):
@@ -99,18 +141,18 @@ class OpenTelemetryServerInterceptorWrapper(_server.OpenTelemetryServerIntercept
                 #span.set_attribute('tester', 'tester')
                 #dump request headers
                 #introspect(handler_call_details) 
-                logger.debug('RCBJ0201: ' + str(handler_call_details.invocation_metadata))
+                logger.debug('Request Metadata: ' + str(handler_call_details.invocation_metadata))
                 for h in handler_call_details.invocation_metadata:
                   logger.debug(str(h))
                   span.set_attribute('rpc.request.metadata.' + h[0].lower(), h[1])
                 #introspect(request_or_iterator)
-                logger.debug('RCBJ0202: ' + str(request_or_iterator))
+                logger.debug('Request Body: ' + str(request_or_iterator))
                 span.set_attribute('rpc.request.body', str(request_or_iterator))
                 try:
                   # Capture response
                   context = _OpenTelemetryWrapperServicerContext(context, span)
                   response = behavior(request_or_iterator, context)
-                  logger.debug('RCBJ0203: ' + str(response))
+                  logger.debug('Response Body: ' + str(response))
                   span.set_attribute('rpc.request.body', str(response))
                   #introspect(context)
                   return response
@@ -127,3 +169,47 @@ class OpenTelemetryServerInterceptorWrapper(_server.OpenTelemetryServerIntercept
 
   def _intercept_server_stream(self, behavior, handler_call_details, request_or_iterator, context):
     logger.debug('Entering OpenTelemetryServerInterceptorWrapper.intercept_server_stream().')
+
+class OpenTelemetryClientInterceptorWrapper(_server.OpenTelemetryServerInterceptor):
+    def __init__(self):
+      logger.debug('Entering OpenTelemetryClientInterceptorWrapper.__init__().')
+      super().__init__(tracer)
+   
+    def __enter__(self):
+      return self
+ 
+    def intercept_unary(self, request, metadata, client_info, invoker):
+        logger.debug('Entering OpenTelemetryClientInterceptorWrapper.intercept_unary().')
+        if not metadata:
+            mutable_metadata = OrderedDict()
+        else:
+            mutable_metadata = OrderedDict(metadata)
+
+        with self._start_guarded_span(client_info.full_method) as guarded_span:
+            _inject_span_context(mutable_metadata)
+            metadata = tuple(mutable_metadata.items())
+
+            rpc_info = RpcInfo(
+                full_method=client_info.full_method,
+                metadata=metadata,
+                timeout=client_info.timeout,
+                request=request,
+            )
+
+            try:
+                result = invoker(request, metadata)
+            except grpc.RpcError as err:
+                guarded_span.generated_span.set_status(
+                    Status(StatusCode.ERROR)
+                )
+                guarded_span.generated_span.set_attribute(
+                    "rpc.grpc.status_code", err.code().value[0]
+                )
+                raise err
+
+            return self._trace_result(guarded_span, rpc_info, result)
+
+    def intercept_stream(
+        self, request_or_iterator, metadata, client_info, invoker
+    ):
+      logger.debug('Entering OpenTelemetryClientInterceptorWrapper.intercept_stream().')

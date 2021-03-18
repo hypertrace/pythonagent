@@ -23,10 +23,18 @@ class Agent:
     except:
       logger.error('Failed to initialize flask instrumentation wrapper: exception=%s, stacktrace=%s', sys.exc_info()[0], traceback.format_exc())
 
-  def registerGrpc(self):
-    logger.debug('Calling Agent.registerGrpc().')
+  def registerServerGrpc(self):
+    logger.debug('Calling Agent.registerServerGrpc().')
     try:
-      self._init.grpcInit()
+      self._init.grpcServerInit()
+      self._init.dumpConfig()
+    except:
+      logger.error('Failed to initialize grpc instrumentation wrapper: exception=%s, stacktrace=%s', sys.exc_info()[0], traceback.format_exc())
+
+  def registerClientGrpc(self):
+    logger.debug('Calling Agent.registerClientGrpc().')
+    try:
+      self._init.grpcClientInit()
       self._init.dumpConfig()
     except:
       logger.error('Failed to initialize grpc instrumentation wrapper: exception=%s, stacktrace=%s', sys.exc_info()[0], traceback.format_exc())

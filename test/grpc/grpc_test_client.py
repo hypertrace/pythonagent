@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 #
 logger.info('Initializing agent.')
 agent = Agent()
-agent.registerServerGrpc()
+agent.registerClientGrpc()
 agent.globalInit()
 logger.info('Agent initialized.')
 #
