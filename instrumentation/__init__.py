@@ -58,3 +58,4 @@ class BaseInstrumentorWrapper:
   def setServiceName(self, serviceName):
     logger.debug('Setting self._serviceName')
     self._serviceName = serviceName
+

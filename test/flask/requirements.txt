@@ -6,4 +6,7 @@ opentelemetry-instrumentation-requests==0.18b1
 opentelemetry-instrumentation-wsgi==0.18b1
 opentelemetry-sdk==1.0.0rc1
 opentelemetry-util-http==0.18b1
+google
+protobuf
+google-cloud
 pyyaml
