@@ -69,16 +69,17 @@ class GrpcInstrumentorClientWrapper(GrpcInstrumentorClient, BaseInstrumentorWrap
   def _instrument(self, **kwargs):
     logger.debug('Entering GrpcInstrumentorClientWrapper._instrument().')
     super()._instrument(**kwargs)
-    for ctype in self._which_channel(kwargs):
-      _wrap(
-        "grpc", ctype, self.wrapper_fn_wrapper,
-    )
+# Uncomment this to reenable the client handler.
+#    for ctype in self._which_channel(kwargs):
+#      _wrap(
+#        "grpc", ctype, self.wrapper_fn_wrapper,
+#    )
 
   def _uninstrument(self, **kwargs):
     logger.debug('Entering GrpcInstrumentorClientWrapper._uninstrument().')
     super()._uninstrument(**kwargs)
-    for ctype in self._which_channel(kwargs):
-      unwrap(grpc, ctype)
+#    for ctype in self._which_channel(kwargs):
+#      unwrap(grpc, ctype)
 
   def wrapper_fn_wrapper(self, original_func, instance, args, kwargs):
     channel = original_func(*args, **kwargs)
