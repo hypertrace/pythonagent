@@ -1,6 +1,7 @@
 import logging
 import sys
 import os
+import traceback
 from opentelemetry import trace
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
 from opentelemetry.sdk.trace import TracerProvider
@@ -8,6 +9,7 @@ from opentelemetry.sdk.trace.export import ConsoleSpanExporter, SimpleExportSpan
 from config import HypertraceConfig
 from instrumentation.flask import FlaskInstrumentorWrapper
 from instrumentation.grpc import GrpcInstrumentorServerWrapper,GrpcInstrumentorClientWrapper
+from opentelemetry.instrumentation.grpc import GrpcInstrumentorServer
 from opentelemetry.sdk.resources import Resource
 
 logger = logging.getLogger(__name__)
@@ -18,7 +20,8 @@ class AgentInit:
     logger.debug('Initializing AgentInit object.')
     self._moduleInitialized = {
       "flask": False,
-      "grpc": False,
+      "grpc:server": False,
+      "grpc:client": False,
       "mysql": False,
       "postgresql": False
     }
@@ -42,7 +45,7 @@ class AgentInit:
       self._grpcInstrumentorServerWrapper = None
     except:
       logger.error('Failed to initialize opentelemetry: exception=%s, stacktrace=%s', sys.exc_info()[0], traceback.format_exc())
-      raise e 
+      raise sys.exc_info()[0]
 
   def dumpConfig(self):
     logger.debug('Calling DumpConfig().')
@@ -63,27 +66,35 @@ class AgentInit:
       self._flaskInstrumentorWrapper.setProcessResponseBody(self._hypertraceConfig.DATA_CAPTURE_HTTP_BODY_REQUEST)
     except:
       logger.debug('Failed to initialize flask instrumentation wrapper: exception=%s, stacktrace=%s', sys.exc_info()[0], traceback.format_exc())
-      raise e
+      raise sys.exc_info()[0]
 
-  def grpcInit(self):
-    logger.debug('Calling AgentInit.grpcInit')
+  def grpcServerInit(self):
+    logger.debug('Calling AgentInit.grpcServerInit')
     try:
-      self._moduleInitialized['grpc'] = True
-      self._grpcInstrumentorClientWrapper = GrpcInstrumentorClientWrapper()
+      self._moduleInitialized['grpc:server'] = True
       self._grpcInstrumentorServerWrapper = GrpcInstrumentorServerWrapper()
-      self._grpcInstrumentorClientWrapper.instrument()
       self._grpcInstrumentorServerWrapper.instrument()
-      self._grpcInstrumentorClientWrapper.setProcessRequestHeaders(self._hypertraceConfig.DATA_CAPTURE_RPC_METADATA_REQUEST)
-      self._grpcInstrumentorClientWrapper.setProcessResponseHeaders(self._hypertraceConfig.DATA_CAPTURE_RPC_METADATA_RESPONSE)
-      self._grpcInstrumentorClientWrapper.setProcessRequestBody(self._hypertraceConfig.DATA_CAPTURE_RPC_BODY_REQUEST)
-      self._grpcInstrumentorClientWrapper.setProcessResponseBody(self._hypertraceConfig.DATA_CAPTURE_RPC_BODY_REQUEST)
       self._grpcInstrumentorServerWrapper.setProcessRequestHeaders(self._hypertraceConfig.DATA_CAPTURE_RPC_METADATA_REQUEST)
       self._grpcInstrumentorServerWrapper.setProcessResponseHeaders(self._hypertraceConfig.DATA_CAPTURE_RPC_METADATA_RESPONSE)
       self._grpcInstrumentorServerWrapper.setProcessRequestBody(self._hypertraceConfig.DATA_CAPTURE_RPC_BODY_REQUEST)
       self._grpcInstrumentorServerWrapper.setProcessResponseBody(self._hypertraceConfig.DATA_CAPTURE_RPC_BODY_REQUEST)
     except:
       logger.debug('Failed to initialize grpc instrumentation wrapper: exception=%s, stacktrace=%s', sys.exc_info()[0], traceback.format_exc())
-      raise e
+      raise sys.exc_info()[0]
+
+  def grpcClientInit(self):
+    logger.debug('Calling AgentInit.grpcClientInit')
+    try:
+      self._moduleInitialized['grpc:client'] = True
+      self._grpcInstrumentorClientWrapper = GrpcInstrumentorClientWrapper()
+      self._grpcInstrumentorClientWrapper.instrument()
+      self._grpcInstrumentorClientWrapper.setProcessRequestHeaders(self._hypertraceConfig.DATA_CAPTURE_RPC_METADATA_REQUEST)
+      self._grpcInstrumentorClientWrapper.setProcessResponseHeaders(self._hypertraceConfig.DATA_CAPTURE_RPC_METADATA_RESPONSE)
+      self._grpcInstrumentorClientWrapper.setProcessRequestBody(self._hypertraceConfig.DATA_CAPTURE_RPC_BODY_REQUEST)
+      self._grpcInstrumentorClientWrapper.setProcessResponseBody(self._hypertraceConfig.DATA_CAPTURE_RPC_BODY_REQUEST)
+    except:
+      logger.debug('Failed to initialize grpc instrumentation wrapper: exception=%s, stacktrace=%s', sys.exc_info()[0], traceback.format_exc())
+      raise sys.exc_info()[0]
 
   def globalInit(self):
     logger.debug('Calling AgentInit.globalInit().')
@@ -91,4 +102,4 @@ class AgentInit:
       self._requestsInstrumentor.instrument()
     except:
       logger.debug('Failed global init: exception=%s, stacktrace=%s', sys.exc_info()[0], traceback.format_exc())
-      raise e
+      sys.exc_info()[0]

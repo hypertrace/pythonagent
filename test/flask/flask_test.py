@@ -6,12 +6,11 @@ import traceback
 from werkzeug.serving import make_server
 from flask import request
 import time
-import sys
-import os
 import atexit
 import threading
 from flask import Flask
 from agent import Agent
+
 logging.basicConfig(filename='agent.log', level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
@@ -27,7 +26,7 @@ logger.info('Initializing agent.')
 logger.info('Initializing agent.')
 agent = Agent()
 agent.registerFlaskApp(app)
-agent.registerGrpc() # Keeping this in place to test these running together
+agent.registerServerGrpc() # Keeping this in place to test these running together
 agent.globalInit()
 #
 # End initialization logic for Python Agent
