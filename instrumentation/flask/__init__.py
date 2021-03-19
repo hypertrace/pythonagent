@@ -35,11 +35,7 @@ def _hypertrace_before_request( flaskWrapper, app):
   def hypertrace_before_request():
     logger.debug('Entering _hypertrace_before_request().');
     try:
-      activation = flask.request.environ.get(_ENVIRON_ACTIVATION_KEY)
       span = flask.request.environ.get(_ENVIRON_SPAN_KEY)
-      token = flask.request.environ.get(_ENVIRON_TOKEN)
-      logger.debug('activation: ' + str(activation))
-      logger.debug('token: ' + str(token))
       logger.debug('span: ' + str(span))
       if span.is_recording():
         logger.debug('Span is Recording!')
@@ -74,11 +70,7 @@ def _hypertrace_after_request(flaskWrapper, app):
       logger.debug('Entering _hypertrace_after_request().')
       logger.debug('Dumping response.')
       introspect(response)
-      activation = flask.request.environ.get(_ENVIRON_ACTIVATION_KEY)
       span = flask.request.environ.get(_ENVIRON_SPAN_KEY)
-      token = flask.request.environ.get(_ENVIRON_TOKEN)
-      logger.debug('activation: ' + str(activation))
-      logger.debug('token: ' + str(token))
       logger.debug('span: ' + str(span))
       if flaskWrapper.getProcessResponseHeaders():
         logger.debug('Dumping Response Headers.')
