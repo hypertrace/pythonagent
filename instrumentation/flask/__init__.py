@@ -70,15 +70,7 @@ def _hypertrace_after_request(flaskWrapper, app):
       logger.debug('Entering _hypertrace_after_request().')
       logger.debug('Dumping response.')
       introspect(response)
-<<<<<<< HEAD
       span = flask.request.environ.get(_ENVIRON_SPAN_KEY)
-=======
-      activation = flask.request.environ.get(_ENVIRON_ACTIVATION_KEY)
-      span = flask.request.environ.get(_ENVIRON_SPAN_KEY)
-      token = flask.request.environ.get(_ENVIRON_TOKEN)
-      logger.debug('activation: ' + str(activation))
-      logger.debug('token: ' + str(token))
->>>>>>> release0.1-merge
       logger.debug('span: ' + str(span))
       if flaskWrapper.getProcessResponseHeaders():
         logger.debug('Dumping Response Headers.')

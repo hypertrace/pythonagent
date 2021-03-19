@@ -120,7 +120,7 @@ class OpenTelemetryServerInterceptorWrapper(_server.OpenTelemetryServerIntercept
   def intercept_service(self, continuation, handler_call_details):
         logger.debug('Entering OpenTelemetryServerInterceptorWrapper.intercept_service().')
         def telemetry_wrapper(behavior, request_streaming, response_streaming):
-        logger.debug('Entering OpenTelemetryServerInterceptorWrapper.telemetry_wrapper().')
+            logger.debug('Entering OpenTelemetryServerInterceptorWrapper.telemetry_wrapper().')
             def telemetry_interceptor(request_or_iterator, context):
                 logger.debug('Entering OpenTelemetryServerInterceptorWrapper.telemetry_interceptor().')
                 # handle streaming responses specially
