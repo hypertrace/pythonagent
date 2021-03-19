@@ -36,28 +36,12 @@ def _hypertrace_before_request( flaskWrapper, app):
     logger.debug('Entering _hypertrace_before_request().');
     try:
       span = flask.request.environ.get(_ENVIRON_SPAN_KEY)
+      requestHeaders = flask.request.headers # for now, assuming single threaded mode (multiple python processes)
+      requestBody = flask.request.data       # same
       logger.debug('span: ' + str(span))
-      if span.is_recording():
-        logger.debug('Span is Recording!')
-      if flaskWrapper.getProcessRequestHeaders():
-        logger.debug('Dumping Request Headers:')
-        for h in flask.request.headers:
-          logger.debug(str(h))
-          span.set_attribute('http.request.header.' + h[0].lower(), h[1])
-      if flaskWrapper.getProcessRequestBody():
-        logger.debug('Request Body: ' + str(flask.request.data))
-        contentTypeHeaderTuple = [item for item in flask.request.headers if item[0].lower() == 'content-type']
-        logger.debug('contentTypeHeaderTuple=' + str(contentTypeHeaderTuple))
-        if len(contentTypeHeaderTuple) > 0:
-          logger.debug('Found content-type header.')        
-          if contentTypeHeaderTuple[0][1] != None and contentTypeHeaderTuple[0][1] != '':
-            logger.debug('Mimetype/content-type value exists. %s', contentTypeHeaderTuple[0][1])
-            if isInterestingContentType(contentTypeHeaderTuple[0][1]):
-              logger.debug('This is an interesting content-type.')
-              if contentTypeHeaderTuple[0][1] == 'application/json':
-                span.set_attribute('http.request.body', json.dumps(json.loads(flask.request.data.decode('UTF8').replace("'", '"'))))
-              else:
-                span.set_attribute('http.request.body', str(flask.request.data.decode('UTF8')))
+      logger.debug('Request Headers: ' + str(requestBody))
+      logger.debug('Request Body: ' + str(requestBody))
+      flaskWrapper.genericRequestHandler(requestHeaders, requestBody, span)
     except:
       logger.error('An error occurred in flask before_request handler: exception=%s, stacktrace=%s', sys.exc_info()[0], traceback.format_exc())
       #Not rethrowing to avoid causing runtime errors for Flask.
@@ -68,29 +52,11 @@ def _hypertrace_after_request(flaskWrapper, app):
   def hypertrace_after_request(response):
     try:
       logger.debug('Entering _hypertrace_after_request().')
-      logger.debug('Dumping response.')
-      introspect(response)
       span = flask.request.environ.get(_ENVIRON_SPAN_KEY)
-      logger.debug('span: ' + str(span))
-      if flaskWrapper.getProcessResponseHeaders():
-        logger.debug('Dumping Response Headers.')
-        for h in response.headers:
-          logger.debug(str(h))
-          span.set_attribute('http.response.header.' + h[0].lower(), h[1])
-      if flaskWrapper.getProcessResponseBody():
-        logger.debug('Response Body: ' + str(response.data))
-        contentTypeHeaderTuple = [item for item in response.headers if item[0].lower() == 'content-type']
-        logger.debug('contentTypeHeaderTuple=' + str(contentTypeHeaderTuple))
-        if len(contentTypeHeaderTuple) > 0:
-          logger.debug('Found content-type header.')
-          if contentTypeHeaderTuple[0][1] != None and contentTypeHeaderTuple[0][1] != '':
-            logger.debug('Mimetype/content-type value exists. %s', contentTypeHeaderTuple[0][1])
-            if isInterestingContentType(contentTypeHeaderTuple[0][1]):
-              logger.debug('This is an interesting content-type.')
-              if contentTypeHeaderTuple[0][1] == 'application/json':
-                span.set_attribute('http.response.body', json.dumps(json.loads(response.data.decode('UTF8').replace("'", '"'))))
-              else:
-                span.set_attribute('http.response.body', str(response.data.decode('UTF8')))
+      logger.debug('Span: ' + str(span))
+      logger.debug('Response Headers: ' + str(response.headers))
+      logger.debug('Response Body: ' + str(response.data))
+      flaskWrapper.genericResponseHandler(response.headers, response.data, span)
       return response
     except:
       logger.error('An error occurred in flask after_request handler: exception=%s, stacktrace=%s', sys.exc_info()[0], traceback.format_exc())
@@ -127,14 +93,3 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
 
   def getApp():
     return self._app
-
-def isInterestingContentType(contentType):
-  logger.debug('Entering FlaskInstrumentorWrapper.isInterestingContentType().')
-  try:
-    if contentType == 'application/json': return True
-    if contentType == 'application/graphql': return True
-    if contentType == 'application/x-www-form-urlencoded': return True
-    return False;
-  except:
-    logger.error('An error occurred while inspecting content-type: exception=%s, stacktrace=%s', sys.exc_info()[0], traceback.format_exc())
-    return False
