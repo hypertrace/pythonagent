@@ -49,11 +49,10 @@ class GrpcInstrumentorServerWrapper(GrpcInstrumentorServer, BaseInstrumentorWrap
     logger.debug('Entering GrpcInstrumentorServerWrapper._instument().')
     super()._instrument(**kwargs)
     self._original_wrapper_func = grpc.server
-
     def server_wrapper(*args, **kwargs):
       logger.debug('Entering wrapper interceptors set')
-      logger.debug('Setting server_interceptor_wrapper().')
-      kwargs["interceptors"] = [server_interceptor_wrapper()]
+      logger.debug('Setting server_interceptor_wrapper() as interceptor.')
+      kwargs["interceptors"] = [server_interceptor_wrapper(self)]
       return self._original_wrapper_func(*args, **kwargs)
     grpc.server = server_wrapper
 
@@ -88,11 +87,10 @@ class GrpcInstrumentorClientWrapper(GrpcInstrumentorClient, BaseInstrumentorWrap
       channel, client_interceptor_wrapper(tracer_provider=tracer_provider),
     )
 
-def server_interceptor_wrapper(tracer_provider=None):
+def server_interceptor_wrapper(gisw, tracer_provider=None):
   logger.debug('Entering server_interceptor_wrapper().')
   tracer = trace.get_tracer(__name__, __version__, tracer_provider)
-  logger.debug('Calling OpenTelemetryServerInterceptorWrapper(tracer).')
-  return OpenTelemetryServerInterceptorWrapper(tracer)
+  return OpenTelemetryServerInterceptorWrapper(tracer, gisw)
 
 def client_interceptor_wrapper(tracer_provider):
   logger.debug('Entering client_interceptor_wrapper().')
@@ -103,20 +101,23 @@ class _OpenTelemetryWrapperServicerContext(_server._OpenTelemetryServicerContext
   def __init__(self, servicer_context, active_span):
     logger.debug('Entering _OpenTelemetryWrapperServicerContext.__init__().')
     super().__init__(servicer_context, active_span)
+    self._responseHeaders = ()
 
   def set_trailing_metadata(self, *args, **kwargs):
     logger.debug('Entering _OpenTelemetryWrapperServicerContext.set_trailing_metadata().')
     logger.debug('Span Object: ' + str(self._active_span))
     logger.debug('Response Headers: ' + str(args))
-    for h in args[0]:
-      logger.debug(str(h))
-      self._active_span.set_attribute('rpc.response.metadata.' + h[0].lower(), h[1])
+    self._responseHeaders = args 
     return self._servicer_context.set_trailing_metadata(*args, **kwargs)
 
+  def get_trailing_metadata(self):
+    return self._responseHeaders 
+
 class OpenTelemetryServerInterceptorWrapper(_server.OpenTelemetryServerInterceptor):
-  def __init__(self, tracer):
+  def __init__(self, tracer, gisw ):
     logger.debug('Entering OpenTelemetryServerInterceptorWrapper.__init__().')
     super().__init__(tracer)
+    self._gisw = gisw
 
   def intercept_service(self, continuation, handler_call_details):
         logger.debug('Entering OpenTelemetryServerInterceptorWrapper.intercept_service().')
@@ -135,19 +136,16 @@ class OpenTelemetryServerInterceptorWrapper(_server.OpenTelemetryServerIntercept
                 logger.debug('Span Object: ' + str(context._active_span))
                 span = context._active_span
                 logger.debug('Request Metadata: ' + str(handler_call_details.invocation_metadata))
-                for h in handler_call_details.invocation_metadata:
-                  logger.debug(str(h))
-                  span.set_attribute('rpc.request.metadata.' + h[0].lower(), h[1])
-                #introspect(request_or_iterator)
                 logger.debug('Request Body: ' + str(request_or_iterator))
-                span.set_attribute('rpc.request.body', str(request_or_iterator))
+                self._gisw.genericRpcRequestHandler(handler_call_details.invocation_metadata, request_or_iterator, span)
                 try:
                   # Capture response
                   context = _OpenTelemetryWrapperServicerContext(context, span)
                   response = behavior(request_or_iterator, context)
                   logger.debug('Response Body: ' + str(response))
-                  span.set_attribute('rpc.request.body', str(response))
-                  #introspect(context)
+#                  logger.debug('RCBJ0600: ' + str(context))
+                  logger.debug('Response Headers: ' + str(context.get_trailing_metadata()))
+                  self._gisw.genericRpcResponseHandler(context.get_trailing_metadata()[0], response, span)
                   return response
                 except Exception as error:
                   # Bare exceptions are likely to be gRPC aborts, which
