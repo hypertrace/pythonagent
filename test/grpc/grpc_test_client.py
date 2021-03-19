@@ -69,8 +69,8 @@ def exit_callback():
         metadata = (('tester1', 'tester1'),
                     ('tester2', 'tester2'))
         response = stub.SayHello(helloworld_pb2.HelloRequest(name='you'), metadata=metadata)
-      logger.info("Greeter client received: " + response.message)
-      os._exit(0)
+        logger.info("Greeter client received: " + response.message)
+        os._exit(0)
     except:
       logger.error('An error occurred while calling greeter client: exception=%s, stacktrace=%s', sys.exc_info()[0], traceback.format_exc())
       os._exit(1)
