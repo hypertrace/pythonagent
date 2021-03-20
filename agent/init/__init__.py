@@ -11,7 +11,6 @@ from instrumentation.flask import FlaskInstrumentorWrapper
 from instrumentation.grpc import GrpcInstrumentorServerWrapper,GrpcInstrumentorClientWrapper
 from instrumentation.mysql import MySQLInstrumentorWrapper
 from opentelemetry.instrumentation.grpc import GrpcInstrumentorServer
-from instrumentation.mysql import MySQLInstrumentorWrapper
 from opentelemetry.sdk.resources import Resource
 
 logger = logging.getLogger(__name__)

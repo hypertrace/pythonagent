@@ -10,11 +10,11 @@ import mysql.connector
 from instrumentation import BaseInstrumentorWrapper
 from opentelemetry.instrumentation.mysql import MySQLInstrumentor
 
-Initialize logger with local module name
+#Initialize logger with local module name
 logger = logging.getLogger(__name__)
 
 # The main entry point 
-class MySqlInstrumentorWrapper(MySQLInstrumentor, BaseInstrumentorWrapper):
+class MySQLInstrumentorWrapper(MySQLInstrumentor, BaseInstrumentorWrapper):
   def __init__(self):
     super().__init__(self)
 
