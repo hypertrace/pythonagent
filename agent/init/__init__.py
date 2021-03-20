@@ -9,7 +9,9 @@ from opentelemetry.sdk.trace.export import ConsoleSpanExporter, SimpleExportSpan
 from config import HypertraceConfig
 from instrumentation.flask import FlaskInstrumentorWrapper
 from instrumentation.grpc import GrpcInstrumentorServerWrapper,GrpcInstrumentorClientWrapper
+from instrumentation.mysql import MySQLInstrumentorWrapper
 from opentelemetry.instrumentation.grpc import GrpcInstrumentorServer
+from instrumentation.mysql import MySQLInstrumentorWrapper
 from opentelemetry.sdk.resources import Resource
 
 logger = logging.getLogger(__name__)
@@ -43,8 +45,11 @@ class AgentInit:
       self._flaskInstrumentorWrapper = None
       self._grpcInstrumentorClientWrapper = None
       self._grpcInstrumentorServerWrapper = None
+      self._mysqlInstrumentorWrapper = None
     except:
-      logger.error('Failed to initialize opentelemetry: exception=%s, stacktrace=%s', sys.exc_info()[0], traceback.format_exc())
+      logger.error('Failed to initialize opentelemetry: exception=%s, stacktrace=%s',
+        sys.exc_info()[0],
+        traceback.format_exc())
       raise sys.exc_info()[0]
 
   def dumpConfig(self):
@@ -65,7 +70,9 @@ class AgentInit:
       self._flaskInstrumentorWrapper.setProcessRequestBody(self._hypertraceConfig.DATA_CAPTURE_HTTP_BODY_REQUEST)
       self._flaskInstrumentorWrapper.setProcessResponseBody(self._hypertraceConfig.DATA_CAPTURE_HTTP_BODY_REQUEST)
     except:
-      logger.debug('Failed to initialize flask instrumentation wrapper: exception=%s, stacktrace=%s', sys.exc_info()[0], traceback.format_exc())
+      logger.debug('Failed to initialize flask instrumentation wrapper: exception=%s, stacktrace=%s',
+        sys.exc_info()[0],
+        traceback.format_exc())
       raise sys.exc_info()[0]
 
   def grpcServerInit(self):
@@ -79,7 +86,9 @@ class AgentInit:
       self._grpcInstrumentorServerWrapper.setProcessRequestBody(self._hypertraceConfig.DATA_CAPTURE_RPC_BODY_REQUEST)
       self._grpcInstrumentorServerWrapper.setProcessResponseBody(self._hypertraceConfig.DATA_CAPTURE_RPC_BODY_REQUEST)
     except:
-      logger.debug('Failed to initialize grpc instrumentation wrapper: exception=%s, stacktrace=%s', sys.exc_info()[0], traceback.format_exc())
+      logger.debug('Failed to initialize grpc instrumentation wrapper: exception=%s,stacktrace=%s',
+        sys.exc_info()[0],
+        traceback.format_exc())
       raise sys.exc_info()[0]
 
   def grpcClientInit(self):
@@ -93,7 +102,26 @@ class AgentInit:
       self._grpcInstrumentorClientWrapper.setProcessRequestBody(self._hypertraceConfig.DATA_CAPTURE_RPC_BODY_REQUEST)
       self._grpcInstrumentorClientWrapper.setProcessResponseBody(self._hypertraceConfig.DATA_CAPTURE_RPC_BODY_REQUEST)
     except:
-      logger.debug('Failed to initialize grpc instrumentation wrapper: exception=%s, stacktrace=%s', sys.exc_info()[0], traceback.format_exc())
+      logger.debug('Failed to initialize grpc instrumentation wrapper: exception=%s, stacktrace=%s',
+        sys.exc_info()[0],
+        traceback.format_exc())
+      raise sys.exc_info()[0]
+
+
+  def mysqlInit(self):
+    logger.debug('Calling AgentInit.mysqlInit()')
+    try:
+      self._moduleInitialized['mysql'] = True
+      self._mysqlInstrumentorWrapper = MysqlInstrumentorWrapper()
+      self._mysqlInstrumentorWrapper.instrument()
+      self._mysqlInstrumentorWrapper.setProcessRequestHeaders(self._hypertraceConfig.DATA_CAPTURE_RPC_METADATA_REQUEST)
+      self._mysqlInstrumentorWrapper.setProcessResponseHeaders(self._hypertraceConfig.DATA_CAPTURE_RPC_METADATA_RESPONSE)
+      self._mysqlInstrumentorWrapper.setProcessRequestBody(self._hypertraceConfig.DATA_CAPTURE_RPC_BODY_REQUEST)
+      self._mysqlInstrumentorWrapper.setProcessResponseBody(self._hypertraceConfig.DATA_CAPTURE_RPC_BODY_REQUEST)
+    except:
+      logger.debug('Failed to initialize grpc instrumentation wrapper: exception=%s, stacktrace=%s',
+        sys.exc_info()[0],
+        traceback.format_exc())
       raise sys.exc_info()[0]
 
   def globalInit(self):
@@ -101,5 +129,7 @@ class AgentInit:
     try:
       self._requestsInstrumentor.instrument()
     except:
-      logger.debug('Failed global init: exception=%s, stacktrace=%s', sys.exc_info()[0], traceback.format_exc())
-      sys.exc_info()[0]
+      logger.debug('Failed global init: exception=%s, stacktrace=%s',
+        sys.exc_info()[0],
+        traceback.format_exc())
+      raise sys.exc_info()[0]
