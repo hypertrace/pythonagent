@@ -26,7 +26,6 @@ logger.info('Initializing agent.')
 logger.info('Initializing agent.')
 agent = Agent()
 agent.registerFlaskApp(app)
-agent.registerServerGrpc() # Keeping this in place to test these running together
 agent.globalInit()
 #
 # End initialization logic for Python Agent

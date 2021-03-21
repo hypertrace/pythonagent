@@ -5,7 +5,7 @@ import flask
 import traceback
 import json
 from werkzeug.serving import make_server
-from flask import request
+from flask import request, Flask
 import time
 import atexit
 import threading
@@ -26,7 +26,6 @@ logger.info('Initializing agent.')
 logger.info('Initializing agent.')
 agent = Agent()
 agent.registerFlaskApp(app)
-agent.registerServerGrpc() # Keeping this in place to test these running together
 agent.globalInit()
 #
 # End initialization logic for Python Agent

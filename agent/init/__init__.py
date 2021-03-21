@@ -7,10 +7,6 @@ from opentelemetry.instrumentation.requests import RequestsInstrumentor
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import ConsoleSpanExporter, SimpleExportSpanProcessor
 from config import HypertraceConfig
-from instrumentation.flask import FlaskInstrumentorWrapper
-from instrumentation.grpc import GrpcInstrumentorServerWrapper,GrpcInstrumentorClientWrapper
-from instrumentation.mysql import MySQLInstrumentorWrapper
-from opentelemetry.instrumentation.grpc import GrpcInstrumentorServer
 from opentelemetry.sdk.resources import Resource
 
 logger = logging.getLogger(__name__)
@@ -59,6 +55,7 @@ class AgentInit:
   def flaskInit(self, app):
     logger.debug('Calling AgentInit.flaskInit().')
     try:
+      from instrumentation.flask import FlaskInstrumentorWrapper
       logger.debug('Dump config inside flaskInit :' + str(self._hypertraceConfig.DATA_CAPTURE_HTTP_BODY_REQUEST));
       self._moduleInitialized['flask'] = True
       self._flaskInstrumentorWrapper = FlaskInstrumentorWrapper()
@@ -77,6 +74,7 @@ class AgentInit:
   def grpcServerInit(self):
     logger.debug('Calling AgentInit.grpcServerInit')
     try:
+      from instrumentation.grpc import GrpcInstrumentorServerWrapper,GrpcInstrumentorClientWrapper
       self._moduleInitialized['grpc:server'] = True
       self._grpcInstrumentorServerWrapper = GrpcInstrumentorServerWrapper()
       self._grpcInstrumentorServerWrapper.instrument()
@@ -93,6 +91,7 @@ class AgentInit:
   def grpcClientInit(self):
     logger.debug('Calling AgentInit.grpcClientInit')
     try:
+      from instrumentation.grpc import GrpcInstrumentorServerWrapper,GrpcInstrumentorClientWrapper
       self._moduleInitialized['grpc:client'] = True
       self._grpcInstrumentorClientWrapper = GrpcInstrumentorClientWrapper()
       self._grpcInstrumentorClientWrapper.instrument()
@@ -110,6 +109,7 @@ class AgentInit:
   def mySQLInit(self):
     logger.debug('Calling AgentInit.mysqlInit()')
     try:
+      from instrumentation.mysql import MySQLInstrumentorWrapper
       self._moduleInitialized['mysql'] = True
       self._mysqlInstrumentorWrapper = MySQLInstrumentorWrapper() 
       self._mysqlInstrumentorWrapper.instrument()
