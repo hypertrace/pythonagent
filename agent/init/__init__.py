@@ -107,11 +107,11 @@ class AgentInit:
       raise sys.exc_info()[0]
 
 
-  def mysqlInit(self):
+  def mySQLInit(self):
     logger.debug('Calling AgentInit.mysqlInit()')
     try:
       self._moduleInitialized['mysql'] = True
-      self._mysqlInstrumentorWrapper = MysqlInstrumentorWrapper()
+      self._mysqlInstrumentorWrapper = MySQLInstrumentorWrapper() 
       self._mysqlInstrumentorWrapper.instrument()
       self._mysqlInstrumentorWrapper.setProcessRequestHeaders(self._hypertraceConfig.DATA_CAPTURE_RPC_METADATA_REQUEST)
       self._mysqlInstrumentorWrapper.setProcessResponseHeaders(self._hypertraceConfig.DATA_CAPTURE_RPC_METADATA_RESPONSE)

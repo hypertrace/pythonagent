@@ -22,8 +22,12 @@ agent.globalInit()
 #
 logger.info('Agent initialized.')
 
-cnx = mysql.connector.connect(database="db", username='mysql', password='mysql', host='localhost', port=3306)
+cnx = mysql.connector.connect(database='hypertrace',
+  username='root',
+  password='example',
+  host='localhost',
+  port=3306)
 cursor = cnx.cursor()
-cursor.execute("INSERT INTO test (testField) VALUES (123)")
+cursor.execute("INSERT INTO hypertrace_data (col1, col2) VALUES (123, 'abcdefghijklmnopqrstuvwxyz')")
 cursor.close()
 cnx.close()

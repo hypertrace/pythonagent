@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 # The main entry point 
 class MySQLInstrumentorWrapper(MySQLInstrumentor, BaseInstrumentorWrapper):
   def __init__(self):
-    super().__init__(self)
+    super().__init__()
 
   def _instrument(self, **kwargs):
     super()._instrument(**kwargs)

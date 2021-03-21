@@ -10,5 +10,5 @@ google
 protobuf
 google-cloud
 pyyaml
-mysql.connector
+mysql.connector==8.0.5
 flask
