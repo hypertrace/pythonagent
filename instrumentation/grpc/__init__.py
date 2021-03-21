@@ -8,7 +8,13 @@ import json
 import traceback
 from contextlib import contextmanager
 from opentelemetry import propagators, trace
-from opentelemetry.instrumentation.grpc import GrpcInstrumentorServer, GrpcInstrumentorClient, _server, _client, server_interceptor
+from opentelemetry.instrumentation.grpc import (
+  GrpcInstrumentorServer,
+  GrpcInstrumentorClient,
+  _server,
+  _client,
+  server_interceptor
+)
 from opentelemetry.instrumentation.grpc.version import __version__
 from instrumentation import BaseInstrumentorWrapper
 from opentelemetry.instrumentation.grpc.grpcext import intercept_channel
@@ -28,7 +34,7 @@ def introspect(obj):
     logger.error("No data to display");
     traceback.print_exc()
 
-# The main entry point for a wrapper around the OTel grpc instrumentation module
+# The main entry point for a wrapper around the OTel grpc:server instrumentation module
 class GrpcInstrumentorServerWrapper(GrpcInstrumentorServer, BaseInstrumentorWrapper):
   # Construtor
   def __init__(self):
@@ -45,6 +51,7 @@ class GrpcInstrumentorServerWrapper(GrpcInstrumentorServer, BaseInstrumentorWrap
     logger.debug('Entering GrpcInstrumentorServerWrapper.uninstrument()')
     super().uninstrument()
 
+  # Internal enable wrapper instrumentation
   def _instrument(self, **kwargs):
     logger.debug('Entering GrpcInstrumentorServerWrapper._instument().')
     super()._instrument(**kwargs)
@@ -56,15 +63,20 @@ class GrpcInstrumentorServerWrapper(GrpcInstrumentorServer, BaseInstrumentorWrap
       return self._original_wrapper_func(*args, **kwargs)
     grpc.server = server_wrapper
 
+  # Internal disable wrapper instrumentation
   def _uninstrument(self, **kwargs):
     logger.debug('Entering GrpcInstrumentorServerWrapper._uninstrument()')
     super()._uninstrument(**kwargs)
 
+# The main entry point for a wrapper around the OTel grpc:client instrumentation module
 class GrpcInstrumentorClientWrapper(GrpcInstrumentorClient, BaseInstrumentorWrapper):
+
+  # constructor
   def __init__(self):
     logger.debug('Entering GrpcInstrumentorClientWrapper constructor.');
     super().__init__()
 
+  # Internal initialize instrumentation
   def _instrument(self, **kwargs):
     logger.debug('Entering GrpcInstrumentorClientWrapper._instrument().')
     super()._instrument(**kwargs)
@@ -74,12 +86,12 @@ class GrpcInstrumentorClientWrapper(GrpcInstrumentorClient, BaseInstrumentorWrap
 #        "grpc", ctype, self.wrapper_fn_wrapper,
 #    )
 
+  # Internal disable instrumentation
   def _uninstrument(self, **kwargs):
     logger.debug('Entering GrpcInstrumentorClientWrapper._uninstrument().')
     super()._uninstrument(**kwargs)
-#    for ctype in self._which_channel(kwargs):
-#      unwrap(grpc, ctype)
 
+  # Wrap function for initializing the the request handler
   def wrapper_fn_wrapper(self, original_func, instance, args, kwargs):
     channel = original_func(*args, **kwargs)
     tracer_provider = kwargs.get("tracer_provider")
@@ -87,16 +99,19 @@ class GrpcInstrumentorClientWrapper(GrpcInstrumentorClient, BaseInstrumentorWrap
       channel, client_interceptor_wrapper(tracer_provider=tracer_provider),
     )
 
+# Initialize the server handler
 def server_interceptor_wrapper(gisw, tracer_provider=None):
   logger.debug('Entering server_interceptor_wrapper().')
   tracer = trace.get_tracer(__name__, __version__, tracer_provider)
   return OpenTelemetryServerInterceptorWrapper(tracer, gisw)
 
+# Initialize the client handler
 def client_interceptor_wrapper(tracer_provider):
   logger.debug('Entering client_interceptor_wrapper().')
   tracer = trace.get_tracer(__name__, __version__, tracer_provider)
   return OpenTelemetryClientInterceptorWrapper(tracer)
 
+# Wrapper around Server-side telemetry context
 class _OpenTelemetryWrapperServicerContext(_server._OpenTelemetryServicerContext):
   def __init__(self, servicer_context, active_span):
     logger.debug('Entering _OpenTelemetryWrapperServicerContext.__init__().')
@@ -113,6 +128,7 @@ class _OpenTelemetryWrapperServicerContext(_server._OpenTelemetryServicerContext
   def get_trailing_metadata(self):
     return self._responseHeaders 
 
+# Wrapper around server-side interceptor
 class OpenTelemetryServerInterceptorWrapper(_server.OpenTelemetryServerInterceptor):
   def __init__(self, tracer, gisw ):
     logger.debug('Entering OpenTelemetryServerInterceptorWrapper.__init__().')
@@ -162,6 +178,7 @@ class OpenTelemetryServerInterceptorWrapper(_server.OpenTelemetryServerIntercept
     logger.debug('Entering OpenTelemetryServerInterceptorWrapper.intercept_server_stream().')
     # COME_BACK -- need to implement this
 
+# Wrapper around server-side interceptor
 class OpenTelemetryClientInterceptorWrapper(_client.OpenTelemetryClientInterceptor):
     def __init__(self, tracer):
       logger.debug('Entering OpenTelemetryClientInterceptorWrapper.__init__().')

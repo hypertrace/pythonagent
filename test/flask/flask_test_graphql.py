@@ -9,7 +9,6 @@ from flask import request
 import time
 import atexit
 import threading
-from flask import Flask
 from agent import Agent
 
 logging.basicConfig(filename='agent.log', level=logging.DEBUG)
