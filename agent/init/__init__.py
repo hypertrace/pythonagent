@@ -113,15 +113,33 @@ class AgentInit:
       self._moduleInitialized['mysql'] = True
       self._mysqlInstrumentorWrapper = MySQLInstrumentorWrapper() 
       self._mysqlInstrumentorWrapper.instrument()
-      self._mysqlInstrumentorWrapper.setProcessRequestHeaders(self._hypertraceConfig.DATA_CAPTURE_RPC_METADATA_REQUEST)
-      self._mysqlInstrumentorWrapper.setProcessResponseHeaders(self._hypertraceConfig.DATA_CAPTURE_RPC_METADATA_RESPONSE)
-      self._mysqlInstrumentorWrapper.setProcessRequestBody(self._hypertraceConfig.DATA_CAPTURE_RPC_BODY_REQUEST)
-      self._mysqlInstrumentorWrapper.setProcessResponseBody(self._hypertraceConfig.DATA_CAPTURE_RPC_BODY_REQUEST)
+      self._mysqlInstrumentorWrapper.setProcessRequestHeaders(self._hypertraceConfig.DATA_CAPTURE_HTTP_HEADERS_REQUEST)
+      self._mysqlInstrumentorWrapper.setProcessResponseHeaders(self._hypertraceConfig.DATA_CAPTURE_HTTP_HEADERS_RESPONSE)
+      self._mysqlInstrumentorWrapper.setProcessRequestBody(self._hypertraceConfig.DATA_CAPTURE_HTTP_BODY_REQUEST)
+      self._mysqlInstrumentorWrapper.setProcessResponseBody(self._hypertraceConfig.DATA_CAPTURE_HTTP_BODY_REQUEST)
     except:
       logger.debug('Failed to initialize grpc instrumentation wrapper: exception=%s, stacktrace=%s',
         sys.exc_info()[0],
         traceback.format_exc())
       raise sys.exc_info()[0]
+
+  def postgreSQLInit(self):
+    logger.debug('Calling AgentInit.postgreSQLInit()')
+    try:
+      from instrumentation.mysql import PostgreSQLInstrumentorWrapper
+      self._moduleInitialized['mysql'] = True
+      self._mysqlInstrumentorWrapper = PostgreSQLInstrumentorWrapper()
+      self._mysqlInstrumentorWrapper.instrument()
+      self._mysqlInstrumentorWrapper.setProcessRequestHeaders(self._hypertraceConfig.DATA_CAPTURE_HTTP_HEADERS_REQUEST)
+      self._mysqlInstrumentorWrapper.setProcessResponseHeaders(self._hypertraceConfig.DATA_CAPTURE_HTTP_HEADERS_RESPONSE)
+      self._mysqlInstrumentorWrapper.setProcessRequestBody(self._hypertraceConfig.DATA_CAPTURE_HTTP_BODYDY_REQUEST)
+      self._mysqlInstrumentorWrapper.setProcessResponseBody(self._hypertraceConfig.DATA_CAPTURE_HTTP_BODY_REQUEST)
+    except:
+      logger.debug('Failed to initialize grpc instrumentation wrapper: exception=%s, stacktrace=%s',
+        sys.exc_info()[0],
+        traceback.format_exc())
+      raise sys.exc_info()[0]
+
 
   def globalInit(self):
     logger.debug('Calling AgentInit.globalInit().')

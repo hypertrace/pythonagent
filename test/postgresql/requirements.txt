@@ -10,5 +10,6 @@ google
 protobuf
 google-cloud
 pyyaml
-mysql.connector
+psycopg2-binary
+#psycopg2
 flask

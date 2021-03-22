@@ -57,6 +57,16 @@ class Agent:
         sys.exc_info()[0],
         traceback.format_exc())
 
+  def registerPostgreSQL(self):
+    logger.debug('Calling Agent.registerPostgreSQL().')
+    try:
+      self._init.postgreSQLInit()
+      self._init.dumpConfig()
+    except:
+      logger.error('Failed to initialize postgresql instrumentation wrapper: exception=%s, stacktrace=%s',
+        sys.exc_info()[0],
+        traceback.format_exc())
+
   def globalInit(self):
     logger.debug('Calling Agent.globalInit().')
     try:
