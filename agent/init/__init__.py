@@ -1,3 +1,4 @@
+from config.config_pb2 import AgentConfig
 import logging
 import sys
 import os
@@ -5,17 +6,22 @@ from opentelemetry import trace
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import ConsoleSpanExporter, SimpleExportSpanProcessor
-from config import HypertraceConfig
+#from config import HypertraceConfig
+from config  import HypertraceConfig
 from instrumentation.flask import FlaskInstrumentorWrapper
 from instrumentation.grpc import GrpcInstrumentorServerWrapper,GrpcInstrumentorClientWrapper
 from opentelemetry.sdk.resources import Resource
 
 logger = logging.getLogger(__name__)
 
+
 class AgentInit:
   
+  
+
   def __init__(self):
     logger.debug('Initializing AgentInit object.')
+    logger.debug('Nitin -')
     self._moduleInitialized = {
       "flask": False,
       "grpc": False,
@@ -23,19 +29,20 @@ class AgentInit:
       "postgresql": False
     }
     try:
-      self._hypertraceConfig = HypertraceConfig()
+      hypertraceConfig = HypertraceConfig.HypertraceConfig();
+      global agent_config;
+      agent_config = hypertraceConfig.getConfig();
+
       self._tracerProvider = TracerProvider(
         resource=Resource.create({
-            "service.name": self._hypertraceConfig.DATA_CAPTURE_SERVICE_NAME,
+            "service.name": agent_config.service_name,
             "service.instance.id": os.getpid(),
         })
       )
-#      self._tracerProvider = trace.get_tracer('tester')
       trace.set_tracer_provider(self._tracerProvider)
       self._consoleSpanExporter = ConsoleSpanExporter(service_name='tester')
       self._simpleExportSpanProcessor = SimpleExportSpanProcessor(self._consoleSpanExporter)
       trace.get_tracer_provider().add_span_processor(self._simpleExportSpanProcessor)
-#      self._tracerProvider.add_span_processor(self._simpleExportSpanProcessor)
       self._requestsInstrumentor = RequestsInstrumentor()
       self._flaskInstrumentorWrapper = None
       self._grpcInstrumentorClientWrapper = None
@@ -52,17 +59,18 @@ class AgentInit:
   def flaskInit(self, app):
     logger.debug('Calling AgentInit.flaskInit().')
     try:
-      logger.debug('Dump config inside flaskInit :' + str(self._hypertraceConfig.DATA_CAPTURE_HTTP_BODY_REQUEST));
+      logger.debug('Dump config inside flaskInit :' + str(agent_config.data_capture.http_body));
       self._moduleInitialized['flask'] = True
       self._flaskInstrumentorWrapper = FlaskInstrumentorWrapper()
       self._flaskInstrumentorWrapper.instrument_app(app)
-      self._flaskInstrumentorWrapper.setServiceName(self._hypertraceConfig.DATA_CAPTURE_SERVICE_NAME)
-      self._flaskInstrumentorWrapper.setProcessRequestHeaders(self._hypertraceConfig.DATA_CAPTURE_HTTP_HEADERS_REQUEST)
-      self._flaskInstrumentorWrapper.setProcessResponseHeaders(self._hypertraceConfig.DATA_CAPTURE_HTTP_HEADERS_RESPONSE)
-      self._flaskInstrumentorWrapper.setProcessRequestBody(self._hypertraceConfig.DATA_CAPTURE_HTTP_BODY_REQUEST)
-      self._flaskInstrumentorWrapper.setProcessResponseBody(self._hypertraceConfig.DATA_CAPTURE_HTTP_BODY_REQUEST)
+      self._flaskInstrumentorWrapper.setServiceName(agent_config.service_name)
+      self._flaskInstrumentorWrapper.setProcessRequestHeaders(agent_config.data_capture.http_headers)
+      self._flaskInstrumentorWrapper.setProcessResponseHeaders(agent_config.data_capture.http_headers)
+      self._flaskInstrumentorWrapper.setProcessRequestBody(agent_config.data_capture.http_body)
+      self._flaskInstrumentorWrapper.setProcessResponseBody(agent_config.data_capture.http_body)
     except:
       logger.debug('Failed to initialize flask instrumentation wrapper: exception=%s, stacktrace=%s', sys.exc_info()[0], traceback.format_exc())
+      
       raise e
 
   def grpcInit(self):
@@ -73,14 +81,14 @@ class AgentInit:
       self._grpcInstrumentorServerWrapper = GrpcInstrumentorServerWrapper()
       self._grpcInstrumentorClientWrapper.instrument()
       self._grpcInstrumentorServerWrapper.instrument()
-      self._grpcInstrumentorClientWrapper.setProcessRequestHeaders(self._hypertraceConfig.DATA_CAPTURE_RPC_METADATA_REQUEST)
-      self._grpcInstrumentorClientWrapper.setProcessResponseHeaders(self._hypertraceConfig.DATA_CAPTURE_RPC_METADATA_RESPONSE)
-      self._grpcInstrumentorClientWrapper.setProcessRequestBody(self._hypertraceConfig.DATA_CAPTURE_RPC_BODY_REQUEST)
-      self._grpcInstrumentorClientWrapper.setProcessResponseBody(self._hypertraceConfig.DATA_CAPTURE_RPC_BODY_REQUEST)
-      self._grpcInstrumentorServerWrapper.setProcessRequestHeaders(self._hypertraceConfig.DATA_CAPTURE_RPC_METADATA_REQUEST)
-      self._grpcInstrumentorServerWrapper.setProcessResponseHeaders(self._hypertraceConfig.DATA_CAPTURE_RPC_METADATA_RESPONSE)
-      self._grpcInstrumentorServerWrapper.setProcessRequestBody(self._hypertraceConfig.DATA_CAPTURE_RPC_BODY_REQUEST)
-      self._grpcInstrumentorServerWrapper.setProcessResponseBody(self._hypertraceConfig.DATA_CAPTURE_RPC_BODY_REQUEST)
+      self._grpcInstrumentorClientWrapper.setProcessRequestHeaders(agent_config.data_capture.http_headers)
+      self._grpcInstrumentorClientWrapper.setProcessResponseHeaders(agent_config.data_capture.http_headers)
+      self._grpcInstrumentorClientWrapper.setProcessRequestBody(agent_config.data_capture.http_headers)
+      self._grpcInstrumentorClientWrapper.setProcessResponseBody(agent_config.data_capture.http_headers)
+      self._grpcInstrumentorServerWrapper.setProcessRequestHeaders(agent_config.data_capture.http_headers)
+      self._grpcInstrumentorServerWrapper.setProcessResponseHeaders(agent_config.data_capture.http_headers)
+      self._grpcInstrumentorServerWrapper.setProcessRequestBody(agent_config.data_capture.http_headers)
+      self._grpcInstrumentorServerWrapper.setProcessResponseBody(agent_config.data_capture.http_headers)
     except:
       logger.debug('Failed to initialize grpc instrumentation wrapper: exception=%s, stacktrace=%s', sys.exc_info()[0], traceback.format_exc())
       raise e

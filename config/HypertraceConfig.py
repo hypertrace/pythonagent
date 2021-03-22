@@ -76,7 +76,6 @@ class HypertraceConfig:
     def getConfig(self):  
         try:
             
-
             opa = jf.Parse(jf.MessageToJson(config_pb2.Opa()), config_pb2.Opa)
             opa.endpoint = 'https://localhost',
             opa.poll_period_seconds = 30,
@@ -120,13 +119,10 @@ class HypertraceConfig:
             agent_config.javaagent = javaAgent 
             agent_config.resource_attributes = { 'service_name': SERVICE_NAME }
 
-            print(agent_config.service_name)
-            print(agent_config.reporting.endpoint)
-            print(agent_config.javaagent.filter_jar_paths)
-            print('Nitin '+ str(agent_config.data_capture.http_headers));
-            print('Nitin '+ str(agent_config.data_capture.http_body));
+            logger.debug('Hypertrace Config Service Name.' + agent_config.service_name)
+            logger.debug('Hypertrace Config reporting.endpoint.' + agent_config.reporting.endpoint)
+            
             return agent_config;
-
         except ImportError:
             logger.error('An error occurred while parsing the agent-config file.')
 
