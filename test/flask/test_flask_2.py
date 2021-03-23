@@ -4,6 +4,7 @@ import logging
 import flask
 import traceback
 import json
+import pytest
 from werkzeug.serving import make_server
 from flask import request, Flask
 import time
@@ -11,8 +12,25 @@ import atexit
 import threading
 from agent import Agent
 
-logging.basicConfig(filename='agent.log', level=logging.DEBUG)
-logger = logging.getLogger(__name__)
+def setup_custom_logger(name):
+  try:
+    formatter = logging.Formatter(fmt='%(asctime)s %(levelname)-8s %(message)s',
+                                  datefmt='%Y-%m-%d %H:%M:%S')
+    handler = logging.FileHandler('agent.log', mode='a')
+    handler.setFormatter(formatter)
+    screen_handler = logging.StreamHandler(stream=sys.stdout)
+    screen_handler.setFormatter(formatter)
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.DEBUG)
+    logger.addHandler(handler)
+    logger.addHandler(screen_handler)
+    return logger
+  except:
+    logger.error('Failed to customize logger: exception=%s, stacktrace=%s',
+      sys.exc_info()[0],
+      traceback.format_exc())
+
+logger = setup_custom_logger(__name__)
 
 logger.info('Initializing flask app.')
 # Create Flask app
@@ -100,22 +118,19 @@ class FlaskServer(threading.Thread):
 
 server = FlaskServer(app)
 
-logger.info('Running test calls.')
-with app.test_client() as c:
-  try: 
-    logger.info('Making test call to /route1')
-    r1 = c.get('http://localhost:5000/route1', headers={ 'tester1': 'tester1', 'tester2':'tester2'})
-    a1 = json.loads(r1.data.decode('UTF8'))['data']['hero']['name']
-    logger.info('Reading /route1 response: ' + str(a1))
-    if a1 != 'R2-D2':
-      logger.error('r1 Result not expected.')
-      exit(1)
-    logger.info('r1 result: ' + str(a1))
-    logger.info('Exiting from flask instrumentation test.')
-  except:
-    e = sys.exc_info()[0]
-    traceback.print_exc() 
-    sys.exit(1)
-    os._exit(1)
-
-sys.exit(0)
+def test_run():
+  logger.info('Running test calls.')
+  with app.test_client() as c:
+    try: 
+      logger.info('Making test call to /route1')
+      r1 = c.get('http://localhost:5000/route1', headers={ 'tester1': 'tester1', 'tester2':'tester2'})
+      a1 = json.loads(r1.data.decode('UTF8'))['data']['hero']['name']
+      logger.info('Reading /route1 response: ' + str(a1))
+      assert a1 == 'R2-D2'
+      logger.info('r1 result: ' + str(a1))
+      logger.info('Exiting from flask instrumentation test.')
+    except:
+      logger.error('Failed to initialize postgresql instrumentation wrapper: exception=%s, stacktrace=%s',
+        sys.exc_info()[0],
+        traceback.format_exc())
+      return 1

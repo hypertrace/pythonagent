@@ -24,8 +24,9 @@ class PostgreSQLInstrumentorWrapper(MySQLInstrumentor, BaseInstrumentorWrapper):
     super()._instrument(**kwargs)
 
   def _uninstrument(self, **kwargs):
+    super()._uninstrument(**kwargs)
 
-  def instrument_connection(self, connection):  # pylint: disable=no-self-use
+  def instrument_connection(self, connection):
     return super().instrument_connection(connection)
 
   def uninstrument_connection(

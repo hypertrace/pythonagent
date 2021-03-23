@@ -25,7 +25,7 @@ class AgentInit:
     try:
       self._hypertraceConfig = HypertraceConfig()
       self._tracerProvider = TracerProvider(
-        resource=Resource.create({
+      resource=Resource.create({
             "service.name": self._hypertraceConfig.DATA_CAPTURE_SERVICE_NAME,
             "service.instance.id": os.getpid(),
         })
@@ -126,14 +126,14 @@ class AgentInit:
   def postgreSQLInit(self):
     logger.debug('Calling AgentInit.postgreSQLInit()')
     try:
-      from instrumentation.mysql import PostgreSQLInstrumentorWrapper
+      from instrumentation.postgresql import PostgreSQLInstrumentorWrapper
       self._moduleInitialized['mysql'] = True
       self._mysqlInstrumentorWrapper = PostgreSQLInstrumentorWrapper()
       self._mysqlInstrumentorWrapper.instrument()
       self._mysqlInstrumentorWrapper.setProcessRequestHeaders(self._hypertraceConfig.DATA_CAPTURE_HTTP_HEADERS_REQUEST)
       self._mysqlInstrumentorWrapper.setProcessResponseHeaders(self._hypertraceConfig.DATA_CAPTURE_HTTP_HEADERS_RESPONSE)
-      self._mysqlInstrumentorWrapper.setProcessRequestBody(self._hypertraceConfig.DATA_CAPTURE_HTTP_BODYDY_REQUEST)
-      self._mysqlInstrumentorWrapper.setProcessResponseBody(self._hypertraceConfig.DATA_CAPTURE_HTTP_BODY_REQUEST)
+      self._mysqlInstrumentorWrapper.setProcessRequestBody(self._hypertraceConfig.DATA_CAPTURE_HTTP_BODY_REQUEST)
+      self._mysqlInstrumentorWrapper.setProcessResponseBody(self._hypertraceConfig.DATA_CAPTURE_HTTP_BODY_RESPONSE)
     except:
       logger.debug('Failed to initialize grpc instrumentation wrapper: exception=%s, stacktrace=%s',
         sys.exc_info()[0],

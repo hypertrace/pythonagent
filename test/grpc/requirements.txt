@@ -8,3 +8,4 @@ opentelemetry-sdk==1.0.0rc1
 opentelemetry-util-http==0.18b1
 pyyaml
 protobuf==3.15.2
+pytest

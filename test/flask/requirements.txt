@@ -10,3 +10,4 @@ google
 protobuf
 google-cloud
 pyyaml
+pytest
