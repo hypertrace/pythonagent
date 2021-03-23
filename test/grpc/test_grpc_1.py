@@ -19,6 +19,7 @@ import logging
 import grpc
 import threading
 import pytest
+from threading import Timer
 import traceback
 import helloworld_pb2
 import helloworld_pb2_grpc
@@ -44,18 +45,6 @@ def setup_custom_logger(name):
 
 logger = setup_custom_logger(__name__)
 
-#
-# Code snippet here represents the current initialization logic
-#
-logger.info('Initializing agent.')
-agent = Agent()
-agent.registerServerGrpc()
-agent.globalInit()
-logger.info('Agent initialized.')
-#
-# End initialization logic for Python Agent
-#
-
 class Greeter(helloworld_pb2_grpc.GreeterServicer):
     def SayHello(self, request, context):
         logger.debug('Received request.')
@@ -65,7 +54,7 @@ class Greeter(helloworld_pb2_grpc.GreeterServicer):
         logger.debug('Returning response.')
         return helloworld_pb2.HelloReply(message='Hello, %s!' % request.name)
 
-def serve():
+def serve(timer):
     logger.info('Creating server.')
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     logger.info('Adding GreeterServicer endpoint to server.')
@@ -75,25 +64,56 @@ def serve():
     logger.info('Starting server.')
     server.start()
     logger.info('Waiting for termination.') 
-    server.wait_for_termination()
+    return server
+#    server.wait_for_termination()
 
 def exit_callback(): 
-    # NOTE(gRPC Python Team): .close() is possible on a channel and should be
-    # used in circumstances in which the with statement does not fit the needs
-    # of the code.
-    try:
-      with grpc.insecure_channel('localhost:50051') as channel:
-        stub = helloworld_pb2_grpc.GreeterStub(channel)
-        response = stub.SayHello(helloworld_pb2.HelloRequest(name='you'))
-      assert response.message == 'Hello, you!'
-      logger.info("Greeter client received: " + response.message)
-      os._exit(0)
-    except:
-      logger.error('An error occurred while calling greeter client: exception=%s, stacktrace=%s', sys.exc_info()[0], traceback.format_exc())
-      os._exit(1)
+  try:
+    with grpc.insecure_channel('localhost:50051') as channel:
+      stub = helloworld_pb2_grpc.GreeterStub(channel)
+      response = stub.SayHello(helloworld_pb2.HelloRequest(name='you'))
+    assert response.message == 'Hello, you!'
+    logger.info("Greeter client received: " + response.message)
+    return 0
+  except:
+    logger.error('An error occurred while calling greeter client: exception=%s, stacktrace=%s',
+      sys.exc_info()[0],
+      traceback.format_exc())
+    return 1
+
+class CustomTimer(Timer):
+  def __init__(self, interval, function, args=[], kwargs={}):
+    self._original_function = function
+    super(CustomTimer, self).__init__(
+      interval, self._do_execute, args, kwargs)
+
+  def _do_execute(self, *a, **kw):
+    self.result = self._original_function(*a, **kw)
+
+  def join(self):
+    logger.info('Waiting for exit_callback() to finish.')
+    super(CustomTimer, self).join()
+    return self.result
 
 def test_run():
+  try:
+    #
+    # Code snippet here represents the current initialization logic
+    #
+    logger.info('Initializing agent.')
+    agent = Agent()
+    agent.registerServerGrpc()
+    agent.globalInit()
+    logger.info('Agent initialized.')
+    #
+    # End initialization logic for Python Agent
+    #
     logger.info('Starting Test Run.')
-    timer = threading.Timer(4.0, exit_callback)
+    timer = CustomTimer(4.0, exit_callback)
     timer.start()
-    serve()
+    server = serve(timer)
+    return timer.join()
+  except:
+    logger.error('An error occurred while calling greeter client: exception=%s, stacktrace=%s',
+      sys.exc_info()[0],
+      traceback.format_exc())
