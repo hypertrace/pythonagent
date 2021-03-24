@@ -1,8 +1,4 @@
 import yaml
-
-#import os
-#import sys
-
 from google.protobuf import json_format as jf
 from config import config_pb2 as config_pb2
 # import config_pb2 as config_pb2
@@ -76,7 +72,6 @@ class HypertraceConfig:
     def getConfig(self):  
         try:
             
-
             opa = jf.Parse(jf.MessageToJson(config_pb2.Opa()), config_pb2.Opa)
             opa.endpoint = 'https://localhost',
             opa.poll_period_seconds = 30,
@@ -127,6 +122,10 @@ class HypertraceConfig:
             print('Nitin '+ str(agent_config.data_capture.http_body));
             return agent_config;
 
+            logger.debug('Hypertrace Config Service Name.' + agent_config.service_name)
+            logger.debug('Hypertrace Config reporting.endpoint.' + agent_config.reporting.endpoint)
+            
+            return agent_config;
         except ImportError:
             logger.error('An error occurred while parsing the agent-config file.')
 
