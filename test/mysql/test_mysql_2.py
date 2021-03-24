@@ -107,7 +107,7 @@ def test_run():
   logger.info('Running test calls.')
   with app.test_client() as c:
     try:
-      logger.info('Making test call to /route1')
+      logger.info('Making test call to /dbtest')
       for x in range(10): # Run 10 requests
         r1 = app.test_client().get('http://localhost:5000/dbtest')
         logger.info('Reading /route1 response.')

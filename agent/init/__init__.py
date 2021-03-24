@@ -39,13 +39,13 @@ class AgentInit:
       )
       trace.set_tracer_provider(self._tracerProvider)
 
-#      self._consoleSpanExporter = ConsoleSpanExporter(service_name=agent_config.service_name)
-#      self._simpleExportSpanProcessor = SimpleExportSpanProcessor(self._consoleSpanExporter)
+      self._consoleSpanExporter = ConsoleSpanExporter(service_name=agent_config.service_name)
+      self._simpleExportSpanProcessor = SimpleExportSpanProcessor(self._consoleSpanExporter)
 
       self._jaegerExporter = self.createJaegerExporter()
       self._batchExportSpanProcessor = BatchExportSpanProcessor(self._jaegerExporter)
 
-#      trace.get_tracer_provider().add_span_processor(self._simpleExportSpanProcessor)
+      trace.get_tracer_provider().add_span_processor(self._simpleExportSpanProcessor)
       trace.get_tracer_provider().add_span_processor(self._batchExportSpanProcessor)
       self._requestsInstrumentor = RequestsInstrumentor()
       self._flaskInstrumentorWrapper = None
