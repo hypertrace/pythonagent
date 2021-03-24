@@ -12,14 +12,13 @@ from opentelemetry import trace
 from opentelemetry.exporter import jaeger
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchExportSpanProcessor
-from config  import HypertraceConfig
+from config import HypertraceConfig
 
 logger = logging.getLogger(__name__)
 
 class AgentInit:
   def __init__(self):
     logger.debug('Initializing AgentInit object.')
-    logger.debug('Nitin -')
     self._moduleInitialized = {
       "flask": False,
       "grpc:server": False,
@@ -47,7 +46,9 @@ class AgentInit:
 
       trace.get_tracer_provider().add_span_processor(self._simpleExportSpanProcessor)
       trace.get_tracer_provider().add_span_processor(self._batchExportSpanProcessor)
+
       self._requestsInstrumentor = RequestsInstrumentor()
+
       self._flaskInstrumentorWrapper = None
       self._grpcInstrumentorClientWrapper = None
       self._grpcInstrumentorServerWrapper = None
