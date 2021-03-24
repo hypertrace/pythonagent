@@ -123,6 +123,14 @@ Hypertrace python agent will use Jaeger backend as OpenTelemetry collector. Hype
 # Instrumented Modules Documentation
 * [Flask](https://flask.palletsprojects.com/en/1.1.x/api)
 * [grpc](https://grpc.github.io/grpc/python/)
+* [mysql-connector](https://dev.mysql.com/doc/connector-python/en/)
+* [psycopg2/postgresql](https://www.psycopg.org/docs/)
+
+Base OTel Instrumentation Modules
+* [Flask](https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation/opentelemetry-instrumentation-flask)
+* [grpc](https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation/opentelemetry-instrumentation-grpc)
+* [mysql-connector](https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation/opentelemetry-instrumentation-mysql)
+* [psycopg2](https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation/opentelemetry-instrumentation-psycopg2)
 
 # Build agent-config config.proto
 * run: ```protoc --python_out=../agent-config-python -Itools/env-vars-generator/protobuf/src -I. config.proto```
