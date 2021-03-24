@@ -3,6 +3,7 @@ import os.path
 import logging
 import inspect
 import traceback
+import json
 
 # Setup logger name
 logger = logging.getLogger(__name__)
@@ -118,6 +119,7 @@ class BaseInstrumentorWrapper:
             if self.isInterestingContentType(contentTypeHeaderTuple[0][1]):
               logger.debug('This is an interesting content-type.')
               if contentTypeHeaderTuple[0][1] == 'application/json' or contentTypeHeaderTuple[0][1] == 'application/graphql':
+                logger.info('RCBJ0500: ' + requestBody.decode('UTF8'))
                 span.set_attribute(self.HTTP_REQUEST_BODY_PREFIX,
                   json.dumps(json.loads(requestBody.decode('UTF8').replace("'", '"'))))
               else:

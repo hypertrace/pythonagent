@@ -26,7 +26,7 @@ def setup_custom_logger(name):
     logger.addHandler(screen_handler)
     return logger
   except:
-    logger.error('Failed to customize logger: exception=%s, stacktrace=%s',
+    print('Failed to customize logger: exception=%s, stacktrace=%s',
       sys.exc_info()[0],
       traceback.format_exc())
 
@@ -130,4 +130,4 @@ def test_run():
       logger.error('Failed to initialize postgresql instrumentation wrapper: exception=%s, stacktrace=%s',
         sys.exc_info()[0],
         traceback.format_exc())
-    return 1
+      return 1

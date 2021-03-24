@@ -1,17 +1,37 @@
-import logging
 import sys
-import threading
-import traceback
-
+import os
+import logging
 import flask
-from flask import Flask
-from flask import request, jsonify, json
+import pytest
+import traceback
+import json
+import pytest
 from werkzeug.serving import make_server
-
+from flask import request, Flask
+import time
+import atexit
+import threading
 from agent import Agent
 
-logging.basicConfig(filename='agent.log', level=logging.DEBUG)
-logger = logging.getLogger(__name__)
+def setup_custom_logger(name):
+  try:
+    formatter = logging.Formatter(fmt='%(asctime)s %(levelname)-8s %(message)s',
+                                  datefmt='%Y-%m-%d %H:%M:%S')
+    handler = logging.FileHandler('agent.log', mode='a')
+    handler.setFormatter(formatter)
+    screen_handler = logging.StreamHandler(stream=sys.stdout)
+    screen_handler.setFormatter(formatter)
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.DEBUG)
+    logger.addHandler(handler)
+    logger.addHandler(screen_handler)
+    return logger
+  except:
+    print('Failed to customize logger: exception=%s, stacktrace=%s',
+      sys.exc_info()[0],
+      traceback.format_exc())
+
+logger = setup_custom_logger(__name__)
 
 logger.info('Initializing flask app.')
 # Create Flask app
@@ -25,54 +45,26 @@ logger.info('Initializing agent.')
 logger.info('Initializing agent.')
 agent = Agent()
 agent.registerFlaskApp(app)
-agent.registerGrpc()  # Keeping this in place to test these running together
 agent.globalInit()
 #
 # End initialization logic for Python Agent
 #
 logger.info('Agent initialized.')
 
-def shutdown_server():
-    func = request.environ.get('werkzeug.server.shutdown')
-    if func is None:
-        raise RuntimeError('Not running with the Werkzeug Server')
-    func()
-
 def before_first_request():
-    logger.debug("test_program: before_first_request() called")
-
+  logger.debug("test_program: before_first_request() called")
 
 @app.before_request
 def before_request():
-    logger.debug("test_program: before_request() called")
-
+    logger.debug("test_progam: before_request() called")
 
 @app.after_request
 def after_request(response):
     logger.debug("test_program: after_request() called")
     return response
 
-
-@app.route("/route1")
-def testAPI1():
-    logger.info('Serving request for /route1.')
-    response = flask.Response(mimetype='application/json')
-    response.headers['tester3'] = 'tester3'
-    response.data = str('{ "a": "a", "xyz": "xyz" }')
-    return response
-
-
-@app.route("/route2")
-def testAPI2():
-    logger.info('Serving request for /route2.')
-    response = flask.Response(mimetype='application/json')
-    response.headers['tester3'] = 'tester3'
-    response.data = str('{ "a": "a", "xyz": "xyz" }')
-    return response
-
-
 @app.route('/test/postdata', methods=['POST'])
-def test_post_api():
+def post_api():
     data = request.get_json()
     logger.info('Serving request for /test/postdata')
     response = flask.Response(mimetype='application/json')
@@ -81,18 +73,6 @@ def test_post_api():
     sum2 = data['d2'] ;
     response.data = str(sum1+sum2)
     return response
-
-
-
-
-@app.route("/terminate")
-def terminate():
-    logger.info('Serving request for /terminate.')
-    shutdown_server()
-    response = flask.Response()
-    response.data = {'a': 'a', 'xyz': 'xyz'}
-    return response
-
 
 # Run the flask web server in a separate thread
 class FlaskServer(threading.Thread):
@@ -115,42 +95,22 @@ class FlaskServer(threading.Thread):
 
 server = FlaskServer(app)
 
-logger.info('Running test calls.')
-with app.test_client() as c:
+def test_run():
+  logger.info('Running test calls.')
+  with app.test_client() as c:
     try:
-        logger.info('Making test call to /route1')
-        r1 = app.test_client().get('http://localhost:5000/route1', headers={'tester1': 'tester1', 'tester2': 'tester2'}, content_type='application/json')
-        logger.info('Making test call to /route2')
-        r2 = app.test_client().get('http://localhost:5000/route2', headers={'tester1': 'tester1', 'tester2': 'tester2'})
         logger.info('Making test call to /test/postdata')
-        r3 = app.test_client().post('http://localhost:5000/test/postdata', headers={'tester1': 'tester1', 'tester2': 'tester2'},data=json.dumps({'d1': 10, 'd2': 20}), content_type='application/json')
-        
-
-        logger.info('Reading /route1 response')
-        a1 = r1.get_json()['a']
-        logger.info('Reading /route2 response')
-        a2 = r2.get_json()['a']
+        r3 = app.test_client().post('http://localhost:5000/test/postdata',
+          headers={'tester1': 'tester1', 'tester2': 'tester2'},
+          data=json.dumps({'d1': 10, 'd2': 20}), content_type='application/json')
         logger.info('Reading /test/postdata response')
         a3 = r3.status_code
-
-        if a1 != 'a':
-            logger.error('r1 Result not expected.')
-            exit(1)
-        if a2 != 'a':
-            logger.error('r2 Result not expected.')
-            exit(1)
-        if a3 != 200:
-            logger.error('post request to /test/postdata API has failed.')
-            exit(1)
-
-        logger.info('r1 result: ' + str(a1))
-        logger.info('r2 result: ' + str(a2))
+        assert a3 == 200
         logger.info('r3 result: ' + str(a3))
         logger.info('Exiting from flask instrumentation test.')
+        return 0
     except:
-        e = sys.exc_info()[0]
-        traceback.print_exc()
-        sys.exit(1)
-        os._exit(1)
-
-sys.exit(0)
+      logger.error('Failed to initialize flask instrumentation wrapper: exception=%s, stacktrace=%s',
+        sys.exc_info()[0],
+        traceback.format_exc())
+      return 1

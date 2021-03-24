@@ -27,7 +27,7 @@ def setup_custom_logger(name):
     logger.addHandler(screen_handler)
     return logger
   except:
-    logger.error('Failed to customize logger: exception=%s, stacktrace=%s',
+    print('Failed to customize logger: exception=%s, stacktrace=%s',
       sys.exc_info()[0],
       traceback.format_exc())
 
