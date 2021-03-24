@@ -28,7 +28,6 @@ def setup_custom_logger(name):
 
 def test_run():
   logger = setup_custom_logger(__name__)
-  logger.info('Initializing agent.')
   #
   # Code snippet here represents the current initialization logic
   #
@@ -42,15 +41,23 @@ def test_run():
   logger.info('Agent initialized.')
   
   try:
+    logger.info('Creating connection.')
     cnx = psycopg2.connect( database='hypertrace',
                           host='localhost',
                           port=5432,
                           user='postgres',
                           password='postgres'
                         )
+    logger.info('Connection successful.');
+    logger.info('Creating cursor.')
     cursor = cnx.cursor()
+    logger.info('Cursor created')
+    logger.info('Executing statement.')
     cursor.execute("INSERT INTO hypertrace_data (col1, col2) VALUES (123, 'abcdefghijklmnopqrstuvwxyz')")
+    logger.info('Statement executed.')
+    logger.info('Closing cursor.')
     cursor.close()
+    logger.info('Closing connection.')
     cnx.close()
   except:
     logger.error('Failed to initialize postgresql instrumentation wrapper: exception=%s, stacktrace=%s',

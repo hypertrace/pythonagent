@@ -41,6 +41,7 @@ class AgentInit:
       self._grpcInstrumentorClientWrapper = None
       self._grpcInstrumentorServerWrapper = None
       self._mysqlInstrumentorWrapper = None
+      self._postgresqlInstrumentorWrapper = None
     except:
       logger.error('Failed to initialize opentelemetry: exception=%s, stacktrace=%s',
         sys.exc_info()[0],
@@ -127,13 +128,13 @@ class AgentInit:
     logger.debug('Calling AgentInit.postgreSQLInit()')
     try:
       from instrumentation.postgresql import PostgreSQLInstrumentorWrapper
-      self._moduleInitialized['mysql'] = True
-      self._mysqlInstrumentorWrapper = PostgreSQLInstrumentorWrapper()
-      self._mysqlInstrumentorWrapper.instrument()
-      self._mysqlInstrumentorWrapper.setProcessRequestHeaders(self._hypertraceConfig.DATA_CAPTURE_HTTP_HEADERS_REQUEST)
-      self._mysqlInstrumentorWrapper.setProcessResponseHeaders(self._hypertraceConfig.DATA_CAPTURE_HTTP_HEADERS_RESPONSE)
-      self._mysqlInstrumentorWrapper.setProcessRequestBody(self._hypertraceConfig.DATA_CAPTURE_HTTP_BODY_REQUEST)
-      self._mysqlInstrumentorWrapper.setProcessResponseBody(self._hypertraceConfig.DATA_CAPTURE_HTTP_BODY_RESPONSE)
+      self._moduleInitialized['postgresql'] = True
+      self._postgresqlInstrumentorWrapper = PostgreSQLInstrumentorWrapper()
+      self._postgresqlInstrumentorWrapper.instrument()
+      self._postgresqlInstrumentorWrapper.setProcessRequestHeaders(self._hypertraceConfig.DATA_CAPTURE_HTTP_HEADERS_REQUEST)
+      self._postgresqlInstrumentorWrapper.setProcessResponseHeaders(self._hypertraceConfig.DATA_CAPTURE_HTTP_HEADERS_RESPONSE)
+      self._postgresqlInstrumentorWrapper.setProcessRequestBody(self._hypertraceConfig.DATA_CAPTURE_HTTP_BODY_REQUEST)
+      self._postgresqlInstrumentorWrapper.setProcessResponseBody(self._hypertraceConfig.DATA_CAPTURE_HTTP_BODY_RESPONSE)
     except:
       logger.debug('Failed to initialize grpc instrumentation wrapper: exception=%s, stacktrace=%s',
         sys.exc_info()[0],

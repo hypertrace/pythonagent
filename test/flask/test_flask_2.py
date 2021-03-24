@@ -2,6 +2,7 @@ import sys
 import os
 import logging
 import flask
+import pytest
 import traceback
 import json
 import pytest
@@ -118,6 +119,7 @@ class FlaskServer(threading.Thread):
 
 server = FlaskServer(app)
 
+@pytest.mark.serial
 def test_run():
   logger.info('Running test calls.')
   with app.test_client() as c:

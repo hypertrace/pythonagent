@@ -2,6 +2,7 @@ import sys
 import os
 import logging
 import flask
+import pytest
 import traceback
 from werkzeug.serving import make_server
 from flask import request
@@ -48,7 +49,7 @@ class FlaskServer(threading.Thread):
     logger.info('Shutting down server.')
     self.srv.shutdown()
 
-
+@pytest.mark.serial
 def test_run():
   logger = setup_custom_logger(__name__)
   logger.info('Initializing flask app.')
