@@ -211,3 +211,4 @@ data_capture:
 
 # Testing tools
 * [tox](https://tox.readthedocs.io/en/latest/)
+* [pytest](https://docs.pytest.org/en/stable/contents.html)
