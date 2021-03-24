@@ -7,16 +7,16 @@ from opentelemetry import trace
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import ConsoleSpanExporter, SimpleExportSpanProcessor
-from config  import HypertraceConfig
 from opentelemetry.sdk.resources import Resource
+from opentelemetry import trace
+from opentelemetry.exporter import jaeger
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchExportSpanProcessor
+from config  import HypertraceConfig
 
 logger = logging.getLogger(__name__)
 
-
 class AgentInit:
-  
-  
-
   def __init__(self):
     logger.debug('Initializing AgentInit object.')
     logger.debug('Nitin -')
@@ -31,7 +31,6 @@ class AgentInit:
       hypertraceConfig = HypertraceConfig.HypertraceConfig();
       global agent_config;
       agent_config = hypertraceConfig.getConfig();
-
       self._tracerProvider = TracerProvider(
         resource=Resource.create({
             "service.name": agent_config.service_name,
@@ -39,9 +38,15 @@ class AgentInit:
         })
       )
       trace.set_tracer_provider(self._tracerProvider)
-      self._consoleSpanExporter = ConsoleSpanExporter(service_name='tester')
-      self._simpleExportSpanProcessor = SimpleExportSpanProcessor(self._consoleSpanExporter)
-      trace.get_tracer_provider().add_span_processor(self._simpleExportSpanProcessor)
+
+#      self._consoleSpanExporter = ConsoleSpanExporter(service_name=agent_config.service_name)
+#      self._simpleExportSpanProcessor = SimpleExportSpanProcessor(self._consoleSpanExporter)
+
+      self._jaegerExporter = self.createJaegerExporter()
+      self._batchExportSpanProcessor = BatchExportSpanProcessor(self._jaegerExporter)
+
+#      trace.get_tracer_provider().add_span_processor(self._simpleExportSpanProcessor)
+      trace.get_tracer_provider().add_span_processor(self._batchExportSpanProcessor)
       self._requestsInstrumentor = RequestsInstrumentor()
       self._flaskInstrumentorWrapper = None
       self._grpcInstrumentorClientWrapper = None
@@ -157,3 +162,19 @@ class AgentInit:
         sys.exc_info()[0],
         traceback.format_exc())
       raise sys.exc_info()[0]
+
+  def createJaegerExporter(self):
+    jaeger_exporter = jaeger.JaegerSpanExporter(
+      service_name= agent_config.service_name,
+      # configure agent
+      agent_host_name='localhost',
+      agent_port=6831,
+      # optional: configure also collector
+      # collector_endpoint='http://localhost:14268/api/traces?format=jaeger.thrift',
+      # username=xxxx, # optional
+      # password=xxxx, # optional
+      # insecure=True, # optional
+      # credentials=xxx # optional channel creds
+      # transport_format='protobuf' # optional
+    )
+    return jaeger_exporter

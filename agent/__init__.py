@@ -26,7 +26,6 @@ logger = setup_custom_logger(__name__)
 
 class Agent:
   def __init__(self):
-#    logging.basicConfig(filename='agent.log', level=logging.DEBUG)
     logger.debug('Initializing Agent.');
     try:
       self._init = AgentInit()
