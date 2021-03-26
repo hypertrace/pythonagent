@@ -56,6 +56,12 @@ class AgentInit:
         traceback.format_exc())
       raise sys.exc_info()[0]
 
+  def dumpConfig(self):
+    logger.debug('Calling DumpConfig().')
+    for m in self._moduleInitialized:
+      logger.debug(m + ':' + str(self._moduleInitialized[m]))
+
+
 
   # Creates a flask wrapper using the config defined in hypertraceconfig
   def flaskInit(self, app):
