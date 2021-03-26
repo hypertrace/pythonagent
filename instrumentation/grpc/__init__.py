@@ -159,7 +159,6 @@ class OpenTelemetryServerInterceptorWrapper(_server.OpenTelemetryServerIntercept
                   context = _OpenTelemetryWrapperServicerContext(context, span)
                   response = behavior(request_or_iterator, context)
                   logger.debug('Response Body: ' + str(response))
-#                  logger.debug('RCBJ0600: ' + str(context))
                   logger.debug('Response Headers: ' + str(context.get_trailing_metadata()))
                   self._gisw.genericRpcResponseHandler(context.get_trailing_metadata()[0], response, span)
                   return response
