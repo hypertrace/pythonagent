@@ -1,0 +1,14 @@
+version: '3.1'
+
+services:
+  db:
+    image: "postgres"
+    environment:
+      POSTGRES_USER:  postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB:  hypertrace
+    ports:
+      - 5432:5432      
+    volumes:
+      - ./sql:/docker-entrypoint-initdb.d
+#psql --host=database --username=unicorn_user --dbname=rainbow_database
