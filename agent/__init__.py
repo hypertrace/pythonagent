@@ -53,6 +53,7 @@ class Agent:
       logger.error('Failed to initialize grpc instrumentation wrapper: exception=%s, stacktrace=%s',
         sys.exc_info()[0],
         traceback.format_exc())
+<<<<<<< HEAD
 
   def registerClientGrpc(self):
     logger.debug('Calling Agent.registerClientGrpc().')
@@ -80,6 +81,35 @@ class Agent:
       self._init.postgreSQLInit()
       self._init.dumpConfig()
     except:
+=======
+
+  def registerClientGrpc(self):
+    logger.debug('Calling Agent.registerClientGrpc().')
+    try:
+      self._init.grpcClientInit()
+      self._init.dumpConfig()
+    except:
+      logger.error('Failed to initialize grpc instrumentation wrapper: exception=%s, stacktrace=%s',
+        sys.exc_info()[0],
+        traceback.format_exc())
+
+  def registerMySQL(self):
+    logger.debug('Calling Agent.registerMySQL().')
+    try:
+      self._init.mySQLInit()
+      self._init.dumpConfig()
+    except:
+      logger.error('Failed to initialize mysql instrumentation wrapper: exception=%s, stacktrace=%s',
+        sys.exc_info()[0],
+        traceback.format_exc())
+
+  def registerPostgreSQL(self):
+    logger.debug('Calling Agent.registerPostgreSQL().')
+    try:
+      self._init.postgreSQLInit()
+      self._init.dumpConfig()
+    except:
+>>>>>>> main
       logger.error('Failed to initialize postgresql instrumentation wrapper: exception=%s, stacktrace=%s',
         sys.exc_info()[0],
         traceback.format_exc())
@@ -92,9 +122,12 @@ class Agent:
       logger.error('Failed to initialize global: exception=%s, stacktrace=%s',
         sys.exc_info()[0],
         traceback.format_exc())
+<<<<<<< HEAD
 
   def getInMemorySpanExport(self):
     return self._init.getInMemorySpanExport()
 
   def setInMemorySpanExport(self, memory_exporter):
     self._init.setInMemorySpanExport(memory_exporter)
+=======
+>>>>>>> main

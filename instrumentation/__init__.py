@@ -1,9 +1,9 @@
 import sys
 import os.path
-import logging
 import inspect
 import traceback
 import json
+import logging
 
 # Setup logger name
 logger = logging.getLogger(__name__)
@@ -60,29 +60,29 @@ class BaseInstrumentorWrapper:
   def getServiceName(self):
     return self._serviceName
 
-  # Set whether request headers should be put in extended span
+  # Set whether request headers should be put in extended span, takes a BoolValue as input
   def setProcessRequestHeaders(self, processRequestHeaders):
-    logger.debug('Setting self._processRequestHeaders.')
+    logger.debug('Setting self._processRequestHeaders to \'%s\'' % processRequestHeaders.value)
     self._processRequestHeaders = processRequestHeaders
 
-  # Set whether response headers should be put in extended span
+  # Set whether response headers should be put in extended span, takes a BoolValue as input
   def setProcessResponseHeaders(self, processResponseHeaders):
-    logger.debug('Setting self._processResponseHeaders.');
+    logger.debug('Setting self._processResponseHeaders to \'%s\'' % processResponseHeaders.value)
     self._processResponseHeaders = processResponseHeaders
 
-  # Set whether request body should be put in extended span
+  # Set whether request body should be put in extended span, takes a BoolValue as input
   def setProcessRequestBody(self, processRequestBody):
-    logger.debug('Setting self._processRequestBody.');
+    logger.debug('Setting self._processRequestBody to \'%s\'' % processRequestBody.value)
     self._processRequestBody = processRequestBody
 
-  # Set whether response body should be put in extended span
+  # Set whether response body should be put in extended span, takes a BoolValue as input
   def setProcessResponseBody(self, processResponseBody):
-    logger.debug('Setting self._processResponseBody.');
+    logger.debug('Setting self._processResponseBody to \'%s\'' % processResponseBody.value)
     self._processResponseBody = processResponseBody
 
   # Set service name
   def setServiceName(self, serviceName):
-    logger.debug('Setting self._serviceName')
+    logger.debug('Setting self._serviceName to \'%s\'' % serviceName)
     self._serviceName = serviceName
 
   # Generic HTTP Request Handler
