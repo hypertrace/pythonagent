@@ -171,7 +171,7 @@ def test_run():
         assert flaskSpanAsObject['attributes']['http.response.header.content-type'] == 'application/json'
         assert flaskSpanAsObject['attributes']['http.response.body'] == '{ "a": "a", "xyz": "xyz" }'
         assert flaskSpanAsObject['attributes']['http.status_code'] == 200
-        # MySQL INSERT Extended span Object
+        # PostgreSQL INSERT Extended span Object
         # {
         #   "db.system": "postgresql",
         #   "db.name": "hypertrace",
@@ -198,10 +198,10 @@ def test_run():
         assert sql2SpanAsObject['attributes']['db.statement'] == "INSERT INTO hypertrace_data (col1, col2) VALUES (123, 'abcdefghijklmnopqrstuvwxyz')"
         agent.getInMemorySpanExport().clear()
         logger.info('r1 result: ' + str(a1))
-    logger.info('Exiting from flask + mysql instrumentation test.')
+    logger.info('Exiting from flask + postgresql instrumentation test.')
     return 0
   except:
-    logger.error('Failed to run flask + mysql instrumentation wrapper test: exception=%s, stacktrace=%s',
+    logger.error('Failed to run flask + postgresql instrumentation wrapper test: exception=%s, stacktrace=%s',
       sys.exc_info()[0],
       traceback.format_exc())
     raise sys.exc_info()[0]
