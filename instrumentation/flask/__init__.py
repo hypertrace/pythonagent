@@ -34,7 +34,10 @@ def _hypertrace_before_request( flaskWrapper, app):
   def hypertrace_before_request():
     logger.debug('Entering _hypertrace_before_request().');
     try:
-      # Read span from flask "environment"
+      # Read span from flask "environment". The global flask.request
+      # object keeps track of which request belong to the currently
+      # active thread. See 
+      #   https://flask.palletsprojects.com/en/1.1.x/api/#flask.request
       span = flask.request.environ.get(_ENVIRON_SPAN_KEY)
       # Pull request headers
       requestHeaders = flask.request.headers # for now, assuming single threaded mode (multiple python processes)

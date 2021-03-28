@@ -6,13 +6,17 @@ import traceback
 from opentelemetry import trace
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
 from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import ConsoleSpanExporter, SimpleExportSpanProcessor
+from opentelemetry.sdk.trace.export import ConsoleSpanExporter, SimpleSpanProcessor
 from opentelemetry.sdk.resources import Resource
 from opentelemetry import trace
 from opentelemetry.exporter import jaeger
 from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchExportSpanProcessor
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from config import HypertraceConfig
+from opentelemetry.sdk.trace import TracerProvider, export
+from opentelemetry.sdk.trace.export.in_memory_span_exporter import (
+    InMemorySpanExporter,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -39,13 +43,11 @@ class AgentInit:
       trace.set_tracer_provider(self._tracerProvider)
 
       self._consoleSpanExporter = ConsoleSpanExporter(service_name=agent_config.service_name)
-      self._simpleExportSpanProcessor = SimpleExportSpanProcessor(self._consoleSpanExporter)
+      self._simpleExportSpanProcessor = SimpleSpanProcessor(self._consoleSpanExporter)
 
-      self._jaegerExporter = self.createJaegerExporter()
-      self._batchExportSpanProcessor = BatchExportSpanProcessor(self._jaegerExporter)
+#      self.createJaegerExporter()
 
       trace.get_tracer_provider().add_span_processor(self._simpleExportSpanProcessor)
-      trace.get_tracer_provider().add_span_processor(self._batchExportSpanProcessor)
 
       self._requestsInstrumentor = RequestsInstrumentor()
 
@@ -178,4 +180,17 @@ class AgentInit:
       # credentials=xxx # optional channel creds
       # transport_format='protobuf' # optional
     )
+    self._jaegerExporter = self.createJaegerExporter()
+    self._batchExportSpanProcessor = BatchSpanProcessor(self._jaegerExporter)
+
+    trace.get_tracer_provider().add_span_processor(self._batchExportSpanProcessor)
+
     return jaeger_exporter
+
+  def getInMemorySpanExport(self):
+    return self._memory_exporter
+
+  def setInMemorySpanExport(self,memory_exporter):
+    self._memory_exporter = memory_exporter
+    self._simpleExportSpanProcessor2 = export.SimpleSpanProcessor(self._memory_exporter)
+    trace.get_tracer_provider().add_span_processor(self._simpleExportSpanProcessor2)

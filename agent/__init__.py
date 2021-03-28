@@ -92,3 +92,9 @@ class Agent:
       logger.error('Failed to initialize global: exception=%s, stacktrace=%s',
         sys.exc_info()[0],
         traceback.format_exc())
+
+  def getInMemorySpanExport(self):
+    return self._init.getInMemorySpanExport()
+
+  def setInMemorySpanExport(self, memory_exporter):
+    self._init.setInMemorySpanExport(memory_exporter)

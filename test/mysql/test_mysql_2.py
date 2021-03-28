@@ -11,6 +11,11 @@ import time
 import atexit
 import threading
 import mysql.connector
+from opentelemetry import trace as trace_api
+from opentelemetry.sdk.trace import TracerProvider, export
+from opentelemetry.sdk.trace.export.in_memory_span_exporter import (
+    InMemorySpanExporter,
+)
 from agent import Agent
 from flask import Flask
 
@@ -47,9 +52,9 @@ class FlaskServer(threading.Thread):
     self.srv.serve_forever()
     self.start()
 
-@pytest.mark.serial
 def test_run():
   logger = setup_custom_logger(__name__)
+
   logger.info('Initializing flask app.')
   # Create Flask app
   app = Flask(__name__)
@@ -100,24 +105,102 @@ def test_run():
   #
   # End initialization logic for Python Agent
   #
-  logger.info('Agent initialized.')
 
+  # Setup In-Memory Span Exporter
+  logger.info('Agent initialized.')
+  logger.info('Adding in-memory span exporter.')
+  memory_exporter = InMemorySpanExporter() 
+  agent.setInMemorySpanExport(memory_exporter)
+  logger.info('Added in-memoy span exporter')
+
+  # Create flask server object
   server = FlaskServer(app)
 
-  logger.info('Running test calls.')
-  with app.test_client() as c:
-    try:
+  try:
+    logger.info('Running test calls.')
+    with app.test_client() as c:
       logger.info('Making test call to /dbtest')
       for x in range(10): # Run 10 requests
         r1 = app.test_client().get('http://localhost:5000/dbtest')
-        logger.info('Reading /route1 response.')
+        logger.info('Reading /dbtest response.')
         a1 = r1.get_json()['a']
         assert a1 == 'a'
+        # Get all of the in memory spans that were recorded for this iteration
+        span_list = agent.getInMemorySpanExport().get_finished_spans()
+        # Confirm something was returned.
+        assert span_list
+        # Confirm there are three spans
+        logger.debug('len(span_list): ' + str(len(span_list)))
+        assert len(span_list) == 3
+        logger.debug('span_list: ' + str(span_list[2].attributes))
+        logger.debug('span_list: ' + str(span_list[1].attributes))
+        logger.debug('span_list: ' + str(span_list[0].attributes))
+        # Convert each span to a JSON object
+        flaskSpanAsObject = json.loads(span_list[2].to_json())
+        sql1SpanAsObject = json.loads(span_list[1].to_json())
+        sql2SpanAsObject = json.loads(span_list[0].to_json())
+        # Flask extended span object attributes should look like:
+        #
+        # {
+        #   "http.method": "GET",
+        #   "http.server_name": "localhost",
+        #   "http.scheme": "http",
+        #   "net.host.port": 5000,
+        #   "http.host": "localhost:5000",
+        #   "http.target": "/dbtest",
+        #   "net.peer.ip": "127.0.0.1",
+        #   "http.user_agent": "werkzeug/1.0.1",
+        #   "http.flavor": "1.1",
+        #   "http.route": "/dbtest",
+        #   "http.request.header.user-agent": "werkzeug/1.0.1",
+        #   "http.request.header.host": "localhost:5000",
+        #   "http.response.header.content-type": "application/json",
+        #   "http.response.header.content-length": "26",
+        #   "http.response.body": "{ \"a\": \"a\", \"xyz\": \"xyz\" }",
+        #   "http.status_text": "OK",
+        #   "http.status_code": 200
+        # }
+        #
+        # Dump all attributes for debugging
+        for key in flaskSpanAsObject:
+          logger.debug(key + ' : ' + str(flaskSpanAsObject[key])) 
+        # Check that the expected results are in the flask extended span attributes
+        assert flaskSpanAsObject['attributes']['http.method'] == 'GET'
+        assert flaskSpanAsObject['attributes']['http.target'] == '/dbtest'
+        assert flaskSpanAsObject['attributes']['http.response.header.content-type'] == 'application/json'
+        assert flaskSpanAsObject['attributes']['http.response.body'] == '{ "a": "a", "xyz": "xyz" }'
+        assert flaskSpanAsObject['attributes']['http.status_code'] == 200
+        # MySQL INSERT Extended span Object
+        # {
+        #   "db.system": "mysql",
+        #   "db.name": "hypertrace",
+        #   "db.statement": "INSERT INTO hypertrace_data (col1, col2) VALUES (123, \"abcdefghijklmnopqrstuvwxyz\")",
+        #   "db.user": "root",
+        #   "net.peer.name": "localhost",
+        #   "net.peer.port": 3306
+        # }
+        for key in sql1SpanAsObject:
+          logger.debug(key + ' : ' + str(sql1SpanAsObject[key]))
+        assert sql1SpanAsObject['attributes']['db.system'] == 'mysql'
+        assert sql1SpanAsObject['attributes']['db.name'] == 'hypertrace'
+        assert sql1SpanAsObject['attributes']['db.user'] == 'root'
+        assert sql1SpanAsObject['attributes']['net.peer.name'] == 'localhost'
+        assert sql1SpanAsObject['attributes']['net.peer.port'] == 3306
+        assert sql1SpanAsObject['attributes']['db.statement'] == "INSERT INTO hypertrace_data (col1, col2) VALUES (456, 'abcdefghijklmnopqrstuvwxyz')"
+        for key in sql2SpanAsObject:
+          logger.debug(key + ' : ' + str(sql2SpanAsObject[key]))
+        assert sql2SpanAsObject['attributes']['db.system'] == 'mysql'
+        assert sql2SpanAsObject['attributes']['db.name'] == 'hypertrace'
+        assert sql2SpanAsObject['attributes']['db.user'] == 'root'
+        assert sql2SpanAsObject['attributes']['net.peer.name'] == 'localhost'
+        assert sql2SpanAsObject['attributes']['net.peer.port'] == 3306
+        assert sql2SpanAsObject['attributes']['db.statement'] == "INSERT INTO hypertrace_data (col1, col2) VALUES (123, 'abcdefghijklmnopqrstuvwxyz')"
+        agent.getInMemorySpanExport().clear()
         logger.info('r1 result: ' + str(a1))
-      logger.info('Exiting from flask instrumentation test.')
-      return 0
-    except:
-      logger.error('Failed to initialize postgresql instrumentation wrapper: exception=%s, stacktrace=%s',
-        sys.exc_info()[0],
-        traceback.format_exc())
-      return 1
+    logger.info('Exiting from flask + mysql instrumentation test.')
+    return 0
+  except:
+    logger.error('Failed to run flask + mysql instrumentation wrapper test: exception=%s, stacktrace=%s',
+      sys.exc_info()[0],
+      traceback.format_exc())
+    raise sys.exc_info()[0]
