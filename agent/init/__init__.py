@@ -16,7 +16,6 @@ from opentelemetry.sdk.trace import TracerProvider, export
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import (
     InMemorySpanExporter,
 )
-
 from config.AgentConfig import AgentConfig
 from config.logger import get_logger
 
@@ -25,7 +24,7 @@ logger = get_logger(__name__)
 class AgentInit:
   def __init__(self, agent):
     logger.debug('Initializing AgentInit object.')
-   self.agent = agent 
+    self.agent = agent 
     self._moduleInitialized = {
       "flask": False,
       "grpc:server": False,

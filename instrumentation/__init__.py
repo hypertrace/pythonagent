@@ -8,7 +8,6 @@ import logging
 # Setup logger name
 logger = logging.getLogger(__name__)
 
-
 # This is a base class for all Hypertrace Instrumentation wrapper classes
 class BaseInstrumentorWrapper:
   # Standard extended span attribute names / prefixes
