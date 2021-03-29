@@ -93,7 +93,6 @@ def test_run():
 
   logger.info('Flask app initialized.')
 
-  logger.info('Initializing agent.')
   #
   # Code snippet here represents the current initialization logic
   #

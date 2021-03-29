@@ -1,0 +1,31 @@
+version: '3'
+
+services:
+  flask_app:
+    container_name: flask_app
+    build:
+      context: ../..
+      dockerfile: test/gunicorn/flask_app/Dockerfile
+    ports:
+      - "8000:8000"
+    command: gunicorn -w 1 -b 0.0.0.0:8000 wsgi:server
+    depends_on:
+      - db
+  nginx:
+    container_name: nginx
+    build: ./nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - flask_app
+  db:
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_DATABASE: hypertrace
+    volumes:
+      - ./sql:/docker-entrypoint-initdb.d
+#  docker exec -it mysql_db_1 mysql -h mysql_db_1 -u root -p
