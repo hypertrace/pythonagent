@@ -1,15 +1,13 @@
 import os
-
 import yaml
+import logging
 from google.protobuf import json_format as jf
 from google.protobuf.wrappers_pb2 import BoolValue
+from agent.config import config_pb2 as config_pb2
+from agent.config.AgentConfig_default import *
 
-from config import config_pb2 as config_pb2
-from config.AgentConfig_default import *
-from config.logger import get_logger
-
-logger = get_logger(__name__)
-
+# Initialize logger
+logger = logging.getLogger(__name__)
 
 class AgentConfig:
     def __new__(cls, *args, **kwargs):

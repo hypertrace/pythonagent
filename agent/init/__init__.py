@@ -1,4 +1,3 @@
-from config.config_pb2 import AgentConfig
 import sys
 import os
 import traceback
@@ -13,13 +12,11 @@ from opentelemetry.exporter import jaeger
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.sdk.trace import TracerProvider, export
-from opentelemetry.sdk.trace.export.in_memory_span_exporter import (
-    InMemorySpanExporter,
-)
-from config.AgentConfig import AgentConfig
-from config.logger import get_logger
+from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
+from agent.config.AgentConfig import AgentConfig
 
-logger = get_logger(__name__)
+# Initialize logger
+logger = logging.getLogger(__name__)
 
 class AgentInit:
   def __init__(self, agent):
@@ -81,7 +78,7 @@ class AgentInit:
   def flaskInit(self, app):
     logger.debug('Calling AgentInit.flaskInit().')
     try:
-      from instrumentation.flask import FlaskInstrumentorWrapper
+      from agent.instrumentation.flask import FlaskInstrumentorWrapper
       self._moduleInitialized['flask'] = True
       self._flaskInstrumentorWrapper = FlaskInstrumentorWrapper()
       self._flaskInstrumentorWrapper.instrument_app(app)
@@ -102,7 +99,7 @@ class AgentInit:
   def grpcServerInit(self):
     logger.debug('Calling AgentInit.grpcServerInit')
     try:
-      from instrumentation.grpc import GrpcInstrumentorServerWrapper,GrpcInstrumentorClientWrapper
+      from agent.instrumentation.grpc import GrpcInstrumentorServerWrapper,GrpcInstrumentorClientWrapper
       self._moduleInitialized['grpc:server'] = True
       self._grpcInstrumentorServerWrapper = GrpcInstrumentorServerWrapper()
       self._grpcInstrumentorServerWrapper.instrument()
@@ -122,7 +119,7 @@ class AgentInit:
   def grpcClientInit(self):
     logger.debug('Calling AgentInit.grpcClientInit')
     try:
-      from instrumentation.grpc import GrpcInstrumentorServerWrapper,GrpcInstrumentorClientWrapper
+      from agent.instrumentation.grpc import GrpcInstrumentorServerWrapper,GrpcInstrumentorClientWrapper
       self._moduleInitialized['grpc:client'] = True
 
       self._grpcInstrumentorClientWrapper = GrpcInstrumentorClientWrapper()
@@ -144,7 +141,7 @@ class AgentInit:
   def mySQLInit(self):
     logger.debug('Calling AgentInit.mysqlInit()')
     try:
-      from instrumentation.mysql import MySQLInstrumentorWrapper
+      from agent.instrumentation.mysql import MySQLInstrumentorWrapper
       self._moduleInitialized['mysql'] = True
       self._mysqlInstrumentorWrapper = MySQLInstrumentorWrapper() 
       self._mysqlInstrumentorWrapper.instrument()
@@ -165,7 +162,7 @@ class AgentInit:
   def postgreSQLInit(self):
     logger.debug('Calling AgentInit.postgreSQLInit()')
     try:
-      from instrumentation.postgresql import PostgreSQLInstrumentorWrapper
+      from agent.instrumentation.postgresql import PostgreSQLInstrumentorWrapper
       self._moduleInitialized['postgresql'] = True
       self._postgresqlInstrumentorWrapper = PostgreSQLInstrumentorWrapper()
       self._postgresqlInstrumentorWrapper.instrument()

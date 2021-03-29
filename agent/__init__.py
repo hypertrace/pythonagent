@@ -2,10 +2,8 @@ import sys
 import os.path
 import logging
 import traceback
-
 from agent.init import AgentInit
-from config.logger import get_logger
-from config.AgentConfig import AgentConfig
+from agent.config.AgentConfig import AgentConfig
 
 def setup_custom_logger(name):
   try:
