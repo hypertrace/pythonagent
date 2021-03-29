@@ -25,8 +25,7 @@ logger = get_logger(__name__)
 class AgentInit:
   def __init__(self, agent):
     logger.debug('Initializing AgentInit object.')
-    self.agent = agent
-
+   self.agent = agent 
     self._moduleInitialized = {
       "flask": False,
       "grpc:server": False,

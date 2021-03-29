@@ -7,7 +7,25 @@ from agent.init import AgentInit
 from config.logger import get_logger
 from config.AgentConfig import AgentConfig
 
-logger = get_logger(__name__)
+def setup_custom_logger(name):
+  try:
+    formatter = logging.Formatter(fmt='%(asctime)s %(levelname)-8s %(message)s',
+                                  datefmt='%Y-%m-%d %H:%M:%S')
+    handler = logging.FileHandler('agent.log', mode='a')
+    handler.setFormatter(formatter)
+    screen_handler = logging.StreamHandler(stream=sys.stdout)
+    screen_handler.setFormatter(formatter)
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.DEBUG)
+    logger.addHandler(handler)
+    logger.addHandler(screen_handler)
+    return logger
+  except:
+    logger.error('Failed to customize logger: exception=%s, stacktrace=%s',
+      sys.exc_info()[0],
+      traceback.format_exc())
+
+logger = setup_custom_logger(__name__)
 
 class Agent:
   def __init__(self):
