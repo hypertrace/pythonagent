@@ -3,7 +3,7 @@ import os.path
 import logging
 import traceback
 from agent.init import AgentInit
-from agent.config.AgentConfig import AgentConfig
+from agent.config import AgentConfig
 
 def setup_custom_logger(name):
   try:

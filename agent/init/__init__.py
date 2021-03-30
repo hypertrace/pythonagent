@@ -13,7 +13,7 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.sdk.trace import TracerProvider, export
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
-from agent.config.AgentConfig import AgentConfig
+from agent.config import AgentConfig
 
 # Initialize logger
 logger = logging.getLogger(__name__)
