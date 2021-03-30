@@ -87,7 +87,6 @@ def serve(timer):
     server.start()
     logger.info('Waiting for termination.') 
     return server
-#    server.wait_for_termination()
 
 def exit_callback(): 
   try:
@@ -134,7 +133,8 @@ def exit_callback():
     logger.error('An error occurred while calling greeter client: exception=%s, stacktrace=%s',
       sys.exc_info()[0],
       traceback.format_exc())
-    raise Exception(sys.exc_info()[0])
+    # raise Exception(sys.exc_info()[0])
+    return 1
 
 class CustomTimer(Timer):
   def __init__(self, interval, function, args=[], kwargs={}):
@@ -157,7 +157,8 @@ def test_run():
     timer.start()
     server = serve(timer)
     rc = timer.join()
-#    exit_callback()
+    if rc == 1:
+      raise Exception('Test failed.')
   except:
     logger.error('An error occurred while calling greeter client: exception=%s, stacktrace=%s',
       sys.exc_info()[0],
