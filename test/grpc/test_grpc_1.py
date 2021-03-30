@@ -19,11 +19,15 @@ import logging
 import grpc
 import threading
 import pytest
+import json
 from threading import Timer
 import traceback
 import helloworld_pb2
 import helloworld_pb2_grpc
 from agent import Agent
+from opentelemetry import trace as trace_api
+from opentelemetry.sdk.trace import TracerProvider, export
+from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
 
 def setup_custom_logger(name):
   try:
@@ -44,6 +48,24 @@ def setup_custom_logger(name):
       traceback.format_exc())
 
 logger = setup_custom_logger(__name__)
+
+#
+# Code snippet here represents the current initialization logic
+#
+logger.info('Initializing agent.')
+agent = Agent()
+agent.registerServerGrpc()
+agent.globalInit()
+logger.info('Agent initialized.')
+#
+# End initialization logic for Python Agent
+#
+# Setup In-Memory Span Exporter
+logger.info('Agent initialized.')
+logger.info('Adding in-memory span exporter.')
+memory_exporter = InMemorySpanExporter()
+agent.setInMemorySpanExport(memory_exporter)
+logger.info('Added in-memoy span exporter')
 
 class Greeter(helloworld_pb2_grpc.GreeterServicer):
     def SayHello(self, request, context):
@@ -72,14 +94,47 @@ def exit_callback():
     with grpc.insecure_channel('localhost:50051') as channel:
       stub = helloworld_pb2_grpc.GreeterStub(channel)
       response = stub.SayHello(helloworld_pb2.HelloRequest(name='you'))
-    assert response.message == 'Hello, you!'
-    logger.info("Greeter client received: " + response.message)
-    return 0
+      assert response.message == 'Hello, you!'
+      logger.info("Greeter client received: " + response.message)
+      # Get all of the in memory spans that were recorded for this iteration
+      span_list = agent.getInMemorySpanExport().get_finished_spans()
+      # Confirm something was returned.
+      assert span_list
+      # Confirm there are three spans
+      logger.debug('len(span_list): ' + str(len(span_list)))
+      assert len(span_list) == 1
+      logger.debug('span_list: ' + str(span_list[0].attributes))
+      flaskSpanAsObject = json.loads(span_list[0].to_json())
+      # Check that the expected results are in the flask extended span attributes
+#      "attributes": {
+#        "rpc.system": "grpc",
+#        "rpc.grpc.status_code": 0,
+#        "rpc.method": "SayHello",
+#        "rpc.service": "helloworld.Greeter",
+#        "rpc.user_agent": "grpc-python/1.36.1 grpc-c/15.0.0 (linux; chttp2)",
+#        "net.peer.ip": "[::1]",
+#        "net.peer.port": "47132",
+#        "net.peer.name": "localhost",
+#        "rpc.request.metadata.user-agent": "grpc-python/1.36.1 grpc-c/15.0.0 (linux; chttp2)",
+#        "rpc.request.body": "name: \"you\"\n",
+#        "rpc.response.metadata.tester": "tester",
+#        "rpc.response.metadata.tester2": "tester2",
+#        "rpc.response.body": "message: \"Hello, you!\"\n"
+      assert flaskSpanAsObject['attributes']['rpc.system'] == 'grpc'
+      assert flaskSpanAsObject['attributes']['rpc.method'] == 'SayHello'
+      assert flaskSpanAsObject['attributes']['rpc.request.metadata.user-agent'] == 'grpc-python/1.36.1 grpc-c/15.0.0 (linux; chttp2)'
+      assert flaskSpanAsObject['attributes']['rpc.request.body'] == 'name: \"you\"\n'
+      assert flaskSpanAsObject['attributes']['rpc.grpc.status_code'] == 0
+      assert flaskSpanAsObject['attributes']['rpc.response.metadata.tester2'] == 'tester2'
+      assert flaskSpanAsObject['attributes']['rpc.response.metadata.tester'] == 'tester'
+      assert flaskSpanAsObject['attributes']['rpc.response.body'] == 'message: \"Hello, you!\"\n'
+      agent.getInMemorySpanExport().clear()
+      return 0
   except:
     logger.error('An error occurred while calling greeter client: exception=%s, stacktrace=%s',
       sys.exc_info()[0],
       traceback.format_exc())
-    return 1
+    raise Exception(sys.exc_info()[0])
 
 class CustomTimer(Timer):
   def __init__(self, interval, function, args=[], kwargs={}):
@@ -97,23 +152,14 @@ class CustomTimer(Timer):
 
 def test_run():
   try:
-    #
-    # Code snippet here represents the current initialization logic
-    #
-    logger.info('Initializing agent.')
-    agent = Agent()
-    agent.registerServerGrpc()
-    agent.globalInit()
-    logger.info('Agent initialized.')
-    #
-    # End initialization logic for Python Agent
-    #
     logger.info('Starting Test Run.')
     timer = CustomTimer(4.0, exit_callback)
     timer.start()
     server = serve(timer)
-    return timer.join()
+    rc = timer.join()
+#    exit_callback()
   except:
     logger.error('An error occurred while calling greeter client: exception=%s, stacktrace=%s',
       sys.exc_info()[0],
       traceback.format_exc())
+    raise sys.exc_info()[0]
