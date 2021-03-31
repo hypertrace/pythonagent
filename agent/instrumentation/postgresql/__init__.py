@@ -2,7 +2,7 @@ import sys
 import os.path
 import logging
 import traceback
-from instrumentation import BaseInstrumentorWrapper
+from agent.instrumentation import BaseInstrumentorWrapper
 from opentelemetry.instrumentation.psycopg2 import Psycopg2Instrumentor
 
 #Initialize logger with local module name
