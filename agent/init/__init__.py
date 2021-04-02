@@ -31,14 +31,6 @@ class AgentInit:
       "postgresql": False
     }
     try:
-#      logger.debug('http_headers -> request: ' + str(self._agent._config.data_capture.http_headers.request.value))
-#      logger.debug('http_headers -> response: ' + str(self._agent._config.data_capture.http_headers.response.value))
-#      logger.debug('http_body -> request: ' + str(self._agent._config.data_capture.http_body.request.value))
-#      logger.debug('http_body -> response: ' + str(self._agent._config.data_capture.http_body.response.value))
-#      logger.debug('rpc_body -> request: ' + str(self._agent._config.data_capture.rpc_body.request.value))
-#      logger.debug('rpc_body -> response: ' + str(self._agent._config.data_capture.rpc_body.response.value))
-#      logger.debug('rpc_metadata -> request: ' + str(self._agent._config.data_capture.rpc_metadata.request.value))
-#      logger.debug('rpc_metadata -> response: ' + str(self._agent._config.data_capture.rpc_metadata.response.value))
       self._config.dumpConfig()
 
       self._tracerProvider = TracerProvider(
