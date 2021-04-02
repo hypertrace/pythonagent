@@ -39,7 +39,7 @@ def test_run():
     logger.info('Making test call to /dbtest/no-hypertrace')
     startTime = datetime.datetime.now()
     for x in range(1000): # Run 1000 requests
-      r1 = requests.get('http://localhost/dbtest/no-hypertrace')
+      r1 = requests.get('http://localhost:8000/dbtest/no-hypertrace')
       logger.debug('Reading /dbtest/no-hypertrace response.')
       a1 = r1.json()['a']
       assert a1 == 'a'
