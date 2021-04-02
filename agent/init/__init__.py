@@ -178,11 +178,20 @@ class AgentInit:
         traceback.format_exc())
       raise sys.exc_info()[0]
 
-
   def globalInit(self):
     logger.debug('Calling AgentInit.globalInit().')
     try:
       self._requestsInstrumentor.instrument()
+    except:
+      logger.debug('Failed global init: exception=%s, stacktrace=%s',
+        sys.exc_info()[0],
+        traceback.format_exc())
+      raise sys.exc_info()[0]
+
+  def globalDisable(self):
+    logger.debug('Calling AgentInit.globalDisable().')
+    try:
+      self._requestsInstrumentor.uninstrument()
     except:
       logger.debug('Failed global init: exception=%s, stacktrace=%s',
         sys.exc_info()[0],

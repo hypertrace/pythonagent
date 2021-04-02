@@ -6,6 +6,8 @@ services:
     build:
       context: ../..
       dockerfile: test/gunicorn/flask_app/Dockerfile
+    environment:
+      ENABLE_INSTRUMENTATION: ${ENABLE_INSTRUMENTATION}
     ports:
       - "8000:8000"
     command: gunicorn -w 1 -b 0.0.0.0:8000 wsgi:server
