@@ -14,6 +14,8 @@ import mysql.connector
 from opentelemetry import trace as trace_api
 from opentelemetry.sdk.trace import TracerProvider, export
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
+from opentelemetry.sdk.trace.export import BatchSpanProcessor, SimpleSpanProcessor
+
 from agent import Agent
 from flask import Flask
 
@@ -120,7 +122,7 @@ def after_request(response):
     if not ENABLE_INSTRUMENTATION:
       return response
     # Get all of the in memory spans that were recorded for this iteration
-    span_list = agent.getInMemorySpanExport().get_finished_spans()
+    span_list = memoryExporter.get_finished_spans()
     # Confirm something was returned.
     assert span_list
     # Confirm there are three spans
@@ -179,7 +181,7 @@ def after_request(response):
     assert sql1SpanAsObject['attributes']['net.peer.name'] == 'db'
     assert sql1SpanAsObject['attributes']['net.peer.port'] == 3306
     assert sql1SpanAsObject['attributes']['db.statement'] == "INSERT INTO hypertrace_data (col1, col2) VALUES (123, 'abcdefghijklmnopqrstuvwxyz')"
-    agent.getInMemorySpanExport().clear()
+    memoryExporter.clear()
     return response
   except:
     logger.error('An error occurred validating span data: exception=%s, stacktrace=%s',
@@ -200,10 +202,11 @@ if ENABLE_INSTRUMENTATION == True:
   #
   # End initialization logic for Python Agent
   #
-  
-#  # Setup In-Memory Span Exporter
-#  logger.info('Agent initialized.')
-#  logger.info('Adding in-memory span exporter.')
-#  memoryExporter = InMemorySpanExporter()
-#  agent.setInMemorySpanExport(memoryExporter)
-#  logger.info('Added in-memoy span exporter')
+ 
+  # Setup In-Memory Span Exporter
+  logger.info('Agent initialized.')
+  logger.info('Adding in-memory span exporter.')
+  memoryExporter = InMemorySpanExporter()
+  simpleExportSpanProcessor = SimpleSpanProcessor(memoryExporter)
+  agent.setProcessor(simpleExportSpanProcessor)
+  logger.info('Added in-memoy span exporter') 

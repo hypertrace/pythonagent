@@ -8,7 +8,6 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import ConsoleSpanExporter, SimpleSpanProcessor
 from opentelemetry.sdk.resources import Resource
 from opentelemetry import trace
-from opentelemetry.exporter import jaeger
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.sdk.trace import TracerProvider, export
@@ -43,9 +42,6 @@ class AgentInit:
 
       self._consoleSpanExporter = ConsoleSpanExporter(service_name=self._agent._config.service_name)
       self._simpleExportSpanProcessor = SimpleSpanProcessor(self._consoleSpanExporter)
-
-#      self.createJaegerExporter()
-
       trace.get_tracer_provider().add_span_processor(self._simpleExportSpanProcessor)
 
       self._requestsInstrumentor = RequestsInstrumentor()
@@ -93,7 +89,7 @@ class AgentInit:
   def grpcServerInit(self):
     logger.debug('Calling AgentInit.grpcServerInit')
     try:
-      from _agent.instrumentation.grpc import GrpcInstrumentorServerWrapper,GrpcInstrumentorClientWrapper
+      from agent.instrumentation.grpc import GrpcInstrumentorServerWrapper,GrpcInstrumentorClientWrapper
       self._moduleInitialized['grpc:server'] = True
       self._grpcInstrumentorServerWrapper = GrpcInstrumentorServerWrapper()
       self._grpcInstrumentorServerWrapper.instrument()
@@ -192,31 +188,6 @@ class AgentInit:
         traceback.format_exc())
       raise sys.exc_info()[0]
 
-  def createJaegerExporter(self):
-    jaeger_exporter = jaeger.JaegerSpanExporter(
-      service_name= agent_config.service_name,
-      # configure agent
-      agent_host_name='localhost',
-      agent_port=6831,
-      # optional: configure also collector
-      # collector_endpoint='http://localhost:14268/api/traces?format=jaeger.thrift',
-      # username=xxxx, # optional
-      # password=xxxx, # optional
-      # insecure=True, # optional
-      # credentials=xxx # optional channel creds
-      # transport_format='protobuf' # optional
-    )
-    self._jaegerExporter = self.createJaegerExporter()
-    self._batchExportSpanProcessor = BatchSpanProcessor(self._jaegerExporter)
-
-    trace.get_tracer_provider().add_span_processor(self._batchExportSpanProcessor)
-
-    return jaeger_exporter
-
-  def getInMemorySpanExport(self):
-    return self._memory_exporter
-
-  def setInMemorySpanExport(self,memory_exporter):
-    self._memory_exporter = memory_exporter
-    self._simpleExportSpanProcessor2 = export.SimpleSpanProcessor(self._memory_exporter)
-    trace.get_tracer_provider().add_span_processor(self._simpleExportSpanProcessor2)
+  def setProcessor(self, processor):
+    logger.debug('Entering AgentInit.setProcessor().')
+    trace.get_tracer_provider().add_span_processor(processor)

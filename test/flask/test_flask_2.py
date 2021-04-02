@@ -15,6 +15,8 @@ from agent import Agent
 from opentelemetry import trace as trace_api
 from opentelemetry.sdk.trace import TracerProvider, export
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
+from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
+from opentelemetry.sdk.trace.export import BatchSpanProcessor, SimpleSpanProcessor
 
 def setup_custom_logger(name):
   try:
@@ -124,8 +126,9 @@ logger.info('Agent initialized.')
 # Setup In-Memory Span Exporter
 logger.info('Agent initialized.')
 logger.info('Adding in-memory span exporter.')
-memory_exporter = InMemorySpanExporter()
-agent.setInMemorySpanExport(memory_exporter)
+memoryExporter = InMemorySpanExporter()
+simpleExportSpanProcessor = SimpleSpanProcessor(memoryExporter)
+agent.setProcessor(simpleExportSpanProcessor)
 logger.info('Added in-memoy span exporter')
 
 @pytest.mark.serial
@@ -136,7 +139,7 @@ def test_run():
       logger.info('Making test call to /route1')
       r1 = app.test_client().get('http://localhost:5000/route1', headers={ 'tester1': 'tester1', 'tester2':'tester2'})
       # Get all of the in memory spans that were recorded for this iteration
-      span_list = agent.getInMemorySpanExport().get_finished_spans()
+      span_list = memoryExporter.get_finished_spans()
       # Confirm something was returned.
       assert span_list
       # Confirm there are three spans
@@ -153,7 +156,7 @@ def test_run():
       assert 'R2-D2' in flaskSpanAsObject['attributes']['http.response.body']
       assert flaskSpanAsObject['attributes']['http.status_code'] == 200
       assert flaskSpanAsObject['attributes']['http.response.header.tester3'] == 'tester3'
-      agent.getInMemorySpanExport().clear()
+      memoryExporter.clear()
       a1 = json.loads(r1.data.decode('UTF8'))['data']['hero']['name']
       logger.info('Reading /route1 response: ' + str(a1))
       assert a1 == 'R2-D2'
