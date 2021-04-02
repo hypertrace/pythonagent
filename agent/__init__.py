@@ -29,7 +29,7 @@ class Agent:
   def __init__(self):
     logger.debug('Initializing Agent.');
     try:
-      self.config = AgentConfig()
+      self._config = AgentConfig()
       self._init = AgentInit(self)
     except:
       logger.error('Failed to initialize Agent: exception=%s, stacktrace=%s',
