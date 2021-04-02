@@ -3,6 +3,7 @@ import os.path
 import logging
 import traceback
 from agent.init import AgentInit
+from agent.config import AgentConfig
 
 def setup_custom_logger(name):
   try:
@@ -28,7 +29,8 @@ class Agent:
   def __init__(self):
     logger.debug('Initializing Agent.');
     try:
-      self._init = AgentInit()
+      self._config = AgentConfig()
+      self._init = AgentInit(self)
     except:
       logger.error('Failed to initialize Agent: exception=%s, stacktrace=%s',
         sys.exc_info()[0],
@@ -92,3 +94,7 @@ class Agent:
       logger.error('Failed to initialize global: exception=%s, stacktrace=%s',
         sys.exc_info()[0],
         traceback.format_exc())
+
+  def setProcessor(self, processor):
+    logger.debug('Entering Agent.setProcessor().')
+    return self._init.setProcessor(processor)
