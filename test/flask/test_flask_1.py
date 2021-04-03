@@ -12,9 +12,11 @@ import atexit
 import threading
 from flask import Flask
 from agent import Agent
+from opentelemetry.exporter import jaeger
 from opentelemetry import trace as trace_api
 from opentelemetry.sdk.trace import TracerProvider, export
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
+from opentelemetry.sdk.trace.export import BatchSpanProcessor, SimpleSpanProcessor
 
 def setup_custom_logger(name):
   try:
@@ -53,7 +55,7 @@ class FlaskServer(threading.Thread):
     logger.info('Shutting down server.')
     self.srv.shutdown()
 
-@pytest.mark.serial
+#@pytest.mark.serial
 def test_run():
   logger = setup_custom_logger(__name__)
   logger.info('Initializing flask app.')
@@ -98,7 +100,6 @@ def test_run():
   
   logger.info('Flask app initialized.')
 
-  logger.info('Initializing agent.')
   #
   # Code snippet here represents the current initialization logic
   #
@@ -116,9 +117,29 @@ def test_run():
   # Setup In-Memory Span Exporter
   logger.info('Agent initialized.')
   logger.info('Adding in-memory span exporter.')
-  memory_exporter = InMemorySpanExporter()
-  agent.setInMemorySpanExport(memory_exporter)
+  memoryExporter = InMemorySpanExporter()
+  simpleExportSpanProcessor = SimpleSpanProcessor(memoryExporter)
+  agent.setProcessor(simpleExportSpanProcessor)
   logger.info('Added in-memoy span exporter')
+
+  # Setup Jaeger Exporter
+  #logger.info('Adding jaeger span exporter.')
+  #jaegerExporter = jaeger.JaegerSpanExporter(
+  #    service_name= 'pythonagent',
+  #    # configure agent
+  #    agent_host_name='localhost',
+  #    agent_port=6831,
+  #    # optional: configure also collector
+  #    # collector_endpoint='http://localhost:14268/api/traces?format=jaeger.thrift',
+  #    # username=xxxx, # optional
+  #    # password=xxxx, # optional
+  #    # insecure=True, # optional
+  #    # credentials=xxx # optional channel creds
+  #    # transport_format='protobuf' # optional
+  #)
+  #batchExportSpanProcessor = BatchSpanProcessor(jaegerExporter)
+  #agent.setProcessor(batchExportSpanProcessor)
+  #logger.info('Added jaeger span exporter.')
 
   logger.info('Running test calls.')
   with app.test_client() as c:
@@ -126,7 +147,7 @@ def test_run():
       logger.info('Making test call to /route1')
       r1 = app.test_client().get('http://localhost:5000/route1', headers={ 'tester1': 'tester1', 'tester2':'tester2'})
       # Get all of the in memory spans that were recorded for this iteration
-      span_list = agent.getInMemorySpanExport().get_finished_spans()
+      span_list = memoryExporter.get_finished_spans()
       # Confirm something was returned.
       assert span_list
       # Confirm there are three spans
@@ -143,7 +164,7 @@ def test_run():
       assert flaskSpanAsObject['attributes']['http.response.body'] == '{ "a": "a", "xyz": "xyz" }'
       assert flaskSpanAsObject['attributes']['http.status_code'] == 200
       assert flaskSpanAsObject['attributes']['http.response.header.tester3'] == 'tester3'
-      agent.getInMemorySpanExport().clear()
+      memoryExporter.clear()
       logger.info('Making test call to /route2')
       r2 = app.test_client().get('http://localhost:5000/route2', headers={ 'tester1': 'tester1', 'tester2':'tester2'})
       # Confirm something was returned.
@@ -162,7 +183,7 @@ def test_run():
       assert flaskSpanAsObject['attributes']['http.response.body'] == '{ "a": "a", "xyz": "xyz" }'
       assert flaskSpanAsObject['attributes']['http.status_code'] == 200
       assert flaskSpanAsObject['attributes']['http.response.header.tester3'] == 'tester3'
-      agent.getInMemorySpanExport().clear()
+      memoryExporter.clear()
       logger.info('Reading /route1 response.')
       a1 = r1.get_json()['a']
       logger.info('Reading /route2 response.')

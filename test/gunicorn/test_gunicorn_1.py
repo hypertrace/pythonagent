@@ -37,7 +37,7 @@ def test_run():
     logger.info('Running test calls.')
     logger.info('Making test call to /dbtest')
     for x in range(10): # Run 10 requests
-        r1 = requests.get('http://localhost/dbtest')
+        r1 = requests.get('http://localhost:8000/dbtest/full-test')
         logger.info('Reading /dbtest response.')
         a1 = r1.json()['a']
         assert a1 == 'a'

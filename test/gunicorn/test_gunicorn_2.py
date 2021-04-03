@@ -36,14 +36,14 @@ def test_run():
   try:
     logger = setup_custom_logger(__file__)
     logger.info('Running test calls.')
-    logger.info('Making test call to /dbtest')
+    logger.info('Making test call to /dbtest/no-hypertrace')
     startTime = datetime.datetime.now()
     for x in range(1000): # Run 1000 requests
-        r1 = requests.get('http://localhost/dbtest')
-        logger.info('Reading /dbtest response.')
-        a1 = r1.json()['a']
-        assert a1 == 'a'
-        logger.info('r1 result: ' + str(a1))
+      r1 = requests.get('http://localhost:8000/dbtest/no-hypertrace')
+      logger.debug('Reading /dbtest/no-hypertrace response.')
+      a1 = r1.json()['a']
+      assert a1 == 'a'
+      logger.info('r1 result: ' + str(a1))
     logger.info('Exiting from flask + mysql instrumentation test.')
     endTime = datetime.datetime.now()
     elapsedTime= endTime - startTime
