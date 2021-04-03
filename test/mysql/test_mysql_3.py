@@ -5,7 +5,7 @@ import json
 import mysql.connector
 from agent import Agent
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
-
+from opentelemetry.sdk.trace.export import BatchSpanProcessor, SimpleSpanProcessor
 
 def setup_custom_logger(name):
     try:
@@ -39,9 +39,11 @@ def test_run():
     logger.info('Agent initialized.')
 
     # Setup In-Memory Span Exporter
+    logger.info('Agent initialized.')
     logger.info('Adding in-memory span exporter.')
-    memory_exporter = InMemorySpanExporter()
-    agent.setInMemorySpanExport(memory_exporter)
+    memoryExporter = InMemorySpanExporter()
+    simpleExportSpanProcessor = SimpleSpanProcessor(memoryExporter)
+    agent.setProcessor(simpleExportSpanProcessor)
     logger.info('Added in-memoy span exporter')
 
     try:
@@ -78,7 +80,7 @@ def test_run():
 
         logger.info('Connection closed.')
         # Get all of the in memory spans that were recorded for this iteration
-        span_list = agent.getInMemorySpanExport().get_finished_spans()
+        span_list = memoryExporter.get_finished_spans()
         assert span_list
 
         # Confirm there are two spans INSERT -> UPDATE
@@ -107,7 +109,7 @@ def test_run():
         assert flaskSpanAsObject['attributes']['net.peer.port'] == 3306
         logger.debug("span 2: ok")
 
-        agent.getInMemorySpanExport().clear()
+        memoryExporter.clear()
         return 0
     except:
         logger.error('Failed to run mysql tests: exception=%s, stacktrace=%s',
