@@ -18,6 +18,7 @@ from opentelemetry.sdk.trace.export.in_memory_span_exporter import (
 )
 from agent import Agent
 from flask import Flask
+from opentelemetry.sdk.trace.export import BatchSpanProcessor, SimpleSpanProcessor
 
 def setup_custom_logger(name):
   try:
@@ -110,8 +111,9 @@ def test_run():
   # Setup In-Memory Span Exporter
   logger.info('Agent initialized.')
   logger.info('Adding in-memory span exporter.')
-  memory_exporter = InMemorySpanExporter() 
-  agent.setInMemorySpanExport(memory_exporter)
+  memoryExporter = InMemorySpanExporter()
+  simpleExportSpanProcessor = SimpleSpanProcessor(memoryExporter)
+  agent.setProcessor(simpleExportSpanProcessor)
   logger.info('Added in-memoy span exporter')
 
   # Create flask server object
@@ -127,7 +129,7 @@ def test_run():
         a1 = r1.get_json()['a']
         assert a1 == 'a'
         # Get all of the in memory spans that were recorded for this iteration
-        span_list = agent.getInMemorySpanExport().get_finished_spans()
+        span_list = memoryExporter.get_finished_spans()
         # Confirm something was returned.
         assert span_list
         # Confirm there are three spans
@@ -196,7 +198,7 @@ def test_run():
         assert sql2SpanAsObject['attributes']['net.peer.name'] == 'localhost'
         assert sql2SpanAsObject['attributes']['net.peer.port'] == 5432
         assert sql2SpanAsObject['attributes']['db.statement'] == "INSERT INTO hypertrace_data (col1, col2) VALUES (123, 'abcdefghijklmnopqrstuvwxyz')"
-        agent.getInMemorySpanExport().clear()
+        memoryExporter.clear()
         logger.info('r1 result: ' + str(a1))
     logger.info('Exiting from flask + postgresql instrumentation test.')
     return 0

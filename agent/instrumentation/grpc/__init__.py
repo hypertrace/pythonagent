@@ -16,7 +16,7 @@ from opentelemetry.instrumentation.grpc import (
   server_interceptor
 )
 from opentelemetry.instrumentation.grpc.version import __version__
-from instrumentation import BaseInstrumentorWrapper
+from agent.instrumentation import BaseInstrumentorWrapper
 from opentelemetry.instrumentation.grpc.grpcext import intercept_channel
 from wrapt import wrap_function_wrapper as _wrap
 

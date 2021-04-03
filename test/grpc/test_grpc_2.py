@@ -22,6 +22,7 @@ import traceback
 import helloworld_pb2
 import helloworld_pb2_grpc
 from agent import Agent
+from opentelemetry.sdk.trace.export import BatchSpanProcessor, SimpleSpanProcessor
 
 logging.basicConfig(filename='agent.log', level=logging.DEBUG,)
 logger = logging.getLogger(__name__)
@@ -37,6 +38,14 @@ logger.info('Agent initialized.')
 #
 # End initialization logic for Python Agent
 #
+
+# Setup In-Memory Span Exporter
+logger.info('Agent initialized.')
+logger.info('Adding in-memory span exporter.')
+memoryExporter = InMemorySpanExporter()
+simpleExportSpanProcessor = SimpleSpanProcessor(memoryExporter)
+agent.setProcessor(simpleExportSpanProcessor)
+logger.info('Added in-memoy span exporter')
 
 class Greeter(helloworld_pb2_grpc.GreeterServicer):
     def SayHello(self, request, context):
