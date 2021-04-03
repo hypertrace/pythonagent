@@ -94,10 +94,6 @@ def test_run():
 
   logger.info('Flask app initialized.')
 
-<<<<<<< HEAD
-=======
-  logger.info('Initializing agent.')
->>>>>>> feature/ticket62
   #
   # Code snippet here represents the current initialization logic
   #
@@ -113,17 +109,10 @@ def test_run():
   # Setup In-Memory Span Exporter
   logger.info('Agent initialized.')
   logger.info('Adding in-memory span exporter.')
-<<<<<<< HEAD
   memoryExporter = InMemorySpanExporter()
   simpleExportSpanProcessor = SimpleSpanProcessor(memoryExporter)
   agent.setProcessor(simpleExportSpanProcessor)
   logger.info('Added in-memoy span exporter')
-=======
-  memory_exporter = InMemorySpanExporter() 
-  agent.setInMemorySpanExport(memory_exporter)
-  logger.info('Added in-memoy span exporter')
-
->>>>>>> feature/ticket62
   # Create flask server object
   server = FlaskServer(app)
 
@@ -137,11 +126,7 @@ def test_run():
         a1 = r1.get_json()['a']
         assert a1 == 'a'
         # Get all of the in memory spans that were recorded for this iteration
-<<<<<<< HEAD
         span_list = memoryExporter.get_finished_spans()
-=======
-        span_list = agent.getInMemorySpanExport().get_finished_spans()
->>>>>>> feature/ticket62
         # Confirm something was returned.
         assert span_list
         # Confirm there are three spans
@@ -210,11 +195,7 @@ def test_run():
         assert sql2SpanAsObject['attributes']['net.peer.name'] == 'localhost'
         assert sql2SpanAsObject['attributes']['net.peer.port'] == 3306
         assert sql2SpanAsObject['attributes']['db.statement'] == "INSERT INTO hypertrace_data (col1, col2) VALUES (123, 'abcdefghijklmnopqrstuvwxyz')"
-<<<<<<< HEAD
         memoryExporter.clear()
-=======
-        agent.getInMemorySpanExport().clear()
->>>>>>> feature/ticket62
         logger.info('r1 result: ' + str(a1))
     logger.info('Exiting from flask + mysql instrumentation test.')
     return 0
