@@ -9,7 +9,6 @@ from agent import Agent
 from opentelemetry import trace as trace_api
 from opentelemetry.sdk.trace import TracerProvider, export
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
-from opentelemetry.sdk.trace.export import BatchSpanProcessor, SimpleSpanProcessor
 
 def setup_custom_logger(name):
   try:
@@ -47,11 +46,10 @@ def test_run():
   # Setup In-Memory Span Exporter
   logger.info('Agent initialized.')
   logger.info('Adding in-memory span exporter.')
-  memoryExporter = InMemorySpanExporter()
-  simpleExportSpanProcessor = SimpleSpanProcessor(memoryExporter)
-  agent.setProcessor(simpleExportSpanProcessor)
+  memory_exporter = InMemorySpanExporter()
+  agent.setInMemorySpanExport(memory_exporter)
   logger.info('Added in-memoy span exporter')
- 
+  
   try:
       logger.info('Making connection to mysql.')
       cnx = mysql.connector.connect(database='hypertrace',
@@ -70,7 +68,7 @@ def test_run():
       cnx.close()
       logger.info('Connection closed.')
       # Get all of the in memory spans that were recorded for this iteration
-      span_list = memoryExporter.get_finished_spans()
+      span_list = agent.getInMemorySpanExport().get_finished_spans()
       # Confirm something was returned.
       assert span_list
       # Confirm there are three spans
@@ -93,7 +91,7 @@ def test_run():
       assert flaskSpanAsObject['attributes']['db.user'] == 'root'
       assert flaskSpanAsObject['attributes']['net.peer.name'] == 'localhost'
       assert flaskSpanAsObject['attributes']['net.peer.port'] == 3306
-      memoryExporter.clear()
+      agent.getInMemorySpanExport().clear()
       return 0
   except:
     logger.error('Failed to initialize postgresql instrumentation wrapper: exception=%s, stacktrace=%s',
