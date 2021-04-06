@@ -82,6 +82,38 @@ def testAPI1():
       response.data = str('{}')
       return response
 
+@server.route("/dbtest/no-confirmation-check")
+def testAPI2():
+    try:
+      logger.info('Serving request for /dbtest/no-confirmation-check.')
+      databaseTest()
+      response = flask.Response(mimetype='application/json')
+      response.data = str('{ "a": "a", "xyz": "xyz" }')
+      return response
+    except:
+      logger.error('Failed to initialize postgresql instrumentation wrapper: exception=%s, stacktrace=%s',
+        sys.exc_info()[0],
+        traceback.format_exc())
+      response = flask.Response(mimetype='application/json', status=500)
+      response.data = str('{}')
+      return response
+
+@server.route("/dbtest/no-hypertrace")
+def testAPI3():
+    try:
+      logger.info('Serving request for /dbtest/no-hypertrace.')
+#      databaseTest()
+      response = flask.Response(mimetype='application/json')
+      response.data = str('{ "a": "a", "xyz": "xyz" }')
+      return response
+    except:
+      logger.error('Failed to initialize postgresql instrumentation wrapper: exception=%s, stacktrace=%s',
+        sys.exc_info()[0],
+        traceback.format_exc())
+      response = flask.Response(mimetype='application/json', status=500)
+      response.data = str('{}')
+      return response
+
 #@server.teardown_request
 def after_request(response):
   try:

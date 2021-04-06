@@ -1,8 +1,8 @@
 version: '3'
 
 services:
-  flask_app1:
-    container_name: flask_app1
+  flask_app:
+    container_name: flask_app
     build:
       context: ../..
       dockerfile: test/gunicorn/flask_app/Dockerfile
@@ -10,29 +10,9 @@ services:
       ENABLE_INSTRUMENTATION: ${ENABLE_INSTRUMENTATION}
     ports:
       - "8000:8000"
-    command: gunicorn -w 1 -b 0.0.0.0:8000 wsgi1:server
+    command: gunicorn -w 1 -b 0.0.0.0:8000 wsgi:server
     depends_on:
       - db
-  flask_app2:
-    container_name: flask_app2
-    build:
-      context: ../..
-      dockerfile: test/gunicorn/flask_app/Dockerfile
-    environment:
-      ENABLE_INSTRUMENTATION: ${ENABLE_INSTRUMENTATION}
-    ports:
-      - "8000:8000"
-    command: gunicorn -w 1 -b 0.0.0.0:8000 wsgi2:server
-  flask_app3:
-    container_name: flask_app3
-    build:
-      context: ../..
-      dockerfile: test/gunicorn/flask_app/Dockerfile
-    environment:
-      ENABLE_INSTRUMENTATION: ${ENABLE_INSTRUMENTATION}
-    ports:
-      - "8000:8000"
-    command: gunicorn -w 1 -b 0.0.0.0:8000 wsgi3:server
   db:
     image: mysql
     command: --default-authentication-plugin=mysql_native_password

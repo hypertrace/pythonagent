@@ -10,6 +10,8 @@ import time
 import atexit
 import threading
 import mysql.connector
+from opentelemetry import trace as trace_api
+from opentelemetry.sdk.trace import TracerProvider, export
 import datetime
 
 def setup_custom_logger(name):
@@ -21,7 +23,7 @@ def setup_custom_logger(name):
     screen_handler = logging.StreamHandler(stream=sys.stdout)
     screen_handler.setFormatter(formatter)
     logger = logging.getLogger(name)
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.DEBUG)
     logger.addHandler(handler)
     logger.addHandler(screen_handler)
     return logger
@@ -34,14 +36,14 @@ def test_run():
   try:
     logger = setup_custom_logger(__file__)
     logger.info('Running test calls.')
-    logger.info('Making test call to /dbtest/full-test')
+    logger.info('Making test call to /dbtest/no-hypertrace')
     startTime = datetime.datetime.now()
     for x in range(1000): # Run 1000 requests
-      r1 = requests.get('http://localhost:8000/dbtest/full-test')
-      logger.debug('Reading /dbtest/full-test response.')
+      r1 = requests.get('http://localhost:8000/dbtest/no-hypertrace')
+      logger.debug('Reading /dbtest/no-hypertrace response.')
       a1 = r1.json()['a']
       assert a1 == 'a'
-      logger.debug('r1 result: ' + str(a1))
+      logger.info('r1 result: ' + str(a1))
     logger.info('Exiting from flask + mysql instrumentation test.')
     endTime = datetime.datetime.now()
     elapsedTime= endTime - startTime

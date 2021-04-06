@@ -13,7 +13,6 @@
 # limitations under the License.
 
 from concurrent import futures
-import re
 import sys
 import os
 import logging
@@ -69,7 +68,6 @@ logger.info('Adding in-memory span exporter.')
 memoryExporter = InMemorySpanExporter()
 simpleExportSpanProcessor = SimpleSpanProcessor(memoryExporter)
 agent.setProcessor(simpleExportSpanProcessor)
-
 logger.info('Added in-memoy span exporter')
 
 class Greeter(helloworld_pb2_grpc.GreeterServicer):
@@ -126,8 +124,7 @@ def exit_callback():
 #        "rpc.response.body": "message: \"Hello, you!\"\n"
       assert flaskSpanAsObject['attributes']['rpc.system'] == 'grpc'
       assert flaskSpanAsObject['attributes']['rpc.method'] == 'SayHello'
-      user_agent_re = re.compile('grpc-python/1.36.1 grpc-c/15.0.0 (.*; chttp2)')
-      assert re.match(user_agent_re, flaskSpanAsObject['attributes']['rpc.request.metadata.user-agent'])
+      assert flaskSpanAsObject['attributes']['rpc.request.metadata.user-agent'] == 'grpc-python/1.36.1 grpc-c/15.0.0 (linux; chttp2)'
       assert flaskSpanAsObject['attributes']['rpc.request.body'] == 'name: \"you\"\n'
       assert flaskSpanAsObject['attributes']['rpc.grpc.status_code'] == 0
       assert flaskSpanAsObject['attributes']['rpc.response.metadata.tester2'] == 'tester2'

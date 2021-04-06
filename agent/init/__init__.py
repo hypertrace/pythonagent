@@ -4,8 +4,11 @@ import traceback
 import logging
 from opentelemetry import trace
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
+from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import ConsoleSpanExporter, SimpleSpanProcessor
 from opentelemetry.sdk.resources import Resource
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.sdk.trace import TracerProvider, export
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
@@ -37,10 +40,9 @@ class AgentInit:
       )
       trace.set_tracer_provider(self._tracerProvider)
 
-#      self._consoleSpanExporter = ConsoleSpanExporter(service_name=self._agent._config.service_name)
-#      self._simpleExportSpanProcessor = SimpleSpanProcessor(self._consoleSpanExporter)
-
-#      trace.get_tracer_provider().add_span_processor(self._simpleExportSpanProcessor)
+      self._consoleSpanExporter = ConsoleSpanExporter(service_name=self._agent._config.service_name)
+      self._simpleExportSpanProcessor = SimpleSpanProcessor(self._consoleSpanExporter)
+      trace.get_tracer_provider().add_span_processor(self._simpleExportSpanProcessor)
 
       self._requestsInstrumentor = RequestsInstrumentor()
 
@@ -139,6 +141,7 @@ class AgentInit:
 
       self._mysqlInstrumentorWrapper.setProcessResponseHeaders(self._agent._config.data_capture.http_headers.response)
       self._mysqlInstrumentorWrapper.setProcessResponseBody(self._agent._config.data_capture.http_body.response)
+
     except:
       logger.debug('Failed to initialize grpc instrumentation wrapper: exception=%s, stacktrace=%s',
         sys.exc_info()[0],
