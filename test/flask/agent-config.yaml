@@ -8,7 +8,7 @@ data_capture:
     response: true
   http_body:
     request: true
-    response: true
+    response: false 
   rpc_metadata:
     request: true
     response: true

@@ -51,7 +51,7 @@ def test_run():
   simpleExportSpanProcessor = SimpleSpanProcessor(memoryExporter)
   agent.setProcessor(simpleExportSpanProcessor)
   logger.info('Added in-memoy span exporter')
-
+ 
   try:
       logger.info('Making connection to mysql.')
       cnx = mysql.connector.connect(database='hypertrace',

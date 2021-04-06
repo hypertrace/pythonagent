@@ -14,7 +14,7 @@ def setup_custom_logger(name):
     screen_handler = logging.StreamHandler(stream=sys.stdout)
     screen_handler.setFormatter(formatter)
     logger = logging.getLogger(name)
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.DEBUG)
     logger.addHandler(handler)
     logger.addHandler(screen_handler)
     return logger
