@@ -12,7 +12,6 @@ DEFAULT_DATA_CAPTURE_MAX_SIZE_BYTES = 128 * 1024
 # config_pb2.AgentConfig
 DEFAULT_AGENT_CONFIG_ENABLED = True
 
-
 DEFAULT_AGENT_CONFIG = {
     'service_name': "pythonagent",
     'reporting': {
