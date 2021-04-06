@@ -11,6 +11,7 @@ google
 protobuf
 google-cloud
 pyyaml
-mysql.connector
+#mysql.connector
+mysql-connector-python==8.0.23
 flask
 pytest
