@@ -9,7 +9,6 @@ from werkzeug.serving import make_server
 import time
 import atexit
 import threading
-import mysql.connector
 import datetime
 
 def setup_custom_logger(name):
