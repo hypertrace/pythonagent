@@ -9,12 +9,8 @@ DEFAULT_REPORTING_TOKEN = '12345'
 # config_pb2.DataCapture
 DEFAULT_DATA_CAPTURE_MAX_SIZE_BYTES = 128 * 1024
 
-# config_pb2.JavaAgent
-DEFAULT_JAVA_AGENT_PATH = "JAVA AGENT SOME PATH"
-
 # config_pb2.AgentConfig
 DEFAULT_AGENT_CONFIG_ENABLED = True
-
 
 DEFAULT_AGENT_CONFIG = {
     'service_name': "pythonagent",

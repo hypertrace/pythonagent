@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from concurrent import futures
+import re
 import sys
 import os
 import logging
@@ -28,6 +29,7 @@ from agent import Agent
 from opentelemetry import trace as trace_api
 from opentelemetry.sdk.trace import TracerProvider, export
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
+from opentelemetry.sdk.trace.export import BatchSpanProcessor, SimpleSpanProcessor
 
 def setup_custom_logger(name):
   try:
@@ -60,11 +62,14 @@ logger.info('Agent initialized.')
 #
 # End initialization logic for Python Agent
 #
+
 # Setup In-Memory Span Exporter
 logger.info('Agent initialized.')
 logger.info('Adding in-memory span exporter.')
-memory_exporter = InMemorySpanExporter()
-agent.setInMemorySpanExport(memory_exporter)
+memoryExporter = InMemorySpanExporter()
+simpleExportSpanProcessor = SimpleSpanProcessor(memoryExporter)
+agent.setProcessor(simpleExportSpanProcessor)
+
 logger.info('Added in-memoy span exporter')
 
 class Greeter(helloworld_pb2_grpc.GreeterServicer):
@@ -96,7 +101,7 @@ def exit_callback():
       assert response.message == 'Hello, you!'
       logger.info("Greeter client received: " + response.message)
       # Get all of the in memory spans that were recorded for this iteration
-      span_list = agent.getInMemorySpanExport().get_finished_spans()
+      span_list = memoryExporter.get_finished_spans()
       # Confirm something was returned.
       assert span_list
       # Confirm there are three spans
@@ -121,13 +126,14 @@ def exit_callback():
 #        "rpc.response.body": "message: \"Hello, you!\"\n"
       assert flaskSpanAsObject['attributes']['rpc.system'] == 'grpc'
       assert flaskSpanAsObject['attributes']['rpc.method'] == 'SayHello'
-      assert flaskSpanAsObject['attributes']['rpc.request.metadata.user-agent'] == 'grpc-python/1.36.1 grpc-c/15.0.0 (linux; chttp2)'
+      user_agent_re = re.compile('grpc-python/1.36.1 grpc-c/15.0.0 (.*; chttp2)')
+      assert re.match(user_agent_re, flaskSpanAsObject['attributes']['rpc.request.metadata.user-agent'])
       assert flaskSpanAsObject['attributes']['rpc.request.body'] == 'name: \"you\"\n'
       assert flaskSpanAsObject['attributes']['rpc.grpc.status_code'] == 0
       assert flaskSpanAsObject['attributes']['rpc.response.metadata.tester2'] == 'tester2'
       assert flaskSpanAsObject['attributes']['rpc.response.metadata.tester'] == 'tester'
       assert flaskSpanAsObject['attributes']['rpc.response.body'] == 'message: \"Hello, you!\"\n'
-      agent.getInMemorySpanExport().clear()
+      memoryExporter.clear()
       return 0
   except:
     logger.error('An error occurred while calling greeter client: exception=%s, stacktrace=%s',
