@@ -2,15 +2,10 @@ import sys
 import os
 import traceback
 import logging
-import json
 from opentelemetry import trace
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
-from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import ConsoleSpanExporter, SimpleSpanProcessor
-from opentelemetry.exporter.zipkin.proto.http import ZipkinExporter
 from opentelemetry.sdk.resources import Resource
-from opentelemetry import trace
-from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.sdk.trace import TracerProvider, export
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
@@ -42,12 +37,10 @@ class AgentInit:
       )
       trace.set_tracer_provider(self._tracerProvider)
 
-      self._consoleSpanExporter = ConsoleSpanExporter(service_name=self._agent._config.service_name)
-      self._simpleExportSpanProcessor = SimpleSpanProcessor(self._consoleSpanExporter)
+#      self._consoleSpanExporter = ConsoleSpanExporter(service_name=self._agent._config.service_name)
+#      self._simpleExportSpanProcessor = SimpleSpanProcessor(self._consoleSpanExporter)
 
-      trace.get_tracer_provider().add_span_processor(self._simpleExportSpanProcessor)
-
-      self.setZipkinProcessor()
+#      trace.get_tracer_provider().add_span_processor(self._simpleExportSpanProcessor)
 
       self._requestsInstrumentor = RequestsInstrumentor()
 
@@ -195,34 +188,3 @@ class AgentInit:
   def setProcessor(self, processor):
     logger.debug('Entering AgentInit.setProcessor().')
     trace.get_tracer_provider().add_span_processor(processor)
-
-
-  def setZipkinProcessor(self):
-    if 'OTEL_TRACES_EXPORTER' in os.environ:
-      if os.environ['OTEL_TRACES_EXPORTER'] == 'zipkin':
-        logger.debug("OTEL_TRACES_EXPORTER is zipkin, adding exporter.")
-      else:
-        return
-    else:
-        return
-
-    try:
-      zipkin_exporter = ZipkinExporter(
-      # version=Protocol.V2
-      # optional:
-      # endpoint set to agent-config.yaml reporting endpoint
-      endpoint=self._agent._config.reporting.endpoint,
-      # local_node_ipv4="192.168.0.1",
-      # local_node_ipv6="2001:db8::c001",
-      # local_node_port=31313,
-      # max_tag_value_length=256
-      )
-
-      span_processor = BatchSpanProcessor(zipkin_exporter)
-      trace.get_tracer_provider().add_span_processor(span_processor)
-
-      logger.info('Added ZipkinExporter span exporter')
-    except:
-      logger.error('Failed to setProcessor: exception=%s, stacktrace=%s',
-      sys.exc_info()[0],
-      traceback.format_exc())

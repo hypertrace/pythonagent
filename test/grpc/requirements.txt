@@ -3,15 +3,10 @@ opentelemetry-instrumentation
 opentelemetry-exporter-jaeger
 opentelemetry-instrumentation-flask
 opentelemetry-instrumentation-grpc
-opentelemetry-instrumentation-mysql
 opentelemetry-instrumentation-requests
 opentelemetry-instrumentation-wsgi
+opentelemetry-sdk
 opentelemetry-util-http
-google
-protobuf
-google-cloud
 pyyaml
-mysql.connector
-flask
+protobuf==3.15.2
 pytest
-pytest-xdist
