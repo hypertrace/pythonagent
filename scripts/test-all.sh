@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DIRS=(flask \
-      grpc \
+      grpc  \
       mysql \
       postgresql \
       gunicorn)
