@@ -23,10 +23,45 @@ class AgentConfig:
       path = os.path.abspath(os.environ['AGENT_YAML'])
       logger.debug("AgentConfig - using file from %s", path)
       file = open(path, 'r')
-      new_config = yaml.load(file, Loader=yaml.FullLoader)
+      self.new_config = yaml.load(file, Loader=yaml.FullLoader)
+      print(self.new_config)
+
       file.close()
     else:
       logger.debug("AgentConfig - using default")
+
+    if self.new_config:
+      for parentKey in DEFAULT_AGENT_CONFIG.keys():
+        if parentKey in self.new_config:
+            if type(DEFAULT_AGENT_CONFIG[parentKey]) is dict:
+                for subKey in DEFAULT_AGENT_CONFIG[parentKey].keys():
+                    if subKey in self.new_config[parentKey]:
+                        if type(DEFAULT_AGENT_CONFIG[parentKey][subKey]) is dict:
+                            for valueKey in DEFAULT_AGENT_CONFIG[parentKey][subKey].keys():
+                                if valueKey in self.new_config[parentKey][subKey]:
+                                    value = self.new_config[parentKey][subKey][valueKey]
+                                    self.config[parentKey][subKey][valueKey] = value
+                                    logger.debug("[YAML] %s.%s.%s -> %s", parentKey, subKey, valueKey, value)
+                                else:
+                                    value = DEFAULT_AGENT_CONFIG[parentKey][subKey][valueKey]
+                                    self.config[parentKey][subKey][valueKey] = value
+                                    logger.debug("[DEFAULT] %s.%s.%s -> %s", parentKey, subKey, valueKey, value)
+                        else:
+                            value = self.new_config[parentKey][subKey]
+                            logger.debug("[YAML] %s.%s -> %s", parentKey, subKey, value)
+                            self.config[parentKey][subKey] = value
+                    else:
+                        value = DEFAULT_AGENT_CONFIG[parentKey][subKey]
+                        self.config[parentKey][subKey] = value
+                        logger.debug("[DEFAULT] %s.%s -> %s", parentKey, subKey, value)
+            else:
+                value = self.new_config[parentKey]
+                self.config[parentKey] = value
+                logger.debug("[YAML] %s -> %s", parentKey, value)
+        else:
+            value = DEFAULT_AGENT_CONFIG[parentKey]
+            self.config[parentKey] = value
+            logger.debug("[DEFAULT] %s -> %s", parentKey, value)
 
     self.opa = jf.Parse(jf.MessageToJson(config_pb2.Opa()), config_pb2.Opa)
     self.opa.endpoint = DEFAULT_OPA_ENDPOINT,
@@ -34,40 +69,11 @@ class AgentConfig:
     self.opa.enabled = DEFAULT_OPA_ENABLED
 
     self.reporting = jf.Parse(jf.MessageToJson(config_pb2.Reporting()), config_pb2.Reporting)
-    self.reporting.endpoint = self.config['reporting']['endpoint']  # 'https://localhost'
+    self.reporting.endpoint = os.environ['OTEL_EXPORTER_ZIPKIN_ENDPOINT'] if 'OTEL_EXPORTER_ZIPKIN_ENDPOINT' in os.environ else self.config['reporting']['endpoint']  # 'https://localhost'
     self.reporting.secure = self.config['reporting']['secure']
     self.reporting.token = DEFAULT_REPORTING_TOKEN
     self.reporting.opa = self.opa
     self.reporting.trace_reporter_type = config_pb2.TraceReporterType.OTLP
-
-    if self.new_config:
-      for parentKey in self.DEFAULT_AGENT_CONFIG.keys():
-        if parentKey in self.new_config:
-          if type(self.DEFAULT_AGENT_CONFIG[parentKey]) is dict:
-            for subKey in DEFAULT_AGENT_CONFIG[parentKey].keys():
-              if subKey in self.new_config[parentKey]:
-                if type(self.DEFAULT_AGENT_CONFIG[parentKey][subKey]) is dict:
-                  for valueKey in self.DEFAULT_AGENT_CONFIG[parentKey][subKey].keys():
-                    if valueKey in self.new_config[parentKey][subKey]:
-                      value = new_config[parentKey][subKey][valueKey]
-                      logger.debug("[YAML] %s.%s.%s -> %s", parentKey, subKey, valueKey, value)
-                    else:
-                      value = DEFAULT_AGENT_CONFIG[parentKey][subKey][valueKey]
-                      self.config[parentKey][subKey][valueKey] = value
-                      logger.debug("[DEFAULT] %s.%s.%s -> %s", parentKey, subKey, valueKey, value)
-                  else:
-                    value = DEFAULT_AGENT_CONFIG[parentKey][subKey]
-                    logger.debug("[YAML] %s.%s -> %s", parentKey, subKey, value)
-                else:
-                  value = DEFAULT_AGENT_CONFIG[parentKey][subKey]
-                  config[parentKey][subKey] = value
-                  logger.debug("[DEFAULT] %s.%s -> %s", parentKey, subKey, value)
-              else:
-                logger.debug("[YAML] %s -> %s", parentKey, config[parentKey])
-            else:
-              value = self.DEFAULT_AGENT_CONFIG[parentKey]
-              self.config[parentKey] = value
-              logger.debug("[DEFAULT] %s -> %s", parentKey, value)
 
     self.rpc_body = config_pb2.Message(request=BoolValue(value=self.config['data_capture']['rpc_body']['request']),
                                        response=BoolValue(value=self.config['data_capture']['rpc_body']['response']))
