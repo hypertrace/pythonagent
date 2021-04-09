@@ -5,9 +5,6 @@
 # Flask Instrumentation Wrapper Architecture
 ![diagram](images/FlaskInstrumentationWrapper.jpg)
 
-# Assumptions
-* Tested with [Python v3.7.9](https://www.python.org/downloads/release/python-379/).
-
 # Setup
 1. clone this repo.
 2. run tests: ```scripts/test-all.sh```
@@ -57,10 +54,10 @@ Hypertrace python agent will use Jaeger backend as OpenTelemetry collector. Hype
 * [Python 3 Documentation](https://docs.python.org/3)
 * 
 # Instrumented Modules Documentation
-* [Flask](https://flask.palletsprojects.com/en/1.1.x/api)
-* [grpc](https://grpc.github.io/grpc/python/)
-* [mysql-connector](https://dev.mysql.com/doc/connector-python/en/)
-* [psycopg2/postgresql](https://www.psycopg.org/docs/)
+* [Flask](https://flask.palletsprojects.com/en/1.1.x/api) -- Python 3.7, 3.8, 3.9
+* [grpc](https://grpc.github.io/grpc/python/) -- Python 3.7, 3.8, 3.9
+* [mysql-connector](https://dev.mysql.com/doc/connector-python/en/) -- Python 3.7, 3.8, 3.9
+* [psycopg2/postgresql](https://www.psycopg.org/docs/) -- Python 3.8, 3.9
 
 # Base OTel Instrumentation Modules
 * [Flask](https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation/opentelemetry-instrumentation-flask)
@@ -69,7 +66,6 @@ Hypertrace python agent will use Jaeger backend as OpenTelemetry collector. Hype
 * [psycopg2](https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation/opentelemetry-instrumentation-psycopg2)
 
 # Additional documentation
-* [NGINX](https://nginx.org/en/docs/)
 * [gunicorn](https://docs.gunicorn.org/en/stable/configure.html)
 
 # Build agent-config config.proto
