@@ -14,7 +14,7 @@ def setup_custom_logger(name):
     screen_handler = logging.StreamHandler(stream=sys.stdout)
     screen_handler.setFormatter(formatter)
     logger = logging.getLogger(name)
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.DEBUG)
     logger.addHandler(handler)
     logger.addHandler(screen_handler)
     return logger
@@ -83,6 +83,16 @@ class Agent:
       self._init.dumpConfig()
     except:
       logger.error('Failed to initialize postgresql instrumentation wrapper: exception=%s, stacktrace=%s',
+        sys.exc_info()[0],
+        traceback.format_exc())
+
+  def registerRequests(self):
+    logger.debug('Calling Agent.registerRequests()')
+    try:
+      self._init.requestsInit()
+      self._init.dumpConfig()
+    except:
+      logger.error('Failed to initialize requests instrumentation wrapper: exception=%s, stacktrace=%s',
         sys.exc_info()[0],
         traceback.format_exc())
 

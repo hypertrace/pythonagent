@@ -103,7 +103,6 @@ def test_run():
     logger.info('Initializing agent.')
     agent = Agent()
     agent.registerFlaskApp(app)
-    agent.globalInit()
 
     # End initialization logic for Python Agent
     logger.info('Agent initialized.')

@@ -103,7 +103,6 @@ def test_run():
   agent = Agent()
   agent.registerFlaskApp(app)
   agent.registerPostgreSQL() 
-  agent.globalInit()
   #
   # End initialization logic for Python Agent
   #

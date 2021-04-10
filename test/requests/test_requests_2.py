@@ -5,13 +5,15 @@ import flask
 import pytest
 import traceback
 import json
-import pytest
+import requests
 from werkzeug.serving import make_server
-from flask import request, Flask
+from flask import request
 import time
 import atexit
 import threading
+from flask import Flask
 from agent import Agent
+from opentelemetry.exporter import jaeger
 from opentelemetry import trace as trace_api
 from opentelemetry.sdk.trace import TracerProvider, export
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
@@ -35,67 +37,13 @@ def setup_custom_logger(name):
       sys.exc_info()[0],
       traceback.format_exc())
 
-logger = setup_custom_logger(__name__)
-
-logger.info('Initializing flask app.')
-# Create Flask app
-app = Flask(__name__)
-logger.info('Flask app initialized.')
-
-def before_first_request():
-  logger.debug("test_program: before_first_request() called")
-
-@app.before_request
-def before_request():
-    logger.debug("test_progam: before_request() called")
-
-@app.after_request
-def after_request(response):
-    logger.debug("test_program: after_request() called")
-    return response
-
-@app.route("/route1")
-def testAPI1():
-  logger.info('Serving request for /route1.')
-  response = flask.Response(mimetype='application/graphql')
-  response.headers['tester3'] = 'tester3'
-  response.data = str('''{
-  "errors": [
-    {
-      "message": "Name for character with ID 1002 could not be fetched.",
-      "locations": [ { "line": 6, "column": 7 } ],
-      "path": [ "hero", "heroFriends", 1, "name" ]
-    }
-  ],
-  "data": {
-    "hero": {
-      "name": "R2-D2",
-      "heroFriends": [
-        {
-          "id": "1000",
-          "name": "Luke Skywalker"
-        },
-        {
-          "id": "1002",
-          "name": null
-        },
-        {
-          "id": "1003",
-          "name": "Leia Organa"
-        }
-      ]
-    }
-  }
-}''').replace('\n','')
-  return response
-
 # Run the flask web server in a separate thread
 class FlaskServer(threading.Thread):
-  def __init__(self, app):
+  def __init__(self, app, port):
     super().__init__()
     self.daemon = True
     threading.Thread.__init__(self)
-    self.srv = make_server('localhost', 5000, app)
+    self.srv = make_server('localhost', port, app, threaded=True)
     self.ctx = app.app_context()
     self.ctx.push()
 
@@ -108,61 +56,80 @@ class FlaskServer(threading.Thread):
     logger.info('Shutting down server.')
     self.srv.shutdown()
 
-server = FlaskServer(app)
-
-#
-# Code snippet here represents the current initialization logic
-#
-logger.info('Initializing agent.')
-agent = Agent()
-agent.registerFlaskApp(app)
-#
-# End initialization logic for Python Agent
-#
-logger.info('Agent initialized.')
-
-# Setup In-Memory Span Exporter
-logger.info('Agent initialized.')
-logger.info('Adding in-memory span exporter.')
-memoryExporter = InMemorySpanExporter()
-simpleExportSpanProcessor = SimpleSpanProcessor(memoryExporter)
-agent.setProcessor(simpleExportSpanProcessor)
-
-logger.info('Added in-memoy span exporter')
-
-@pytest.mark.serial
 def test_run():
+  logger = setup_custom_logger(__name__)
+  logger.info('Initializing flask app.')
+  # Create Flask app
+  app1 = Flask(__name__ + '1')
+
+  @app1.route("/route1")
+  def testAPI1():
+    logger.info('Serving request for /route1.')
+    #Make test call
+    logger.info('Making call to /route2.')
+    response = requests.get(url='http://localhost:8000/route2')
+    logger.info('response: ' + str(response))
+    response = flask.Response(mimetype='application/json')
+    response.headers['tester3'] = 'tester3'
+    response.data = str('{ "a": "a", "xyz": "xyz" }')
+    return response
+
+  #
+  # Code snippet here represents the current initialization logic
+  #
+  logger.info('Initializing agent.')
+  agent = Agent()
+  agent.registerFlaskApp(app1)
+  agent.registerRequests()
+  #
+  # End initialization logic for Python Agent
+  #
+  logger.info('Agent initialized.')
+
+  server1 = FlaskServer(app1, 5000)
+  # Setup In-Memory Span Exporter
+  logger.info('Agent initialized.')
+  logger.info('Adding in-memory span exporter.')
+  memoryExporter = InMemorySpanExporter()
+  simpleExportSpanProcessor = SimpleSpanProcessor(memoryExporter)
+  agent.setProcessor(simpleExportSpanProcessor)
+  logger.info('Added in-memoy span exporter')
+
   logger.info('Running test calls.')
-  with app.test_client():
-    try: 
+  with app1.test_client() as c:
+    try:
       logger.info('Making test call to /route1')
-      r1 = app.test_client().get('http://localhost:5000/route1', headers={ 'tester1': 'tester1', 'tester2':'tester2'})
+      r1 = app1.test_client().get('http://localhost:5000/route1', headers={ 'tester1': 'tester1', 'tester2':'tester2'})
       # Get all of the in memory spans that were recorded for this iteration
       span_list = memoryExporter.get_finished_spans()
       # Confirm something was returned.
       assert span_list
-      # Confirm there are three spans
+      # Confirm there are two spans
       logger.debug('len(span_list): ' + str(len(span_list)))
-      assert len(span_list) == 1
+      assert len(span_list) == 2
+      logger.debug('span_list: ' + str(span_list[1].attributes))
       logger.debug('span_list: ' + str(span_list[0].attributes))
-      flaskSpanAsObject = json.loads(span_list[0].to_json())
+      flaskSpanAsObject = json.loads(span_list[1].to_json())
+      requestsSpanAsObject = json.loads(span_list[0].to_json())
       # Check that the expected results are in the flask extended span attributes
       assert flaskSpanAsObject['attributes']['http.method'] == 'GET'
       assert flaskSpanAsObject['attributes']['http.target'] == '/route1'
       assert flaskSpanAsObject['attributes']['http.request.header.tester1'] == 'tester1'
       assert flaskSpanAsObject['attributes']['http.request.header.tester2'] == 'tester2'
-      assert flaskSpanAsObject['attributes']['http.response.header.content-type'] == 'application/graphql'
-      assert 'R2-D2' in flaskSpanAsObject['attributes']['http.response.body']
+      assert flaskSpanAsObject['attributes']['http.response.header.content-type'] == 'application/json'
+      assert flaskSpanAsObject['attributes']['http.response.body'] == '{ "a": "a", "xyz": "xyz" }'
       assert flaskSpanAsObject['attributes']['http.status_code'] == 200
       assert flaskSpanAsObject['attributes']['http.response.header.tester3'] == 'tester3'
+      logger.info('RCBJ0001: ' + json.dumps(requestsSpanAsObject))
       memoryExporter.clear()
-      a1 = json.loads(r1.data.decode('UTF8'))['data']['hero']['name']
-      logger.info('Reading /route1 response: ' + str(a1))
-      assert a1 == 'R2-D2'
+      logger.info('Reading /route1 response.')
+      a1 = r1.get_json()['a']
+      assert a1 == 'a'
       logger.info('r1 result: ' + str(a1))
       logger.info('Exiting from flask instrumentation test.')
+      return 0
     except:
-      logger.error('Failed to initialize mysql instrumentation wrapper: exception=%s, stacktrace=%s',
+      logger.error('Failed to initialize requests + flask instrumentation wrapper: exception=%s, stacktrace=%s',
         sys.exc_info()[0],
         traceback.format_exc())
       raise sys.exc_info()[0]

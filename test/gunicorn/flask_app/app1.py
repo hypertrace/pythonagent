@@ -165,7 +165,6 @@ if ENABLE_INSTRUMENTATION == True:
   agent = Agent()
   agent.registerFlaskApp(server)
   agent.registerMySQL()
-  agent.globalInit()
   #
   # End initialization logic for Python Agent
   #
