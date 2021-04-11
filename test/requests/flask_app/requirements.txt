@@ -4,7 +4,6 @@ opentelemetry-exporter-zipkin
 opentelemetry-exporter-jaeger
 opentelemetry-instrumentation-flask
 opentelemetry-instrumentation-grpc
-opentelemetry-instrumentation-mysql
 opentelemetry-instrumentation-requests
 opentelemetry-instrumentation-wsgi
 opentelemetry-util-http
@@ -12,7 +11,6 @@ google
 protobuf
 google-cloud
 pyyaml
-mysql.connector
 flask
 pytest
 gunicorn

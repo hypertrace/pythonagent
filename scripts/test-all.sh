@@ -4,7 +4,8 @@ DIRS=(flask \
       grpc  \
       mysql \
       postgresql \
-      gunicorn)
+      gunicorn \
+      requests)
 BASE_TEST_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 for DIR in ${DIRS[@]}

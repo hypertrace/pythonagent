@@ -119,12 +119,17 @@ class BaseInstrumentorWrapper:
             if self.isInterestingContentType(contentTypeHeaderTuple[0][1]):
               logger.debug('This is an interesting content-type.')
               if contentTypeHeaderTuple[0][1] == 'application/json' or contentTypeHeaderTuple[0][1] == 'application/graphql':
-                logger.info('RCBJ0500: ' + requestBody.decode('UTF8'))
+                logger.info('decoded Request Body: ' + requestBody.decode('UTF8'))
                 span.set_attribute(self.HTTP_REQUEST_BODY_PREFIX,
                   json.dumps(json.loads(requestBody.decode('UTF8').replace("'", '"'))))
               else:
-                span.set_attribute(self.HTTP_REQUEST_BODY_PREFIX,
-                  str(requestBody.decode('UTF8')))
+                logger.debug('typeOf requestBody: ' + str(type(requestBody)))
+                requestBodyStr = None
+                if type(requestBody) == bytes:
+                  requestBodyStr = requestBody.decode('UTF8')
+                else:
+                  requestBodyStr = requestBody
+                span.set_attribute(self.HTTP_REQUEST_BODY_PREFIX, requestBodyStr)
     except:
       logger.error('An error occurred in genericRequestHandler: exception=%s, stacktrace=%s',
         sys.exc_info()[0],
@@ -169,8 +174,13 @@ class BaseInstrumentorWrapper:
                 span.set_attribute(self.HTTP_RESPONSE_BODY_PREFIX,
                   json.dumps(json.loads(responseBody.decode('UTF8').replace("'", '"'))))
               else:
-                span.set_attribute(self.HTTP_RESPONSE_BODY_PREFIX,
-                  str(responseBody.decode('UTF8')))
+                logger.debug('typeOf responseBody: ' + str(type(responseBody)))
+                responseBodyStr = None
+                if type(responseBody) == bytes:
+                  responseBodyStr = responseBody.decode('UTF8')
+                else:
+                  responseBodyStr = responseBody
+                span.set_attribute(self.HTTP_RESPONSE_BODY_PREFIX, responseBodyStr)
     except:
       logger.error('An error occurred in genericResponseHandler: exception=%s, stacktrace=%s',
         sys.exc_info()[0],

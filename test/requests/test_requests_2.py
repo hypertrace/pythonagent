@@ -67,7 +67,11 @@ def test_run():
     logger.info('Serving request for /route1.')
     #Make test call
     logger.info('Making call to /route2.')
-    response = requests.get(url='http://localhost:8000/route2')
+    headers = { 
+      'tester1': 'tester1',
+      'tester2': 'tester2'
+    }
+    response = requests.get(url='http://localhost:8000/route2', headers=headers)
     logger.info('response: ' + str(response))
     response = flask.Response(mimetype='application/json')
     response.headers['tester3'] = 'tester3'
@@ -120,7 +124,7 @@ def test_run():
       assert flaskSpanAsObject['attributes']['http.response.body'] == '{ "a": "a", "xyz": "xyz" }'
       assert flaskSpanAsObject['attributes']['http.status_code'] == 200
       assert flaskSpanAsObject['attributes']['http.response.header.tester3'] == 'tester3'
-      logger.info('RCBJ0001: ' + json.dumps(requestsSpanAsObject))
+      logger.info('requestsSpanAsObject: ' + json.dumps(requestsSpanAsObject))
       memoryExporter.clear()
       logger.info('Reading /route1 response.')
       a1 = r1.get_json()['a']
