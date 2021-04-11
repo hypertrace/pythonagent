@@ -187,10 +187,10 @@ class OpenTelemetryClientInterceptorWrapper(_client.OpenTelemetryClientIntercept
       logger.debug('Entering OpenTelemetryClientInterceptorWrapper.intercept_unary().')
       try:
         # Not sure how to obtain span object here
-        logger.debug('RCBJ0400: ' + str(request))
-        logger.debug('RCBJ0401: ' + str(metadata))
+        logger.debug('request: ' + str(request))
+        logger.debug('metadata: ' + str(metadata))
         result = invoker(request, metadata)
-        logger.debug('RCBJ402: ' + str(result))
+        logger.debug('result: ' + str(result))
         # Not sure how to obtain trailing metadata here
       except grpc.RpcError as err:
         logger.error('An error occurred processing client_request: exception=%s, stacktrace=%s', sys.exc_info()[0], traceback.format_exc())

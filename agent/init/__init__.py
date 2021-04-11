@@ -4,7 +4,6 @@ import traceback
 import logging
 import json
 from opentelemetry import trace
-from opentelemetry.instrumentation.requests import RequestsInstrumentor
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import ConsoleSpanExporter, SimpleSpanProcessor
 from opentelemetry.exporter.zipkin.proto.http import ZipkinExporter
@@ -29,7 +28,8 @@ class AgentInit:
       "grpc:server": False,
       "grpc:client": False,
       "mysql": False,
-      "postgresql": False
+      "postgresql": False, 
+      "requests": False
     }
     try:
       self._config.dumpConfig()
@@ -49,13 +49,12 @@ class AgentInit:
 
       self.setZipkinProcessor()
 
-      self._requestsInstrumentor = RequestsInstrumentor()
-
       self._flaskInstrumentorWrapper = None
       self._grpcInstrumentorClientWrapper = None
       self._grpcInstrumentorServerWrapper = None
       self._mysqlInstrumentorWrapper = None
       self._postgresqlInstrumentorWrapper = None
+      self._requestsInstrumentorWrapper = None
     except:
       logger.error('Failed to initialize opentelemetry: exception=%s, stacktrace=%s',
         sys.exc_info()[0],
@@ -67,23 +66,19 @@ class AgentInit:
     for m in self._moduleInitialized:
       logger.debug(m + ':' + str(self._moduleInitialized[m]))
 
-
-
   # Creates a flask wrapper using the config defined in hypertraceconfig
-  def flaskInit(self, app):
+  def flaskInit(self, app, useB3=False):
     logger.debug('Calling AgentInit.flaskInit().')
     try:
       from agent.instrumentation.flask import FlaskInstrumentorWrapper
       self._moduleInitialized['flask'] = True
       self._flaskInstrumentorWrapper = FlaskInstrumentorWrapper()
       self._flaskInstrumentorWrapper.instrument_app(app)
-      self._flaskInstrumentorWrapper.setServiceName(self._agent._config.service_name)
-
-      self._flaskInstrumentorWrapper.setProcessRequestHeaders(self._agent._config.data_capture.http_headers.request)
-      self._flaskInstrumentorWrapper.setProcessRequestBody(self._agent._config.data_capture.http_body.request)
-
-      self._flaskInstrumentorWrapper.setProcessResponseHeaders(self._agent._config.data_capture.http_headers.response)
-      self._flaskInstrumentorWrapper.setProcessResponseBody(self._agent._config.data_capture.http_body.response)
+      self.initInstrumentorWrapperBaseForHTTP(self._flaskInstrumentorWrapper)
+      if useB3:
+        from opentelemetry.propagate import set_global_textmap
+        from opentelemetry.propagators.b3 import B3Format
+        set_global_textmap(B3Format())
     except:
       logger.debug('Failed to initialize flask instrumentation wrapper: exception=%s, stacktrace=%s',
         sys.exc_info()[0],
@@ -138,59 +133,55 @@ class AgentInit:
     try:
       from agent.instrumentation.mysql import MySQLInstrumentorWrapper
       self._moduleInitialized['mysql'] = True
-      self._mysqlInstrumentorWrapper = MySQLInstrumentorWrapper() 
-      self._mysqlInstrumentorWrapper.instrument()
-
-      self._mysqlInstrumentorWrapper.setProcessRequestHeaders(self._agent._config.data_capture.http_headers.request)
-      self._mysqlInstrumentorWrapper.setProcessRequestBody(self._agent._config.data_capture.http_body.request)
-
-      self._mysqlInstrumentorWrapper.setProcessResponseHeaders(self._agent._config.data_capture.http_headers.response)
-      self._mysqlInstrumentorWrapper.setProcessResponseBody(self._agent._config.data_capture.http_body.response)
+      self._mysqlInstrumentorWrapper = MySQLInstrumentorWrapper()
+      self.initInstrumentorWrapperBaseForHTTP(self._mysqlInstrumentorWrapper)
     except:
-      logger.debug('Failed to initialize grpc instrumentation wrapper: exception=%s, stacktrace=%s',
+      logger.debug('Failed to initialize mysql instrumentation wrapper: exception=%s, stacktrace=%s',
         sys.exc_info()[0],
         traceback.format_exc())
       raise sys.exc_info()[0]
 
-  # Creates a postgresql server wrapper using the config defined in hypertraceconfig
+  # Creates a postgresql client wrapper using the config defined in hypertraceconfig
   def postgreSQLInit(self):
     logger.debug('Calling AgentInit.postgreSQLInit()')
     try:
       from agent.instrumentation.postgresql import PostgreSQLInstrumentorWrapper
       self._moduleInitialized['postgresql'] = True
       self._postgresqlInstrumentorWrapper = PostgreSQLInstrumentorWrapper()
-      self._postgresqlInstrumentorWrapper.instrument()
-
-      self._postgresqlInstrumentorWrapper.setProcessRequestHeaders(self._agent._config.data_capture.http_headers.request)
-      self._postgresqlInstrumentorWrapper.setProcessRequestBody(self._agent._config.data_capture.http_body.request)
-
-      self._postgresqlInstrumentorWrapper.setProcessResponseHeaders(self._agent._config.data_capture.http_headers.response)
-      self._postgresqlInstrumentorWrapper.setProcessResponseBody(self._agent._config.data_capture.http_body.response)
+      self.initInstrumentorWrapperBaseForHTTP(self._postgresqlInstrumentorWrapper)
     except:
-      logger.debug('Failed to initialize grpc instrumentation wrapper: exception=%s, stacktrace=%s',
+      logger.debug('Failed to initialize postgresql instrumentation wrapper: exception=%s, stacktrace=%s',
         sys.exc_info()[0],
         traceback.format_exc())
       raise sys.exc_info()[0]
 
-  def globalInit(self):
-    logger.debug('Calling AgentInit.globalInit().')
+  # Creates a requests client wrapper using the config defined in hypertraceconfig
+  def requestsInit(self, useB3=False):
+    logger.debug('Calling AgentInit.requestsInit()')
     try:
-      self._requestsInstrumentor.instrument()
+      from agent.instrumentation.requests import RequestsInstrumentorWrapper
+      self._moduleInitialized['requests'] = True
+      self._requestsInstrumentorWrapper = RequestsInstrumentorWrapper()
+      self.initInstrumentorWrapperBaseForHTTP(self._requestsInstrumentorWrapper)
+      if useB3:
+        from opentelemetry.propagate import set_global_textmap
+        from opentelemetry.propagators.b3 import B3Format
+        set_global_textmap(B3Format())
     except:
-      logger.debug('Failed global init: exception=%s, stacktrace=%s',
+      logger.debug('Failed to initialize requests instrumentation wrapper: exception=%s, stacktrace=%s',
         sys.exc_info()[0],
         traceback.format_exc())
       raise sys.exc_info()[0]
 
-  def globalDisable(self):
-    logger.debug('Calling AgentInit.globalDisable().')
-    try:
-      self._requestsInstrumentor.uninstrument()
-    except:
-      logger.debug('Failed global init: exception=%s, stacktrace=%s',
-        sys.exc_info()[0],
-        traceback.format_exc())
-      raise sys.exc_info()[0]
+  def initInstrumentorWrapperBaseForHTTP(self, instrumentor):
+    logger.debug('Calling AgentInit.initInstrumentorWrapperBaseForHTTP().')
+    instrumentor.instrument()
+
+    instrumentor.setProcessRequestHeaders(self._agent._config.data_capture.http_headers.request)
+    instrumentor.setProcessRequestBody(self._agent._config.data_capture.http_body.request)
+
+    instrumentor.setProcessResponseHeaders(self._agent._config.data_capture.http_headers.response)
+    instrumentor.setProcessResponseBody(self._agent._config.data_capture.http_body.response)
 
   def setProcessor(self, processor):
     logger.debug('Entering AgentInit.setProcessor().')

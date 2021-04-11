@@ -57,7 +57,6 @@ logger = setup_custom_logger(__name__)
 logger.info('Initializing agent.')
 agent = Agent()
 agent.registerServerGrpc()
-agent.globalInit()
 logger.info('Agent initialized.')
 #
 # End initialization logic for Python Agent

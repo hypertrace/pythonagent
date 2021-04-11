@@ -14,7 +14,7 @@ def setup_custom_logger(name):
     screen_handler = logging.StreamHandler(stream=sys.stdout)
     screen_handler.setFormatter(formatter)
     logger = logging.getLogger(name)
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.DEBUG)
     logger.addHandler(handler)
     logger.addHandler(screen_handler)
     return logger
@@ -36,10 +36,10 @@ class Agent:
         sys.exc_info()[0],
         traceback.format_exc())
 
-  def registerFlaskApp(self, app):
+  def registerFlaskApp(self, app, useS3=False):
     logger.debug('Calling Agent.registerFlaskApp.')
     try:
-      self._init.flaskInit(app)
+      self._init.flaskInit(app, useS3)
       self._init.dumpConfig()
     except:
       logger.error('Failed to initialize flask instrumentation wrapper: exception=%s, stacktrace=%s',
@@ -83,6 +83,16 @@ class Agent:
       self._init.dumpConfig()
     except:
       logger.error('Failed to initialize postgresql instrumentation wrapper: exception=%s, stacktrace=%s',
+        sys.exc_info()[0],
+        traceback.format_exc())
+
+  def registerRequests(self, useB3=False):
+    logger.debug('Calling Agent.registerRequests()')
+    try:
+      self._init.requestsInit(useB3)
+      self._init.dumpConfig()
+    except:
+      logger.error('Failed to initialize requests instrumentation wrapper: exception=%s, stacktrace=%s',
         sys.exc_info()[0],
         traceback.format_exc())
 
