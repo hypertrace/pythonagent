@@ -21,6 +21,7 @@ from opentelemetry.trace.status import Status
 logger = logging.getLogger(__name__)
 
 def get_active_span_for_call_wrapper(requestsWrapper):
+  logger.debug('Entering get_active_span_for_call_wrapper().')
   def get_active_span_for_call(span, response):
     logger.debug('Entering get_active_span_for_request().')
     logger.debug('span: ' + str(span))

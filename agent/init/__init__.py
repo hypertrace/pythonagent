@@ -66,8 +66,6 @@ class AgentInit:
     for m in self._moduleInitialized:
       logger.debug(m + ':' + str(self._moduleInitialized[m]))
 
-
-
   # Creates a flask wrapper using the config defined in hypertraceconfig
   def flaskInit(self, app):
     logger.debug('Calling AgentInit.flaskInit().')
@@ -154,13 +152,17 @@ class AgentInit:
       raise sys.exc_info()[0]
 
   # Creates a requests client wrapper using the config defined in hypertraceconfig
-  def requestsInit(self):
+  def requestsInit(self, useB3=False):
     logger.debug('Calling AgentInit.requestsInit()')
     try:
       from agent.instrumentation.requests import RequestsInstrumentorWrapper
       self._moduleInitialized['requests'] = True
       self._requestsInstrumentorWrapper = RequestsInstrumentorWrapper()
       self.initInstrumentorWrapperBaseForHTTP(self._requestsInstrumentorWrapper)
+      if useB3:
+        from opentelemetry.propagate import set_global_textmap
+        from opentelemetry.propagators.b3 import B3Format
+        set_global_textmap(B3Format())
     except:
       logger.debug('Failed to initialize requests instrumentation wrapper: exception=%s, stacktrace=%s',
         sys.exc_info()[0],

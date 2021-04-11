@@ -86,10 +86,10 @@ class Agent:
         sys.exc_info()[0],
         traceback.format_exc())
 
-  def registerRequests(self):
+  def registerRequests(self, useB3=False):
     logger.debug('Calling Agent.registerRequests()')
     try:
-      self._init.requestsInit()
+      self._init.requestsInit(useB3)
       self._init.dumpConfig()
     except:
       logger.error('Failed to initialize requests instrumentation wrapper: exception=%s, stacktrace=%s',
