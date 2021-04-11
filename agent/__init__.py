@@ -36,10 +36,10 @@ class Agent:
         sys.exc_info()[0],
         traceback.format_exc())
 
-  def registerFlaskApp(self, app):
+  def registerFlaskApp(self, app, useS3=False):
     logger.debug('Calling Agent.registerFlaskApp.')
     try:
-      self._init.flaskInit(app)
+      self._init.flaskInit(app, useS3)
       self._init.dumpConfig()
     except:
       logger.error('Failed to initialize flask instrumentation wrapper: exception=%s, stacktrace=%s',

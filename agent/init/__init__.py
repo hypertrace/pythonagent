@@ -67,7 +67,7 @@ class AgentInit:
       logger.debug(m + ':' + str(self._moduleInitialized[m]))
 
   # Creates a flask wrapper using the config defined in hypertraceconfig
-  def flaskInit(self, app):
+  def flaskInit(self, app, useB3=False):
     logger.debug('Calling AgentInit.flaskInit().')
     try:
       from agent.instrumentation.flask import FlaskInstrumentorWrapper
@@ -75,6 +75,10 @@ class AgentInit:
       self._flaskInstrumentorWrapper = FlaskInstrumentorWrapper()
       self._flaskInstrumentorWrapper.instrument_app(app)
       self.initInstrumentorWrapperBaseForHTTP(self._flaskInstrumentorWrapper)
+      if useB3:
+        from opentelemetry.propagate import set_global_textmap
+        from opentelemetry.propagators.b3 import B3Format
+        set_global_textmap(B3Format())
     except:
       logger.debug('Failed to initialize flask instrumentation wrapper: exception=%s, stacktrace=%s',
         sys.exc_info()[0],
