@@ -42,11 +42,7 @@ class AgentInit:
       )
       trace.set_tracer_provider(self._tracerProvider)
 
-      self._consoleSpanExporter = ConsoleSpanExporter(service_name=self._agent._config.service_name)
-      self._simpleExportSpanProcessor = SimpleSpanProcessor(self._consoleSpanExporter)
-
-      trace.get_tracer_provider().add_span_processor(self._simpleExportSpanProcessor)
-
+      self.setConsoleSpanProcessor()
       self.setZipkinProcessor()
 
       self._flaskInstrumentorWrapper = None
@@ -187,6 +183,11 @@ class AgentInit:
     logger.debug('Entering AgentInit.setProcessor().')
     trace.get_tracer_provider().add_span_processor(processor)
 
+  def setConsoleSpanProcessor(self):
+    logger.debug('Entering AgentInit.setConsoleSpanProcessor().')
+    consoleSpanExporter = ConsoleSpanExporter(service_name=self._agent._config.service_name)
+    simpleExportSpanProcessor = SimpleSpanProcessor(consoleSpanExporter)
+    trace.get_tracer_provider().add_span_processor(simpleExportSpanProcessor)
 
   def setZipkinProcessor(self):
     if 'OTEL_TRACES_EXPORTER' in os.environ:
