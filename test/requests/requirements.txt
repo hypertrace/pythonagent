@@ -3,7 +3,7 @@ opentelemetry-instrumentation
 opentelemetry-exporter-jaeger
 opentelemetry-exporter-zipkin
 opentelemetry-propagator-b3
-opentelemetry-exporter-jaeger
+opentelemetry-exporter-otlp
 opentelemetry-instrumentation-flask
 opentelemetry-instrumentation-grpc
 opentelemetry-instrumentation-mysql

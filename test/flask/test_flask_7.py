@@ -5,7 +5,6 @@ import flask
 import pytest
 import traceback
 import json
-import requests
 from werkzeug.serving import make_server
 from flask import request
 import time
@@ -13,11 +12,16 @@ import atexit
 import threading
 from flask import Flask
 from agent import Agent
+from opentelemetry.exporter import jaeger
 from opentelemetry import trace as trace_api
 from opentelemetry.sdk.trace import TracerProvider, export
-from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
 from opentelemetry.sdk.trace.export import BatchSpanProcessor, SimpleSpanProcessor
+
+
+def fail_test():
+  raise RuntimeError('Error')
+
 
 def setup_custom_logger(name):
   try:
@@ -39,11 +43,11 @@ def setup_custom_logger(name):
 
 # Run the flask web server in a separate thread
 class FlaskServer(threading.Thread):
-  def __init__(self, app, port):
+  def __init__(self, app):
     super().__init__()
     self.daemon = True
     threading.Thread.__init__(self)
-    self.srv = make_server('localhost', port, app, threaded=True)
+    self.srv = make_server('localhost', 5000, app)
     self.ctx = app.app_context()
     self.ctx.push()
 
@@ -56,41 +60,48 @@ class FlaskServer(threading.Thread):
     logger.info('Shutting down server.')
     self.srv.shutdown()
 
+#@pytest.mark.serial
 def test_run():
   logger = setup_custom_logger(__name__)
   logger.info('Initializing flask app.')
   # Create Flask app
-  app1 = Flask(__name__ + '1')
+  app = Flask(__name__)
+  @app.before_first_request
+  def before_first_request():
+    logger.debug("test_program: before_first_request() called")
 
-  @app1.route("/route1")
+  @app.before_request
+  def before_request():
+      logger.debug("test_progam: before_request() called")
+
+  @app.after_request
+  def after_request(response):
+      logger.debug("test_program: after_request() called")
+      return response
+
+  @app.route("/route1")
   def testAPI1():
     logger.info('Serving request for /route1.')
-    #Make test call
-    logger.info('Making call to /route2.')
-    headers = { 
-      'tester1': 'tester1',
-      'tester2': 'tester2'
-    }
-    response = requests.get(url='http://localhost:8000/route2', headers=headers)
-    logger.info('response: ' + str(response))
     response = flask.Response(mimetype='application/json')
     response.headers['tester3'] = 'tester3'
     response.data = str('{ "a": "a", "xyz": "xyz" }')
     return response
+
+  logger.info('Flask app initialized.')
 
   #
   # Code snippet here represents the current initialization logic
   #
   logger.info('Initializing agent.')
   agent = Agent()
-  agent.registerFlaskApp(app1)
-  agent.registerRequests()
+  agent.registerFlaskApp(app)
   #
   # End initialization logic for Python Agent
   #
   logger.info('Agent initialized.')
 
-  server1 = FlaskServer(app1, 5000)
+  server = FlaskServer(app)
+
   # Setup In-Memory Span Exporter
   logger.info('Agent initialized.')
   logger.info('Adding in-memory span exporter.')
@@ -99,32 +110,20 @@ def test_run():
   agent.setProcessor(simpleExportSpanProcessor)
   logger.info('Added in-memoy span exporter')
 
-  # Setup Jaeger Exporter
-  logger.info('Adding jaeger span exporter.')
-  jaegerExporter = JaegerExporter(
-      agent_host_name='localhost',
-      agent_port=6831,
-  )
-  batchExportSpanProcessor = BatchSpanProcessor(jaegerExporter)
-  agent.setProcessor(batchExportSpanProcessor)
-  logger.info('Added jaeger span exporter.')
-
   logger.info('Running test calls.')
-  with app1.test_client() as c:
-    try:
+  with app.test_client() as c:
+    try: 
       logger.info('Making test call to /route1')
-      r1 = app1.test_client().get('http://localhost:5000/route1', headers={ 'tester1': 'tester1', 'tester2':'tester2'})
+      r1 = app.test_client().get('http://localhost:5000/route1', headers={ 'tester1': 'tester1', 'tester2':'tester2'})
       # Get all of the in memory spans that were recorded for this iteration
       span_list = memoryExporter.get_finished_spans()
       # Confirm something was returned.
       assert span_list
-      # Confirm there are two spans
+      # Confirm there are three spans
       logger.debug('len(span_list): ' + str(len(span_list)))
-      assert len(span_list) == 2
-      logger.debug('span_list: ' + str(span_list[1].attributes))
+      assert len(span_list) == 1
       logger.debug('span_list: ' + str(span_list[0].attributes))
-      flaskSpanAsObject = json.loads(span_list[1].to_json())
-      requestsSpanAsObject = json.loads(span_list[0].to_json())
+      flaskSpanAsObject = json.loads(span_list[0].to_json())
       # Check that the expected results are in the flask extended span attributes
       assert flaskSpanAsObject['attributes']['http.method'] == 'GET'
       assert flaskSpanAsObject['attributes']['http.target'] == '/route1'
@@ -134,16 +133,7 @@ def test_run():
       assert flaskSpanAsObject['attributes']['http.response.body'] == '{ "a": "a", "xyz": "xyz" }'
       assert flaskSpanAsObject['attributes']['http.status_code'] == 200
       assert flaskSpanAsObject['attributes']['http.response.header.tester3'] == 'tester3'
-      logger.info('requestsSpanAsObject: ' + json.dumps(requestsSpanAsObject))
       memoryExporter.clear()
-      logger.info('Reading /route1 response.')
-      a1 = r1.get_json()['a']
-      assert a1 == 'a'
-      logger.info('r1 result: ' + str(a1))
-      logger.info('Exiting from flask instrumentation test.')
-      return 0
-    except:
-      logger.error('Failed to initialize requests + flask instrumentation wrapper: exception=%s, stacktrace=%s',
-        sys.exc_info()[0],
-        traceback.format_exc())
-      raise sys.exc_info()[0]
+      fail_test()
+    except Exception as e:
+      assert type(e) is RuntimeError

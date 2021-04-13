@@ -7,6 +7,7 @@ from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import ConsoleSpanExporter, SimpleSpanProcessor
 from opentelemetry.exporter.zipkin.proto.http import ZipkinExporter
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.resources import Resource
 from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider
@@ -44,6 +45,7 @@ class AgentInit:
 
       self.setConsoleSpanProcessor()
       self.setZipkinProcessor()
+      self.setOtlpProcessor()
 
       self._flaskInstrumentorWrapper = None
       self._grpcInstrumentorClientWrapper = None
@@ -214,6 +216,28 @@ class AgentInit:
       trace.get_tracer_provider().add_span_processor(span_processor)
 
       logger.info('Added ZipkinExporter span exporter')
+    except:
+      logger.error('Failed to setProcessor: exception=%s, stacktrace=%s',
+      sys.exc_info()[0],
+      traceback.format_exc())
+
+  def setOtlpProcessor(self):
+    if 'OTEL_TRACES_EXPORTER' in os.environ:
+      if os.environ['OTEL_TRACES_EXPORTER'] == 'otlp':
+        logger.debug("OTEL_TRACES_EXPORTER is otlp, adding exporter.")
+      else:
+        return
+    else:
+        return
+
+    try:
+      otlp_exporter = OTLPSpanExporter(endpoint="http://localhost:16686")
+      #endpoint=self._agent._config.reporting.endpoint, insecure=self._agent._config.reporting.secure)
+
+      span_processor = BatchSpanProcessor(otlp_exporter)
+      trace.get_tracer_provider().add_span_processor(span_processor)
+
+      logger.info('Added OtlpExporter span exporter')
     except:
       logger.error('Failed to setProcessor: exception=%s, stacktrace=%s',
       sys.exc_info()[0],
