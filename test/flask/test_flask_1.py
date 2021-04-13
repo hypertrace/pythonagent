@@ -12,7 +12,7 @@ import atexit
 import threading
 from flask import Flask
 from agent import Agent
-from opentelemetry.exporter import jaeger
+from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 from opentelemetry import trace as trace_api
 from opentelemetry.sdk.trace import TracerProvider, export
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
@@ -122,23 +122,14 @@ def test_run():
   logger.info('Added in-memoy span exporter')
 
   # Setup Jaeger Exporter
-  #logger.info('Adding jaeger span exporter.')
-  #jaegerExporter = jaeger.JaegerSpanExporter(
-  #    service_name= 'pythonagent',
-  #    # configure agent
-  #    agent_host_name='localhost',
-  #    agent_port=6831,
-  #    # optional: configure also collector
-  #    # collector_endpoint='http://localhost:14268/api/traces?format=jaeger.thrift',
-  #    # username=xxxx, # optional
-  #    # password=xxxx, # optional
-  #    # insecure=True, # optional
-  #    # credentials=xxx # optional channel creds
-  #    # transport_format='protobuf' # optional
-  #)
-  #batchExportSpanProcessor = BatchSpanProcessor(jaegerExporter)
-  #agent.setProcessor(batchExportSpanProcessor)
-  #logger.info('Added jaeger span exporter.')
+  logger.info('Adding jaeger span exporter.')
+  jaegerExporter = JaegerExporter(
+      agent_host_name='localhost',
+      agent_port=6831,
+  )
+  batchExportSpanProcessor = BatchSpanProcessor(jaegerExporter)
+  agent.setProcessor(batchExportSpanProcessor)
+  logger.info('Added jaeger span exporter.')
 
   logger.info('Running test calls.')
   with app.test_client() as c:
