@@ -3,12 +3,13 @@ import yaml
 import logging
 from google.protobuf import json_format as jf
 from google.protobuf.wrappers_pb2 import BoolValue
-from agent.config import config_pb2 as config_pb2
-from agent.config.AgentConfig_default import *
+from hypertrace.agent.config import config_pb2 as config_pb2
+from hypertrace.agent.config.AgentConfig_default import *
 
 # Initialize logger
 logger = logging.getLogger(__name__)
 
+# Read agent-config file and override with environment variables as necessaary
 class AgentConfig:
   def __init__(self):
     """

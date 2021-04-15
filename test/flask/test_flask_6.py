@@ -4,8 +4,7 @@ import flask
 import traceback
 from werkzeug.serving import make_server
 import threading
-from agent import Agent
-
+from hypertrace.agent import Agent
 
 def setup_custom_logger(name):
   try:

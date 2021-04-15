@@ -5,7 +5,7 @@ import inspect
 import flask
 import traceback
 import json
-from agent.instrumentation import BaseInstrumentorWrapper
+from hypertrace.agent.instrumentation import BaseInstrumentorWrapper
 from opentelemetry.instrumentation.flask import (
   FlaskInstrumentor,
   get_default_span_name,

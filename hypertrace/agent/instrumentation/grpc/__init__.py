@@ -16,9 +16,9 @@ from opentelemetry.instrumentation.grpc import (
   server_interceptor
 )
 from opentelemetry.instrumentation.grpc.version import __version__
-from agent.instrumentation import BaseInstrumentorWrapper
 from opentelemetry.instrumentation.grpc.grpcext import intercept_channel
 from wrapt import wrap_function_wrapper as _wrap
+from hypertrace.agent.instrumentation import BaseInstrumentorWrapper
 
 #Initialize logger with local module name
 logger = logging.getLogger(__name__)

@@ -21,8 +21,8 @@ import threading
 import traceback
 import helloworld_pb2
 import helloworld_pb2_grpc
-from agent import Agent
 from opentelemetry.sdk.trace.export import BatchSpanProcessor, SimpleSpanProcessor
+from hypertrace.agent import Agent
 
 logging.basicConfig(filename='agent.log', level=logging.DEBUG,)
 logger = logging.getLogger(__name__)

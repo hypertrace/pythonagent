@@ -8,10 +8,10 @@ import json
 import requests
 import aiohttp
 from opentelemetry import trace as trace_api
-from agent import Agent
 from opentelemetry.sdk.trace import TracerProvider, export
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
 from opentelemetry.sdk.trace.export import BatchSpanProcessor, SimpleSpanProcessor
+from hypertrace.agent import Agent
 
 def setup_custom_logger(name):
   try:

@@ -2,8 +2,8 @@ import sys
 import os.path
 import logging
 import traceback
-from agent.instrumentation import BaseInstrumentorWrapper
 from opentelemetry.instrumentation.psycopg2 import Psycopg2Instrumentor
+from hypertrace.agent.instrumentation import BaseInstrumentorWrapper
 
 #Initialize logger with local module name
 logger = logging.getLogger(__name__)

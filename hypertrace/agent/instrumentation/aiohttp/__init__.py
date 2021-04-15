@@ -14,7 +14,7 @@ from opentelemetry.instrumentation.instrumentor import BaseInstrumentor
 from opentelemetry.trace import SpanKind, TracerProvider, get_tracer
 from opentelemetry.trace.status import Status, StatusCode
 from opentelemetry.instrumentation.aiohttp_client import AioHttpClientInstrumentor
-from agent.instrumentation import BaseInstrumentorWrapper
+from hypertrace.agent.instrumentation import BaseInstrumentorWrapper
 
 #Initialize logger with local module name
 logger = logging.getLogger(__name__)

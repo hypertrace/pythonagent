@@ -11,7 +11,7 @@ from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExport
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.sdk.trace import TracerProvider, export
-from agent.config import AgentConfig
+from hypertrace.agent.config import AgentConfig
 
 # Initialize logger
 logger = logging.getLogger(__name__)
@@ -66,7 +66,7 @@ class AgentInit:
   def flaskInit(self, app, useB3=False):
     logger.debug('Calling AgentInit.flaskInit().')
     try:
-      from agent.instrumentation.flask import FlaskInstrumentorWrapper
+      from hypertrace.agent.instrumentation.flask import FlaskInstrumentorWrapper
       self._moduleInitialized['flask'] = True
       self._flaskInstrumentorWrapper = FlaskInstrumentorWrapper()
       self._flaskInstrumentorWrapper.instrument_app(app)
@@ -83,7 +83,7 @@ class AgentInit:
   def grpcServerInit(self):
     logger.debug('Calling AgentInit.grpcServerInit')
     try:
-      from agent.instrumentation.grpc import GrpcInstrumentorServerWrapper,GrpcInstrumentorClientWrapper
+      from hypertrace.agent.instrumentation.grpc import GrpcInstrumentorServerWrapper,GrpcInstrumentorClientWrapper
       self._moduleInitialized['grpc:server'] = True
       self._grpcInstrumentorServerWrapper = GrpcInstrumentorServerWrapper()
       self._grpcInstrumentorServerWrapper.instrument()
@@ -103,7 +103,7 @@ class AgentInit:
   def grpcClientInit(self):
     logger.debug('Calling AgentInit.grpcClientInit')
     try:
-      from agent.instrumentation.grpc import GrpcInstrumentorServerWrapper,GrpcInstrumentorClientWrapper
+      from hypertrace.agent.instrumentation.grpc import GrpcInstrumentorServerWrapper,GrpcInstrumentorClientWrapper
       self._moduleInitialized['grpc:client'] = True
 
       self._grpcInstrumentorClientWrapper = GrpcInstrumentorClientWrapper()
@@ -125,7 +125,7 @@ class AgentInit:
   def mySQLInit(self):
     logger.debug('Calling AgentInit.mysqlInit()')
     try:
-      from agent.instrumentation.mysql import MySQLInstrumentorWrapper
+      from hypertrace.agent.instrumentation.mysql import MySQLInstrumentorWrapper
       self._moduleInitialized['mysql'] = True
       self._mysqlInstrumentorWrapper = MySQLInstrumentorWrapper()
       self.initInstrumentorWrapperBaseForHTTP(self._mysqlInstrumentorWrapper)
@@ -139,7 +139,7 @@ class AgentInit:
   def postgreSQLInit(self):
     logger.debug('Calling AgentInit.postgreSQLInit()')
     try:
-      from agent.instrumentation.postgresql import PostgreSQLInstrumentorWrapper
+      from hypertrace.agent.instrumentation.postgresql import PostgreSQLInstrumentorWrapper
       self._moduleInitialized['postgresql'] = True
       self._postgresqlInstrumentorWrapper = PostgreSQLInstrumentorWrapper()
       self.initInstrumentorWrapperBaseForHTTP(self._postgresqlInstrumentorWrapper)
@@ -153,7 +153,7 @@ class AgentInit:
   def requestsInit(self, useB3=False):
     logger.debug('Calling AgentInit.requestsInit()')
     try:
-      from agent.instrumentation.requests import RequestsInstrumentorWrapper
+      from hypertrace.agent.instrumentation.requests import RequestsInstrumentorWrapper
       self._moduleInitialized['requests'] = True
       self._requestsInstrumentorWrapper = RequestsInstrumentorWrapper()
       self.initInstrumentorWrapperBaseForHTTP(self._requestsInstrumentorWrapper)
@@ -169,7 +169,7 @@ class AgentInit:
   def aioHttpClientInit(self, useB3=False):
     logger.debug('Calling AgentInit.aioHttpClientInit()')
     try:
-      from agent.instrumentation.aiohttp import AioHttpClientInstrumentorWrapper
+      from hypertrace.agent.instrumentation.aiohttp import AioHttpClientInstrumentorWrapper
       self._moduleInitialized['aiohttp-client'] = True
       self._aioHttpClientInstrumentorWrapper = AioHttpClientInstrumentorWrapper()
       self.initInstrumentorWrapperBaseForHTTP(self._aioHttpClientInstrumentorWrapper)
@@ -211,14 +211,7 @@ class AgentInit:
 
     try:
       zipkin_exporter = ZipkinExporter(
-      # version=Protocol.V2
-      # optional:
-      # endpoint set to agent-config.yaml reporting endpoint
-      endpoint=self._agent._config.reporting.endpoint,
-      # local_node_ipv4="192.168.0.1",
-      # local_node_ipv6="2001:db8::c001",
-      # local_node_port=31313,
-      # max_tag_value_length=256
+        endpoint=self._agent._config.reporting.endpoint,
       )
 
       span_processor = BatchSpanProcessor(zipkin_exporter)

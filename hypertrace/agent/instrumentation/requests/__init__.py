@@ -2,11 +2,11 @@ import sys
 import os.path
 import logging
 import traceback
-from agent.instrumentation import BaseInstrumentorWrapper
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
 import functools
 import types
 from requests.models import Response
+from hypertrace.agent.instrumentation import BaseInstrumentorWrapper
 
 #Initialize logger with local module name
 logger = logging.getLogger(__name__)

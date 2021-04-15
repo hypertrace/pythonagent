@@ -5,12 +5,11 @@ import traceback
 import json
 import pytest
 import mysql.connector
-from agent import Agent
 from opentelemetry import trace as trace_api
 from opentelemetry.sdk.trace import TracerProvider, export
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
 from opentelemetry.sdk.trace.export import BatchSpanProcessor, SimpleSpanProcessor
-
+from hypertrace.agent import Agent
 
 def fail_test():
   raise RuntimeError('Error')

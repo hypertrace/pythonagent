@@ -7,8 +7,8 @@ import grpc
 import json
 import traceback
 import mysql.connector
-from agent.instrumentation import BaseInstrumentorWrapper
 from opentelemetry.instrumentation.mysql import MySQLInstrumentor
+from hypertrace.agent.instrumentation import BaseInstrumentorWrapper
 
 #Initialize logger with local module name
 logger = logging.getLogger(__name__)

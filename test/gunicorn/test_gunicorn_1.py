@@ -9,9 +9,6 @@ from werkzeug.serving import make_server
 import time
 import atexit
 import threading
-import mysql.connector
-from opentelemetry import trace as trace_api
-from opentelemetry.sdk.trace import TracerProvider, export
 
 def setup_custom_logger(name):
   try:
