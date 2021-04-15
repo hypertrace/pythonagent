@@ -118,23 +118,22 @@ class BaseInstrumentorWrapper:
             # Is this an interesting content-type?
             if self.isInterestingContentType(contentTypeHeaderTuple[0][1]):
               logger.debug('This is an interesting content-type.')
-              if contentTypeHeaderTuple[0][1] == 'application/json' or contentTypeHeaderTuple[0][1] == 'application/graphql':
-                logger.info('decoded Request Body: ' + requestBody.decode('UTF8'))
-                span.set_attribute(self.HTTP_REQUEST_BODY_PREFIX,
-                  json.dumps(json.loads(requestBody.decode('UTF8').replace("'", '"'))))
+              requestBodyStr = None
+              if type(requestBody) == bytes:
+                requestBodyStr = requestBody.decode('UTF8')
               else:
-                logger.debug('typeOf requestBody: ' + str(type(requestBody)))
-                requestBodyStr = None
-                if type(requestBody) == bytes:
-                  requestBodyStr = requestBody.decode('UTF8')
-                else:
-                  requestBodyStr = requestBody
+                requestBodyStr = requestBody
+              if contentTypeHeaderTuple[0][1] == 'application/json' or contentTypeHeaderTuple[0][1] == 'application/graphql':
+                logger.info('decoded Request Body: ' + requestBodyStr)
+                span.set_attribute(self.HTTP_REQUEST_BODY_PREFIX,
+                  json.dumps(json.loads(requestBodyStr.replace("'", '"'))))
+              else:
                 span.set_attribute(self.HTTP_REQUEST_BODY_PREFIX, requestBodyStr)
     except:
       logger.error('An error occurred in genericRequestHandler: exception=%s, stacktrace=%s',
         sys.exc_info()[0],
         traceback.format_exc())
-      #Not rethrowing to avoid causing runtime errors for Flask.
+      #Not rethrowing to avoid causing runtime errors
 
   # Generic HTTP Response Handler
   def genericResponseHandler(self, responseHeaders, responseBody, span):
@@ -169,27 +168,26 @@ class BaseInstrumentorWrapper:
             # Is this an interesting content-type?
             if self.isInterestingContentType(contentTypeHeaderTuple[0][1]):
               logger.debug('This is an interesting content-type.')
+              responseBodyStr = None
+              if type(responseBody) == bytes:
+                responseBodyStr = responseBody.decode('UTF8')
+              else:
+                responseBodyStr = responseBody
               # Format message body correctly
               if contentTypeHeaderTuple[0][1] == 'application/json' and contentTypeHeaderTuple[0][1] == 'application/graphql':
                 span.set_attribute(self.HTTP_RESPONSE_BODY_PREFIX,
-                  json.dumps(json.loads(responseBody.decode('UTF8').replace("'", '"'))))
+                  json.dumps(json.loads(responseBodyStr.replace("'", '"'))))
               else:
-                logger.debug('typeOf responseBody: ' + str(type(responseBody)))
-                responseBodyStr = None
-                if type(responseBody) == bytes:
-                  responseBodyStr = responseBody.decode('UTF8')
-                else:
-                  responseBodyStr = responseBody
                 span.set_attribute(self.HTTP_RESPONSE_BODY_PREFIX, responseBodyStr)
     except:
       logger.error('An error occurred in genericResponseHandler: exception=%s, stacktrace=%s',
         sys.exc_info()[0],
         traceback.format_exc())
-      #Not rethrowing to avoid causing runtime errors for Flask.
+      #Not rethrowing to avoid causing runtime errors
 
   # Should this mimetype be put in the extended span?
   def isInterestingContentType(self, contentType):
-    logger.debug('Entering FlaskInstrumentorWrapper.isInterestingContentType().')
+    logger.debug('Entering BaseInstrumentorWrapper.isInterestingContentType().')
     try:
       if contentType == 'application/json': return True
       if contentType == 'application/graphql': return True
@@ -228,7 +226,7 @@ class BaseInstrumentorWrapper:
       logger.error('An error occurred in genericRequestHandler: exception=%s, stacktrace=%s',
         sys.exc_info()[0],
         traceback.format_exc())
-      #Not rethrowing to avoid causing runtime errors for Flask.
+      #Not rethrowing to avoid causing runtime errors
 
   # Generic RPC Response Handler
   def genericRpcResponseHandler(self, responseHeaders, responseBody, span):
@@ -256,4 +254,4 @@ class BaseInstrumentorWrapper:
       logger.error('An error occurred in genericResponseHandler: exception=%s, stacktrace=%s',
         sys.exc_info()[0],
         traceback.format_exc())
-      #Not rethrowing to avoid causing runtime errors for Flask.
+      #Not rethrowing to avoid causing runtime errors

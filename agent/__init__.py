@@ -96,12 +96,13 @@ class Agent:
         sys.exc_info()[0],
         traceback.format_exc())
 
-  def globalInit(self):
-    logger.debug('Calling Agent.globalInit().')
+  def registerAioHttpClient(self, useB3=False):
+    logger.debug('Calling Agent.registerAioHttpClient().')
     try:
-      self._init.globalInit()
+      self._init.aioHttpClientInit(useB3)
+      self._init.dumpConfig()
     except:
-      logger.error('Failed to initialize global: exception=%s, stacktrace=%s',
+      logger.error('Failed to initialize aiohttp-client instrumentation wrapper: exception=%s, stacktrace=%s',
         sys.exc_info()[0],
         traceback.format_exc())
 
