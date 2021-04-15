@@ -9,11 +9,8 @@ from opentelemetry.sdk.trace.export import ConsoleSpanExporter, SimpleSpanProces
 from opentelemetry.exporter.zipkin.proto.http import ZipkinExporter
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.resources import Resource
-from opentelemetry import trace
-from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.sdk.trace import TracerProvider, export
-from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
 from agent.config import AgentConfig
 
 # Initialize logger
@@ -53,6 +50,7 @@ class AgentInit:
       self._mysqlInstrumentorWrapper = None
       self._postgresqlInstrumentorWrapper = None
       self._requestsInstrumentorWrapper = None
+      self._aioHttpClientInstrumentorWrapper = None
     except:
       logger.error('Failed to initialize opentelemetry: exception=%s, stacktrace=%s',
         sys.exc_info()[0],
@@ -74,9 +72,7 @@ class AgentInit:
       self._flaskInstrumentorWrapper.instrument_app(app)
       self.initInstrumentorWrapperBaseForHTTP(self._flaskInstrumentorWrapper)
       if useB3:
-        from opentelemetry.propagate import set_global_textmap
-        from opentelemetry.propagators.b3 import B3Format
-        set_global_textmap(B3Format())
+        self.enableB3()
     except:
       logger.debug('Failed to initialize flask instrumentation wrapper: exception=%s, stacktrace=%s',
         sys.exc_info()[0],
@@ -162,22 +158,35 @@ class AgentInit:
       self._requestsInstrumentorWrapper = RequestsInstrumentorWrapper()
       self.initInstrumentorWrapperBaseForHTTP(self._requestsInstrumentorWrapper)
       if useB3:
-        from opentelemetry.propagate import set_global_textmap
-        from opentelemetry.propagators.b3 import B3Format
-        set_global_textmap(B3Format())
+        self.enableB3()
     except:
       logger.debug('Failed to initialize requests instrumentation wrapper: exception=%s, stacktrace=%s',
         sys.exc_info()[0],
         traceback.format_exc())
       raise sys.exc_info()[0]
 
+  # Creates an aiohttp-requests wrapper using the config defined in hypertraceconfig
+  def aioHttpClientInit(self, useB3=False):
+    logger.debug('Calling AgentInit.aioHttpClientInit()')
+    try:
+      from agent.instrumentation.aiohttp import AioHttpClientInstrumentorWrapper
+      self._moduleInitialized['aiohttp-client'] = True
+      self._aioHttpClientInstrumentorWrapper = AioHttpClientInstrumentorWrapper()
+      self.initInstrumentorWrapperBaseForHTTP(self._aioHttpClientInstrumentorWrapper)
+      if useB3:
+        self.enableB3()
+    except:
+      logger.debug('Failed to initialize requests instrumentation wrapper: exception=%s, stacktrace=%s',
+        sys.exc_info()[0],
+        traceback.format_exc())
+      raise sys.exc_info()[0]
+
+  # Common wrapper initialization logic
   def initInstrumentorWrapperBaseForHTTP(self, instrumentor):
     logger.debug('Calling AgentInit.initInstrumentorWrapperBaseForHTTP().')
     instrumentor.instrument()
-
     instrumentor.setProcessRequestHeaders(self._agent._config.data_capture.http_headers.request)
     instrumentor.setProcessRequestBody(self._agent._config.data_capture.http_body.request)
-
     instrumentor.setProcessResponseHeaders(self._agent._config.data_capture.http_headers.response)
     instrumentor.setProcessResponseBody(self._agent._config.data_capture.http_body.response)
 
@@ -242,3 +251,8 @@ class AgentInit:
       logger.error('Failed to setProcessor: exception=%s, stacktrace=%s',
       sys.exc_info()[0],
       traceback.format_exc())
+
+  def enableB3(self):
+    from opentelemetry.propagate import set_global_textmap
+    from opentelemetry.propagators.b3 import B3Format
+    set_global_textmap(B3Format())
