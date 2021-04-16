@@ -6,9 +6,9 @@ name: Checks
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    branches: [ feature/develop ]
+    branches: [ feature/develop, main ]
   pull_request:
-    branches: [ feature/develop ]
+    branches: [ feature/develop, main ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -40,7 +40,7 @@ jobs:
       - name: Install pip
         run: sudo apt-get install python3-pip
         
-      - name: Run pylint on this branch to generate a report
+      - name: Install tox
         run: pip install --user -r dev-requirements.txt
         
       - name: Run pylint on this branch to generate a report
