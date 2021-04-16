@@ -28,6 +28,9 @@ jobs:
       - name: Run apt-get update
         run: sudo apt-get update
         
+      - name: Install make
+        run: sudo apt-get install make
+        
       - name: install software-properties-common
         run: sudo apt install software-properties-common
 
@@ -43,5 +46,8 @@ jobs:
       - name: Install tox
         run: pip install --user -r dev-requirements.txt
         
-      - name: Run pylint on this branch to generate a report
-        run: tox -e lint
+#      - name: Run pylint on this branch to generate a report
+#        run: tox -e lint
+
+      - name: Run Test Cases
+        run: make hypertrace_tests
