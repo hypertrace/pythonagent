@@ -50,4 +50,4 @@ jobs:
 #        run: tox -e lint
 
       - name: Run Test Cases
-        run: make hypertrace_tests
+        run: make hypertrace_test
