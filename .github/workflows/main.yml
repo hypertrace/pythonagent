@@ -28,6 +28,12 @@ jobs:
       - name: Run apt-get update
         run: sudo apt-get update
         
+      - name: install software-properties-common
+        run: sudo apt install software-properties-common
+
+      - name: setup repo
+        run: sudo add-apt-repository ppa:deadsnakes/ppa -y
+
       - name: install python3.7
         run: sudo apt-get install python3.7
 
