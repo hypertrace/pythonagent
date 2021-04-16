@@ -1,0 +1,59 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Checks
+
+# Controls when the action will run. 
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ feature/develop, main ]
+  pull_request:
+    branches: [ feature/develop, main ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - name: Run apt-get update
+        run: sudo apt-get update
+        
+      - name: Install make
+        run: sudo apt-get install make
+        
+      - name: install software-properties-common
+        run: sudo apt install software-properties-common
+
+      - name: setup repo
+        run: sudo add-apt-repository ppa:deadsnakes/ppa -y
+
+      - name: install python3.7
+        run: sudo apt-get install python3.7
+        
+      - name: install python3.8
+        run: sudo apt-get install python3.8
+        
+      - name: install python3.9
+        run: sudo apt-get install python3.9
+
+      - name: Install pip
+        run: sudo apt-get install python3-pip
+        
+      - name: Install tox
+        run: pip install --user -r dev-requirements.txt
+        
+#      - name: Run pylint on this branch to generate a report
+#        run: tox -e lint
+
+      - name: Run Test Cases
+        run: make hypertrace_test

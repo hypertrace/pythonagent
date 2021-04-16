@@ -1,0 +1,1785 @@
+Running tests in /Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/scripts/../test/flask
+py37 recreate: /Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask/.tox/py37
+py37 installdeps: -rrequirements.txt
+py37 installed: WARNING: Could not generate requirement for distribution -oogle 3.0.0 (/Users/nsahai/.pyenv/versions/3.7.10/lib/python3.7/site-packages): Parse error at "'-oogle=='": Expected W:(abcd...),apipkg==1.5,asgiref==3.3.4,attrs==20.3.0,backoff==1.10.0,beautifulsoup4==4.9.3,cachetools==4.2.1,certifi==2020.12.5,cffi==1.14.5,chardet==4.0.0,click==7.1.2,execnet==1.8.0,Flask==1.1.2,google==3.0.0,google-api-core==1.26.1,google-api-python-client==2.0.2,google-auth==1.28.0,google-auth-httplib2==0.1.0,google-cloud==0.34.0,google-cloud-bigquery==2.12.0,google-cloud-core==1.6.0,google-crc32c==1.1.2,google-resumable-media==1.2.0,googleapis-common-protos==1.52.0,grpcio==1.36.1,httplib2==0.19.0,idna==2.10,importlib-metadata==3.10.1,iniconfig==1.1.1,itsdangerous==1.1.0,Jinja2==2.11.3,MarkupSafe==1.1.1,mysql-connector==2.2.9,mysql-connector-python==8.0.23,opentelemetry-api==1.0.0,opentelemetry-exporter-jaeger==1.0.0,opentelemetry-exporter-jaeger-proto-grpc==1.0.0,opentelemetry-exporter-jaeger-thrift==1.0.0,opentelemetry-exporter-otlp==1.0.0,opentelemetry-exporter-otlp-proto-grpc==1.0.0,opentelemetry-exporter-zipkin==1.0.0,opentelemetry-exporter-zipkin-json==1.0.0,opentelemetry-exporter-zipkin-proto-http==1.0.0,opentelemetry-instrumentation==0.19b0,opentelemetry-instrumentation-dbapi==0.19b0,opentelemetry-instrumentation-flask==0.19b0,opentelemetry-instrumentation-grpc==0.19b0,opentelemetry-instrumentation-mysql==0.19b0,opentelemetry-instrumentation-requests==0.19b0,opentelemetry-instrumentation-wsgi==0.19b0,opentelemetry-proto==1.0.0,opentelemetry-sdk==1.0.0,opentelemetry-util-http==0.19b0,packaging==20.9,pluggy==0.13.1,proto-plus==1.18.0,protobuf==3.15.7,py==1.10.0,pyasn1==0.4.8,pyasn1-modules==0.2.8,pycparser==2.20,pyparsing==2.4.7,pytest==6.2.3,pytest-forked==1.3.0,pytest-xdist==2.2.1,pytz==2021.1,PyYAML==5.4.1,requests==2.25.1,rsa==4.7.2,six==1.15.0,soupsieve==2.2,thrift==0.13.0,toml==0.10.2,typing-extensions==3.7.4.3,uritemplate==3.0.1,urllib3==1.26.4,Werkzeug==1.0.1,wrapt==1.12.1,zipp==3.4.1
+py37 run-test-pre: PYTHONHASHSEED='4124926585'
+py37 run-test: commands[0] | pytest -rPx test_flask_1.py
+============================= test session starts ==============================
+platform darwin -- Python 3.7.10, pytest-6.2.3, py-1.10.0, pluggy-0.13.1
+cachedir: .tox/py37/.pytest_cache
+rootdir: /Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask, configfile: pytest.ini
+plugins: xdist-2.2.1, forked-1.3.0
+collected 1 item
+
+test_flask_1.py F                                                        [100%]
+
+=================================== FAILURES ===================================
+___________________________________ test_run ___________________________________
+
+    def test_run():
+      logger = setup_custom_logger(__name__)
+      logger.info('Initializing flask app.')
+      # Create Flask app
+      app = Flask(__name__)
+      @app.before_first_request
+      def before_first_request():
+        logger.debug("test_program: before_first_request() called")
+    
+      @app.before_request
+      def before_request():
+          logger.debug("test_progam: before_request() called")
+    
+      @app.after_request
+      def after_request(response):
+          logger.debug("test_program: after_request() called")
+          return response
+    
+      @app.route("/route1")
+      def testAPI1():
+        logger.info('Serving request for /route1.')
+        response = flask.Response(mimetype='application/json')
+        response.headers['tester3'] = 'tester3'
+        response.data = str('{ "a": "a", "xyz": "xyz" }')
+        raise RuntimeError('An error')
+        return response
+    
+      @app.route("/route2")
+      def testAPI2():
+        logger.info('Serving request for /route2.')
+        response = flask.Response(mimetype='application/json')
+        response.headers['tester3'] = 'tester3'
+        response.data = str('{ "a": "a", "xyz": "xyz" }')
+        return response
+    
+      @app.route("/terminate")
+      def terminate():
+        logger.info('Serving request for /terminatae.')
+        shutdown_server()
+        response = flask.Response()
+        response.data = { 'a': 'a', 'xyz': 'xyz' }
+        return response
+    
+      logger.info('Flask app initialized.')
+    
+      #
+      # Code snippet here represents the current initialization logic
+      #
+      logger.info('Initializing agent.')
+      agent = Agent()
+      agent.registerFlaskApp(app)
+      #
+      # End initialization logic for Python Agent
+      #
+      logger.info('Agent initialized.')
+    
+      server = FlaskServer(app)
+    
+      # Setup In-Memory Span Exporter
+      logger.info('Agent initialized.')
+      logger.info('Adding in-memory span exporter.')
+      memoryExporter = InMemorySpanExporter()
+      simpleExportSpanProcessor = SimpleSpanProcessor(memoryExporter)
+      agent.setProcessor(simpleExportSpanProcessor)
+      logger.info('Added in-memoy span exporter')
+    
+      # Setup Jaeger Exporter
+      #logger.info('Adding jaeger span exporter.')
+      #jaegerExporter = jaeger.JaegerSpanExporter(
+      #    service_name= 'pythonagent',
+      #    # configure agent
+      #    agent_host_name='localhost',
+      #    agent_port=6831,
+      #    # optional: configure also collector
+      #    # collector_endpoint='http://localhost:14268/api/traces?format=jaeger.thrift',
+      #    # username=xxxx, # optional
+      #    # password=xxxx, # optional
+      #    # insecure=True, # optional
+      #    # credentials=xxx # optional channel creds
+      #    # transport_format='protobuf' # optional
+      #)
+      #batchExportSpanProcessor = BatchSpanProcessor(jaegerExporter)
+      #agent.setProcessor(batchExportSpanProcessor)
+      #logger.info('Added jaeger span exporter.')
+    
+      logger.info('Running test calls.')
+      with app.test_client() as c:
+        try:
+          logger.info('Making test call to /route1')
+          r1 = app.test_client().get('http://localhost:5000/route1', headers={ 'tester1': 'tester1', 'tester2':'tester2'})
+          # Get all of the in memory spans that were recorded for this iteration
+          span_list = memoryExporter.get_finished_spans()
+          # Confirm something was returned.
+          assert span_list
+          # Confirm there are three spans
+          logger.debug('len(span_list): ' + str(len(span_list)))
+          assert len(span_list) == 1
+          logger.debug('span_list: ' + str(span_list[0].attributes))
+          flaskSpanAsObject = json.loads(span_list[0].to_json())
+          # Check that the expected results are in the flask extended span attributes
+          assert flaskSpanAsObject['attributes']['http.method'] == 'GET'
+          assert flaskSpanAsObject['attributes']['http.target'] == '/route1'
+          assert flaskSpanAsObject['attributes']['http.request.header.tester1'] == 'tester1'
+          assert flaskSpanAsObject['attributes']['http.request.header.tester2'] == 'tester2'
+>         assert flaskSpanAsObject['attributes']['http.response.header.content-type'] == 'application/json'
+E         AssertionError: assert 'text/html; charset=utf-8' == 'application/json'
+E           - application/json
+E           + text/html; charset=utf-8
+
+test_flask_1.py:163: AssertionError
+
+During handling of the above exception, another exception occurred:
+
+    def test_run():
+      logger = setup_custom_logger(__name__)
+      logger.info('Initializing flask app.')
+      # Create Flask app
+      app = Flask(__name__)
+      @app.before_first_request
+      def before_first_request():
+        logger.debug("test_program: before_first_request() called")
+    
+      @app.before_request
+      def before_request():
+          logger.debug("test_progam: before_request() called")
+    
+      @app.after_request
+      def after_request(response):
+          logger.debug("test_program: after_request() called")
+          return response
+    
+      @app.route("/route1")
+      def testAPI1():
+        logger.info('Serving request for /route1.')
+        response = flask.Response(mimetype='application/json')
+        response.headers['tester3'] = 'tester3'
+        response.data = str('{ "a": "a", "xyz": "xyz" }')
+        raise RuntimeError('An error')
+        return response
+    
+      @app.route("/route2")
+      def testAPI2():
+        logger.info('Serving request for /route2.')
+        response = flask.Response(mimetype='application/json')
+        response.headers['tester3'] = 'tester3'
+        response.data = str('{ "a": "a", "xyz": "xyz" }')
+        return response
+    
+      @app.route("/terminate")
+      def terminate():
+        logger.info('Serving request for /terminatae.')
+        shutdown_server()
+        response = flask.Response()
+        response.data = { 'a': 'a', 'xyz': 'xyz' }
+        return response
+    
+      logger.info('Flask app initialized.')
+    
+      #
+      # Code snippet here represents the current initialization logic
+      #
+      logger.info('Initializing agent.')
+      agent = Agent()
+      agent.registerFlaskApp(app)
+      #
+      # End initialization logic for Python Agent
+      #
+      logger.info('Agent initialized.')
+    
+      server = FlaskServer(app)
+    
+      # Setup In-Memory Span Exporter
+      logger.info('Agent initialized.')
+      logger.info('Adding in-memory span exporter.')
+      memoryExporter = InMemorySpanExporter()
+      simpleExportSpanProcessor = SimpleSpanProcessor(memoryExporter)
+      agent.setProcessor(simpleExportSpanProcessor)
+      logger.info('Added in-memoy span exporter')
+    
+      # Setup Jaeger Exporter
+      #logger.info('Adding jaeger span exporter.')
+      #jaegerExporter = jaeger.JaegerSpanExporter(
+      #    service_name= 'pythonagent',
+      #    # configure agent
+      #    agent_host_name='localhost',
+      #    agent_port=6831,
+      #    # optional: configure also collector
+      #    # collector_endpoint='http://localhost:14268/api/traces?format=jaeger.thrift',
+      #    # username=xxxx, # optional
+      #    # password=xxxx, # optional
+      #    # insecure=True, # optional
+      #    # credentials=xxx # optional channel creds
+      #    # transport_format='protobuf' # optional
+      #)
+      #batchExportSpanProcessor = BatchSpanProcessor(jaegerExporter)
+      #agent.setProcessor(batchExportSpanProcessor)
+      #logger.info('Added jaeger span exporter.')
+    
+      logger.info('Running test calls.')
+      with app.test_client() as c:
+        try:
+          logger.info('Making test call to /route1')
+          r1 = app.test_client().get('http://localhost:5000/route1', headers={ 'tester1': 'tester1', 'tester2':'tester2'})
+          # Get all of the in memory spans that were recorded for this iteration
+          span_list = memoryExporter.get_finished_spans()
+          # Confirm something was returned.
+          assert span_list
+          # Confirm there are three spans
+          logger.debug('len(span_list): ' + str(len(span_list)))
+          assert len(span_list) == 1
+          logger.debug('span_list: ' + str(span_list[0].attributes))
+          flaskSpanAsObject = json.loads(span_list[0].to_json())
+          # Check that the expected results are in the flask extended span attributes
+          assert flaskSpanAsObject['attributes']['http.method'] == 'GET'
+          assert flaskSpanAsObject['attributes']['http.target'] == '/route1'
+          assert flaskSpanAsObject['attributes']['http.request.header.tester1'] == 'tester1'
+          assert flaskSpanAsObject['attributes']['http.request.header.tester2'] == 'tester2'
+          assert flaskSpanAsObject['attributes']['http.response.header.content-type'] == 'application/json'
+          assert flaskSpanAsObject['attributes']['http.response.body'] == '{ "a": "a", "xyz": "xyz" }'
+          assert flaskSpanAsObject['attributes']['http.status_code'] == 200
+          assert flaskSpanAsObject['attributes']['http.response.header.tester3'] == 'tester3'
+          memoryExporter.clear()
+          logger.info('Making test call to /route2')
+          r2 = app.test_client().get('http://localhost:5000/route2', headers={ 'tester1': 'tester1', 'tester2':'tester2'})
+          # Confirm something was returned.
+          assert span_list
+          # Confirm there are three spans
+          logger.debug('len(span_list): ' + str(len(span_list)))
+          assert len(span_list) == 1
+          logger.debug('span_list: ' + str(span_list[0].attributes))
+          flaskSpanAsObject = json.loads(span_list[0].to_json())
+          # Check that the expected results are in the flask extended span attributes
+          assert flaskSpanAsObject['attributes']['http.method'] == 'GET'
+          assert flaskSpanAsObject['attributes']['http.target'] == '/route1'
+          assert flaskSpanAsObject['attributes']['http.request.header.tester1'] == 'tester1'
+          assert flaskSpanAsObject['attributes']['http.request.header.tester2'] == 'tester2'
+          assert flaskSpanAsObject['attributes']['http.response.header.content-type'] == 'application/json'
+          assert flaskSpanAsObject['attributes']['http.response.body'] == '{ "a": "a", "xyz": "xyz" }'
+          assert flaskSpanAsObject['attributes']['http.status_code'] == 200
+          assert flaskSpanAsObject['attributes']['http.response.header.tester3'] == 'tester3'
+          memoryExporter.clear()
+          logger.info('Reading /route1 response.')
+          a1 = r1.get_json()['a']
+          logger.info('Reading /route2 response.')
+          a2 = r2.get_json()['a']
+          assert a1 == 'a'
+          assert a2 == 'a'
+          logger.info('r1 result: ' + str(a1))
+          logger.info('r2 result: ' + str(a2))
+          logger.info('Exiting from flask instrumentation test.')
+          return 0
+        except:
+          logger.error('Failed to initialize postgresql instrumentation wrapper: exception=%s, stacktrace=%s',
+            sys.exc_info()[0],
+            traceback.format_exc())
+>         raise sys.exc_info()[0]
+E         AssertionError
+
+test_flask_1.py:201: AssertionError
+----------------------------- Captured stdout call -----------------------------
+2021-04-13 10:49:23 INFO     Initializing flask app.
+2021-04-13 10:49:23 INFO     Flask app initialized.
+2021-04-13 10:49:23 INFO     Initializing agent.
+2021-04-13 10:49:23 DEBUG    Initializing Agent.
+2021-04-13 10:49:23 DEBUG    AgentConfig - using default
+2021-04-13 10:49:23 DEBUG    Initializing AgentInit object.
+2021-04-13 10:49:23 INFO     {'config': {'service_name': 'pythonagent', 'reporting': {'endpoint': 'http://localhost:9411/api/v2/spans', 'secure': False}, 'data_capture': {'http_headers': {'request': True, 'response': True}, 'http_body': {'request': True, 'response': False}, 'rpc_metadata': {'request': True, 'response': False}, 'rpc_body': {'request': True, 'response': False}}}, 'new_config': None, 'opa': <class 'config_pb2.Opa'>, 'reporting': <class 'config_pb2.Reporting'>, 'rpc_body': request {
+  value: true
+}
+response {
+}
+, 'rpc_metadata': request {
+  value: true
+}
+response {
+}
+, 'http_body': request {
+  value: true
+}
+response {
+}
+, 'http_headers': request {
+  value: true
+}
+response {
+  value: true
+}
+, 'data_capture': <class 'config_pb2.DataCapture'>, 'agent_config': <class 'config_pb2.AgentConfig'>, 'service_name': 'pythonagent'}
+2021-04-13 10:49:23 DEBUG    OTEL_TRACES_EXPORTER is zipkin, adding exporter.
+2021-04-13 10:49:23 INFO     Added ZipkinExporter span exporter
+2021-04-13 10:49:23 DEBUG    Calling Agent.registerFlaskApp.
+2021-04-13 10:49:23 DEBUG    Calling AgentInit.flaskInit().
+2021-04-13 10:49:23 DEBUG    Entering FlaskInstrumentorWrapper constructor.
+2021-04-13 10:49:23 DEBUG    Entering BaseInstrumentorWrapper constructor.
+2021-04-13 10:49:23 DEBUG    Entering FlaskInstrumentorWrapper.instument_app().
+2021-04-13 10:49:23 DEBUG    Calling AgentInit.initInstrumentorWrapperBaseForHTTP().
+2021-04-13 10:49:23 DEBUG    Setting self._processRequestHeaders to 'True'
+2021-04-13 10:49:23 DEBUG    Setting self._processRequestBody to 'True'
+2021-04-13 10:49:23 DEBUG    Setting self._processResponseHeaders to 'True'
+2021-04-13 10:49:23 DEBUG    Setting self._processResponseBody to 'False'
+2021-04-13 10:49:23 DEBUG    Calling DumpConfig().
+2021-04-13 10:49:23 DEBUG    flask:True
+2021-04-13 10:49:23 DEBUG    grpc:server:False
+2021-04-13 10:49:23 DEBUG    grpc:client:False
+2021-04-13 10:49:23 DEBUG    mysql:False
+2021-04-13 10:49:23 DEBUG    postgresql:False
+2021-04-13 10:49:23 DEBUG    requests:False
+2021-04-13 10:49:23 INFO     Agent initialized.
+2021-04-13 10:49:23 INFO     Agent initialized.
+2021-04-13 10:49:23 INFO     Adding in-memory span exporter.
+2021-04-13 10:49:23 DEBUG    Entering Agent.setProcessor().
+2021-04-13 10:49:23 DEBUG    Entering AgentInit.setProcessor().
+2021-04-13 10:49:23 INFO     Added in-memoy span exporter
+2021-04-13 10:49:23 INFO     Running test calls.
+2021-04-13 10:49:23 INFO     Making test call to /route1
+2021-04-13 10:49:23 DEBUG    test_program: before_first_request() called
+2021-04-13 10:49:23 DEBUG    test_progam: before_request() called
+2021-04-13 10:49:23 DEBUG    Entering _hypertrace_before_request().
+2021-04-13 10:49:23 DEBUG    span: _Span(name="/route1", context=SpanContext(trace_id=0x2ec270cd264fafe514a11f5ca803234c, span_id=0x8f133f9efbd20ee8, trace_flags=0x01, trace_state=[], is_remote=False))
+2021-04-13 10:49:23 DEBUG    Request Headers: b''
+2021-04-13 10:49:23 DEBUG    Request Body: b''
+2021-04-13 10:49:23 DEBUG    Entering BaseInstrumentationWrapper.genericRequestHandler().
+2021-04-13 10:49:23 DEBUG    span: _Span(name="/route1", context=SpanContext(trace_id=0x2ec270cd264fafe514a11f5ca803234c, span_id=0x8f133f9efbd20ee8, trace_flags=0x01, trace_state=[], is_remote=False))
+2021-04-13 10:49:23 DEBUG    requestHeaders: User-Agent: werkzeug/1.0.1
+Host: localhost:5000
+Tester1: tester1
+Tester2: tester2
+
+
+2021-04-13 10:49:23 DEBUG    requestBody: b''
+2021-04-13 10:49:23 DEBUG    Span is Recording!
+2021-04-13 10:49:23 DEBUG    Dumping Request Headers:
+2021-04-13 10:49:23 DEBUG    ('User-Agent', 'werkzeug/1.0.1')
+2021-04-13 10:49:23 DEBUG    ('Host', 'localhost:5000')
+2021-04-13 10:49:23 DEBUG    ('Tester1', 'tester1')
+2021-04-13 10:49:23 DEBUG    ('Tester2', 'tester2')
+2021-04-13 10:49:23 DEBUG    Request Body: b''
+2021-04-13 10:49:23 DEBUG    contentTypeHeaderTuple=[]
+2021-04-13 10:49:23 INFO     Serving request for /route1.
+2021-04-13 10:49:23 ERROR    Exception on /route1 [GET]
+Traceback (most recent call last):
+  File "/Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask/.tox/py37/lib/python3.7/site-packages/flask/app.py", line 2447, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask/.tox/py37/lib/python3.7/site-packages/flask/app.py", line 1952, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask/.tox/py37/lib/python3.7/site-packages/flask/app.py", line 1821, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask/.tox/py37/lib/python3.7/site-packages/flask/_compat.py", line 39, in reraise
+    raise value
+  File "/Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask/.tox/py37/lib/python3.7/site-packages/flask/app.py", line 1950, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask/.tox/py37/lib/python3.7/site-packages/flask/app.py", line 1936, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask/test_flask_1.py", line 83, in testAPI1
+    raise RuntimeError('An error')
+RuntimeError: An error
+2021-04-13 10:49:23 DEBUG    Entering _hypertrace_after_request().
+2021-04-13 10:49:23 DEBUG    Span: _Span(name="/route1", context=SpanContext(trace_id=0x2ec270cd264fafe514a11f5ca803234c, span_id=0x8f133f9efbd20ee8, trace_flags=0x01, trace_state=[], is_remote=False))
+2021-04-13 10:49:23 DEBUG    Response Headers: Content-Type: text/html; charset=utf-8
+Content-Length: 290
+
+
+2021-04-13 10:49:23 DEBUG    Response Body: b'<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n<title>500 Internal Server Error</title>\n<h1>Internal Server Error</h1>\n<p>The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.</p>\n'
+2021-04-13 10:49:23 DEBUG    Entering BaseInstrumentationWrapper.genericResponseHandler().
+2021-04-13 10:49:23 DEBUG    span: _Span(name="/route1", context=SpanContext(trace_id=0x2ec270cd264fafe514a11f5ca803234c, span_id=0x8f133f9efbd20ee8, trace_flags=0x01, trace_state=[], is_remote=False))
+2021-04-13 10:49:23 DEBUG    responseHeaders: Content-Type: text/html; charset=utf-8
+Content-Length: 290
+
+
+2021-04-13 10:49:23 DEBUG    responseBody: b'<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n<title>500 Internal Server Error</title>\n<h1>Internal Server Error</h1>\n<p>The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.</p>\n'
+2021-04-13 10:49:23 DEBUG    Span is Recording!
+2021-04-13 10:49:23 DEBUG    Dumping Response Headers:
+2021-04-13 10:49:23 DEBUG    ('Content-Type', 'text/html; charset=utf-8')
+2021-04-13 10:49:23 DEBUG    ('Content-Length', '290')
+2021-04-13 10:49:23 DEBUG    Response Body: b'<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n<title>500 Internal Server Error</title>\n<h1>Internal Server Error</h1>\n<p>The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.</p>\n'
+2021-04-13 10:49:23 DEBUG    contentTypeHeaderTuple=[('Content-Type', 'text/html; charset=utf-8')]
+2021-04-13 10:49:23 DEBUG    Found content-type header.
+2021-04-13 10:49:23 DEBUG    Mimetype/content-type value exists. text/html; charset=utf-8
+2021-04-13 10:49:23 DEBUG    Entering FlaskInstrumentorWrapper.isInterestingContentType().
+2021-04-13 10:49:23 DEBUG    test_program: after_request() called
+{
+    "name": "/route1",
+    "context": {
+        "trace_id": "0x2ec270cd264fafe514a11f5ca803234c",
+        "span_id": "0x8f133f9efbd20ee8",
+        "trace_state": "[]"
+    },
+    "kind": "SpanKind.SERVER",
+    "parent_id": null,
+    "start_time": "2021-04-13T17:49:23.627244Z",
+    "end_time": "2021-04-13T17:49:23.640872Z",
+    "status": {
+        "status_code": "ERROR",
+        "description": "RuntimeError: An error"
+    },
+    "attributes": {
+        "http.method": "GET",
+        "http.server_name": "localhost",
+        "http.scheme": "http",
+        "net.host.port": 5000,
+        "http.host": "localhost:5000",
+        "http.target": "/route1",
+        "net.peer.ip": "127.0.0.1",
+        "http.user_agent": "werkzeug/1.0.1",
+        "http.flavor": "1.1",
+        "http.route": "/route1",
+        "http.request.header.user-agent": "werkzeug/1.0.1",
+        "http.request.header.host": "localhost:5000",
+        "http.request.header.tester1": "tester1",
+        "http.request.header.tester2": "tester2",
+        "http.response.header.content-type": "text/html; charset=utf-8",
+        "http.response.header.content-length": "290",
+        "http.status_text": "INTERNAL SERVER ERROR",
+        "http.status_code": 500
+    },
+    "events": [
+        {
+            "name": "exception",
+            "timestamp": "2021-04-13T17:49:23.640823Z",
+            "attributes": {
+                "exception.type": "RuntimeError",
+                "exception.message": "An error",
+                "exception.stacktrace": "Traceback (most recent call last):\n  File \"/Users/nsahai/.pyenv/versions/3.7.10/lib/python3.7/site-packages/opentelemetry/trace/__init__.py\", line 462, in use_span\n    yield span\n  File \"/Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask/.tox/py37/lib/python3.7/site-packages/flask/app.py\", line 2447, in wsgi_app\n    response = self.full_dispatch_request()\n  File \"/Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask/.tox/py37/lib/python3.7/site-packages/flask/app.py\", line 1952, in full_dispatch_request\n    rv = self.handle_user_exception(e)\n  File \"/Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask/.tox/py37/lib/python3.7/site-packages/flask/app.py\", line 1821, in handle_user_exception\n    reraise(exc_type, exc_value, tb)\n  File \"/Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask/.tox/py37/lib/python3.7/site-packages/flask/_compat.py\", line 39, in reraise\n    raise value\n  File \"/Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask/.tox/py37/lib/python3.7/site-packages/flask/app.py\", line 1950, in full_dispatch_request\n    rv = self.dispatch_request()\n  File \"/Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask/.tox/py37/lib/python3.7/site-packages/flask/app.py\", line 1936, in dispatch_request\n    return self.view_functions[rule.endpoint](**req.view_args)\n  File \"/Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask/test_flask_1.py\", line 83, in testAPI1\n    raise RuntimeError('An error')\nRuntimeError: An error\n",
+                "exception.escaped": "False"
+            }
+        }
+    ],
+    "links": [],
+    "resource": {
+        "telemetry.sdk.language": "python",
+        "telemetry.sdk.name": "opentelemetry",
+        "telemetry.sdk.version": "1.0.0",
+        "service.name": "pythonagent",
+        "service.instance.id": 98589
+    }
+}
+2021-04-13 10:49:23 DEBUG    len(span_list): 1
+2021-04-13 10:49:23 DEBUG    span_list: BoundedDict({'http.method': 'GET', 'http.server_name': 'localhost', 'http.scheme': 'http', 'net.host.port': 5000, 'http.host': 'localhost:5000', 'http.target': '/route1', 'net.peer.ip': '127.0.0.1', 'http.user_agent': 'werkzeug/1.0.1', 'http.flavor': '1.1', 'http.route': '/route1', 'http.request.header.user-agent': 'werkzeug/1.0.1', 'http.request.header.host': 'localhost:5000', 'http.request.header.tester1': 'tester1', 'http.request.header.tester2': 'tester2', 'http.response.header.content-type': 'text/html; charset=utf-8', 'http.response.header.content-length': '290', 'http.status_text': 'INTERNAL SERVER ERROR', 'http.status_code': 500}, maxlen=128)
+2021-04-13 10:49:23 ERROR    Failed to initialize postgresql instrumentation wrapper: exception=<class 'AssertionError'>, stacktrace=Traceback (most recent call last):
+  File "/Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask/test_flask_1.py", line 163, in test_run
+    assert flaskSpanAsObject['attributes']['http.response.header.content-type'] == 'application/json'
+AssertionError: assert 'text/html; charset=utf-8' == 'application/json'
+  - application/json
+  + text/html; charset=utf-8
+
+------------------------------ Captured log call -------------------------------
+INFO     test_flask_1:test_flask_1.py:61 Initializing flask app.
+INFO     test_flask_1:test_flask_1.py:102 Flask app initialized.
+INFO     test_flask_1:test_flask_1.py:107 Initializing agent.
+DEBUG    agent:__init__.py:30 Initializing Agent.
+DEBUG    agent.config:__init__.py:31 AgentConfig - using default
+DEBUG    agent.init:__init__.py:24 Initializing AgentInit object.
+INFO     agent.config:__init__.py:185 {'config': {'service_name': 'pythonagent', 'reporting': {'endpoint': 'http://localhost:9411/api/v2/spans', 'secure': False}, 'data_capture': {'http_headers': {'request': True, 'response': True}, 'http_body': {'request': True, 'response': False}, 'rpc_metadata': {'request': True, 'response': False}, 'rpc_body': {'request': True, 'response': False}}}, 'new_config': None, 'opa': <class 'config_pb2.Opa'>, 'reporting': <class 'config_pb2.Reporting'>, 'rpc_body': request {
+  value: true
+}
+response {
+}
+, 'rpc_metadata': request {
+  value: true
+}
+response {
+}
+, 'http_body': request {
+  value: true
+}
+response {
+}
+, 'http_headers': request {
+  value: true
+}
+response {
+  value: true
+}
+, 'data_capture': <class 'config_pb2.DataCapture'>, 'agent_config': <class 'config_pb2.AgentConfig'>, 'service_name': 'pythonagent'}
+DEBUG    agent.init:__init__.py:196 OTEL_TRACES_EXPORTER is zipkin, adding exporter.
+INFO     agent.init:__init__.py:217 Added ZipkinExporter span exporter
+DEBUG    agent:__init__.py:40 Calling Agent.registerFlaskApp.
+DEBUG    agent.init:__init__.py:73 Calling AgentInit.flaskInit().
+DEBUG    agent.instrumentation.flask:__init__.py:85 Entering FlaskInstrumentorWrapper constructor.
+DEBUG    agent.instrumentation:__init__.py:25 Entering BaseInstrumentorWrapper constructor.
+DEBUG    agent.instrumentation.flask:__init__.py:90 Entering FlaskInstrumentorWrapper.instument_app().
+DEBUG    agent.init:__init__.py:179 Calling AgentInit.initInstrumentorWrapperBaseForHTTP().
+DEBUG    agent.instrumentation:__init__.py:65 Setting self._processRequestHeaders to 'True'
+DEBUG    agent.instrumentation:__init__.py:75 Setting self._processRequestBody to 'True'
+DEBUG    agent.instrumentation:__init__.py:70 Setting self._processResponseHeaders to 'True'
+DEBUG    agent.instrumentation:__init__.py:80 Setting self._processResponseBody to 'False'
+DEBUG    agent.init:__init__.py:67 Calling DumpConfig().
+DEBUG    agent.init:__init__.py:69 flask:True
+DEBUG    agent.init:__init__.py:69 grpc:server:False
+DEBUG    agent.init:__init__.py:69 grpc:client:False
+DEBUG    agent.init:__init__.py:69 mysql:False
+DEBUG    agent.init:__init__.py:69 postgresql:False
+DEBUG    agent.init:__init__.py:69 requests:False
+INFO     test_flask_1:test_flask_1.py:113 Agent initialized.
+INFO     test_flask_1:test_flask_1.py:118 Agent initialized.
+INFO     test_flask_1:test_flask_1.py:119 Adding in-memory span exporter.
+DEBUG    agent:__init__.py:109 Entering Agent.setProcessor().
+DEBUG    agent.init:__init__.py:189 Entering AgentInit.setProcessor().
+INFO     test_flask_1:test_flask_1.py:123 Added in-memoy span exporter
+INFO     test_flask_1:test_flask_1.py:144 Running test calls.
+INFO     test_flask_1:test_flask_1.py:147 Making test call to /route1
+DEBUG    test_flask_1:test_flask_1.py:66 test_program: before_first_request() called
+DEBUG    test_flask_1:test_flask_1.py:70 test_progam: before_request() called
+DEBUG    agent.instrumentation.flask:__init__.py:35 Entering _hypertrace_before_request().
+DEBUG    agent.instrumentation.flask:__init__.py:46 span: _Span(name="/route1", context=SpanContext(trace_id=0x2ec270cd264fafe514a11f5ca803234c, span_id=0x8f133f9efbd20ee8, trace_flags=0x01, trace_state=[], is_remote=False))
+DEBUG    agent.instrumentation.flask:__init__.py:47 Request Headers: b''
+DEBUG    agent.instrumentation.flask:__init__.py:48 Request Body: b''
+DEBUG    agent.instrumentation:__init__.py:90 Entering BaseInstrumentationWrapper.genericRequestHandler().
+DEBUG    agent.instrumentation:__init__.py:92 span: _Span(name="/route1", context=SpanContext(trace_id=0x2ec270cd264fafe514a11f5ca803234c, span_id=0x8f133f9efbd20ee8, trace_flags=0x01, trace_state=[], is_remote=False))
+DEBUG    agent.instrumentation:__init__.py:93 requestHeaders: User-Agent: werkzeug/1.0.1
+Host: localhost:5000
+Tester1: tester1
+Tester2: tester2
+
+
+DEBUG    agent.instrumentation:__init__.py:94 requestBody: b''
+DEBUG    agent.instrumentation:__init__.py:97 Span is Recording!
+DEBUG    agent.instrumentation:__init__.py:102 Dumping Request Headers:
+DEBUG    agent.instrumentation:__init__.py:104 ('User-Agent', 'werkzeug/1.0.1')
+DEBUG    agent.instrumentation:__init__.py:104 ('Host', 'localhost:5000')
+DEBUG    agent.instrumentation:__init__.py:104 ('Tester1', 'tester1')
+DEBUG    agent.instrumentation:__init__.py:104 ('Tester2', 'tester2')
+DEBUG    agent.instrumentation:__init__.py:108 Request Body: b''
+DEBUG    agent.instrumentation:__init__.py:111 contentTypeHeaderTuple=[]
+INFO     test_flask_1:test_flask_1.py:79 Serving request for /route1.
+ERROR    test_flask_1:app.py:1892 Exception on /route1 [GET]
+Traceback (most recent call last):
+  File "/Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask/.tox/py37/lib/python3.7/site-packages/flask/app.py", line 2447, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask/.tox/py37/lib/python3.7/site-packages/flask/app.py", line 1952, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask/.tox/py37/lib/python3.7/site-packages/flask/app.py", line 1821, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask/.tox/py37/lib/python3.7/site-packages/flask/_compat.py", line 39, in reraise
+    raise value
+  File "/Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask/.tox/py37/lib/python3.7/site-packages/flask/app.py", line 1950, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask/.tox/py37/lib/python3.7/site-packages/flask/app.py", line 1936, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask/test_flask_1.py", line 83, in testAPI1
+    raise RuntimeError('An error')
+RuntimeError: An error
+DEBUG    agent.instrumentation.flask:__init__.py:62 Entering _hypertrace_after_request().
+DEBUG    agent.instrumentation.flask:__init__.py:69 Span: _Span(name="/route1", context=SpanContext(trace_id=0x2ec270cd264fafe514a11f5ca803234c, span_id=0x8f133f9efbd20ee8, trace_flags=0x01, trace_state=[], is_remote=False))
+DEBUG    agent.instrumentation.flask:__init__.py:70 Response Headers: Content-Type: text/html; charset=utf-8
+Content-Length: 290
+
+
+DEBUG    agent.instrumentation.flask:__init__.py:71 Response Body: b'<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n<title>500 Internal Server Error</title>\n<h1>Internal Server Error</h1>\n<p>The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.</p>\n'
+DEBUG    agent.instrumentation:__init__.py:141 Entering BaseInstrumentationWrapper.genericResponseHandler().
+DEBUG    agent.instrumentation:__init__.py:143 span: _Span(name="/route1", context=SpanContext(trace_id=0x2ec270cd264fafe514a11f5ca803234c, span_id=0x8f133f9efbd20ee8, trace_flags=0x01, trace_state=[], is_remote=False))
+DEBUG    agent.instrumentation:__init__.py:144 responseHeaders: Content-Type: text/html; charset=utf-8
+Content-Length: 290
+
+
+DEBUG    agent.instrumentation:__init__.py:145 responseBody: b'<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n<title>500 Internal Server Error</title>\n<h1>Internal Server Error</h1>\n<p>The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.</p>\n'
+DEBUG    agent.instrumentation:__init__.py:148 Span is Recording!
+DEBUG    agent.instrumentation:__init__.py:153 Dumping Response Headers:
+DEBUG    agent.instrumentation:__init__.py:155 ('Content-Type', 'text/html; charset=utf-8')
+DEBUG    agent.instrumentation:__init__.py:155 ('Content-Length', '290')
+DEBUG    agent.instrumentation:__init__.py:159 Response Body: b'<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n<title>500 Internal Server Error</title>\n<h1>Internal Server Error</h1>\n<p>The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.</p>\n'
+DEBUG    agent.instrumentation:__init__.py:162 contentTypeHeaderTuple=[('Content-Type', 'text/html; charset=utf-8')]
+DEBUG    agent.instrumentation:__init__.py:165 Found content-type header.
+DEBUG    agent.instrumentation:__init__.py:168 Mimetype/content-type value exists. text/html; charset=utf-8
+DEBUG    agent.instrumentation:__init__.py:192 Entering FlaskInstrumentorWrapper.isInterestingContentType().
+DEBUG    test_flask_1:test_flask_1.py:74 test_program: after_request() called
+DEBUG    test_flask_1:test_flask_1.py:154 len(span_list): 1
+DEBUG    test_flask_1:test_flask_1.py:156 span_list: BoundedDict({'http.method': 'GET', 'http.server_name': 'localhost', 'http.scheme': 'http', 'net.host.port': 5000, 'http.host': 'localhost:5000', 'http.target': '/route1', 'net.peer.ip': '127.0.0.1', 'http.user_agent': 'werkzeug/1.0.1', 'http.flavor': '1.1', 'http.route': '/route1', 'http.request.header.user-agent': 'werkzeug/1.0.1', 'http.request.header.host': 'localhost:5000', 'http.request.header.tester1': 'tester1', 'http.request.header.tester2': 'tester2', 'http.response.header.content-type': 'text/html; charset=utf-8', 'http.response.header.content-length': '290', 'http.status_text': 'INTERNAL SERVER ERROR', 'http.status_code': 500}, maxlen=128)
+ERROR    test_flask_1:test_flask_1.py:200 Failed to initialize postgresql instrumentation wrapper: exception=<class 'AssertionError'>, stacktrace=Traceback (most recent call last):
+  File "/Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask/test_flask_1.py", line 163, in test_run
+    assert flaskSpanAsObject['attributes']['http.response.header.content-type'] == 'application/json'
+AssertionError: assert 'text/html; charset=utf-8' == 'application/json'
+  - application/json
+  + text/html; charset=utf-8
+============================== 1 failed in 0.86s ===============================
+ERROR: InvocationError for command /Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask/.tox/py37/bin/pytest -rPx test_flask_1.py (exited with code 1)
+py38 recreate: /Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask/.tox/py38
+py38 installdeps: -rrequirements.txt
+py38 installed: WARNING: Could not generate requirement for distribution -rllib3 1.26.4 (/usr/local/lib/python3.8/site-packages): Parse error at "'-rllib3='": Expected W:(abcd...),WARNING: Could not generate requirement for distribution - llib3 (/usr/local/lib/python3.8/site-packages): Parse error at "'-===llib'": Expected W:(abcd...),alabaster==0.7.12,apipkg==1.5,appdirs==1.4.4,asgiref==3.3.1,astroid==2.5.2,attrs==20.3.0,Babel==2.9.0,backoff==1.10.0,beautifulsoup4==4.9.3,black==19.10b0,bleach==3.3.0,certifi==2020.12.5,chardet==4.0.0,click==7.1.2,coverage==5.5,distlib==0.3.1,docutils==0.16,execnet==1.8.0,filelock==3.0.12,flake8==3.9.0,Flask==1.1.2,google==3.0.0,google-cloud==0.34.0,googleapis-common-protos==1.52.0,grpcio==1.36.1,grpcio-tools==1.29.0,httpretty==1.0.5,idna==2.10,imagesize==1.2.0,iniconfig==1.1.1,isort==5.8.0,itsdangerous==1.1.0,Jinja2==2.11.3,lazy-object-proxy==1.6.0,MarkupSafe==1.1.1,mccabe==0.6.1,mypy==0.790,mypy-extensions==0.4.3,mypy-protobuf==2.4,mysql-connector==2.2.9,mysql-connector-python==8.0.23,opentelemetry-api==1.0.0,opentelemetry-exporter-jaeger==1.0.0,opentelemetry-exporter-jaeger-proto-grpc==1.0.0,opentelemetry-exporter-jaeger-thrift==1.0.0,opentelemetry-exporter-otlp==1.0.0,opentelemetry-exporter-otlp-proto-grpc==1.0.0,opentelemetry-exporter-zipkin==1.0.0,opentelemetry-exporter-zipkin-json==1.0.0,opentelemetry-exporter-zipkin-proto-http==1.0.0,opentelemetry-instrumentation==0.19b0,opentelemetry-instrumentation-dbapi==0.19b0,opentelemetry-instrumentation-flask==0.19b0,opentelemetry-instrumentation-grpc==0.19b0,opentelemetry-instrumentation-mysql==0.19b0,opentelemetry-instrumentation-psycopg2==0.19b0,opentelemetry-instrumentation-requests==0.19b0,opentelemetry-instrumentation-wsgi==0.19b0,opentelemetry-proto==1.0.0,opentelemetry-sdk==1.0.0,opentelemetry-util-http==0.19b0,packaging==20.9,pathspec==0.8.1,pluggy==0.13.1,protobuf==3.15.7,psycopg2-binary==2.8.6,py==1.10.0,pycodestyle==2.7.0,pyflakes==2.3.1,Pygments==2.8.1,pylint==2.7.3,pyparsing==2.4.7,pytest==6.2.2,pytest-cov==2.11.1,pytest-forked==1.3.0,pytest-xdist==2.2.1,pytz==2021.1,PyYAML==5.4.1,readme-renderer==24.0,regex==2021.3.17,requests==2.25.1,six==1.15.0,snowballstemmer==2.1.0,soupsieve==2.2.1,Sphinx==2.4.4,sphinx-autodoc-typehints==1.10.3,sphinx-rtd-theme==0.5.1,sphinxcontrib-applehelp==1.0.2,sphinxcontrib-devhelp==1.0.2,sphinxcontrib-htmlhelp==1.0.3,sphinxcontrib-jsmath==1.0.1,sphinxcontrib-qthelp==1.0.3,sphinxcontrib-serializinghtml==1.1.4,thrift==0.13.0,toml==0.10.2,tox==3.23.0,typed-ast==1.4.2,typing-extensions==3.7.4.3,urllib3==1.26.4,virtualenv==20.4.3,webencodings==0.5.1,Werkzeug==1.0.1,wrapt==1.12.1
+py38 run-test-pre: PYTHONHASHSEED='4124926585'
+py38 run-test: commands[0] | pytest -rPx test_flask_1.py
+============================= test session starts ==============================
+platform darwin -- Python 3.8.8, pytest-6.2.2, py-1.10.0, pluggy-0.13.1
+cachedir: .tox/py38/.pytest_cache
+rootdir: /Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask, configfile: pytest.ini
+plugins: cov-2.11.1
+collected 1 item
+
+test_flask_1.py F                                                        [100%]
+
+=================================== FAILURES ===================================
+___________________________________ test_run ___________________________________
+
+    def test_run():
+      logger = setup_custom_logger(__name__)
+      logger.info('Initializing flask app.')
+      # Create Flask app
+      app = Flask(__name__)
+      @app.before_first_request
+      def before_first_request():
+        logger.debug("test_program: before_first_request() called")
+    
+      @app.before_request
+      def before_request():
+          logger.debug("test_progam: before_request() called")
+    
+      @app.after_request
+      def after_request(response):
+          logger.debug("test_program: after_request() called")
+          return response
+    
+      @app.route("/route1")
+      def testAPI1():
+        logger.info('Serving request for /route1.')
+        response = flask.Response(mimetype='application/json')
+        response.headers['tester3'] = 'tester3'
+        response.data = str('{ "a": "a", "xyz": "xyz" }')
+        raise RuntimeError('An error')
+        return response
+    
+      @app.route("/route2")
+      def testAPI2():
+        logger.info('Serving request for /route2.')
+        response = flask.Response(mimetype='application/json')
+        response.headers['tester3'] = 'tester3'
+        response.data = str('{ "a": "a", "xyz": "xyz" }')
+        return response
+    
+      @app.route("/terminate")
+      def terminate():
+        logger.info('Serving request for /terminatae.')
+        shutdown_server()
+        response = flask.Response()
+        response.data = { 'a': 'a', 'xyz': 'xyz' }
+        return response
+    
+      logger.info('Flask app initialized.')
+    
+      #
+      # Code snippet here represents the current initialization logic
+      #
+      logger.info('Initializing agent.')
+      agent = Agent()
+      agent.registerFlaskApp(app)
+      #
+      # End initialization logic for Python Agent
+      #
+      logger.info('Agent initialized.')
+    
+      server = FlaskServer(app)
+    
+      # Setup In-Memory Span Exporter
+      logger.info('Agent initialized.')
+      logger.info('Adding in-memory span exporter.')
+      memoryExporter = InMemorySpanExporter()
+      simpleExportSpanProcessor = SimpleSpanProcessor(memoryExporter)
+      agent.setProcessor(simpleExportSpanProcessor)
+      logger.info('Added in-memoy span exporter')
+    
+      # Setup Jaeger Exporter
+      #logger.info('Adding jaeger span exporter.')
+      #jaegerExporter = jaeger.JaegerSpanExporter(
+      #    service_name= 'pythonagent',
+      #    # configure agent
+      #    agent_host_name='localhost',
+      #    agent_port=6831,
+      #    # optional: configure also collector
+      #    # collector_endpoint='http://localhost:14268/api/traces?format=jaeger.thrift',
+      #    # username=xxxx, # optional
+      #    # password=xxxx, # optional
+      #    # insecure=True, # optional
+      #    # credentials=xxx # optional channel creds
+      #    # transport_format='protobuf' # optional
+      #)
+      #batchExportSpanProcessor = BatchSpanProcessor(jaegerExporter)
+      #agent.setProcessor(batchExportSpanProcessor)
+      #logger.info('Added jaeger span exporter.')
+    
+      logger.info('Running test calls.')
+      with app.test_client() as c:
+        try:
+          logger.info('Making test call to /route1')
+          r1 = app.test_client().get('http://localhost:5000/route1', headers={ 'tester1': 'tester1', 'tester2':'tester2'})
+          # Get all of the in memory spans that were recorded for this iteration
+          span_list = memoryExporter.get_finished_spans()
+          # Confirm something was returned.
+          assert span_list
+          # Confirm there are three spans
+          logger.debug('len(span_list): ' + str(len(span_list)))
+          assert len(span_list) == 1
+          logger.debug('span_list: ' + str(span_list[0].attributes))
+          flaskSpanAsObject = json.loads(span_list[0].to_json())
+          # Check that the expected results are in the flask extended span attributes
+          assert flaskSpanAsObject['attributes']['http.method'] == 'GET'
+          assert flaskSpanAsObject['attributes']['http.target'] == '/route1'
+          assert flaskSpanAsObject['attributes']['http.request.header.tester1'] == 'tester1'
+          assert flaskSpanAsObject['attributes']['http.request.header.tester2'] == 'tester2'
+>         assert flaskSpanAsObject['attributes']['http.response.header.content-type'] == 'application/json'
+E         AssertionError: assert 'text/html; charset=utf-8' == 'application/json'
+E           - application/json
+E           + text/html; charset=utf-8
+
+test_flask_1.py:163: AssertionError
+
+During handling of the above exception, another exception occurred:
+
+    def test_run():
+      logger = setup_custom_logger(__name__)
+      logger.info('Initializing flask app.')
+      # Create Flask app
+      app = Flask(__name__)
+      @app.before_first_request
+      def before_first_request():
+        logger.debug("test_program: before_first_request() called")
+    
+      @app.before_request
+      def before_request():
+          logger.debug("test_progam: before_request() called")
+    
+      @app.after_request
+      def after_request(response):
+          logger.debug("test_program: after_request() called")
+          return response
+    
+      @app.route("/route1")
+      def testAPI1():
+        logger.info('Serving request for /route1.')
+        response = flask.Response(mimetype='application/json')
+        response.headers['tester3'] = 'tester3'
+        response.data = str('{ "a": "a", "xyz": "xyz" }')
+        raise RuntimeError('An error')
+        return response
+    
+      @app.route("/route2")
+      def testAPI2():
+        logger.info('Serving request for /route2.')
+        response = flask.Response(mimetype='application/json')
+        response.headers['tester3'] = 'tester3'
+        response.data = str('{ "a": "a", "xyz": "xyz" }')
+        return response
+    
+      @app.route("/terminate")
+      def terminate():
+        logger.info('Serving request for /terminatae.')
+        shutdown_server()
+        response = flask.Response()
+        response.data = { 'a': 'a', 'xyz': 'xyz' }
+        return response
+    
+      logger.info('Flask app initialized.')
+    
+      #
+      # Code snippet here represents the current initialization logic
+      #
+      logger.info('Initializing agent.')
+      agent = Agent()
+      agent.registerFlaskApp(app)
+      #
+      # End initialization logic for Python Agent
+      #
+      logger.info('Agent initialized.')
+    
+      server = FlaskServer(app)
+    
+      # Setup In-Memory Span Exporter
+      logger.info('Agent initialized.')
+      logger.info('Adding in-memory span exporter.')
+      memoryExporter = InMemorySpanExporter()
+      simpleExportSpanProcessor = SimpleSpanProcessor(memoryExporter)
+      agent.setProcessor(simpleExportSpanProcessor)
+      logger.info('Added in-memoy span exporter')
+    
+      # Setup Jaeger Exporter
+      #logger.info('Adding jaeger span exporter.')
+      #jaegerExporter = jaeger.JaegerSpanExporter(
+      #    service_name= 'pythonagent',
+      #    # configure agent
+      #    agent_host_name='localhost',
+      #    agent_port=6831,
+      #    # optional: configure also collector
+      #    # collector_endpoint='http://localhost:14268/api/traces?format=jaeger.thrift',
+      #    # username=xxxx, # optional
+      #    # password=xxxx, # optional
+      #    # insecure=True, # optional
+      #    # credentials=xxx # optional channel creds
+      #    # transport_format='protobuf' # optional
+      #)
+      #batchExportSpanProcessor = BatchSpanProcessor(jaegerExporter)
+      #agent.setProcessor(batchExportSpanProcessor)
+      #logger.info('Added jaeger span exporter.')
+    
+      logger.info('Running test calls.')
+      with app.test_client() as c:
+        try:
+          logger.info('Making test call to /route1')
+          r1 = app.test_client().get('http://localhost:5000/route1', headers={ 'tester1': 'tester1', 'tester2':'tester2'})
+          # Get all of the in memory spans that were recorded for this iteration
+          span_list = memoryExporter.get_finished_spans()
+          # Confirm something was returned.
+          assert span_list
+          # Confirm there are three spans
+          logger.debug('len(span_list): ' + str(len(span_list)))
+          assert len(span_list) == 1
+          logger.debug('span_list: ' + str(span_list[0].attributes))
+          flaskSpanAsObject = json.loads(span_list[0].to_json())
+          # Check that the expected results are in the flask extended span attributes
+          assert flaskSpanAsObject['attributes']['http.method'] == 'GET'
+          assert flaskSpanAsObject['attributes']['http.target'] == '/route1'
+          assert flaskSpanAsObject['attributes']['http.request.header.tester1'] == 'tester1'
+          assert flaskSpanAsObject['attributes']['http.request.header.tester2'] == 'tester2'
+          assert flaskSpanAsObject['attributes']['http.response.header.content-type'] == 'application/json'
+          assert flaskSpanAsObject['attributes']['http.response.body'] == '{ "a": "a", "xyz": "xyz" }'
+          assert flaskSpanAsObject['attributes']['http.status_code'] == 200
+          assert flaskSpanAsObject['attributes']['http.response.header.tester3'] == 'tester3'
+          memoryExporter.clear()
+          logger.info('Making test call to /route2')
+          r2 = app.test_client().get('http://localhost:5000/route2', headers={ 'tester1': 'tester1', 'tester2':'tester2'})
+          # Confirm something was returned.
+          assert span_list
+          # Confirm there are three spans
+          logger.debug('len(span_list): ' + str(len(span_list)))
+          assert len(span_list) == 1
+          logger.debug('span_list: ' + str(span_list[0].attributes))
+          flaskSpanAsObject = json.loads(span_list[0].to_json())
+          # Check that the expected results are in the flask extended span attributes
+          assert flaskSpanAsObject['attributes']['http.method'] == 'GET'
+          assert flaskSpanAsObject['attributes']['http.target'] == '/route1'
+          assert flaskSpanAsObject['attributes']['http.request.header.tester1'] == 'tester1'
+          assert flaskSpanAsObject['attributes']['http.request.header.tester2'] == 'tester2'
+          assert flaskSpanAsObject['attributes']['http.response.header.content-type'] == 'application/json'
+          assert flaskSpanAsObject['attributes']['http.response.body'] == '{ "a": "a", "xyz": "xyz" }'
+          assert flaskSpanAsObject['attributes']['http.status_code'] == 200
+          assert flaskSpanAsObject['attributes']['http.response.header.tester3'] == 'tester3'
+          memoryExporter.clear()
+          logger.info('Reading /route1 response.')
+          a1 = r1.get_json()['a']
+          logger.info('Reading /route2 response.')
+          a2 = r2.get_json()['a']
+          assert a1 == 'a'
+          assert a2 == 'a'
+          logger.info('r1 result: ' + str(a1))
+          logger.info('r2 result: ' + str(a2))
+          logger.info('Exiting from flask instrumentation test.')
+          return 0
+        except:
+          logger.error('Failed to initialize postgresql instrumentation wrapper: exception=%s, stacktrace=%s',
+            sys.exc_info()[0],
+            traceback.format_exc())
+>         raise sys.exc_info()[0]
+E         AssertionError
+
+test_flask_1.py:201: AssertionError
+----------------------------- Captured stdout call -----------------------------
+2021-04-13 10:49:30 INFO     Initializing flask app.
+2021-04-13 10:49:30 INFO     Flask app initialized.
+2021-04-13 10:49:30 INFO     Initializing agent.
+2021-04-13 10:49:30 DEBUG    Initializing Agent.
+2021-04-13 10:49:30 DEBUG    AgentConfig - using default
+2021-04-13 10:49:30 DEBUG    Initializing AgentInit object.
+2021-04-13 10:49:30 INFO     {'config': {'service_name': 'pythonagent', 'reporting': {'endpoint': 'http://localhost:9411/api/v2/spans', 'secure': False}, 'data_capture': {'http_headers': {'request': True, 'response': True}, 'http_body': {'request': True, 'response': False}, 'rpc_metadata': {'request': True, 'response': False}, 'rpc_body': {'request': True, 'response': False}}}, 'new_config': None, 'opa': <class 'config_pb2.Opa'>, 'reporting': <class 'config_pb2.Reporting'>, 'rpc_body': request {
+  value: true
+}
+response {
+}
+, 'rpc_metadata': request {
+  value: true
+}
+response {
+}
+, 'http_body': request {
+  value: true
+}
+response {
+}
+, 'http_headers': request {
+  value: true
+}
+response {
+  value: true
+}
+, 'data_capture': <class 'config_pb2.DataCapture'>, 'agent_config': <class 'config_pb2.AgentConfig'>, 'service_name': 'pythonagent'}
+2021-04-13 10:49:30 DEBUG    OTEL_TRACES_EXPORTER is zipkin, adding exporter.
+2021-04-13 10:49:30 INFO     Added ZipkinExporter span exporter
+2021-04-13 10:49:30 DEBUG    Calling Agent.registerFlaskApp.
+2021-04-13 10:49:30 DEBUG    Calling AgentInit.flaskInit().
+2021-04-13 10:49:30 DEBUG    Entering FlaskInstrumentorWrapper constructor.
+2021-04-13 10:49:30 DEBUG    Entering BaseInstrumentorWrapper constructor.
+2021-04-13 10:49:30 DEBUG    Entering FlaskInstrumentorWrapper.instument_app().
+2021-04-13 10:49:30 DEBUG    Calling AgentInit.initInstrumentorWrapperBaseForHTTP().
+2021-04-13 10:49:30 DEBUG    Setting self._processRequestHeaders to 'True'
+2021-04-13 10:49:30 DEBUG    Setting self._processRequestBody to 'True'
+2021-04-13 10:49:30 DEBUG    Setting self._processResponseHeaders to 'True'
+2021-04-13 10:49:30 DEBUG    Setting self._processResponseBody to 'False'
+2021-04-13 10:49:30 DEBUG    Calling DumpConfig().
+2021-04-13 10:49:30 DEBUG    flask:True
+2021-04-13 10:49:30 DEBUG    grpc:server:False
+2021-04-13 10:49:30 DEBUG    grpc:client:False
+2021-04-13 10:49:30 DEBUG    mysql:False
+2021-04-13 10:49:30 DEBUG    postgresql:False
+2021-04-13 10:49:30 DEBUG    requests:False
+2021-04-13 10:49:30 INFO     Agent initialized.
+2021-04-13 10:49:30 INFO     Agent initialized.
+2021-04-13 10:49:30 INFO     Adding in-memory span exporter.
+2021-04-13 10:49:30 DEBUG    Entering Agent.setProcessor().
+2021-04-13 10:49:30 DEBUG    Entering AgentInit.setProcessor().
+2021-04-13 10:49:30 INFO     Added in-memoy span exporter
+2021-04-13 10:49:30 INFO     Running test calls.
+2021-04-13 10:49:30 INFO     Making test call to /route1
+2021-04-13 10:49:30 DEBUG    test_program: before_first_request() called
+2021-04-13 10:49:30 DEBUG    test_progam: before_request() called
+2021-04-13 10:49:30 DEBUG    Entering _hypertrace_before_request().
+2021-04-13 10:49:30 DEBUG    span: _Span(name="/route1", context=SpanContext(trace_id=0x33de7d743fc01d87bb897aa810c2b887, span_id=0x3def169f5f091cec, trace_flags=0x01, trace_state=[], is_remote=False))
+2021-04-13 10:49:30 DEBUG    Request Headers: b''
+2021-04-13 10:49:30 DEBUG    Request Body: b''
+2021-04-13 10:49:30 DEBUG    Entering BaseInstrumentationWrapper.genericRequestHandler().
+2021-04-13 10:49:30 DEBUG    span: _Span(name="/route1", context=SpanContext(trace_id=0x33de7d743fc01d87bb897aa810c2b887, span_id=0x3def169f5f091cec, trace_flags=0x01, trace_state=[], is_remote=False))
+2021-04-13 10:49:30 DEBUG    requestHeaders: User-Agent: werkzeug/1.0.1
+Host: localhost:5000
+Tester1: tester1
+Tester2: tester2
+
+
+2021-04-13 10:49:30 DEBUG    requestBody: b''
+2021-04-13 10:49:30 DEBUG    Span is Recording!
+2021-04-13 10:49:30 DEBUG    Dumping Request Headers:
+2021-04-13 10:49:30 DEBUG    ('User-Agent', 'werkzeug/1.0.1')
+2021-04-13 10:49:30 DEBUG    ('Host', 'localhost:5000')
+2021-04-13 10:49:30 DEBUG    ('Tester1', 'tester1')
+2021-04-13 10:49:30 DEBUG    ('Tester2', 'tester2')
+2021-04-13 10:49:30 DEBUG    Request Body: b''
+2021-04-13 10:49:30 DEBUG    contentTypeHeaderTuple=[]
+2021-04-13 10:49:30 INFO     Serving request for /route1.
+2021-04-13 10:49:30 ERROR    Exception on /route1 [GET]
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.8/site-packages/flask/app.py", line 2447, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/usr/local/lib/python3.8/site-packages/flask/app.py", line 1952, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/usr/local/lib/python3.8/site-packages/flask/app.py", line 1821, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/usr/local/lib/python3.8/site-packages/flask/_compat.py", line 39, in reraise
+    raise value
+  File "/usr/local/lib/python3.8/site-packages/flask/app.py", line 1950, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/usr/local/lib/python3.8/site-packages/flask/app.py", line 1936, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask/test_flask_1.py", line 83, in testAPI1
+    raise RuntimeError('An error')
+RuntimeError: An error
+2021-04-13 10:49:30 DEBUG    Entering _hypertrace_after_request().
+2021-04-13 10:49:30 DEBUG    Span: _Span(name="/route1", context=SpanContext(trace_id=0x33de7d743fc01d87bb897aa810c2b887, span_id=0x3def169f5f091cec, trace_flags=0x01, trace_state=[], is_remote=False))
+2021-04-13 10:49:30 DEBUG    Response Headers: Content-Type: text/html; charset=utf-8
+Content-Length: 290
+
+
+2021-04-13 10:49:30 DEBUG    Response Body: b'<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n<title>500 Internal Server Error</title>\n<h1>Internal Server Error</h1>\n<p>The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.</p>\n'
+2021-04-13 10:49:30 DEBUG    Entering BaseInstrumentationWrapper.genericResponseHandler().
+2021-04-13 10:49:30 DEBUG    span: _Span(name="/route1", context=SpanContext(trace_id=0x33de7d743fc01d87bb897aa810c2b887, span_id=0x3def169f5f091cec, trace_flags=0x01, trace_state=[], is_remote=False))
+2021-04-13 10:49:30 DEBUG    responseHeaders: Content-Type: text/html; charset=utf-8
+Content-Length: 290
+
+
+2021-04-13 10:49:30 DEBUG    responseBody: b'<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n<title>500 Internal Server Error</title>\n<h1>Internal Server Error</h1>\n<p>The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.</p>\n'
+2021-04-13 10:49:30 DEBUG    Span is Recording!
+2021-04-13 10:49:30 DEBUG    Dumping Response Headers:
+2021-04-13 10:49:30 DEBUG    ('Content-Type', 'text/html; charset=utf-8')
+2021-04-13 10:49:30 DEBUG    ('Content-Length', '290')
+2021-04-13 10:49:30 DEBUG    Response Body: b'<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n<title>500 Internal Server Error</title>\n<h1>Internal Server Error</h1>\n<p>The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.</p>\n'
+2021-04-13 10:49:30 DEBUG    contentTypeHeaderTuple=[('Content-Type', 'text/html; charset=utf-8')]
+2021-04-13 10:49:30 DEBUG    Found content-type header.
+2021-04-13 10:49:30 DEBUG    Mimetype/content-type value exists. text/html; charset=utf-8
+2021-04-13 10:49:30 DEBUG    Entering FlaskInstrumentorWrapper.isInterestingContentType().
+2021-04-13 10:49:30 DEBUG    test_program: after_request() called
+{
+    "name": "/route1",
+    "context": {
+        "trace_id": "0x33de7d743fc01d87bb897aa810c2b887",
+        "span_id": "0x3def169f5f091cec",
+        "trace_state": "[]"
+    },
+    "kind": "SpanKind.SERVER",
+    "parent_id": null,
+    "start_time": "2021-04-13T17:49:30.541973Z",
+    "end_time": "2021-04-13T17:49:30.556507Z",
+    "status": {
+        "status_code": "ERROR",
+        "description": "RuntimeError: An error"
+    },
+    "attributes": {
+        "http.method": "GET",
+        "http.server_name": "localhost",
+        "http.scheme": "http",
+        "net.host.port": 5000,
+        "http.host": "localhost:5000",
+        "http.target": "/route1",
+        "net.peer.ip": "127.0.0.1",
+        "http.user_agent": "werkzeug/1.0.1",
+        "http.flavor": "1.1",
+        "http.route": "/route1",
+        "http.request.header.user-agent": "werkzeug/1.0.1",
+        "http.request.header.host": "localhost:5000",
+        "http.request.header.tester1": "tester1",
+        "http.request.header.tester2": "tester2",
+        "http.response.header.content-type": "text/html; charset=utf-8",
+        "http.response.header.content-length": "290",
+        "http.status_text": "INTERNAL SERVER ERROR",
+        "http.status_code": 500
+    },
+    "events": [
+        {
+            "name": "exception",
+            "timestamp": "2021-04-13T17:49:30.556467Z",
+            "attributes": {
+                "exception.type": "RuntimeError",
+                "exception.message": "An error",
+                "exception.stacktrace": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.8/site-packages/opentelemetry/trace/__init__.py\", line 462, in use_span\n    yield span\n  File \"/usr/local/lib/python3.8/site-packages/flask/app.py\", line 2447, in wsgi_app\n    response = self.full_dispatch_request()\n  File \"/usr/local/lib/python3.8/site-packages/flask/app.py\", line 1952, in full_dispatch_request\n    rv = self.handle_user_exception(e)\n  File \"/usr/local/lib/python3.8/site-packages/flask/app.py\", line 1821, in handle_user_exception\n    reraise(exc_type, exc_value, tb)\n  File \"/usr/local/lib/python3.8/site-packages/flask/_compat.py\", line 39, in reraise\n    raise value\n  File \"/usr/local/lib/python3.8/site-packages/flask/app.py\", line 1950, in full_dispatch_request\n    rv = self.dispatch_request()\n  File \"/usr/local/lib/python3.8/site-packages/flask/app.py\", line 1936, in dispatch_request\n    return self.view_functions[rule.endpoint](**req.view_args)\n  File \"/Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask/test_flask_1.py\", line 83, in testAPI1\n    raise RuntimeError('An error')\nRuntimeError: An error\n",
+                "exception.escaped": "False"
+            }
+        }
+    ],
+    "links": [],
+    "resource": {
+        "telemetry.sdk.language": "python",
+        "telemetry.sdk.name": "opentelemetry",
+        "telemetry.sdk.version": "1.0.0",
+        "service.name": "pythonagent",
+        "service.instance.id": 98600
+    }
+}
+2021-04-13 10:49:30 DEBUG    len(span_list): 1
+2021-04-13 10:49:30 DEBUG    span_list: BoundedDict({'http.method': 'GET', 'http.server_name': 'localhost', 'http.scheme': 'http', 'net.host.port': 5000, 'http.host': 'localhost:5000', 'http.target': '/route1', 'net.peer.ip': '127.0.0.1', 'http.user_agent': 'werkzeug/1.0.1', 'http.flavor': '1.1', 'http.route': '/route1', 'http.request.header.user-agent': 'werkzeug/1.0.1', 'http.request.header.host': 'localhost:5000', 'http.request.header.tester1': 'tester1', 'http.request.header.tester2': 'tester2', 'http.response.header.content-type': 'text/html; charset=utf-8', 'http.response.header.content-length': '290', 'http.status_text': 'INTERNAL SERVER ERROR', 'http.status_code': 500}, maxlen=128)
+2021-04-13 10:49:30 ERROR    Failed to initialize postgresql instrumentation wrapper: exception=<class 'AssertionError'>, stacktrace=Traceback (most recent call last):
+  File "/Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask/test_flask_1.py", line 163, in test_run
+    assert flaskSpanAsObject['attributes']['http.response.header.content-type'] == 'application/json'
+AssertionError: assert 'text/html; charset=utf-8' == 'application/json'
+  - application/json
+  + text/html; charset=utf-8
+
+------------------------------ Captured log call -------------------------------
+INFO     test_flask_1:test_flask_1.py:61 Initializing flask app.
+INFO     test_flask_1:test_flask_1.py:102 Flask app initialized.
+INFO     test_flask_1:test_flask_1.py:107 Initializing agent.
+DEBUG    agent:__init__.py:30 Initializing Agent.
+DEBUG    agent.config:__init__.py:31 AgentConfig - using default
+DEBUG    agent.init:__init__.py:24 Initializing AgentInit object.
+INFO     agent.config:__init__.py:185 {'config': {'service_name': 'pythonagent', 'reporting': {'endpoint': 'http://localhost:9411/api/v2/spans', 'secure': False}, 'data_capture': {'http_headers': {'request': True, 'response': True}, 'http_body': {'request': True, 'response': False}, 'rpc_metadata': {'request': True, 'response': False}, 'rpc_body': {'request': True, 'response': False}}}, 'new_config': None, 'opa': <class 'config_pb2.Opa'>, 'reporting': <class 'config_pb2.Reporting'>, 'rpc_body': request {
+  value: true
+}
+response {
+}
+, 'rpc_metadata': request {
+  value: true
+}
+response {
+}
+, 'http_body': request {
+  value: true
+}
+response {
+}
+, 'http_headers': request {
+  value: true
+}
+response {
+  value: true
+}
+, 'data_capture': <class 'config_pb2.DataCapture'>, 'agent_config': <class 'config_pb2.AgentConfig'>, 'service_name': 'pythonagent'}
+DEBUG    agent.init:__init__.py:196 OTEL_TRACES_EXPORTER is zipkin, adding exporter.
+INFO     agent.init:__init__.py:217 Added ZipkinExporter span exporter
+DEBUG    agent:__init__.py:40 Calling Agent.registerFlaskApp.
+DEBUG    agent.init:__init__.py:73 Calling AgentInit.flaskInit().
+DEBUG    agent.instrumentation.flask:__init__.py:85 Entering FlaskInstrumentorWrapper constructor.
+DEBUG    agent.instrumentation:__init__.py:25 Entering BaseInstrumentorWrapper constructor.
+DEBUG    agent.instrumentation.flask:__init__.py:90 Entering FlaskInstrumentorWrapper.instument_app().
+DEBUG    agent.init:__init__.py:179 Calling AgentInit.initInstrumentorWrapperBaseForHTTP().
+DEBUG    agent.instrumentation:__init__.py:65 Setting self._processRequestHeaders to 'True'
+DEBUG    agent.instrumentation:__init__.py:75 Setting self._processRequestBody to 'True'
+DEBUG    agent.instrumentation:__init__.py:70 Setting self._processResponseHeaders to 'True'
+DEBUG    agent.instrumentation:__init__.py:80 Setting self._processResponseBody to 'False'
+DEBUG    agent.init:__init__.py:67 Calling DumpConfig().
+DEBUG    agent.init:__init__.py:69 flask:True
+DEBUG    agent.init:__init__.py:69 grpc:server:False
+DEBUG    agent.init:__init__.py:69 grpc:client:False
+DEBUG    agent.init:__init__.py:69 mysql:False
+DEBUG    agent.init:__init__.py:69 postgresql:False
+DEBUG    agent.init:__init__.py:69 requests:False
+INFO     test_flask_1:test_flask_1.py:113 Agent initialized.
+INFO     test_flask_1:test_flask_1.py:118 Agent initialized.
+INFO     test_flask_1:test_flask_1.py:119 Adding in-memory span exporter.
+DEBUG    agent:__init__.py:109 Entering Agent.setProcessor().
+DEBUG    agent.init:__init__.py:189 Entering AgentInit.setProcessor().
+INFO     test_flask_1:test_flask_1.py:123 Added in-memoy span exporter
+INFO     test_flask_1:test_flask_1.py:144 Running test calls.
+INFO     test_flask_1:test_flask_1.py:147 Making test call to /route1
+DEBUG    test_flask_1:test_flask_1.py:66 test_program: before_first_request() called
+DEBUG    test_flask_1:test_flask_1.py:70 test_progam: before_request() called
+DEBUG    agent.instrumentation.flask:__init__.py:35 Entering _hypertrace_before_request().
+DEBUG    agent.instrumentation.flask:__init__.py:46 span: _Span(name="/route1", context=SpanContext(trace_id=0x33de7d743fc01d87bb897aa810c2b887, span_id=0x3def169f5f091cec, trace_flags=0x01, trace_state=[], is_remote=False))
+DEBUG    agent.instrumentation.flask:__init__.py:47 Request Headers: b''
+DEBUG    agent.instrumentation.flask:__init__.py:48 Request Body: b''
+DEBUG    agent.instrumentation:__init__.py:90 Entering BaseInstrumentationWrapper.genericRequestHandler().
+DEBUG    agent.instrumentation:__init__.py:92 span: _Span(name="/route1", context=SpanContext(trace_id=0x33de7d743fc01d87bb897aa810c2b887, span_id=0x3def169f5f091cec, trace_flags=0x01, trace_state=[], is_remote=False))
+DEBUG    agent.instrumentation:__init__.py:93 requestHeaders: User-Agent: werkzeug/1.0.1
+Host: localhost:5000
+Tester1: tester1
+Tester2: tester2
+
+
+DEBUG    agent.instrumentation:__init__.py:94 requestBody: b''
+DEBUG    agent.instrumentation:__init__.py:97 Span is Recording!
+DEBUG    agent.instrumentation:__init__.py:102 Dumping Request Headers:
+DEBUG    agent.instrumentation:__init__.py:104 ('User-Agent', 'werkzeug/1.0.1')
+DEBUG    agent.instrumentation:__init__.py:104 ('Host', 'localhost:5000')
+DEBUG    agent.instrumentation:__init__.py:104 ('Tester1', 'tester1')
+DEBUG    agent.instrumentation:__init__.py:104 ('Tester2', 'tester2')
+DEBUG    agent.instrumentation:__init__.py:108 Request Body: b''
+DEBUG    agent.instrumentation:__init__.py:111 contentTypeHeaderTuple=[]
+INFO     test_flask_1:test_flask_1.py:79 Serving request for /route1.
+ERROR    test_flask_1:app.py:1891 Exception on /route1 [GET]
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.8/site-packages/flask/app.py", line 2447, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/usr/local/lib/python3.8/site-packages/flask/app.py", line 1952, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/usr/local/lib/python3.8/site-packages/flask/app.py", line 1821, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/usr/local/lib/python3.8/site-packages/flask/_compat.py", line 39, in reraise
+    raise value
+  File "/usr/local/lib/python3.8/site-packages/flask/app.py", line 1950, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/usr/local/lib/python3.8/site-packages/flask/app.py", line 1936, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask/test_flask_1.py", line 83, in testAPI1
+    raise RuntimeError('An error')
+RuntimeError: An error
+DEBUG    agent.instrumentation.flask:__init__.py:62 Entering _hypertrace_after_request().
+DEBUG    agent.instrumentation.flask:__init__.py:69 Span: _Span(name="/route1", context=SpanContext(trace_id=0x33de7d743fc01d87bb897aa810c2b887, span_id=0x3def169f5f091cec, trace_flags=0x01, trace_state=[], is_remote=False))
+DEBUG    agent.instrumentation.flask:__init__.py:70 Response Headers: Content-Type: text/html; charset=utf-8
+Content-Length: 290
+
+
+DEBUG    agent.instrumentation.flask:__init__.py:71 Response Body: b'<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n<title>500 Internal Server Error</title>\n<h1>Internal Server Error</h1>\n<p>The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.</p>\n'
+DEBUG    agent.instrumentation:__init__.py:141 Entering BaseInstrumentationWrapper.genericResponseHandler().
+DEBUG    agent.instrumentation:__init__.py:143 span: _Span(name="/route1", context=SpanContext(trace_id=0x33de7d743fc01d87bb897aa810c2b887, span_id=0x3def169f5f091cec, trace_flags=0x01, trace_state=[], is_remote=False))
+DEBUG    agent.instrumentation:__init__.py:144 responseHeaders: Content-Type: text/html; charset=utf-8
+Content-Length: 290
+
+
+DEBUG    agent.instrumentation:__init__.py:145 responseBody: b'<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n<title>500 Internal Server Error</title>\n<h1>Internal Server Error</h1>\n<p>The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.</p>\n'
+DEBUG    agent.instrumentation:__init__.py:148 Span is Recording!
+DEBUG    agent.instrumentation:__init__.py:153 Dumping Response Headers:
+DEBUG    agent.instrumentation:__init__.py:155 ('Content-Type', 'text/html; charset=utf-8')
+DEBUG    agent.instrumentation:__init__.py:155 ('Content-Length', '290')
+DEBUG    agent.instrumentation:__init__.py:159 Response Body: b'<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n<title>500 Internal Server Error</title>\n<h1>Internal Server Error</h1>\n<p>The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.</p>\n'
+DEBUG    agent.instrumentation:__init__.py:162 contentTypeHeaderTuple=[('Content-Type', 'text/html; charset=utf-8')]
+DEBUG    agent.instrumentation:__init__.py:165 Found content-type header.
+DEBUG    agent.instrumentation:__init__.py:168 Mimetype/content-type value exists. text/html; charset=utf-8
+DEBUG    agent.instrumentation:__init__.py:192 Entering FlaskInstrumentorWrapper.isInterestingContentType().
+DEBUG    test_flask_1:test_flask_1.py:74 test_program: after_request() called
+DEBUG    test_flask_1:test_flask_1.py:154 len(span_list): 1
+DEBUG    test_flask_1:test_flask_1.py:156 span_list: BoundedDict({'http.method': 'GET', 'http.server_name': 'localhost', 'http.scheme': 'http', 'net.host.port': 5000, 'http.host': 'localhost:5000', 'http.target': '/route1', 'net.peer.ip': '127.0.0.1', 'http.user_agent': 'werkzeug/1.0.1', 'http.flavor': '1.1', 'http.route': '/route1', 'http.request.header.user-agent': 'werkzeug/1.0.1', 'http.request.header.host': 'localhost:5000', 'http.request.header.tester1': 'tester1', 'http.request.header.tester2': 'tester2', 'http.response.header.content-type': 'text/html; charset=utf-8', 'http.response.header.content-length': '290', 'http.status_text': 'INTERNAL SERVER ERROR', 'http.status_code': 500}, maxlen=128)
+ERROR    test_flask_1:test_flask_1.py:198 Failed to initialize postgresql instrumentation wrapper: exception=<class 'AssertionError'>, stacktrace=Traceback (most recent call last):
+  File "/Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask/test_flask_1.py", line 163, in test_run
+    assert flaskSpanAsObject['attributes']['http.response.header.content-type'] == 'application/json'
+AssertionError: assert 'text/html; charset=utf-8' == 'application/json'
+  - application/json
+  + text/html; charset=utf-8
+============================== 1 failed in 0.88s ===============================
+ERROR: InvocationError for command /usr/local/bin/pytest -rPx test_flask_1.py (exited with code 1)
+py39 recreate: /Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask/.tox/py39
+py39 installdeps: -rrequirements.txt
+py39 installed: WARNING: Could not find setup.py for directory /Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask/.tox/py39/lib/python3.9/site-packages (tried all parent directories),alabaster==0.7.12,apipkg==1.5,appdirs==1.4.4,asgiref==3.3.1,astroid==2.5.1,attrs==20.3.0,autopep8==1.5.5,Babel==2.9.0,backoff==1.10.0,bcrypt==3.2.0,beautifulsoup4==4.9.3,black==19.10b0,bleach==3.3.0,cachetools==4.2.1,certifi==2020.12.5,cffi==1.14.5,chardet==4.0.0,click==7.1.2,configparser==5.0.2,couchbase==3.0.9,coverage==5.5,cryptography==3.4.6,deepdiff==5.2.3,distlib==0.3.1,docutils==0.16,en==0.0.1,environs==9.3.1,execnet==1.8.0,filelock==3.0.12,flake8==3.8.4,Flask==1.1.2,gen==0.1,Geohash==1.0,google==3.0.0,google-api-core==1.26.0,google-api-python-client==2.0.2,google-auth==1.27.0,google-auth-httplib2==0.0.4,google-cloud==0.34.0,google-cloud-vision==2.2.0,googleapis-common-protos==1.52.0,grpcio==1.37.0,grpcio-tools==1.29.0,httplib2==0.19.0,httpretty==1.0.5,idna==2.10,imagesize==1.2.0,iniconfig==1.1.1,isort==5.7.0,itsdangerous==1.1.0,Jinja2==2.11.3,lazy-object-proxy==1.5.2,libcst==0.3.17,MarkupSafe==1.1.1,marshmallow==3.10.0,mccabe==0.6.1,mypy==0.790,mypy-extensions==0.4.3,mypy-protobuf==2.4,mysql-connector==2.2.9,mysql-connector-python==8.0.23,opentelemetry-api==1.0.0,opentelemetry-exporter-jaeger==1.0.0,opentelemetry-exporter-jaeger-proto-grpc==1.0.0,opentelemetry-exporter-jaeger-thrift==1.0.0,opentelemetry-exporter-otlp==1.0.0,opentelemetry-exporter-otlp-proto-grpc==1.0.0,opentelemetry-exporter-zipkin==1.0.0,opentelemetry-exporter-zipkin-json==1.0.0,opentelemetry-exporter-zipkin-proto-http==1.0.0,opentelemetry-instrumentation==0.19b0,opentelemetry-instrumentation-dbapi==0.19b0,opentelemetry-instrumentation-flask==0.19b0,-e git+git@github.com:Traceableai/pythonagent.git@daf161adca5f915076cf38a80e4e084aa94d2235#egg=opentelemetry_instrumentation_grpc,opentelemetry-instrumentation-mysql==0.19b0,opentelemetry-instrumentation-requests==0.19b0,opentelemetry-instrumentation-wsgi==0.19b0,opentelemetry-launcher==1.0.0rc1,opentelemetry-propagator-b3==1.0.0rc1,opentelemetry-proto==1.0.0,opentelemetry-sdk==1.0.0,opentelemetry-util-http==0.19b0,ordered-set==4.0.2,packaging==20.9,paramiko==2.7.2,pathspec==0.8.1,pluggy==0.13.1,proto-plus==1.13.0,protobuf==3.15.8,py==1.10.0,pyasn1==0.4.8,pyasn1-modules==0.2.8,pycodestyle==2.6.0,pycparser==2.20,pyes==0.99.6,pyflakes==2.2.0,Pygments==2.8.0,pylint==2.7.2,PyNaCl==1.4.0,pyparsing==2.4.7,pyrsistent==0.17.3,pytest==6.2.3,pytest-cov==2.11.1,pytest-forked==1.3.0,pytest-xdist==2.2.1,python-dotenv==0.15.0,python-geohash==0.8.5,pytz==2021.1,PyYAML==5.4.1,readme-renderer==24.0,regex==2020.11.13,requests==2.25.1,rsa==4.7.2,sgmllib3k==1.0.0,six==1.15.0,snowballstemmer==2.1.0,soupsieve==2.2,Sphinx==2.4.4,sphinx-autodoc-typehints==1.10.3,sphinx-rtd-theme==0.5.1,sphinxcontrib-applehelp==1.0.2,sphinxcontrib-devhelp==1.0.2,sphinxcontrib-htmlhelp==1.0.3,sphinxcontrib-jsmath==1.0.1,sphinxcontrib-qthelp==1.0.3,sphinxcontrib-serializinghtml==1.1.4,thrift==0.13.0,toml==0.10.2,typed-ast==1.4.2,typing-extensions==3.7.4.3,typing-inspect==0.6.0,uritemplate==3.0.1,urllib3==1.26.3,virtualenv==20.4.2,webencodings==0.5.1,Werkzeug==1.0.1,wrapt==1.12.1
+py39 run-test-pre: PYTHONHASHSEED='4124926585'
+py39 run-test: commands[0] | pytest -rPx test_flask_1.py
+============================= test session starts ==============================
+platform darwin -- Python 3.9.2, pytest-6.2.3, py-1.10.0, pluggy-0.13.1
+cachedir: .tox/py39/.pytest_cache
+rootdir: /Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask, configfile: pytest.ini
+plugins: xdist-2.2.1, forked-1.3.0, cov-2.11.1
+collected 1 item
+
+test_flask_1.py F                                                        [100%]
+
+=================================== FAILURES ===================================
+___________________________________ test_run ___________________________________
+
+    def test_run():
+      logger = setup_custom_logger(__name__)
+      logger.info('Initializing flask app.')
+      # Create Flask app
+      app = Flask(__name__)
+      @app.before_first_request
+      def before_first_request():
+        logger.debug("test_program: before_first_request() called")
+    
+      @app.before_request
+      def before_request():
+          logger.debug("test_progam: before_request() called")
+    
+      @app.after_request
+      def after_request(response):
+          logger.debug("test_program: after_request() called")
+          return response
+    
+      @app.route("/route1")
+      def testAPI1():
+        logger.info('Serving request for /route1.')
+        response = flask.Response(mimetype='application/json')
+        response.headers['tester3'] = 'tester3'
+        response.data = str('{ "a": "a", "xyz": "xyz" }')
+        raise RuntimeError('An error')
+        return response
+    
+      @app.route("/route2")
+      def testAPI2():
+        logger.info('Serving request for /route2.')
+        response = flask.Response(mimetype='application/json')
+        response.headers['tester3'] = 'tester3'
+        response.data = str('{ "a": "a", "xyz": "xyz" }')
+        return response
+    
+      @app.route("/terminate")
+      def terminate():
+        logger.info('Serving request for /terminatae.')
+        shutdown_server()
+        response = flask.Response()
+        response.data = { 'a': 'a', 'xyz': 'xyz' }
+        return response
+    
+      logger.info('Flask app initialized.')
+    
+      #
+      # Code snippet here represents the current initialization logic
+      #
+      logger.info('Initializing agent.')
+      agent = Agent()
+      agent.registerFlaskApp(app)
+      #
+      # End initialization logic for Python Agent
+      #
+      logger.info('Agent initialized.')
+    
+      server = FlaskServer(app)
+    
+      # Setup In-Memory Span Exporter
+      logger.info('Agent initialized.')
+      logger.info('Adding in-memory span exporter.')
+      memoryExporter = InMemorySpanExporter()
+      simpleExportSpanProcessor = SimpleSpanProcessor(memoryExporter)
+      agent.setProcessor(simpleExportSpanProcessor)
+      logger.info('Added in-memoy span exporter')
+    
+      # Setup Jaeger Exporter
+      #logger.info('Adding jaeger span exporter.')
+      #jaegerExporter = jaeger.JaegerSpanExporter(
+      #    service_name= 'pythonagent',
+      #    # configure agent
+      #    agent_host_name='localhost',
+      #    agent_port=6831,
+      #    # optional: configure also collector
+      #    # collector_endpoint='http://localhost:14268/api/traces?format=jaeger.thrift',
+      #    # username=xxxx, # optional
+      #    # password=xxxx, # optional
+      #    # insecure=True, # optional
+      #    # credentials=xxx # optional channel creds
+      #    # transport_format='protobuf' # optional
+      #)
+      #batchExportSpanProcessor = BatchSpanProcessor(jaegerExporter)
+      #agent.setProcessor(batchExportSpanProcessor)
+      #logger.info('Added jaeger span exporter.')
+    
+      logger.info('Running test calls.')
+      with app.test_client() as c:
+        try:
+          logger.info('Making test call to /route1')
+          r1 = app.test_client().get('http://localhost:5000/route1', headers={ 'tester1': 'tester1', 'tester2':'tester2'})
+          # Get all of the in memory spans that were recorded for this iteration
+          span_list = memoryExporter.get_finished_spans()
+          # Confirm something was returned.
+          assert span_list
+          # Confirm there are three spans
+          logger.debug('len(span_list): ' + str(len(span_list)))
+          assert len(span_list) == 1
+          logger.debug('span_list: ' + str(span_list[0].attributes))
+          flaskSpanAsObject = json.loads(span_list[0].to_json())
+          # Check that the expected results are in the flask extended span attributes
+          assert flaskSpanAsObject['attributes']['http.method'] == 'GET'
+          assert flaskSpanAsObject['attributes']['http.target'] == '/route1'
+          assert flaskSpanAsObject['attributes']['http.request.header.tester1'] == 'tester1'
+          assert flaskSpanAsObject['attributes']['http.request.header.tester2'] == 'tester2'
+>         assert flaskSpanAsObject['attributes']['http.response.header.content-type'] == 'application/json'
+E         AssertionError: assert 'text/html; charset=utf-8' == 'application/json'
+E           - application/json
+E           + text/html; charset=utf-8
+
+test_flask_1.py:163: AssertionError
+
+During handling of the above exception, another exception occurred:
+
+    def test_run():
+      logger = setup_custom_logger(__name__)
+      logger.info('Initializing flask app.')
+      # Create Flask app
+      app = Flask(__name__)
+      @app.before_first_request
+      def before_first_request():
+        logger.debug("test_program: before_first_request() called")
+    
+      @app.before_request
+      def before_request():
+          logger.debug("test_progam: before_request() called")
+    
+      @app.after_request
+      def after_request(response):
+          logger.debug("test_program: after_request() called")
+          return response
+    
+      @app.route("/route1")
+      def testAPI1():
+        logger.info('Serving request for /route1.')
+        response = flask.Response(mimetype='application/json')
+        response.headers['tester3'] = 'tester3'
+        response.data = str('{ "a": "a", "xyz": "xyz" }')
+        raise RuntimeError('An error')
+        return response
+    
+      @app.route("/route2")
+      def testAPI2():
+        logger.info('Serving request for /route2.')
+        response = flask.Response(mimetype='application/json')
+        response.headers['tester3'] = 'tester3'
+        response.data = str('{ "a": "a", "xyz": "xyz" }')
+        return response
+    
+      @app.route("/terminate")
+      def terminate():
+        logger.info('Serving request for /terminatae.')
+        shutdown_server()
+        response = flask.Response()
+        response.data = { 'a': 'a', 'xyz': 'xyz' }
+        return response
+    
+      logger.info('Flask app initialized.')
+    
+      #
+      # Code snippet here represents the current initialization logic
+      #
+      logger.info('Initializing agent.')
+      agent = Agent()
+      agent.registerFlaskApp(app)
+      #
+      # End initialization logic for Python Agent
+      #
+      logger.info('Agent initialized.')
+    
+      server = FlaskServer(app)
+    
+      # Setup In-Memory Span Exporter
+      logger.info('Agent initialized.')
+      logger.info('Adding in-memory span exporter.')
+      memoryExporter = InMemorySpanExporter()
+      simpleExportSpanProcessor = SimpleSpanProcessor(memoryExporter)
+      agent.setProcessor(simpleExportSpanProcessor)
+      logger.info('Added in-memoy span exporter')
+    
+      # Setup Jaeger Exporter
+      #logger.info('Adding jaeger span exporter.')
+      #jaegerExporter = jaeger.JaegerSpanExporter(
+      #    service_name= 'pythonagent',
+      #    # configure agent
+      #    agent_host_name='localhost',
+      #    agent_port=6831,
+      #    # optional: configure also collector
+      #    # collector_endpoint='http://localhost:14268/api/traces?format=jaeger.thrift',
+      #    # username=xxxx, # optional
+      #    # password=xxxx, # optional
+      #    # insecure=True, # optional
+      #    # credentials=xxx # optional channel creds
+      #    # transport_format='protobuf' # optional
+      #)
+      #batchExportSpanProcessor = BatchSpanProcessor(jaegerExporter)
+      #agent.setProcessor(batchExportSpanProcessor)
+      #logger.info('Added jaeger span exporter.')
+    
+      logger.info('Running test calls.')
+      with app.test_client() as c:
+        try:
+          logger.info('Making test call to /route1')
+          r1 = app.test_client().get('http://localhost:5000/route1', headers={ 'tester1': 'tester1', 'tester2':'tester2'})
+          # Get all of the in memory spans that were recorded for this iteration
+          span_list = memoryExporter.get_finished_spans()
+          # Confirm something was returned.
+          assert span_list
+          # Confirm there are three spans
+          logger.debug('len(span_list): ' + str(len(span_list)))
+          assert len(span_list) == 1
+          logger.debug('span_list: ' + str(span_list[0].attributes))
+          flaskSpanAsObject = json.loads(span_list[0].to_json())
+          # Check that the expected results are in the flask extended span attributes
+          assert flaskSpanAsObject['attributes']['http.method'] == 'GET'
+          assert flaskSpanAsObject['attributes']['http.target'] == '/route1'
+          assert flaskSpanAsObject['attributes']['http.request.header.tester1'] == 'tester1'
+          assert flaskSpanAsObject['attributes']['http.request.header.tester2'] == 'tester2'
+          assert flaskSpanAsObject['attributes']['http.response.header.content-type'] == 'application/json'
+          assert flaskSpanAsObject['attributes']['http.response.body'] == '{ "a": "a", "xyz": "xyz" }'
+          assert flaskSpanAsObject['attributes']['http.status_code'] == 200
+          assert flaskSpanAsObject['attributes']['http.response.header.tester3'] == 'tester3'
+          memoryExporter.clear()
+          logger.info('Making test call to /route2')
+          r2 = app.test_client().get('http://localhost:5000/route2', headers={ 'tester1': 'tester1', 'tester2':'tester2'})
+          # Confirm something was returned.
+          assert span_list
+          # Confirm there are three spans
+          logger.debug('len(span_list): ' + str(len(span_list)))
+          assert len(span_list) == 1
+          logger.debug('span_list: ' + str(span_list[0].attributes))
+          flaskSpanAsObject = json.loads(span_list[0].to_json())
+          # Check that the expected results are in the flask extended span attributes
+          assert flaskSpanAsObject['attributes']['http.method'] == 'GET'
+          assert flaskSpanAsObject['attributes']['http.target'] == '/route1'
+          assert flaskSpanAsObject['attributes']['http.request.header.tester1'] == 'tester1'
+          assert flaskSpanAsObject['attributes']['http.request.header.tester2'] == 'tester2'
+          assert flaskSpanAsObject['attributes']['http.response.header.content-type'] == 'application/json'
+          assert flaskSpanAsObject['attributes']['http.response.body'] == '{ "a": "a", "xyz": "xyz" }'
+          assert flaskSpanAsObject['attributes']['http.status_code'] == 200
+          assert flaskSpanAsObject['attributes']['http.response.header.tester3'] == 'tester3'
+          memoryExporter.clear()
+          logger.info('Reading /route1 response.')
+          a1 = r1.get_json()['a']
+          logger.info('Reading /route2 response.')
+          a2 = r2.get_json()['a']
+          assert a1 == 'a'
+          assert a2 == 'a'
+          logger.info('r1 result: ' + str(a1))
+          logger.info('r2 result: ' + str(a2))
+          logger.info('Exiting from flask instrumentation test.')
+          return 0
+        except:
+          logger.error('Failed to initialize postgresql instrumentation wrapper: exception=%s, stacktrace=%s',
+            sys.exc_info()[0],
+            traceback.format_exc())
+>         raise sys.exc_info()[0]
+E         AssertionError
+
+test_flask_1.py:201: AssertionError
+----------------------------- Captured stdout call -----------------------------
+2021-04-13 10:49:40 INFO     Initializing flask app.
+2021-04-13 10:49:40 INFO     Flask app initialized.
+2021-04-13 10:49:40 INFO     Initializing agent.
+2021-04-13 10:49:40 DEBUG    Initializing Agent.
+2021-04-13 10:49:40 DEBUG    AgentConfig - using default
+2021-04-13 10:49:40 DEBUG    Initializing AgentInit object.
+2021-04-13 10:49:40 INFO     {'config': {'service_name': 'pythonagent', 'reporting': {'endpoint': 'http://localhost:9411/api/v2/spans', 'secure': False}, 'data_capture': {'http_headers': {'request': True, 'response': True}, 'http_body': {'request': True, 'response': False}, 'rpc_metadata': {'request': True, 'response': False}, 'rpc_body': {'request': True, 'response': False}}}, 'new_config': None, 'opa': <class 'config_pb2.Opa'>, 'reporting': <class 'config_pb2.Reporting'>, 'rpc_body': request {
+  value: true
+}
+response {
+}
+, 'rpc_metadata': request {
+  value: true
+}
+response {
+}
+, 'http_body': request {
+  value: true
+}
+response {
+}
+, 'http_headers': request {
+  value: true
+}
+response {
+  value: true
+}
+, 'data_capture': <class 'config_pb2.DataCapture'>, 'agent_config': <class 'config_pb2.AgentConfig'>, 'service_name': 'pythonagent'}
+2021-04-13 10:49:40 DEBUG    OTEL_TRACES_EXPORTER is zipkin, adding exporter.
+2021-04-13 10:49:40 INFO     Added ZipkinExporter span exporter
+2021-04-13 10:49:40 DEBUG    Calling Agent.registerFlaskApp.
+2021-04-13 10:49:40 DEBUG    Calling AgentInit.flaskInit().
+2021-04-13 10:49:40 DEBUG    Entering FlaskInstrumentorWrapper constructor.
+2021-04-13 10:49:40 DEBUG    Entering BaseInstrumentorWrapper constructor.
+2021-04-13 10:49:40 DEBUG    Entering FlaskInstrumentorWrapper.instument_app().
+2021-04-13 10:49:40 DEBUG    Calling AgentInit.initInstrumentorWrapperBaseForHTTP().
+2021-04-13 10:49:40 DEBUG    Setting self._processRequestHeaders to 'True'
+2021-04-13 10:49:40 DEBUG    Setting self._processRequestBody to 'True'
+2021-04-13 10:49:40 DEBUG    Setting self._processResponseHeaders to 'True'
+2021-04-13 10:49:40 DEBUG    Setting self._processResponseBody to 'False'
+2021-04-13 10:49:40 DEBUG    Calling DumpConfig().
+2021-04-13 10:49:40 DEBUG    flask:True
+2021-04-13 10:49:40 DEBUG    grpc:server:False
+2021-04-13 10:49:40 DEBUG    grpc:client:False
+2021-04-13 10:49:40 DEBUG    mysql:False
+2021-04-13 10:49:40 DEBUG    postgresql:False
+2021-04-13 10:49:40 DEBUG    requests:False
+2021-04-13 10:49:40 INFO     Agent initialized.
+2021-04-13 10:49:40 INFO     Agent initialized.
+2021-04-13 10:49:40 INFO     Adding in-memory span exporter.
+2021-04-13 10:49:40 DEBUG    Entering Agent.setProcessor().
+2021-04-13 10:49:40 DEBUG    Entering AgentInit.setProcessor().
+2021-04-13 10:49:40 INFO     Added in-memoy span exporter
+2021-04-13 10:49:40 INFO     Running test calls.
+2021-04-13 10:49:40 INFO     Making test call to /route1
+2021-04-13 10:49:40 DEBUG    test_program: before_first_request() called
+2021-04-13 10:49:40 DEBUG    test_progam: before_request() called
+2021-04-13 10:49:40 DEBUG    Entering _hypertrace_before_request().
+2021-04-13 10:49:40 DEBUG    span: _Span(name="/route1", context=SpanContext(trace_id=0xddb9f484a92943ab55483d0c413c0699, span_id=0x44ab879311c6d24a, trace_flags=0x01, trace_state=[], is_remote=False))
+2021-04-13 10:49:40 DEBUG    Request Headers: b''
+2021-04-13 10:49:40 DEBUG    Request Body: b''
+2021-04-13 10:49:40 DEBUG    Entering BaseInstrumentationWrapper.genericRequestHandler().
+2021-04-13 10:49:40 DEBUG    span: _Span(name="/route1", context=SpanContext(trace_id=0xddb9f484a92943ab55483d0c413c0699, span_id=0x44ab879311c6d24a, trace_flags=0x01, trace_state=[], is_remote=False))
+2021-04-13 10:49:40 DEBUG    requestHeaders: User-Agent: werkzeug/1.0.1
+Host: localhost:5000
+Tester1: tester1
+Tester2: tester2
+
+
+2021-04-13 10:49:40 DEBUG    requestBody: b''
+2021-04-13 10:49:40 DEBUG    Span is Recording!
+2021-04-13 10:49:40 DEBUG    Dumping Request Headers:
+2021-04-13 10:49:40 DEBUG    ('User-Agent', 'werkzeug/1.0.1')
+2021-04-13 10:49:40 DEBUG    ('Host', 'localhost:5000')
+2021-04-13 10:49:40 DEBUG    ('Tester1', 'tester1')
+2021-04-13 10:49:40 DEBUG    ('Tester2', 'tester2')
+2021-04-13 10:49:40 DEBUG    Request Body: b''
+2021-04-13 10:49:40 DEBUG    contentTypeHeaderTuple=[]
+2021-04-13 10:49:40 INFO     Serving request for /route1.
+2021-04-13 10:49:40 ERROR    Exception on /route1 [GET]
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/flask/app.py", line 2447, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/flask/app.py", line 1952, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/flask/app.py", line 1821, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/flask/_compat.py", line 39, in reraise
+    raise value
+  File "/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/flask/app.py", line 1950, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/flask/app.py", line 1936, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask/test_flask_1.py", line 83, in testAPI1
+    raise RuntimeError('An error')
+RuntimeError: An error
+2021-04-13 10:49:40 DEBUG    Entering _hypertrace_after_request().
+2021-04-13 10:49:40 DEBUG    Span: _Span(name="/route1", context=SpanContext(trace_id=0xddb9f484a92943ab55483d0c413c0699, span_id=0x44ab879311c6d24a, trace_flags=0x01, trace_state=[], is_remote=False))
+2021-04-13 10:49:40 DEBUG    Response Headers: Content-Type: text/html; charset=utf-8
+Content-Length: 290
+
+
+2021-04-13 10:49:40 DEBUG    Response Body: b'<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n<title>500 Internal Server Error</title>\n<h1>Internal Server Error</h1>\n<p>The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.</p>\n'
+2021-04-13 10:49:40 DEBUG    Entering BaseInstrumentationWrapper.genericResponseHandler().
+2021-04-13 10:49:40 DEBUG    span: _Span(name="/route1", context=SpanContext(trace_id=0xddb9f484a92943ab55483d0c413c0699, span_id=0x44ab879311c6d24a, trace_flags=0x01, trace_state=[], is_remote=False))
+2021-04-13 10:49:40 DEBUG    responseHeaders: Content-Type: text/html; charset=utf-8
+Content-Length: 290
+
+
+2021-04-13 10:49:40 DEBUG    responseBody: b'<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n<title>500 Internal Server Error</title>\n<h1>Internal Server Error</h1>\n<p>The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.</p>\n'
+2021-04-13 10:49:40 DEBUG    Span is Recording!
+2021-04-13 10:49:40 DEBUG    Dumping Response Headers:
+2021-04-13 10:49:40 DEBUG    ('Content-Type', 'text/html; charset=utf-8')
+2021-04-13 10:49:40 DEBUG    ('Content-Length', '290')
+2021-04-13 10:49:40 DEBUG    Response Body: b'<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n<title>500 Internal Server Error</title>\n<h1>Internal Server Error</h1>\n<p>The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.</p>\n'
+2021-04-13 10:49:40 DEBUG    contentTypeHeaderTuple=[('Content-Type', 'text/html; charset=utf-8')]
+2021-04-13 10:49:40 DEBUG    Found content-type header.
+2021-04-13 10:49:40 DEBUG    Mimetype/content-type value exists. text/html; charset=utf-8
+2021-04-13 10:49:40 DEBUG    Entering FlaskInstrumentorWrapper.isInterestingContentType().
+2021-04-13 10:49:40 DEBUG    test_program: after_request() called
+{
+    "name": "/route1",
+    "context": {
+        "trace_id": "0xddb9f484a92943ab55483d0c413c0699",
+        "span_id": "0x44ab879311c6d24a",
+        "trace_state": "[]"
+    },
+    "kind": "SpanKind.SERVER",
+    "parent_id": null,
+    "start_time": "2021-04-13T17:49:40.545828Z",
+    "end_time": "2021-04-13T17:49:40.565443Z",
+    "status": {
+        "status_code": "ERROR",
+        "description": "RuntimeError: An error"
+    },
+    "attributes": {
+        "http.method": "GET",
+        "http.server_name": "localhost",
+        "http.scheme": "http",
+        "net.host.port": 5000,
+        "http.host": "localhost:5000",
+        "http.target": "/route1",
+        "net.peer.ip": "127.0.0.1",
+        "http.user_agent": "werkzeug/1.0.1",
+        "http.flavor": "1.1",
+        "http.route": "/route1",
+        "http.request.header.user-agent": "werkzeug/1.0.1",
+        "http.request.header.host": "localhost:5000",
+        "http.request.header.tester1": "tester1",
+        "http.request.header.tester2": "tester2",
+        "http.response.header.content-type": "text/html; charset=utf-8",
+        "http.response.header.content-length": "290",
+        "http.status_text": "INTERNAL SERVER ERROR",
+        "http.status_code": 500
+    },
+    "events": [
+        {
+            "name": "exception",
+            "timestamp": "2021-04-13T17:49:40.565410Z",
+            "attributes": {
+                "exception.type": "RuntimeError",
+                "exception.message": "An error",
+                "exception.stacktrace": "Traceback (most recent call last):\n  File \"/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/opentelemetry/trace/__init__.py\", line 462, in use_span\n    yield span\n  File \"/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/flask/app.py\", line 2447, in wsgi_app\n    response = self.full_dispatch_request()\n  File \"/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/flask/app.py\", line 1952, in full_dispatch_request\n    rv = self.handle_user_exception(e)\n  File \"/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/flask/app.py\", line 1821, in handle_user_exception\n    reraise(exc_type, exc_value, tb)\n  File \"/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/flask/_compat.py\", line 39, in reraise\n    raise value\n  File \"/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/flask/app.py\", line 1950, in full_dispatch_request\n    rv = self.dispatch_request()\n  File \"/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/flask/app.py\", line 1936, in dispatch_request\n    return self.view_functions[rule.endpoint](**req.view_args)\n  File \"/Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask/test_flask_1.py\", line 83, in testAPI1\n    raise RuntimeError('An error')\nRuntimeError: An error\n",
+                "exception.escaped": "False"
+            }
+        }
+    ],
+    "links": [],
+    "resource": {
+        "telemetry.sdk.language": "python",
+        "telemetry.sdk.name": "opentelemetry",
+        "telemetry.sdk.version": "1.0.0",
+        "service.name": "pythonagent",
+        "service.instance.id": 98628
+    }
+}
+2021-04-13 10:49:40 DEBUG    len(span_list): 1
+2021-04-13 10:49:40 DEBUG    span_list: BoundedDict({'http.method': 'GET', 'http.server_name': 'localhost', 'http.scheme': 'http', 'net.host.port': 5000, 'http.host': 'localhost:5000', 'http.target': '/route1', 'net.peer.ip': '127.0.0.1', 'http.user_agent': 'werkzeug/1.0.1', 'http.flavor': '1.1', 'http.route': '/route1', 'http.request.header.user-agent': 'werkzeug/1.0.1', 'http.request.header.host': 'localhost:5000', 'http.request.header.tester1': 'tester1', 'http.request.header.tester2': 'tester2', 'http.response.header.content-type': 'text/html; charset=utf-8', 'http.response.header.content-length': '290', 'http.status_text': 'INTERNAL SERVER ERROR', 'http.status_code': 500}, maxlen=128)
+2021-04-13 10:49:40 ERROR    Failed to initialize postgresql instrumentation wrapper: exception=<class 'AssertionError'>, stacktrace=Traceback (most recent call last):
+  File "/Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask/test_flask_1.py", line 163, in test_run
+    assert flaskSpanAsObject['attributes']['http.response.header.content-type'] == 'application/json'
+AssertionError: assert 'text/html; charset=utf-8' == 'application/json'
+  - application/json
+  + text/html; charset=utf-8
+
+------------------------------ Captured log call -------------------------------
+INFO     test_flask_1:test_flask_1.py:61 Initializing flask app.
+INFO     test_flask_1:test_flask_1.py:102 Flask app initialized.
+INFO     test_flask_1:test_flask_1.py:107 Initializing agent.
+DEBUG    agent:__init__.py:30 Initializing Agent.
+DEBUG    agent.config:__init__.py:31 AgentConfig - using default
+DEBUG    agent.init:__init__.py:24 Initializing AgentInit object.
+INFO     agent.config:__init__.py:185 {'config': {'service_name': 'pythonagent', 'reporting': {'endpoint': 'http://localhost:9411/api/v2/spans', 'secure': False}, 'data_capture': {'http_headers': {'request': True, 'response': True}, 'http_body': {'request': True, 'response': False}, 'rpc_metadata': {'request': True, 'response': False}, 'rpc_body': {'request': True, 'response': False}}}, 'new_config': None, 'opa': <class 'config_pb2.Opa'>, 'reporting': <class 'config_pb2.Reporting'>, 'rpc_body': request {
+  value: true
+}
+response {
+}
+, 'rpc_metadata': request {
+  value: true
+}
+response {
+}
+, 'http_body': request {
+  value: true
+}
+response {
+}
+, 'http_headers': request {
+  value: true
+}
+response {
+  value: true
+}
+, 'data_capture': <class 'config_pb2.DataCapture'>, 'agent_config': <class 'config_pb2.AgentConfig'>, 'service_name': 'pythonagent'}
+DEBUG    agent.init:__init__.py:196 OTEL_TRACES_EXPORTER is zipkin, adding exporter.
+INFO     agent.init:__init__.py:217 Added ZipkinExporter span exporter
+DEBUG    agent:__init__.py:40 Calling Agent.registerFlaskApp.
+DEBUG    agent.init:__init__.py:73 Calling AgentInit.flaskInit().
+DEBUG    agent.instrumentation.flask:__init__.py:85 Entering FlaskInstrumentorWrapper constructor.
+DEBUG    agent.instrumentation:__init__.py:25 Entering BaseInstrumentorWrapper constructor.
+DEBUG    agent.instrumentation.flask:__init__.py:90 Entering FlaskInstrumentorWrapper.instument_app().
+DEBUG    agent.init:__init__.py:179 Calling AgentInit.initInstrumentorWrapperBaseForHTTP().
+DEBUG    agent.instrumentation:__init__.py:65 Setting self._processRequestHeaders to 'True'
+DEBUG    agent.instrumentation:__init__.py:75 Setting self._processRequestBody to 'True'
+DEBUG    agent.instrumentation:__init__.py:70 Setting self._processResponseHeaders to 'True'
+DEBUG    agent.instrumentation:__init__.py:80 Setting self._processResponseBody to 'False'
+DEBUG    agent.init:__init__.py:67 Calling DumpConfig().
+DEBUG    agent.init:__init__.py:69 flask:True
+DEBUG    agent.init:__init__.py:69 grpc:server:False
+DEBUG    agent.init:__init__.py:69 grpc:client:False
+DEBUG    agent.init:__init__.py:69 mysql:False
+DEBUG    agent.init:__init__.py:69 postgresql:False
+DEBUG    agent.init:__init__.py:69 requests:False
+INFO     test_flask_1:test_flask_1.py:113 Agent initialized.
+INFO     test_flask_1:test_flask_1.py:118 Agent initialized.
+INFO     test_flask_1:test_flask_1.py:119 Adding in-memory span exporter.
+DEBUG    agent:__init__.py:109 Entering Agent.setProcessor().
+DEBUG    agent.init:__init__.py:189 Entering AgentInit.setProcessor().
+INFO     test_flask_1:test_flask_1.py:123 Added in-memoy span exporter
+INFO     test_flask_1:test_flask_1.py:144 Running test calls.
+INFO     test_flask_1:test_flask_1.py:147 Making test call to /route1
+DEBUG    test_flask_1:test_flask_1.py:66 test_program: before_first_request() called
+DEBUG    test_flask_1:test_flask_1.py:70 test_progam: before_request() called
+DEBUG    agent.instrumentation.flask:__init__.py:35 Entering _hypertrace_before_request().
+DEBUG    agent.instrumentation.flask:__init__.py:46 span: _Span(name="/route1", context=SpanContext(trace_id=0xddb9f484a92943ab55483d0c413c0699, span_id=0x44ab879311c6d24a, trace_flags=0x01, trace_state=[], is_remote=False))
+DEBUG    agent.instrumentation.flask:__init__.py:47 Request Headers: b''
+DEBUG    agent.instrumentation.flask:__init__.py:48 Request Body: b''
+DEBUG    agent.instrumentation:__init__.py:90 Entering BaseInstrumentationWrapper.genericRequestHandler().
+DEBUG    agent.instrumentation:__init__.py:92 span: _Span(name="/route1", context=SpanContext(trace_id=0xddb9f484a92943ab55483d0c413c0699, span_id=0x44ab879311c6d24a, trace_flags=0x01, trace_state=[], is_remote=False))
+DEBUG    agent.instrumentation:__init__.py:93 requestHeaders: User-Agent: werkzeug/1.0.1
+Host: localhost:5000
+Tester1: tester1
+Tester2: tester2
+
+
+DEBUG    agent.instrumentation:__init__.py:94 requestBody: b''
+DEBUG    agent.instrumentation:__init__.py:97 Span is Recording!
+DEBUG    agent.instrumentation:__init__.py:102 Dumping Request Headers:
+DEBUG    agent.instrumentation:__init__.py:104 ('User-Agent', 'werkzeug/1.0.1')
+DEBUG    agent.instrumentation:__init__.py:104 ('Host', 'localhost:5000')
+DEBUG    agent.instrumentation:__init__.py:104 ('Tester1', 'tester1')
+DEBUG    agent.instrumentation:__init__.py:104 ('Tester2', 'tester2')
+DEBUG    agent.instrumentation:__init__.py:108 Request Body: b''
+DEBUG    agent.instrumentation:__init__.py:111 contentTypeHeaderTuple=[]
+INFO     test_flask_1:test_flask_1.py:79 Serving request for /route1.
+ERROR    test_flask_1:app.py:1891 Exception on /route1 [GET]
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/flask/app.py", line 2447, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/flask/app.py", line 1952, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/flask/app.py", line 1821, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/flask/_compat.py", line 39, in reraise
+    raise value
+  File "/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/flask/app.py", line 1950, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/flask/app.py", line 1936, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask/test_flask_1.py", line 83, in testAPI1
+    raise RuntimeError('An error')
+RuntimeError: An error
+DEBUG    agent.instrumentation.flask:__init__.py:62 Entering _hypertrace_after_request().
+DEBUG    agent.instrumentation.flask:__init__.py:69 Span: _Span(name="/route1", context=SpanContext(trace_id=0xddb9f484a92943ab55483d0c413c0699, span_id=0x44ab879311c6d24a, trace_flags=0x01, trace_state=[], is_remote=False))
+DEBUG    agent.instrumentation.flask:__init__.py:70 Response Headers: Content-Type: text/html; charset=utf-8
+Content-Length: 290
+
+
+DEBUG    agent.instrumentation.flask:__init__.py:71 Response Body: b'<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n<title>500 Internal Server Error</title>\n<h1>Internal Server Error</h1>\n<p>The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.</p>\n'
+DEBUG    agent.instrumentation:__init__.py:141 Entering BaseInstrumentationWrapper.genericResponseHandler().
+DEBUG    agent.instrumentation:__init__.py:143 span: _Span(name="/route1", context=SpanContext(trace_id=0xddb9f484a92943ab55483d0c413c0699, span_id=0x44ab879311c6d24a, trace_flags=0x01, trace_state=[], is_remote=False))
+DEBUG    agent.instrumentation:__init__.py:144 responseHeaders: Content-Type: text/html; charset=utf-8
+Content-Length: 290
+
+
+DEBUG    agent.instrumentation:__init__.py:145 responseBody: b'<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n<title>500 Internal Server Error</title>\n<h1>Internal Server Error</h1>\n<p>The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.</p>\n'
+DEBUG    agent.instrumentation:__init__.py:148 Span is Recording!
+DEBUG    agent.instrumentation:__init__.py:153 Dumping Response Headers:
+DEBUG    agent.instrumentation:__init__.py:155 ('Content-Type', 'text/html; charset=utf-8')
+DEBUG    agent.instrumentation:__init__.py:155 ('Content-Length', '290')
+DEBUG    agent.instrumentation:__init__.py:159 Response Body: b'<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n<title>500 Internal Server Error</title>\n<h1>Internal Server Error</h1>\n<p>The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.</p>\n'
+DEBUG    agent.instrumentation:__init__.py:162 contentTypeHeaderTuple=[('Content-Type', 'text/html; charset=utf-8')]
+DEBUG    agent.instrumentation:__init__.py:165 Found content-type header.
+DEBUG    agent.instrumentation:__init__.py:168 Mimetype/content-type value exists. text/html; charset=utf-8
+DEBUG    agent.instrumentation:__init__.py:192 Entering FlaskInstrumentorWrapper.isInterestingContentType().
+DEBUG    test_flask_1:test_flask_1.py:74 test_program: after_request() called
+DEBUG    test_flask_1:test_flask_1.py:154 len(span_list): 1
+DEBUG    test_flask_1:test_flask_1.py:156 span_list: BoundedDict({'http.method': 'GET', 'http.server_name': 'localhost', 'http.scheme': 'http', 'net.host.port': 5000, 'http.host': 'localhost:5000', 'http.target': '/route1', 'net.peer.ip': '127.0.0.1', 'http.user_agent': 'werkzeug/1.0.1', 'http.flavor': '1.1', 'http.route': '/route1', 'http.request.header.user-agent': 'werkzeug/1.0.1', 'http.request.header.host': 'localhost:5000', 'http.request.header.tester1': 'tester1', 'http.request.header.tester2': 'tester2', 'http.response.header.content-type': 'text/html; charset=utf-8', 'http.response.header.content-length': '290', 'http.status_text': 'INTERNAL SERVER ERROR', 'http.status_code': 500}, maxlen=128)
+ERROR    test_flask_1:test_flask_1.py:198 Failed to initialize postgresql instrumentation wrapper: exception=<class 'AssertionError'>, stacktrace=Traceback (most recent call last):
+  File "/Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask/test_flask_1.py", line 163, in test_run
+    assert flaskSpanAsObject['attributes']['http.response.header.content-type'] == 'application/json'
+AssertionError: assert 'text/html; charset=utf-8' == 'application/json'
+  - application/json
+  + text/html; charset=utf-8
+============================== 1 failed in 1.45s ===============================
+ERROR: InvocationError for command /Users/nsahai/suvinar-pythonagent/traceable04122021/pythonagent/test/flask/.tox/py39/bin/pytest -rPx test_flask_1.py (exited with code 1)
+___________________________________ summary ____________________________________
+ERROR:   py37: commands failed
+ERROR:   py38: commands failed
+ERROR:   py39: commands failed
+Test failed

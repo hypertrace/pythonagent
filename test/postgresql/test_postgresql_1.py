@@ -5,11 +5,11 @@ import traceback
 import json
 import pytest
 import psycopg2
-from agent import Agent
 from opentelemetry import trace as trace_api
 from opentelemetry.sdk.trace import TracerProvider, export
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
 from opentelemetry.sdk.trace.export import BatchSpanProcessor, SimpleSpanProcessor
+from hypertrace.agent import Agent
 
 def setup_custom_logger(name):
   try:
@@ -36,8 +36,7 @@ def test_run():
   #
   logger.info('Initializing agent.')
   agent = Agent()
-  agent.registerPostgreSQL()
-  agent.globalInit()
+  agent.register_postgresql()
   #
   # End initialization logic for Python Agent
   #
@@ -48,7 +47,7 @@ def test_run():
   logger.info('Adding in-memory span exporter.')
   memoryExporter = InMemorySpanExporter()
   simpleExportSpanProcessor = SimpleSpanProcessor(memoryExporter)
-  agent.setProcessor(simpleExportSpanProcessor)
+  agent.register_processor(simpleExportSpanProcessor)
   logger.info('Added in-memoy span exporter')
 
   try:

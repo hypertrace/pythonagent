@@ -11,12 +11,12 @@ import time
 import atexit
 import threading
 from flask import Flask
-from agent import Agent
-from opentelemetry.exporter import jaeger
+from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 from opentelemetry import trace as trace_api
 from opentelemetry.sdk.trace import TracerProvider, export
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
 from opentelemetry.sdk.trace.export import BatchSpanProcessor, SimpleSpanProcessor
+from hypertrace.agent import Agent
 
 def setup_custom_logger(name):
   try:
@@ -105,8 +105,7 @@ def test_run():
   #
   logger.info('Initializing agent.')
   agent = Agent()
-  agent.registerFlaskApp(app)
-  agent.globalInit()
+  agent.register_flask_app(app)
   #
   # End initialization logic for Python Agent
   #
@@ -119,27 +118,18 @@ def test_run():
   logger.info('Adding in-memory span exporter.')
   memoryExporter = InMemorySpanExporter()
   simpleExportSpanProcessor = SimpleSpanProcessor(memoryExporter)
-  agent.setProcessor(simpleExportSpanProcessor)
+  agent.register_processor(simpleExportSpanProcessor)
   logger.info('Added in-memoy span exporter')
 
   # Setup Jaeger Exporter
-  #logger.info('Adding jaeger span exporter.')
-  #jaegerExporter = jaeger.JaegerSpanExporter(
-  #    service_name= 'pythonagent',
-  #    # configure agent
-  #    agent_host_name='localhost',
-  #    agent_port=6831,
-  #    # optional: configure also collector
-  #    # collector_endpoint='http://localhost:14268/api/traces?format=jaeger.thrift',
-  #    # username=xxxx, # optional
-  #    # password=xxxx, # optional
-  #    # insecure=True, # optional
-  #    # credentials=xxx # optional channel creds
-  #    # transport_format='protobuf' # optional
-  #)
-  #batchExportSpanProcessor = BatchSpanProcessor(jaegerExporter)
-  #agent.setProcessor(batchExportSpanProcessor)
-  #logger.info('Added jaeger span exporter.')
+  logger.info('Adding jaeger span exporter.')
+  jaegerExporter = JaegerExporter(
+      agent_host_name='localhost',
+      agent_port=6831,
+  )
+  batchExportSpanProcessor = BatchSpanProcessor(jaegerExporter)
+  agent.register_processor(batchExportSpanProcessor)
+  logger.info('Added jaeger span exporter.')
 
   logger.info('Running test calls.')
   with app.test_client() as c:

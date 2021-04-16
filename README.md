@@ -5,9 +5,6 @@
 # Flask Instrumentation Wrapper Architecture
 ![diagram](images/FlaskInstrumentationWrapper.jpg)
 
-# Assumptions
-* Tested with [Python v3.7.9](https://www.python.org/downloads/release/python-379/).
-
 # Setup
 1. clone this repo.
 2. run tests: ```scripts/test-all.sh```
@@ -16,15 +13,31 @@
 cd test/flask
 tox
 ```
-# Configure OTEL Collector
-Hypertrace python agent will use Jaeger backend as OpenTelemetry collector. HyperTrace Python Agent will export OpenTelemetry traces to Jaeger. 
- $ docker run -p 16686:16686 -p 6831:6831/udp jaegertracing/all-in-one
-Launch Jaeger UI :
-http://localhost:16686/search
+# Instrument Code
+*Add the following to your app's entrypoint python file:
+```
+from hypertrace.agent import Agent
+
+#
+# Code snippet here represents the current initialization logic
+#
+logger.info('Initializing agent.')
+agent = Agent()
+agent.registerFlaskApp(app)
+agent.registerMySQL()
+agent.registerPostgreSQL()
+agent.registerRequests()
+agent.registerAioHttp()
+agent.registerGrpcServer()
+#
+# End initialization logic for Python Agent
+#
+
+```
 
 The python agent output is now written to a log file managed by the logging module. This can currently be found in ${REPO_HOME}/test/agent.log.
 
-# Configure OTEL Collector
+# Jaeger UI Setup
 Hypertrace python agent will use Jaeger backend as OpenTelemetry collector. HyperTrace Python Agent will export OpenTelemetry traces to Jaeger. 
 * To run the Jaeger UI docker container, run:
 ``` $ docker run -p 16686:16686 -p 6831:6831/udp jaegertracing/all-in-one```
@@ -57,19 +70,22 @@ Hypertrace python agent will use Jaeger backend as OpenTelemetry collector. Hype
 * [Python 3 Documentation](https://docs.python.org/3)
 * 
 # Instrumented Modules Documentation
-* [Flask](https://flask.palletsprojects.com/en/1.1.x/api)
-* [grpc](https://grpc.github.io/grpc/python/)
-* [mysql-connector](https://dev.mysql.com/doc/connector-python/en/)
-* [psycopg2/postgresql](https://www.psycopg.org/docs/)
+* [flask](https://flask.palletsprojects.com/en/1.1.x/api) -- Python 3.7, 3.8, 3.9
+* [grpc](https://grpc.github.io/grpc/python/) -- Python 3.7, 3.8, 3.9
+* [mysql-connector](https://dev.mysql.com/doc/connector-python/en/) -- Python 3.7, 3.8, 3.9
+* [psycopg2/postgresql](https://www.psycopg.org/docs/) -- Python 3.8, 3.9
+* [requests](https://docs.python-requests.org/en/master/) -- Python 3.7, 3.8, 3.9
+* [aiohttp](https://docs.aiohttp.org/en/stable/) -- Python 3.7, 3.8, 3.9
 
 # Base OTel Instrumentation Modules
 * [Flask](https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation/opentelemetry-instrumentation-flask)
 * [grpc](https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation/opentelemetry-instrumentation-grpc)
 * [mysql-connector](https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation/opentelemetry-instrumentation-mysql)
 * [psycopg2](https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation/opentelemetry-instrumentation-psycopg2)
-
+* [requests](https://github.com/open-telemetry/opentelemetry-python-contrib/blob/main/instrumentation/opentelemetry-instrumentation-requests)
+* [aiophttp-client](https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation/opentelemetry-instrumentation-aiohttp-client)
+* 
 # Additional documentation
-* [NGINX](https://nginx.org/en/docs/)
 * [gunicorn](https://docs.gunicorn.org/en/stable/configure.html)
 
 # Build agent-config config.proto
@@ -148,7 +164,10 @@ data_capture:
     }
 }
 ```
+# Enviornment Variables
+See [here](https://github.com/hypertrace/agent-config/blob/main/ENV_VARS.md).
 
 # Testing tools
 * [tox](https://tox.readthedocs.io/en/latest/)
 * [pytest](https://docs.pytest.org/en/stable/contents.html)
+* [gunicorn + flask + nginx Example]( https://github.com/ivanpanshin/flask_gunicorn_nginx_docker) -- used as the basis for the gunicorn tests.

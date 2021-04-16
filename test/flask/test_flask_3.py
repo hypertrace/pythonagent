@@ -11,11 +11,11 @@ from flask import request, Flask
 import time
 import atexit
 import threading
-from agent import Agent
 from opentelemetry import trace as trace_api
 from opentelemetry.sdk.trace import TracerProvider, export
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
 from opentelemetry.sdk.trace.export import BatchSpanProcessor, SimpleSpanProcessor
+from hypertrace.agent import Agent
 
 def setup_custom_logger(name):
   try:
@@ -91,8 +91,7 @@ server = FlaskServer(app)
 #
 logger.info('Initializing agent.')
 agent = Agent()
-agent.registerFlaskApp(app)
-agent.globalInit()
+agent.register_flask_app(app)
 #
 # End initialization logic for Python Agent
 #
@@ -103,7 +102,7 @@ logger.info('Agent initialized.')
 logger.info('Adding in-memory span exporter.')
 memoryExporter = InMemorySpanExporter()
 simpleExportSpanProcessor = SimpleSpanProcessor(memoryExporter)
-agent.setProcessor(simpleExportSpanProcessor)
+agent.register_processor(simpleExportSpanProcessor)
 logger.info('Added in-memoy span exporter')
 
 def test_run():
