@@ -25,6 +25,11 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
-      # Runs a single command using the runners shell
+      - name: Run pylint on this branch to generate a report
+        run: sudo apt install python3-pip
+        
+      - name: Run pylint on this branch to generate a report
+        run: pip install --user -r dev-requirements.txt
+        
       - name: Run pylint on this branch to generate a report
         run: tox -e lint
