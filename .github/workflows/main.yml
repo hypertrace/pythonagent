@@ -27,6 +27,9 @@ jobs:
 
       - name: Run apt-get update
         run: sudo apt-get update
+        
+      - name: install python3.7
+        run: sudo apt-get install python3.7
 
       - name: Install pip
         run: sudo apt-get install python3-pip
