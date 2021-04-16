@@ -12,6 +12,5 @@ opentelemetry-instrumentation-requests
 opentelemetry-instrumentation-grpc
 opentelemetry-util-http
 google
-protobuf
 pyyaml
-pylint==2.1.1 
+pylint==2.4.4
