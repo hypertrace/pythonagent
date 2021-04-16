@@ -1,251 +1,300 @@
+'''Initialize all the OTel components using configuration from AgentConfig'''
 import sys
 import os
 import traceback
 import logging
 import json
 from opentelemetry import trace
-from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace import TracerProvider, export
 from opentelemetry.sdk.trace.export import ConsoleSpanExporter, SimpleSpanProcessor
 from opentelemetry.exporter.zipkin.proto.http import ZipkinExporter
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.sdk.trace import TracerProvider, export
 from hypertrace.agent.config import AgentConfig
+from hypertrace.agent import constants
 
 # Initialize logger
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__) # pylint: disable=C0103
 
-class AgentInit:
-  def __init__(self, agent):
-    logger.debug('Initializing AgentInit object.')
-    self._agent = agent
-    self._config = agent._config;
-    self._moduleInitialized = {
-      "flask": False,
-      "grpc:server": False,
-      "grpc:client": False,
-      "mysql": False,
-      "postgresql": False, 
-      "requests": False
-    }
-    try:
-      self._config.dumpConfig()
+class AgentInit:  # pylint: disable=R0902,R0903
+    '''Initialize all the OTel components using configuration from AgentConfig'''
+    def __init__(self, agent):
+        '''constructor'''
+        logger.debug('Initializing AgentInit object.')
+        self._agent = agent
+        self._config = agent.get_config()
+        self._module_initialized = {
+            "flask": False,
+            "grpc:server": False,
+            "grpc:client": False,
+            "mysql": False,
+            "postgresql": False,
+            "requests": False,
+            "aiohttp_client": False
+        }
+        try:
+            self._config.dump_config()
 
-      self._tracerProvider = TracerProvider(
-        resource=Resource.create({
-            "service.name": self._config.service_name,
-            "service.instance.id": os.getpid(),
-        })
-      )
-      trace.set_tracer_provider(self._tracerProvider)
+            self._tracer_provider = TracerProvider(
+                resource=Resource.create({
+                    "service.name": self._config.service_name,
+                    "service.instance.id": os.getpid(),
+                })
+            )
+            trace.set_tracer_provider(self._tracer_provider)
 
-      self.setConsoleSpanProcessor()
-      self.setZipkinProcessor()
-      self.setOtlpProcessor()
+            self.set_console_span_processor()
+            self.set_zipkin_processor()
+            self.set_otlp_processor()
 
-      self._flaskInstrumentorWrapper = None
-      self._grpcInstrumentorClientWrapper = None
-      self._grpcInstrumentorServerWrapper = None
-      self._mysqlInstrumentorWrapper = None
-      self._postgresqlInstrumentorWrapper = None
-      self._requestsInstrumentorWrapper = None
-      self._aioHttpClientInstrumentorWrapper = None
-    except:
-      logger.error('Failed to initialize opentelemetry: exception=%s, stacktrace=%s',
-        sys.exc_info()[0],
-        traceback.format_exc())
-      raise sys.exc_info()[0]
+            self._flask_instrumentor_wrapper = None
+            self._grpc_instrumentor_client_wrapper = None
+            self._grpc_instrumentor_server_wrapper = None
+            self._mysql_instrumentor_wrapper = None
+            self._postgresql_instrumentor_wrapper = None
+            self._requests_instrumentor_wrapper = None
+            self._aiohttp_client_instrumentor_wrapper = None
+        except Exception as err: # pylint: disable=W0703
+            logger.error('Failed to initialize opentelemetry: exception=%s, stacktrace=%s',
+                         err,
+                         traceback.format_exc())
+            raise sys.exc_info()[0]
 
-  def dumpConfig(self):
-    logger.debug('Calling DumpConfig().')
-    for m in self._moduleInitialized:
-      logger.debug(m + ':' + str(self._moduleInitialized[m]))
+    def dump_config(self):
+        '''dump the current state of AgentInit.'''
+        logger.debug('Calling DumpConfig().')
+        for mod in self._module_initialized:
+            logger.debug(' %s : %s', mod, str(self._module_initialized[mod]))
 
-  # Creates a flask wrapper using the config defined in hypertraceconfig
-  def flaskInit(self, app, useB3=False):
-    logger.debug('Calling AgentInit.flaskInit().')
-    try:
-      from hypertrace.agent.instrumentation.flask import FlaskInstrumentorWrapper
-      self._moduleInitialized['flask'] = True
-      self._flaskInstrumentorWrapper = FlaskInstrumentorWrapper()
-      self._flaskInstrumentorWrapper.instrument_app(app)
-      self.initInstrumentorWrapperBaseForHTTP(self._flaskInstrumentorWrapper)
-      if useB3:
-        self.enableB3()
-    except:
-      logger.debug('Failed to initialize flask instrumentation wrapper: exception=%s, stacktrace=%s',
-        sys.exc_info()[0],
-        traceback.format_exc())
-      raise sys.exc_info()[0]
+    # Creates a flask wrapper using the config defined in hypertraceconfig
+    def flask_init(self, app, use_b3=False):
+        '''Creates a flask instrumentation wrapper using the config defined in hypertraceconfig'''
+        logger.debug('Calling AgentInit.flaskInit().')
+        try:
+            from hypertrace.agent.instrumentation.flask import FlaskInstrumentorWrapper # pylint: disable=C0415
+            self._module_initialized['flask'] = True
+            self._flask_instrumentor_wrapper = FlaskInstrumentorWrapper()
+            self._flask_instrumentor_wrapper.instrument_app(app)
+            self.init_instrumentor_wrapper_base_for_http(
+                self._flask_instrumentor_wrapper)
+            if use_b3:
+                self.enable_b3()
+        except Exception as err: # pylint: disable=W0703
+            logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
+                         'flask',
+                         err,
+                         traceback.format_exc())
 
-  # Creates a grpc server wrapper using the config defined in hypertraceconfig
-  def grpcServerInit(self):
-    logger.debug('Calling AgentInit.grpcServerInit')
-    try:
-      from hypertrace.agent.instrumentation.grpc import GrpcInstrumentorServerWrapper,GrpcInstrumentorClientWrapper
-      self._moduleInitialized['grpc:server'] = True
-      self._grpcInstrumentorServerWrapper = GrpcInstrumentorServerWrapper()
-      self._grpcInstrumentorServerWrapper.instrument()
+    # Creates a grpc server wrapper using the config defined in hypertraceconfig
+    def grpc_server_init(self):
+        '''Creates a grpc server wrapper using the config defined in hypertraceconfig'''
+        logger.debug('Calling AgentInit.grpcServerInit')
+        try:
+            from hypertrace.agent.instrumentation.grpc import ( # pylint: disable=C0415
+                GrpcInstrumentorServerWrapper
+            )
+            self._module_initialized['grpc:server'] = True
+            self._grpc_instrumentor_server_wrapper = GrpcInstrumentorServerWrapper()
+            self._grpc_instrumentor_server_wrapper.instrument()
 
-      self._grpcInstrumentorServerWrapper.setProcessRequestHeaders(self._agent._config.data_capture.http_headers.request)
-      self._grpcInstrumentorServerWrapper.setProcessRequestBody(self._agent._config.data_capture.http_body.request)
+            self._grpc_instrumentor_server_wrapper.set_process_request_headers(
+                self._config.data_capture.http_headers.request)
+            self._grpc_instrumentor_server_wrapper.set_process_request_body(
+                self._config.data_capture.http_body.request)
 
-      self._grpcInstrumentorServerWrapper.setProcessResponseHeaders(self._agent._config.data_capture.http_headers.response)
-      self._grpcInstrumentorServerWrapper.setProcessResponseBody(self._agent._config.data_capture.http_body.response)
-    except:
-      logger.debug('Failed to initialize grpc instrumentation wrapper: exception=%s,stacktrace=%s',
-        sys.exc_info()[0],
-        traceback.format_exc())
-      raise sys.exc_info()[0]
+            self._grpc_instrumentor_server_wrapper.set_process_response_headers(
+                self._config.data_capture.http_headers.response)
+            self._grpc_instrumentor_server_wrapper.set_process_response_body(
+                self._config.data_capture.http_body.response)
+        except Exception as err: # pylint: disable=W0703
+            logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
+                         'grpc:server',
+                         err,
+                         traceback.format_exc())
 
-  # Creates a grpc client wrapper using the config defined in hypertraceconfig
-  def grpcClientInit(self):
-    logger.debug('Calling AgentInit.grpcClientInit')
-    try:
-      from hypertrace.agent.instrumentation.grpc import GrpcInstrumentorServerWrapper,GrpcInstrumentorClientWrapper
-      self._moduleInitialized['grpc:client'] = True
+    # Creates a grpc client wrapper using the config defined in hypertraceconfig
+    def grpc_client_init(self):
+        '''Creates a grpc client wrapper using the config defined in hypertraceconfig'''
+        logger.debug('Calling AgentInit.grpcClientInit')
+        try:
+            from hypertrace.agent.instrumentation.grpc import ( # pylint: disable=C0415
+                GrpcInstrumentorClientWrapper
+            )
+            self._module_initialized['grpc:client'] = True
 
-      self._grpcInstrumentorClientWrapper = GrpcInstrumentorClientWrapper()
-      self._grpcInstrumentorClientWrapper.instrument()
+            self._grpc_instrumentor_client_wrapper = GrpcInstrumentorClientWrapper()
+            self._grpc_instrumentor_client_wrapper.instrument()
 
-      self._grpcInstrumentorClientWrapper.setProcessRequestHeaders(self._agent._config.data_capture.http_headers.request)
-      self._grpcInstrumentorClientWrapper.setProcessRequestBody(self._agent._config.data_capture.http_body.request)
+            self._grpc_instrumentor_client_wrapper.set_process_request_headers(
+                self._config.data_capture.http_headers.request)
+            self._grpc_instrumentor_client_wrapper.set_process_request_body(
+                self._config.data_capture.http_body.request)
 
-      self._grpcInstrumentorClientWrapper.setProcessResponseHeaders(self._agent._config.data_capture.http_headers.response)
-      self._grpcInstrumentorClientWrapper.setProcessResponseBody(self._agent._config.data_capture.http_body.response)
-    except:
-      logger.debug('Failed to initialize grpc instrumentation wrapper: exception=%s, stacktrace=%s',
-        sys.exc_info()[0],
-        traceback.format_exc())
-      raise sys.exc_info()[0]
+            self._grpc_instrumentor_client_wrapper.set_process_response_headers(
+                self._config.data_capture.http_headers.response)
+            self._grpc_instrumentor_client_wrapper.set_process_response_body(
+                self._config.data_capture.http_body.response)
+        except Exception as err: # pylint: disable=W0703
+            logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
+                         'grpc:client',
+                         err,
+                         traceback.format_exc())
 
+    # Creates a mysql server wrapper using the config defined in hypertraceconfig
+    def mysql_init(self):
+        '''Creates a mysql server wrapper using the config defined in hypertraceconfig'''
+        logger.debug('Calling AgentInit.mysqlInit()')
+        try:
+            from hypertrace.agent.instrumentation.mysql import ( # pylint: disable=C0415
+                MySQLInstrumentorWrapper
+            )
+            self._module_initialized['mysql'] = True
+            self._mysql_instrumentor_wrapper = MySQLInstrumentorWrapper()
+            self.init_instrumentor_wrapper_base_for_http(
+                self._mysql_instrumentor_wrapper)
+        except Exception as err: # pylint: disable=W0703
+            logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
+                         'mysql',
+                         err,
+                         traceback.format_exc())
 
-  # Creates a mysql server wrapper using the config defined in hypertraceconfig
-  def mySQLInit(self):
-    logger.debug('Calling AgentInit.mysqlInit()')
-    try:
-      from hypertrace.agent.instrumentation.mysql import MySQLInstrumentorWrapper
-      self._moduleInitialized['mysql'] = True
-      self._mysqlInstrumentorWrapper = MySQLInstrumentorWrapper()
-      self.initInstrumentorWrapperBaseForHTTP(self._mysqlInstrumentorWrapper)
-    except:
-      logger.debug('Failed to initialize mysql instrumentation wrapper: exception=%s, stacktrace=%s',
-        sys.exc_info()[0],
-        traceback.format_exc())
-      raise sys.exc_info()[0]
+    # Creates a postgresql client wrapper using the config defined in hypertraceconfig
+    def postgresql_init(self):
+        '''Creates a postgresql client wrapper using the config defined in hypertraceconfig'''
+        logger.debug('Calling AgentInit.postgreSQLInit()')
+        try:
+            from hypertrace.agent.instrumentation.postgresql import ( # pylint: disable=C0415
+                PostgreSQLInstrumentorWrapper
+            )
+            self._module_initialized['postgresql'] = True
+            self._postgresql_instrumentor_wrapper = PostgreSQLInstrumentorWrapper()
+            self.init_instrumentor_wrapper_base_for_http(
+                self._postgresql_instrumentor_wrapper)
+        except Exception as err: # pylint: disable=W0703
+            logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
+                         'postgresql',
+                         err,
+                         traceback.format_exc())
 
-  # Creates a postgresql client wrapper using the config defined in hypertraceconfig
-  def postgreSQLInit(self):
-    logger.debug('Calling AgentInit.postgreSQLInit()')
-    try:
-      from hypertrace.agent.instrumentation.postgresql import PostgreSQLInstrumentorWrapper
-      self._moduleInitialized['postgresql'] = True
-      self._postgresqlInstrumentorWrapper = PostgreSQLInstrumentorWrapper()
-      self.initInstrumentorWrapperBaseForHTTP(self._postgresqlInstrumentorWrapper)
-    except:
-      logger.debug('Failed to initialize postgresql instrumentation wrapper: exception=%s, stacktrace=%s',
-        sys.exc_info()[0],
-        traceback.format_exc())
-      raise sys.exc_info()[0]
+    # Creates a requests client wrapper using the config defined in hypertraceconfig
+    def requests_init(self, use_b3=False):
+        '''Creates a requests client wrapper using the config defined in hypertraceconfig'''
+        logger.debug('Calling AgentInit.requestsInit()')
+        try:
+            from hypertrace.agent.instrumentation.requests import ( # pylint: disable=C0415
+                RequestsInstrumentorWrapper
+            )
+            self._module_initialized['requests'] = True
+            self._requests_instrumentor_wrapper = RequestsInstrumentorWrapper()
+            self.init_instrumentor_wrapper_base_for_http(
+                self._requests_instrumentor_wrapper)
+            if use_b3:
+                self.enable_b3()
+        except Exception as err: # pylint: disable=W0703
+            logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
+                         'requests',
+                         err,
+                         traceback.format_exc())
 
-  # Creates a requests client wrapper using the config defined in hypertraceconfig
-  def requestsInit(self, useB3=False):
-    logger.debug('Calling AgentInit.requestsInit()')
-    try:
-      from hypertrace.agent.instrumentation.requests import RequestsInstrumentorWrapper
-      self._moduleInitialized['requests'] = True
-      self._requestsInstrumentorWrapper = RequestsInstrumentorWrapper()
-      self.initInstrumentorWrapperBaseForHTTP(self._requestsInstrumentorWrapper)
-      if useB3:
-        self.enableB3()
-    except:
-      logger.debug('Failed to initialize requests instrumentation wrapper: exception=%s, stacktrace=%s',
-        sys.exc_info()[0],
-        traceback.format_exc())
-      raise sys.exc_info()[0]
+    # Creates an aiohttp-client wrapper using the config defined in hypertraceconfig
+    def aiohttp_client_init(self, use_b3=False):
+        '''Creates an aiohttp-client wrapper using the config defined in hypertraceconfig'''
+        logger.debug('Calling AgentInit.aioHttpClientInit()')
+        try:
+            from hypertrace.agent.instrumentation.aiohttp import ( # pylint: disable=C0415
+                AioHttpClientInstrumentorWrapper
+            )
+            self._module_initialized['aiohttp_client'] = True
+            self._aiohttp_client_instrumentor_wrapper = AioHttpClientInstrumentorWrapper()
+            self.init_instrumentor_wrapper_base_for_http(
+                self._aiohttp_client_instrumentor_wrapper)
+            if use_b3:
+                self.enable_b3()
+        except Exception as err: # pylint: disable=W0703
+            logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
+                         'aiohttp_client',
+                         err,
+                         traceback.format_exc())
 
-  # Creates an aiohttp-requests wrapper using the config defined in hypertraceconfig
-  def aioHttpClientInit(self, useB3=False):
-    logger.debug('Calling AgentInit.aioHttpClientInit()')
-    try:
-      from hypertrace.agent.instrumentation.aiohttp import AioHttpClientInstrumentorWrapper
-      self._moduleInitialized['aiohttp-client'] = True
-      self._aioHttpClientInstrumentorWrapper = AioHttpClientInstrumentorWrapper()
-      self.initInstrumentorWrapperBaseForHTTP(self._aioHttpClientInstrumentorWrapper)
-      if useB3:
-        self.enableB3()
-    except:
-      logger.debug('Failed to initialize requests instrumentation wrapper: exception=%s, stacktrace=%s',
-        sys.exc_info()[0],
-        traceback.format_exc())
-      raise sys.exc_info()[0]
+    # Common wrapper initialization logic
+    def init_instrumentor_wrapper_base_for_http(self, instrumentor):
+        '''Common wrapper initialization logic'''
+        logger.debug('Calling AgentInit.initInstrumentorWrapperBaseForHTTP().')
+        instrumentor.instrument()
+        instrumentor.set_process_request_headers(
+            self._config.data_capture.http_headers.request)
+        instrumentor.set_process_request_body(
+            self._config.data_capture.http_body.request)
+        instrumentor.set_process_response_headers(
+            self._config.data_capture.http_headers.response)
+        instrumentor.set_process_response_body(
+            self._config.data_capture.http_body.response)
 
-  # Common wrapper initialization logic
-  def initInstrumentorWrapperBaseForHTTP(self, instrumentor):
-    logger.debug('Calling AgentInit.initInstrumentorWrapperBaseForHTTP().')
-    instrumentor.instrument()
-    instrumentor.setProcessRequestHeaders(self._agent._config.data_capture.http_headers.request)
-    instrumentor.setProcessRequestBody(self._agent._config.data_capture.http_body.request)
-    instrumentor.setProcessResponseHeaders(self._agent._config.data_capture.http_headers.response)
-    instrumentor.setProcessResponseBody(self._agent._config.data_capture.http_body.response)
+    def register_processor(self, processor):
+        '''Register additional span exporter + processor'''
+        logger.debug('Entering AgentInit.register_processor().')
+        self._tracer_provider.add_span_processor(processor)
 
-  def setProcessor(self, processor):
-    logger.debug('Entering AgentInit.setProcessor().')
-    trace.get_tracer_provider().add_span_processor(processor)
+    def set_console_span_processor(self):
+        '''Register the console span processor for debugging purposes.'''
+        logger.debug('Entering AgentInit.setConsoleSpanProcessor().')
+        console_span_exporter = ConsoleSpanExporter(
+            service_name=self._config.service_name)
+        simple_export_span_processor = SimpleSpanProcessor(console_span_exporter)
+        self._tracer_provider.add_span_processor(simple_export_span_processor)
 
-  def setConsoleSpanProcessor(self):
-    logger.debug('Entering AgentInit.setConsoleSpanProcessor().')
-    consoleSpanExporter = ConsoleSpanExporter(service_name=self._agent._config.service_name)
-    simpleExportSpanProcessor = SimpleSpanProcessor(consoleSpanExporter)
-    trace.get_tracer_provider().add_span_processor(simpleExportSpanProcessor)
+    def set_zipkin_processor(self):
+        '''configure zipkin span exporter + processor'''
+        if 'OTEL_TRACES_EXPORTER' in os.environ:
+            if os.environ['OTEL_TRACES_EXPORTER'] == 'zipkin':
+                logger.debug(
+                    "OTEL_TRACES_EXPORTER is zipkin, adding exporter.")
+            else:
+                return
+        else:
+            return
 
-  def setZipkinProcessor(self):
-    if 'OTEL_TRACES_EXPORTER' in os.environ:
-      if os.environ['OTEL_TRACES_EXPORTER'] == 'zipkin':
-        logger.debug("OTEL_TRACES_EXPORTER is zipkin, adding exporter.")
-      else:
-        return
-    else:
-        return
+        try:
+            zipkin_exporter = ZipkinExporter(
+                endpoint=self._config.reporting.endpoint,
+            )
 
-    try:
-      zipkin_exporter = ZipkinExporter(
-        endpoint=self._agent._config.reporting.endpoint,
-      )
+            span_processor = BatchSpanProcessor(zipkin_exporter)
+            self._tracer_provider.add_span_processor(span_processor)
 
-      span_processor = BatchSpanProcessor(zipkin_exporter)
-      trace.get_tracer_provider().add_span_processor(span_processor)
+            logger.info('Added ZipkinExporter span exporter')
+        except Exception as err: # pylint: disable=W0703
+            logger.error('Failed to register_processor: exception=%s, stacktrace=%s',
+                         err,
+                         traceback.format_exc())
 
-      logger.info('Added ZipkinExporter span exporter')
-    except:
-      logger.error('Failed to setProcessor: exception=%s, stacktrace=%s',
-      sys.exc_info()[0],
-      traceback.format_exc())
+    def set_otlp_processor(self):
+        '''configure otlp span exporter + processor'''
+        if 'OTEL_TRACES_EXPORTER' in os.environ:
+            if os.environ['OTEL_TRACES_EXPORTER'] == 'otlp':
+                logger.debug("OTEL_TRACES_EXPORTER is otlp, adding exporter.")
+            else:
+                return
+        else:
+            return
 
-  def setOtlpProcessor(self):
-    if 'OTEL_TRACES_EXPORTER' in os.environ:
-      if os.environ['OTEL_TRACES_EXPORTER'] == 'otlp':
-        logger.debug("OTEL_TRACES_EXPORTER is otlp, adding exporter.")
-      else:
-        return
-    else:
-        return
+        try:
+            otlp_exporter = OTLPSpanExporter(endpoint="http://localhost:16686")
+            # endpoint=self._config.reporting.endpoint,
+            # insecure=self._config.reporting.secure)
 
-    try:
-      otlp_exporter = OTLPSpanExporter(endpoint="http://localhost:16686")
-      #endpoint=self._agent._config.reporting.endpoint, insecure=self._agent._config.reporting.secure)
+            span_processor = BatchSpanProcessor(otlp_exporter)
+            self._tracer_provider.add_span_processor(span_processor)
 
-      span_processor = BatchSpanProcessor(otlp_exporter)
-      trace.get_tracer_provider().add_span_processor(span_processor)
+            logger.info('Added OtlpExporter span exporter')
+        except Exception as err: # pylint: disable=W0703
+            logger.error('Failed to register_processor: exception=%s, stacktrace=%s',
+                         err,
+                         traceback.format_exc())
 
-      logger.info('Added OtlpExporter span exporter')
-    except:
-      logger.error('Failed to setProcessor: exception=%s, stacktrace=%s',
-      sys.exc_info()[0],
-      traceback.format_exc())
-
-  def enableB3(self):
-    from opentelemetry.propagate import set_global_textmap
-    from opentelemetry.propagators.b3 import B3Format
-    set_global_textmap(B3Format())
+    def enable_b3(self): # pylint: disable=R0201
+        '''enable b3 protocol for context propagation'''
+        from opentelemetry.propagate import set_global_textmap # pylint: disable=C0415
+        from opentelemetry.propagators.b3 import B3Format # pylint: disable=C0415
+        set_global_textmap(B3Format())

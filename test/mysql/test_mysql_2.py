@@ -99,8 +99,8 @@ def test_run():
   #
   logger.info('Initializing agent.')
   agent = Agent()
-  agent.registerFlaskApp(app)
-  agent.registerMySQL() 
+  agent.register_flask_app(app)
+  agent.register_mysql() 
   #
   # End initialization logic for Python Agent
   #
@@ -110,7 +110,7 @@ def test_run():
   logger.info('Adding in-memory span exporter.')
   memoryExporter = InMemorySpanExporter()
   simpleExportSpanProcessor = SimpleSpanProcessor(memoryExporter)
-  agent.setProcessor(simpleExportSpanProcessor)
+  agent.register_processor(simpleExportSpanProcessor)
   logger.info('Added in-memoy span exporter')
   # Create flask server object
   server = FlaskServer(app)

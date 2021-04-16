@@ -119,7 +119,7 @@ if ENABLE_INSTRUMENTATION == True:
   #
   logger.info('Initializing agent.')
   agent = Agent()
-  agent.registerFlaskApp(server)
+  agent.register_flask_app(server)
   #
   # End initialization logic for Python Agent
   #
@@ -129,7 +129,7 @@ if ENABLE_INSTRUMENTATION == True:
   logger.info('Adding in-memory span exporter.')
   memoryExporter = InMemorySpanExporter()
   simpleExportSpanProcessor = SimpleSpanProcessor(memoryExporter)
-  agent.setProcessor(simpleExportSpanProcessor)
+  agent.register_processor(simpleExportSpanProcessor)
   logger.info('Added in-memoy span exporter') 
 
   # Setup Jaeger Exporter
@@ -139,6 +139,6 @@ if ENABLE_INSTRUMENTATION == True:
       agent_port=6831,
   )
   batchExportSpanProcessor = BatchSpanProcessor(jaegerExporter)
-  agent.setProcessor(batchExportSpanProcessor)
+  agent.register_processor(batchExportSpanProcessor)
   logger.info('Added jaeger span exporter.')
 

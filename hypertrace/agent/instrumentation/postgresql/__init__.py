@@ -1,3 +1,4 @@
+'''Hypertrace wrapper around OTel postgresql instrumentor'''
 import sys
 import os.path
 import logging
@@ -5,29 +6,8 @@ import traceback
 from opentelemetry.instrumentation.psycopg2 import Psycopg2Instrumentor
 from hypertrace.agent.instrumentation import BaseInstrumentorWrapper
 
-#Initialize logger with local module name
-logger = logging.getLogger(__name__)
+# Initialize logger with local module name
+logger = logging.getLogger(__name__) # pylint: disable=C0103
 
-# The main entry point 
 class PostgreSQLInstrumentorWrapper(Psycopg2Instrumentor, BaseInstrumentorWrapper):
-
-  # Constructor
-  def __init__(self):
-    logger.debug('Entering PostgreSQLInstrumentorWrapper.__init__().')
-    super().__init__()
-
-  def _instrument(self, **kwargs):
-    logger.debug('Entering PostgreSQLInstrumentorWrapper._instrument().')
-    super()._instrument(**kwargs)
-
-  def _uninstrument(self, **kwargs):
-    logger.debug('Entering PostgreSQLInstrumentorWrapper._uninstrument().')
-    super()._uninstrument(**kwargs)
-
-  def instrument_connection(self, connection):
-    logger.debug('Entering PostgreSQLInstrumentorWrapper.instrument_connection().')
-    return super().instrument_connection(connection)
-
-  def uninstrument_connection(self, connection):
-    logger.debug('Entering PostgreSQLInstrumentorWrapper.uninstrument_connection().')
-    return super().uninstrument_connection(connection)
+    '''Hypertrace wrapper around OTel postgresql instrumentor class'''

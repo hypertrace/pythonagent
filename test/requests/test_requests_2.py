@@ -83,8 +83,8 @@ def test_run():
   #
   logger.info('Initializing agent.')
   agent = Agent()
-  agent.registerFlaskApp(app1)
-  agent.registerRequests()
+  agent.register_flask_app(app1)
+  agent.register_requests()
   #
   # End initialization logic for Python Agent
   #
@@ -96,7 +96,7 @@ def test_run():
   logger.info('Adding in-memory span exporter.')
   memoryExporter = InMemorySpanExporter()
   simpleExportSpanProcessor = SimpleSpanProcessor(memoryExporter)
-  agent.setProcessor(simpleExportSpanProcessor)
+  agent.register_processor(simpleExportSpanProcessor)
   logger.info('Added in-memoy span exporter')
 
   # Setup Jaeger Exporter
@@ -106,7 +106,7 @@ def test_run():
       agent_port=6831,
   )
   batchExportSpanProcessor = BatchSpanProcessor(jaegerExporter)
-  agent.setProcessor(batchExportSpanProcessor)
+  agent.register_processor(batchExportSpanProcessor)
   logger.info('Added jaeger span exporter.')
 
   logger.info('Running test calls.')

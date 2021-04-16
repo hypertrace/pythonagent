@@ -56,7 +56,7 @@ logger = setup_custom_logger(__name__)
 #
 logger.info('Initializing agent.')
 agent = Agent()
-agent.registerServerGrpc()
+agent.register_server_grpc()
 logger.info('Agent initialized.')
 #
 # End initialization logic for Python Agent
@@ -67,7 +67,7 @@ logger.info('Agent initialized.')
 logger.info('Adding in-memory span exporter.')
 memoryExporter = InMemorySpanExporter()
 simpleExportSpanProcessor = SimpleSpanProcessor(memoryExporter)
-agent.setProcessor(simpleExportSpanProcessor)
+agent.register_processor(simpleExportSpanProcessor)
 
 logger.info('Added in-memoy span exporter')
 

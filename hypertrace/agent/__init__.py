@@ -1,114 +1,142 @@
+'''Main entry point for Hypertrace agent module.'''
 import sys
 import os.path
 import logging
 import traceback
 from hypertrace.agent.init import AgentInit
 from hypertrace.agent.config import AgentConfig
+from hypertrace.agent import constants
 
 # main logging modle configuration
+
+
 def setup_custom_logger(name):
-  try:
-    formatter = logging.Formatter(fmt='%(asctime)s %(levelname)-8s %(message)s',
-                                  datefmt='%Y-%m-%d %H:%M:%S')
-    handler = logging.FileHandler('agent.log', mode='a')
-    handler.setFormatter(formatter)
-    screen_handler = logging.StreamHandler(stream=sys.stdout)
-    screen_handler.setFormatter(formatter)
-    logger = logging.getLogger(name)
-    logger.setLevel(logging.INFO)
-    logger.addHandler(handler)
-    logger.addHandler(screen_handler)
-    return logger
-  except Exception as e:
-    logger.error('Failed to customize logger: exception=%s, stacktrace=%s',
-      e,
-      traceback.format_exc())
+    '''Agent logger configuration'''
+    try:
+        formatter = logging.Formatter(fmt='%(asctime)s %(levelname)-8s %(message)s',
+                                      datefmt='%Y-%m-%d %H:%M:%S')
+        handler = logging.FileHandler('agent.log', mode='a')
+        handler.setFormatter(formatter)
+        screen_handler = logging.StreamHandler(stream=sys.stdout)
+        screen_handler.setFormatter(formatter)
+        logger_ = logging.getLogger(name)
+        logger_.setLevel(logging.INFO)
+        logger_.addHandler(handler)
+        logger_.addHandler(screen_handler)
+        return logger_
+    except Exception as err: # pylint: disable=W0703
+        print('Failed to customize logger: exception=%s, stacktrace=%s',
+              err,
+              traceback.format_exc())
+
 
 # create logger object
-logger = setup_custom_logger(__name__)
+logger = setup_custom_logger(__name__) # pylint: disable=C0103
 
 # The Hypertrace Python Agent class
 class Agent:
-  def __init__(self):
-    logger.debug('Initializing Agent.');
-    try:
-      self._config = AgentConfig()
-      self._init = AgentInit(self)
-    except Exception as e:
-      logger.error('Failed to initialize Agent: exception=%s, stacktrace=%s',
-        e,
-        traceback.format_exc())
+    '''Top-level entry point for Hypertrace agent.'''
 
-  def registerFlaskApp(self, app, useS3=False):
-    logger.debug('Calling Agent.registerFlaskApp.')
-    try:
-      self._init.flaskInit(app, useS3)
-      self._init.dumpConfig()
-    except Exception as e:
-      logger.error('Failed to initialize flask instrumentation wrapper: exception=%s, stacktrace=%s',
-        e,
-        traceback.format_exc())
+    def __init__(self):
+        '''Constructor'''
+        logger.debug('Initializing Agent.')
+        try:
+            self._config = AgentConfig()
+            self._init = AgentInit(self)
+        except Exception as err: # pylint: disable=W0703
+            logger.error('Failed to initialize Agent: exception=%s, stacktrace=%s',
+                         err,
+                         traceback.format_exc())
 
-  def registerServerGrpc(self):
-    logger.debug('Calling Agent.registerServerGrpc().')
-    try:
-      self._init.grpcServerInit()
-      self._init.dumpConfig()
-    except Exception as e:
-      logger.error('Failed to initialize grpc instrumentation wrapper: exception=%s, stacktrace=%s',
-        e,
-        traceback.format_exc())
+    def register_flask_app(self, app, use_b3=False):
+        '''Register the flask instrumentation module wrapper'''
+        logger.debug('Calling Agent.register_flask_app.')
+        try:
+            self._init.flask_init(app, use_b3)
+            self._init.dump_config()
+        except Exception as err: # pylint: disable=W0703
+            logger.error(constants.EXCEPTION_MESSAGE,
+                         'flask',
+                         err,
+                         traceback.format_exc())
 
-  def registerClientGrpc(self):
-    logger.debug('Calling Agent.registerClientGrpc().')
-    try:
-      self._init.grpcClientInit()
-      self._init.dumpConfig()
-    except Exception as e:
-      logger.error('Failed to initialize grpc instrumentation wrapper: exception=%s, stacktrace=%s',
-        e,
-        traceback.format_exc())
+    def register_server_grpc(self):
+        '''Register the grpc:server instrumentation module wrapper'''
+        logger.debug('Calling Agent.register_server_grpc().')
+        try:
+            self._init.grpc_server_init()
+            self._init.dump_config()
+        except Exception as err: # pylint: disable=W0703
+            logger.error(constants.EXCEPTION_MESSAGE,
+                         'grpc:server',
+                         err,
+                         traceback.format_exc())
 
-  def registerMySQL(self):
-    logger.debug('Calling Agent.registerMySQL().')
-    try:
-      self._init.mySQLInit()
-      self._init.dumpConfig()
-    except Exception as e:
-      logger.error('Failed to initialize mysql instrumentation wrapper: exception=%s, stacktrace=%s',
-        e,
-        traceback.format_exc())
+    def register_client_grpc(self):
+        '''Register the grpc:client instrumentation module wrapper'''
+        logger.debug('Calling Agent.register_client_grpc().')
+        try:
+            self._init.grpc_client_init()
+            self._init.dump_config()
+        except Exception as err: # pylint: disable=W0703
+            logger.error(constants.EXCEPTION_MESSAGE,
+                         'grpc:client',
+                         err,
+                         traceback.format_exc())
 
-  def registerPostgreSQL(self):
-    logger.debug('Calling Agent.registerPostgreSQL().')
-    try:
-      self._init.postgreSQLInit()
-      self._init.dumpConfig()
-    except Exception as e:
-      logger.error('Failed to initialize postgresql instrumentation wrapper: exception=%s, stacktrace=%s',
-        e,
-        traceback.format_exc())
+    def register_mysql(self):
+        '''Register the mysql instrumentation module wrapper'''
+        logger.debug('Calling Agent.register_mysql().')
+        try:
+            self._init.mysql_init()
+            self._init.dump_config()
+        except Exception as err: # pylint: disable=W0703
+            logger.error(constants.EXCEPTION_MESSAGE,
+                         'flask',
+                         err,
+                         traceback.format_exc())
 
-  def registerRequests(self, useB3=False):
-    logger.debug('Calling Agent.registerRequests()')
-    try:
-      self._init.requestsInit(useB3)
-      self._init.dumpConfig()
-    except Exception as e:
-      logger.error('Failed to initialize requests instrumentation wrapper: exception=%s, stacktrace=%s',
-        e,
-        traceback.format_exc())
+    def register_postgresql(self):
+        '''Register the postgresql instrumentation module wrapper'''
+        logger.debug('Calling Agent.register_postgresql().')
+        try:
+            self._init.postgresql_init()
+            self._init.dump_config()
+        except Exception as err: # pylint: disable=W0703
+            logger.error(constants.EXCEPTION_MESSAGE,
+                         'flask',
+                         err,
+                         traceback.format_exc())
 
-  def registerAioHttpClient(self, useB3=False):
-    logger.debug('Calling Agent.registerAioHttpClient().')
-    try:
-      self._init.aioHttpClientInit(useB3)
-      self._init.dumpConfig()
-    except Exception as e:
-      logger.error('Failed to initialize aiohttp-client instrumentation wrapper: exception=%s, stacktrace=%s',
-        e,
-        traceback.format_exc())
+    def register_requests(self, use_b3=False):
+        '''Register the requests instrumentation module wrapper'''
+        logger.debug('Calling Agent.register_requests()')
+        try:
+            self._init.requests_init(use_b3)
+            self._init.dump_config()
+        except Exception as err: # pylint: disable=W0703
+            logger.error(constants.EXCEPTION_MESSAGE,
+                         'flask',
+                         err,
+                         traceback.format_exc())
 
-  def setProcessor(self, processor):
-    logger.debug('Entering Agent.setProcessor().')
-    return self._init.setProcessor(processor)
+    def register_aiohttp_client(self, use_b3=False):
+        '''Register the aiohttp-client instrumentation module wrapper'''
+        logger.debug('Calling Agent.register_aiohttp_client().')
+        try:
+            self._init.aiohttp_client_init(use_b3)
+            self._init.dump_config()
+        except Exception as err: # pylint: disable=W0703
+            logger.error(constants.EXCEPTION_MESSAGE,
+                         'flask',
+                         err,
+                         traceback.format_exc())
+
+    def register_processor(self, processor):
+        '''Add additional span exporters + processors'''
+        logger.debug('Entering Agent.register_processor().')
+        return self._init.register_processor(processor)
+
+    def get_config(self):
+        '''Return configuration object'''
+        return self._config

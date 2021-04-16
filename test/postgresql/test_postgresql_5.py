@@ -32,7 +32,7 @@ def test_run():
     # Code snippet here represents the current initialization logic
     logger.info('Initializing agent.')
     agent = Agent()
-    agent.registerPostgreSQL()
+    agent.register_postgresql()
 
     # End initialization logic for Python Agent
     logger.info('Agent initialized.')
@@ -42,7 +42,7 @@ def test_run():
     logger.info('Adding in-memory span exporter.')
     memoryExporter = InMemorySpanExporter()
     simpleExportSpanProcessor = SimpleSpanProcessor(memoryExporter)
-    agent.setProcessor(simpleExportSpanProcessor)
+    agent.register_processor(simpleExportSpanProcessor)
     logger.info('Added in-memoy span exporter')
 
     try:

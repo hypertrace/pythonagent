@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 #
 logger.info('Initializing agent.')
 agent = Agent()
-agent.registerClientGrpc()
+agent.register_client_grpc()
 logger.info('Agent initialized.')
 #
 # End initialization logic for Python Agent
@@ -43,7 +43,7 @@ logger.info('Agent initialized.')
 logger.info('Adding in-memory span exporter.')
 memoryExporter = InMemorySpanExporter()
 simpleExportSpanProcessor = SimpleSpanProcessor(memoryExporter)
-agent.setProcessor(simpleExportSpanProcessor)
+agent.register_processor(simpleExportSpanProcessor)
 logger.info('Added in-memoy span exporter')
 
 class Greeter(helloworld_pb2_grpc.GreeterServicer):

@@ -79,7 +79,7 @@ def test_run():
     #
     logger.info('Initializing agent.')
     agent = Agent()
-    agent.registerFlaskApp(app)
+    agent.register_flask_app(app)
     #
     # End initialization logic for Python Agent
     #

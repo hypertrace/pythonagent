@@ -39,7 +39,7 @@ async def test_run():
   #
   logger.info('Initializing agent.')
   agent = Agent()
-  agent.registerAioHttpClient(False)
+  agent.register_aiohttp_client(False)
   #
   # End initialization logic for Python Agent
   #
@@ -50,7 +50,7 @@ async def test_run():
   logger.info('Adding in-memory span exporter.')
   memoryExporter = InMemorySpanExporter()
   simpleExportSpanProcessor = SimpleSpanProcessor(memoryExporter)
-  agent.setProcessor(simpleExportSpanProcessor)
+  agent.register_processor(simpleExportSpanProcessor)
   logger.info('Added in-memoy span exporter')
 
   #Make test call
