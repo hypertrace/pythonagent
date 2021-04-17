@@ -164,8 +164,8 @@ data_capture:
     }
 }
 ```
-# Enviornment Variables
-See [here](https://github.com/hypertrace/agent-config/blob/main/ENV_VARS.md).
+# Environment Variables
+See [here](https://github.com/hypertrace/agent-config/blob/main/ENV_VARS.md) for supported Hypertrace environment variables.
 
 # Testing tools
 * [tox](https://tox.readthedocs.io/en/latest/)
