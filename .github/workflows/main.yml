@@ -52,8 +52,8 @@ jobs:
       - name: Install tox
         run: pip install --user -r dev-requirements.txt
         
-#      - name: Run pylint on this branch to generate a report
-#        run: tox -e lint
+      - name: Run pylint on this branch to generate a report
+        run: tox -e lint
 
       - name: Run Test Cases
         run: make hypertrace_test
