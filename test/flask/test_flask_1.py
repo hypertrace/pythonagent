@@ -185,7 +185,7 @@ def test_run():
       logger.info('Exiting from flask instrumentation test.')
       return 0
     except:
-      logger.error('Failed to initialize postgresql instrumentation wrapper: exception=%s, stacktrace=%s',
+      logger.error('Failed to initialize flask instrumentation wrapper: exception=%s, stacktrace=%s',
         sys.exc_info()[0],
         traceback.format_exc())
       raise sys.exc_info()[0]

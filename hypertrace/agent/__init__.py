@@ -40,6 +40,11 @@ class Agent:
     def __init__(self):
         '''Constructor'''
         logger.debug('Initializing Agent.')
+        if 'HT_ENABLED' in os.environ:
+            if os.environ['HT_ENABLED'] == 'false':
+                logger.debug("HT_ENABLED is disabled.")
+                return
+
         try:
             self._config = AgentConfig()
             self._init = AgentInit(self)
@@ -51,6 +56,10 @@ class Agent:
     def register_flask_app(self, app, use_b3=False):
         '''Register the flask instrumentation module wrapper'''
         logger.debug('Calling Agent.register_flask_app.')
+        if 'HT_ENABLED' in os.environ:
+            if os.environ['HT_ENABLED'] == 'false':
+                logger.debug("HT_ENABLED is disabled.")
+                return
         try:
             self._init.flask_init(app, use_b3)
             self._init.dump_config()
@@ -63,6 +72,10 @@ class Agent:
     def register_server_grpc(self):
         '''Register the grpc:server instrumentation module wrapper'''
         logger.debug('Calling Agent.register_server_grpc().')
+        if 'HT_ENABLED' in os.environ:
+            if os.environ['HT_ENABLED'] == 'false':
+                logger.debug("HT_ENABLED is disabled.")
+                return
         try:
             self._init.grpc_server_init()
             self._init.dump_config()
@@ -75,6 +88,10 @@ class Agent:
     def register_client_grpc(self):
         '''Register the grpc:client instrumentation module wrapper'''
         logger.debug('Calling Agent.register_client_grpc().')
+        if 'HT_ENABLED' in os.environ:
+            if os.environ['HT_ENABLED'] == 'false':
+                logger.debug("HT_ENABLED is disabled.")
+                return
         try:
             self._init.grpc_client_init()
             self._init.dump_config()
@@ -87,6 +104,10 @@ class Agent:
     def register_mysql(self):
         '''Register the mysql instrumentation module wrapper'''
         logger.debug('Calling Agent.register_mysql().')
+        if 'HT_ENABLED' in os.environ:
+            if os.environ['HT_ENABLED'] == 'false':
+                logger.debug("HT_ENABLED is disabled.")
+                return
         try:
             self._init.mysql_init()
             self._init.dump_config()
@@ -99,6 +120,10 @@ class Agent:
     def register_postgresql(self):
         '''Register the postgresql instrumentation module wrapper'''
         logger.debug('Calling Agent.register_postgresql().')
+        if 'HT_ENABLED' in os.environ:
+            if os.environ['HT_ENABLED'] == 'false':
+                logger.debug("HT_ENABLED is disabled.")
+                return
         try:
             self._init.postgresql_init()
             self._init.dump_config()
@@ -111,6 +136,10 @@ class Agent:
     def register_requests(self, use_b3=False):
         '''Register the requests instrumentation module wrapper'''
         logger.debug('Calling Agent.register_requests()')
+        if 'HT_ENABLED' in os.environ:
+            if os.environ['HT_ENABLED'] == 'false':
+                logger.debug("HT_ENABLED is disabled.")
+                return
         try:
             self._init.requests_init(use_b3)
             self._init.dump_config()
@@ -123,6 +152,10 @@ class Agent:
     def register_aiohttp_client(self, use_b3=False):
         '''Register the aiohttp-client instrumentation module wrapper'''
         logger.debug('Calling Agent.register_aiohttp_client().')
+        if 'HT_ENABLED' in os.environ:
+            if os.environ['HT_ENABLED'] == 'false':
+                logger.debug("HT_ENABLED is disabled.")
+                return
         try:
             self._init.aiohttp_client_init(use_b3)
             self._init.dump_config()
@@ -135,7 +168,18 @@ class Agent:
     def register_processor(self, processor):
         '''Add additional span exporters + processors'''
         logger.debug('Entering Agent.register_processor().')
+        # if 'HT_ENABLED' in os.environ:
+        #     if os.environ['HT_ENABLED'] == 'true':
+        #         logger.debug("Register processor.")
+        #     else:
+        #         return
+        # else:
+        if 'HT_ENABLED' in os.environ:
+            if os.environ['HT_ENABLED'] == 'false':
+                return
         return self._init.register_processor(processor)
+
+
 
     def get_config(self):
         '''Return configuration object'''

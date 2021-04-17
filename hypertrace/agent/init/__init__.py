@@ -246,10 +246,10 @@ class AgentInit:  # pylint: disable=R0902,R0903
 
     def set_zipkin_processor(self):
         '''configure zipkin span exporter + processor'''
-        if 'OTEL_TRACES_EXPORTER' in os.environ:
-            if os.environ['OTEL_TRACES_EXPORTER'] == 'zipkin':
+        if 'HT_TRACES_EXPORTER' in os.environ:
+            if os.environ['HT_TRACES_EXPORTER'] == 'zipkin':
                 logger.debug(
-                    "OTEL_TRACES_EXPORTER is zipkin, adding exporter.")
+                    "HT_TRACES_EXPORTER is zipkin, adding exporter.")
             else:
                 return
         else:
@@ -271,9 +271,9 @@ class AgentInit:  # pylint: disable=R0902,R0903
 
     def set_otlp_processor(self):
         '''configure otlp span exporter + processor'''
-        if 'OTEL_TRACES_EXPORTER' in os.environ:
-            if os.environ['OTEL_TRACES_EXPORTER'] == 'otlp':
-                logger.debug("OTEL_TRACES_EXPORTER is otlp, adding exporter.")
+        if 'HT_TRACES_EXPORTER' in os.environ:
+            if os.environ['HT_TRACES_EXPORTER'] == 'otlp':
+                logger.debug("HT_TRACES_EXPORTER is otlp, adding exporter.")
             else:
                 return
         else:
