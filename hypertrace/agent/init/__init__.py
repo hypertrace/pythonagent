@@ -253,11 +253,12 @@ class AgentInit:  # pylint: disable=R0902,R0903
             else:
                 return
         else:
-            return
+            logger.debug('Defaulting to Zipkin exporter.')
 
         try:
             zipkin_exporter = ZipkinExporter(
-                endpoint=self._config.reporting.endpoint,
+                endpoint=self._config.reporting.endpoint
+                #insecure=self._config.reporting.secure
             )
 
             span_processor = BatchSpanProcessor(zipkin_exporter)
@@ -280,10 +281,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
             return
 
         try:
-            otlp_exporter = OTLPSpanExporter(endpoint="http://localhost:16686")
-            # endpoint=self._config.reporting.endpoint,
-            # insecure=self._config.reporting.secure)
-
+            otlp_exporter = OTLPSpanExporter(endpoint=self._config.reporting.endpoint,
+                                             insecure=self._config.reporting.secure)
             span_processor = BatchSpanProcessor(otlp_exporter)
             self._tracer_provider.add_span_processor(span_processor)
 
