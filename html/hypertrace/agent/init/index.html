@@ -275,18 +275,19 @@ class AgentInit:  # pylint: disable=R0902,R0903
 
     def set_zipkin_processor(self):
         &#39;&#39;&#39;configure zipkin span exporter + processor&#39;&#39;&#39;
-        if &#39;OTEL_TRACES_EXPORTER&#39; in os.environ:
-            if os.environ[&#39;OTEL_TRACES_EXPORTER&#39;] == &#39;zipkin&#39;:
+        if &#39;HT_TRACES_EXPORTER&#39; in os.environ:
+            if os.environ[&#39;HT_TRACES_EXPORTER&#39;] == &#39;zipkin&#39;:
                 logger.debug(
-                    &#34;OTEL_TRACES_EXPORTER is zipkin, adding exporter.&#34;)
+                    &#34;HT_TRACES_EXPORTER is zipkin, adding exporter.&#34;)
             else:
                 return
         else:
-            return
+            logger.debug(&#39;Defaulting to Zipkin exporter.&#39;)
 
         try:
             zipkin_exporter = ZipkinExporter(
-                endpoint=self._config.reporting.endpoint,
+                endpoint=self._config.reporting.endpoint
+                #insecure=self._config.reporting.secure
             )
 
             span_processor = BatchSpanProcessor(zipkin_exporter)
@@ -300,19 +301,17 @@ class AgentInit:  # pylint: disable=R0902,R0903
 
     def set_otlp_processor(self):
         &#39;&#39;&#39;configure otlp span exporter + processor&#39;&#39;&#39;
-        if &#39;OTEL_TRACES_EXPORTER&#39; in os.environ:
-            if os.environ[&#39;OTEL_TRACES_EXPORTER&#39;] == &#39;otlp&#39;:
-                logger.debug(&#34;OTEL_TRACES_EXPORTER is otlp, adding exporter.&#34;)
+        if &#39;HT_TRACES_EXPORTER&#39; in os.environ:
+            if os.environ[&#39;HT_TRACES_EXPORTER&#39;] == &#39;otlp&#39;:
+                logger.debug(&#34;HT_TRACES_EXPORTER is otlp, adding exporter.&#34;)
             else:
                 return
         else:
             return
 
         try:
-            otlp_exporter = OTLPSpanExporter(endpoint=&#34;http://localhost:16686&#34;)
-            # endpoint=self._config.reporting.endpoint,
-            # insecure=self._config.reporting.secure)
-
+            otlp_exporter = OTLPSpanExporter(endpoint=self._config.reporting.endpoint,
+                                             insecure=self._config.reporting.secure)
             span_processor = BatchSpanProcessor(otlp_exporter)
             self._tracer_provider.add_span_processor(span_processor)
 
@@ -578,18 +577,19 @@ class AgentInit:  # pylint: disable=R0902,R0903
 
     def set_zipkin_processor(self):
         &#39;&#39;&#39;configure zipkin span exporter + processor&#39;&#39;&#39;
-        if &#39;OTEL_TRACES_EXPORTER&#39; in os.environ:
-            if os.environ[&#39;OTEL_TRACES_EXPORTER&#39;] == &#39;zipkin&#39;:
+        if &#39;HT_TRACES_EXPORTER&#39; in os.environ:
+            if os.environ[&#39;HT_TRACES_EXPORTER&#39;] == &#39;zipkin&#39;:
                 logger.debug(
-                    &#34;OTEL_TRACES_EXPORTER is zipkin, adding exporter.&#34;)
+                    &#34;HT_TRACES_EXPORTER is zipkin, adding exporter.&#34;)
             else:
                 return
         else:
-            return
+            logger.debug(&#39;Defaulting to Zipkin exporter.&#39;)
 
         try:
             zipkin_exporter = ZipkinExporter(
-                endpoint=self._config.reporting.endpoint,
+                endpoint=self._config.reporting.endpoint
+                #insecure=self._config.reporting.secure
             )
 
             span_processor = BatchSpanProcessor(zipkin_exporter)
@@ -603,19 +603,17 @@ class AgentInit:  # pylint: disable=R0902,R0903
 
     def set_otlp_processor(self):
         &#39;&#39;&#39;configure otlp span exporter + processor&#39;&#39;&#39;
-        if &#39;OTEL_TRACES_EXPORTER&#39; in os.environ:
-            if os.environ[&#39;OTEL_TRACES_EXPORTER&#39;] == &#39;otlp&#39;:
-                logger.debug(&#34;OTEL_TRACES_EXPORTER is otlp, adding exporter.&#34;)
+        if &#39;HT_TRACES_EXPORTER&#39; in os.environ:
+            if os.environ[&#39;HT_TRACES_EXPORTER&#39;] == &#39;otlp&#39;:
+                logger.debug(&#34;HT_TRACES_EXPORTER is otlp, adding exporter.&#34;)
             else:
                 return
         else:
             return
 
         try:
-            otlp_exporter = OTLPSpanExporter(endpoint=&#34;http://localhost:16686&#34;)
-            # endpoint=self._config.reporting.endpoint,
-            # insecure=self._config.reporting.secure)
-
+            otlp_exporter = OTLPSpanExporter(endpoint=self._config.reporting.endpoint,
+                                             insecure=self._config.reporting.secure)
             span_processor = BatchSpanProcessor(otlp_exporter)
             self._tracer_provider.add_span_processor(span_processor)
 
@@ -945,19 +943,17 @@ class AgentInit:  # pylint: disable=R0902,R0903
 </summary>
 <pre><code class="python">def set_otlp_processor(self):
     &#39;&#39;&#39;configure otlp span exporter + processor&#39;&#39;&#39;
-    if &#39;OTEL_TRACES_EXPORTER&#39; in os.environ:
-        if os.environ[&#39;OTEL_TRACES_EXPORTER&#39;] == &#39;otlp&#39;:
-            logger.debug(&#34;OTEL_TRACES_EXPORTER is otlp, adding exporter.&#34;)
+    if &#39;HT_TRACES_EXPORTER&#39; in os.environ:
+        if os.environ[&#39;HT_TRACES_EXPORTER&#39;] == &#39;otlp&#39;:
+            logger.debug(&#34;HT_TRACES_EXPORTER is otlp, adding exporter.&#34;)
         else:
             return
     else:
         return
 
     try:
-        otlp_exporter = OTLPSpanExporter(endpoint=&#34;http://localhost:16686&#34;)
-        # endpoint=self._config.reporting.endpoint,
-        # insecure=self._config.reporting.secure)
-
+        otlp_exporter = OTLPSpanExporter(endpoint=self._config.reporting.endpoint,
+                                         insecure=self._config.reporting.secure)
         span_processor = BatchSpanProcessor(otlp_exporter)
         self._tracer_provider.add_span_processor(span_processor)
 
@@ -979,18 +975,19 @@ class AgentInit:  # pylint: disable=R0902,R0903
 </summary>
 <pre><code class="python">def set_zipkin_processor(self):
     &#39;&#39;&#39;configure zipkin span exporter + processor&#39;&#39;&#39;
-    if &#39;OTEL_TRACES_EXPORTER&#39; in os.environ:
-        if os.environ[&#39;OTEL_TRACES_EXPORTER&#39;] == &#39;zipkin&#39;:
+    if &#39;HT_TRACES_EXPORTER&#39; in os.environ:
+        if os.environ[&#39;HT_TRACES_EXPORTER&#39;] == &#39;zipkin&#39;:
             logger.debug(
-                &#34;OTEL_TRACES_EXPORTER is zipkin, adding exporter.&#34;)
+                &#34;HT_TRACES_EXPORTER is zipkin, adding exporter.&#34;)
         else:
             return
     else:
-        return
+        logger.debug(&#39;Defaulting to Zipkin exporter.&#39;)
 
     try:
         zipkin_exporter = ZipkinExporter(
-            endpoint=self._config.reporting.endpoint,
+            endpoint=self._config.reporting.endpoint
+            #insecure=self._config.reporting.secure
         )
 
         span_processor = BatchSpanProcessor(zipkin_exporter)

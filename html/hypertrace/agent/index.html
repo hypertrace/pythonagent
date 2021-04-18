@@ -69,6 +69,8 @@ class Agent:
     def __init__(self):
         &#39;&#39;&#39;Constructor&#39;&#39;&#39;
         logger.debug(&#39;Initializing Agent.&#39;)
+        if not self.is_enabled():
+            return
         try:
             self._config = AgentConfig()
             self._init = AgentInit(self)
@@ -80,6 +82,8 @@ class Agent:
     def register_flask_app(self, app, use_b3=False):
         &#39;&#39;&#39;Register the flask instrumentation module wrapper&#39;&#39;&#39;
         logger.debug(&#39;Calling Agent.register_flask_app.&#39;)
+        if not self.is_enabled():
+            return
         try:
             self._init.flask_init(app, use_b3)
             self._init.dump_config()
@@ -92,6 +96,8 @@ class Agent:
     def register_server_grpc(self):
         &#39;&#39;&#39;Register the grpc:server instrumentation module wrapper&#39;&#39;&#39;
         logger.debug(&#39;Calling Agent.register_server_grpc().&#39;)
+        if not self.is_enabled():
+            return
         try:
             self._init.grpc_server_init()
             self._init.dump_config()
@@ -104,6 +110,8 @@ class Agent:
     def register_client_grpc(self):
         &#39;&#39;&#39;Register the grpc:client instrumentation module wrapper&#39;&#39;&#39;
         logger.debug(&#39;Calling Agent.register_client_grpc().&#39;)
+        if not self.is_enabled():
+            return
         try:
             self._init.grpc_client_init()
             self._init.dump_config()
@@ -116,6 +124,8 @@ class Agent:
     def register_mysql(self):
         &#39;&#39;&#39;Register the mysql instrumentation module wrapper&#39;&#39;&#39;
         logger.debug(&#39;Calling Agent.register_mysql().&#39;)
+        if not self.is_enabled():
+            return
         try:
             self._init.mysql_init()
             self._init.dump_config()
@@ -128,6 +138,8 @@ class Agent:
     def register_postgresql(self):
         &#39;&#39;&#39;Register the postgresql instrumentation module wrapper&#39;&#39;&#39;
         logger.debug(&#39;Calling Agent.register_postgresql().&#39;)
+        if not self.is_enabled():
+            return
         try:
             self._init.postgresql_init()
             self._init.dump_config()
@@ -140,6 +152,8 @@ class Agent:
     def register_requests(self, use_b3=False):
         &#39;&#39;&#39;Register the requests instrumentation module wrapper&#39;&#39;&#39;
         logger.debug(&#39;Calling Agent.register_requests()&#39;)
+        if not self.is_enabled():
+            return
         try:
             self._init.requests_init(use_b3)
             self._init.dump_config()
@@ -152,6 +166,8 @@ class Agent:
     def register_aiohttp_client(self, use_b3=False):
         &#39;&#39;&#39;Register the aiohttp-client instrumentation module wrapper&#39;&#39;&#39;
         logger.debug(&#39;Calling Agent.register_aiohttp_client().&#39;)
+        if not self.is_enabled():
+            return
         try:
             self._init.aiohttp_client_init(use_b3)
             self._init.dump_config()
@@ -161,14 +177,25 @@ class Agent:
                          err,
                          traceback.format_exc())
 
-    def register_processor(self, processor):
+    def register_processor(self, processor): # pylint: disable=R1710
         &#39;&#39;&#39;Add additional span exporters + processors&#39;&#39;&#39;
         logger.debug(&#39;Entering Agent.register_processor().&#39;)
-        return self._init.register_processor(processor)
+        if not self.is_enabled():
+            return None
+        if self.is_enabled():
+            return self._init.register_processor(processor)
 
     def get_config(self):
         &#39;&#39;&#39;Return configuration object&#39;&#39;&#39;
-        return self._config</code></pre>
+        return self._config
+
+    def is_enabled(self): # pylint: disable=R0201
+        &#39;&#39;&#39;Is agent enabled?&#39;&#39;&#39;
+        if &#39;HT_ENABLED&#39; in os.environ:
+            if os.environ[&#39;HT_ENABLED&#39;] == &#39;false&#39;:
+                logger.debug(&#34;HT_ENABLED is disabled.&#34;)
+                return False
+        return True</code></pre>
 </details>
 </section>
 <section>
@@ -248,6 +275,8 @@ environment variables, and the agent-config.yaml file.</p></div>
     def __init__(self):
         &#39;&#39;&#39;Constructor&#39;&#39;&#39;
         logger.debug(&#39;Initializing Agent.&#39;)
+        if not self.is_enabled():
+            return
         try:
             self._config = AgentConfig()
             self._init = AgentInit(self)
@@ -259,6 +288,8 @@ environment variables, and the agent-config.yaml file.</p></div>
     def register_flask_app(self, app, use_b3=False):
         &#39;&#39;&#39;Register the flask instrumentation module wrapper&#39;&#39;&#39;
         logger.debug(&#39;Calling Agent.register_flask_app.&#39;)
+        if not self.is_enabled():
+            return
         try:
             self._init.flask_init(app, use_b3)
             self._init.dump_config()
@@ -271,6 +302,8 @@ environment variables, and the agent-config.yaml file.</p></div>
     def register_server_grpc(self):
         &#39;&#39;&#39;Register the grpc:server instrumentation module wrapper&#39;&#39;&#39;
         logger.debug(&#39;Calling Agent.register_server_grpc().&#39;)
+        if not self.is_enabled():
+            return
         try:
             self._init.grpc_server_init()
             self._init.dump_config()
@@ -283,6 +316,8 @@ environment variables, and the agent-config.yaml file.</p></div>
     def register_client_grpc(self):
         &#39;&#39;&#39;Register the grpc:client instrumentation module wrapper&#39;&#39;&#39;
         logger.debug(&#39;Calling Agent.register_client_grpc().&#39;)
+        if not self.is_enabled():
+            return
         try:
             self._init.grpc_client_init()
             self._init.dump_config()
@@ -295,6 +330,8 @@ environment variables, and the agent-config.yaml file.</p></div>
     def register_mysql(self):
         &#39;&#39;&#39;Register the mysql instrumentation module wrapper&#39;&#39;&#39;
         logger.debug(&#39;Calling Agent.register_mysql().&#39;)
+        if not self.is_enabled():
+            return
         try:
             self._init.mysql_init()
             self._init.dump_config()
@@ -307,6 +344,8 @@ environment variables, and the agent-config.yaml file.</p></div>
     def register_postgresql(self):
         &#39;&#39;&#39;Register the postgresql instrumentation module wrapper&#39;&#39;&#39;
         logger.debug(&#39;Calling Agent.register_postgresql().&#39;)
+        if not self.is_enabled():
+            return
         try:
             self._init.postgresql_init()
             self._init.dump_config()
@@ -319,6 +358,8 @@ environment variables, and the agent-config.yaml file.</p></div>
     def register_requests(self, use_b3=False):
         &#39;&#39;&#39;Register the requests instrumentation module wrapper&#39;&#39;&#39;
         logger.debug(&#39;Calling Agent.register_requests()&#39;)
+        if not self.is_enabled():
+            return
         try:
             self._init.requests_init(use_b3)
             self._init.dump_config()
@@ -331,6 +372,8 @@ environment variables, and the agent-config.yaml file.</p></div>
     def register_aiohttp_client(self, use_b3=False):
         &#39;&#39;&#39;Register the aiohttp-client instrumentation module wrapper&#39;&#39;&#39;
         logger.debug(&#39;Calling Agent.register_aiohttp_client().&#39;)
+        if not self.is_enabled():
+            return
         try:
             self._init.aiohttp_client_init(use_b3)
             self._init.dump_config()
@@ -340,14 +383,25 @@ environment variables, and the agent-config.yaml file.</p></div>
                          err,
                          traceback.format_exc())
 
-    def register_processor(self, processor):
+    def register_processor(self, processor): # pylint: disable=R1710
         &#39;&#39;&#39;Add additional span exporters + processors&#39;&#39;&#39;
         logger.debug(&#39;Entering Agent.register_processor().&#39;)
-        return self._init.register_processor(processor)
+        if not self.is_enabled():
+            return None
+        if self.is_enabled():
+            return self._init.register_processor(processor)
 
     def get_config(self):
         &#39;&#39;&#39;Return configuration object&#39;&#39;&#39;
-        return self._config</code></pre>
+        return self._config
+
+    def is_enabled(self): # pylint: disable=R0201
+        &#39;&#39;&#39;Is agent enabled?&#39;&#39;&#39;
+        if &#39;HT_ENABLED&#39; in os.environ:
+            if os.environ[&#39;HT_ENABLED&#39;] == &#39;false&#39;:
+                logger.debug(&#34;HT_ENABLED is disabled.&#34;)
+                return False
+        return True</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
@@ -365,6 +419,24 @@ environment variables, and the agent-config.yaml file.</p></div>
     return self._config</code></pre>
 </details>
 </dd>
+<dt id="hypertrace.agent.Agent.is_enabled"><code class="name flex">
+<span>def <span class="ident">is_enabled</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Is agent enabled?</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_enabled(self): # pylint: disable=R0201
+    &#39;&#39;&#39;Is agent enabled?&#39;&#39;&#39;
+    if &#39;HT_ENABLED&#39; in os.environ:
+        if os.environ[&#39;HT_ENABLED&#39;] == &#39;false&#39;:
+            logger.debug(&#34;HT_ENABLED is disabled.&#34;)
+            return False
+    return True</code></pre>
+</details>
+</dd>
 <dt id="hypertrace.agent.Agent.register_aiohttp_client"><code class="name flex">
 <span>def <span class="ident">register_aiohttp_client</span></span>(<span>self, use_b3=False)</span>
 </code></dt>
@@ -377,6 +449,8 @@ environment variables, and the agent-config.yaml file.</p></div>
 <pre><code class="python">def register_aiohttp_client(self, use_b3=False):
     &#39;&#39;&#39;Register the aiohttp-client instrumentation module wrapper&#39;&#39;&#39;
     logger.debug(&#39;Calling Agent.register_aiohttp_client().&#39;)
+    if not self.is_enabled():
+        return
     try:
         self._init.aiohttp_client_init(use_b3)
         self._init.dump_config()
@@ -399,6 +473,8 @@ environment variables, and the agent-config.yaml file.</p></div>
 <pre><code class="python">def register_client_grpc(self):
     &#39;&#39;&#39;Register the grpc:client instrumentation module wrapper&#39;&#39;&#39;
     logger.debug(&#39;Calling Agent.register_client_grpc().&#39;)
+    if not self.is_enabled():
+        return
     try:
         self._init.grpc_client_init()
         self._init.dump_config()
@@ -421,6 +497,8 @@ environment variables, and the agent-config.yaml file.</p></div>
 <pre><code class="python">def register_flask_app(self, app, use_b3=False):
     &#39;&#39;&#39;Register the flask instrumentation module wrapper&#39;&#39;&#39;
     logger.debug(&#39;Calling Agent.register_flask_app.&#39;)
+    if not self.is_enabled():
+        return
     try:
         self._init.flask_init(app, use_b3)
         self._init.dump_config()
@@ -443,6 +521,8 @@ environment variables, and the agent-config.yaml file.</p></div>
 <pre><code class="python">def register_mysql(self):
     &#39;&#39;&#39;Register the mysql instrumentation module wrapper&#39;&#39;&#39;
     logger.debug(&#39;Calling Agent.register_mysql().&#39;)
+    if not self.is_enabled():
+        return
     try:
         self._init.mysql_init()
         self._init.dump_config()
@@ -465,6 +545,8 @@ environment variables, and the agent-config.yaml file.</p></div>
 <pre><code class="python">def register_postgresql(self):
     &#39;&#39;&#39;Register the postgresql instrumentation module wrapper&#39;&#39;&#39;
     logger.debug(&#39;Calling Agent.register_postgresql().&#39;)
+    if not self.is_enabled():
+        return
     try:
         self._init.postgresql_init()
         self._init.dump_config()
@@ -484,10 +566,13 @@ environment variables, and the agent-config.yaml file.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def register_processor(self, processor):
+<pre><code class="python">def register_processor(self, processor): # pylint: disable=R1710
     &#39;&#39;&#39;Add additional span exporters + processors&#39;&#39;&#39;
     logger.debug(&#39;Entering Agent.register_processor().&#39;)
-    return self._init.register_processor(processor)</code></pre>
+    if not self.is_enabled():
+        return None
+    if self.is_enabled():
+        return self._init.register_processor(processor)</code></pre>
 </details>
 </dd>
 <dt id="hypertrace.agent.Agent.register_requests"><code class="name flex">
@@ -502,6 +587,8 @@ environment variables, and the agent-config.yaml file.</p></div>
 <pre><code class="python">def register_requests(self, use_b3=False):
     &#39;&#39;&#39;Register the requests instrumentation module wrapper&#39;&#39;&#39;
     logger.debug(&#39;Calling Agent.register_requests()&#39;)
+    if not self.is_enabled():
+        return
     try:
         self._init.requests_init(use_b3)
         self._init.dump_config()
@@ -524,6 +611,8 @@ environment variables, and the agent-config.yaml file.</p></div>
 <pre><code class="python">def register_server_grpc(self):
     &#39;&#39;&#39;Register the grpc:server instrumentation module wrapper&#39;&#39;&#39;
     logger.debug(&#39;Calling Agent.register_server_grpc().&#39;)
+    if not self.is_enabled():
+        return
     try:
         self._init.grpc_server_init()
         self._init.dump_config()
@@ -569,6 +658,7 @@ environment variables, and the agent-config.yaml file.</p></div>
 <h4><code><a title="hypertrace.agent.Agent" href="#hypertrace.agent.Agent">Agent</a></code></h4>
 <ul class="">
 <li><code><a title="hypertrace.agent.Agent.get_config" href="#hypertrace.agent.Agent.get_config">get_config</a></code></li>
+<li><code><a title="hypertrace.agent.Agent.is_enabled" href="#hypertrace.agent.Agent.is_enabled">is_enabled</a></code></li>
 <li><code><a title="hypertrace.agent.Agent.register_aiohttp_client" href="#hypertrace.agent.Agent.register_aiohttp_client">register_aiohttp_client</a></code></li>
 <li><code><a title="hypertrace.agent.Agent.register_client_grpc" href="#hypertrace.agent.Agent.register_client_grpc">register_client_grpc</a></code></li>
 <li><code><a title="hypertrace.agent.Agent.register_flask_app" href="#hypertrace.agent.Agent.register_flask_app">register_flask_app</a></code></li>
