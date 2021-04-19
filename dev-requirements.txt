@@ -16,3 +16,4 @@ pyyaml
 pylint==2.4.4
 tox
 pdoc3
+pipenv
