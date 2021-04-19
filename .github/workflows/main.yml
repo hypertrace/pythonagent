@@ -64,12 +64,28 @@ jobs:
       - name: Build package2
         run: python3 -m build
         
-      - name: Pushes to private package repo
+#      - name: Push binary package to private package repo
+#        uses: cpina/github-action-push-to-another-repository@master
+#        env:
+#          API_TOKEN_GITHUB: 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
+#        with:
+#          source-directory: dist
+#          destination-repository-name: hypertrace-pythonagent
+#          destination-github-username: rcbj
+#          target-branch: main
+
+      - name: Create src package to copy to repo for installs
+        run: mkdir src_install && \
+             cp -R src src_install && \
+             cp LICENSE README.md pyproject.toml setup.cfg setup.py src_install
+
+      - name: Push src package to private package repo
         uses: cpina/github-action-push-to-another-repository@master
         env:
           API_TOKEN_GITHUB: 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
         with:
-          source-directory: dist
+          source-directory: src_install
           destination-repository-name: hypertrace-pythonagent
           destination-github-username: rcbj
           target-branch: main
+
