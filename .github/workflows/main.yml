@@ -71,6 +71,6 @@ jobs:
         with:
           source-directory: build
           destination-repository-name: hypertrace-pythonagent
-          destination-github-username: rcbjBlueMars
+          destination-github-username: rcbj
           target-branch: main   
           user-email: robert@iyasec.io
