@@ -17,3 +17,5 @@ docs:
 	tox -e pdoc
 lint:
 	tox -e lint
+install:
+	pip install dist/hypertrace-0.1.0.tar.gz
