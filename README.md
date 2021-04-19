@@ -5,7 +5,7 @@
 # Flask Instrumentation Wrapper Architecture
 ![diagram](images/FlaskInstrumentationWrapper.jpg)
 
-# Setup
+# Developer Setup
 1. clone this repo.
 2. run tests: ```scripts/test-all.sh```
 3. To run individual tests:
@@ -14,7 +14,13 @@ cd test/flask
 tox
 ```
 # Instrument Code
-*Add the following to your app's entrypoint python file:
+* Have access granted to your github.com id.
+* Install the hypertrace python agent:
+```
+pip install git+https://github.com/rcbj/hypertrace-pythonagent.git@main#egg=hypertrace
+```
+* Enter your github.com username and password when prompted.
+* Add the following to your app's entrypoint python file:
 ```
 from hypertrace.agent import Agent
 
