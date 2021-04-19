@@ -81,7 +81,7 @@ jobs:
         run: cp -R src src_install
 
       - name: copy files into src_install 2
-        run: cp LICENSE README.md pyproject.toml setup.cfg setup.py src_install
+        run: cp LICENSE README.md pyproject.toml setup.py src_install
 
       - name: Push src package to private package repo
         uses: cpina/github-action-push-to-another-repository@master
