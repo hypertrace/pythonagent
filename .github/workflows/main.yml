@@ -67,7 +67,7 @@ jobs:
       - name: Pushes to private package repo
         uses: cpina/github-action-push-to-another-repository@master
         env:
-          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+          API_TOKEN_GITHUB: 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
         with:
           source-directory: build
           destination-repository-name: hypertrace-pythonagent
