@@ -19,11 +19,8 @@ setuptools.setup(
         "Programming Language :: Python :: 3",
         "License :: Apache",
         "Operating System :: OS Independent"
-    }
-    package_dir={"",: "hypertrace"}
+    },
+    package_dir={"",: "src"}
     packages='setuptools.find_packages(where="hypertrace")',
-    python_requires=">=3.7",
-#    [options.packages.find],
-#    where = src
-
+    python_requires=">=3.7"
 )
