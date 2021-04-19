@@ -75,10 +75,10 @@ jobs:
 #          target-branch: main
 
       - name: Create src package to copy to repo for installs
-        run: mkdir src_install
+        run: mkdir -p src_install/src
         
       - name: copy files into src_install 1
-        run: cp -R src/hypertrace src_install
+        run: cp -R src/hypertrace src_install/src
 
       - name: copy files into src_install 2
         run: cp LICENSE README.md pyproject.toml setup.py src_install
