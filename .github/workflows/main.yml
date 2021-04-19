@@ -49,11 +49,31 @@ jobs:
       - name: Install pip
         run: sudo apt-get install python3-pip
         
-      - name: Install tox
-        run: pip install --user -r dev-requirements.txt
-        
-      - name: Run pylint on this branch to generate a report
-        run: tox -e lint
+#      - name: Install tox
+#        run: pip install --user -r dev-requirements.txt
+#        
+#      - name: Run pylint on this branch to generate a report
+#        run: tox -e lint
+#
+#      - name: Run Test Cases
+#        run: make hypertrace_test
 
-      - name: Run Test Cases
-        run: make hypertrace_test
+      - name: Build package1
+        run: python -m pip install --upgrade build
+        
+      - name: Build package2
+        run: python3 -m build
+        
+      - name: Pushes to private package repo
+        uses: cpina/github-action-push-to-another-repository@master
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+        with:
+          source-directory: build
+          destination-repository-name: hypertrace-pythonagent
+          destination-github-username: rcbjBlueMars
+          target-branch: main
+          
+          destination-github-username: 'cpina'
+          destination-repository-name: 'pandoc-test-output'
+          user-email: carles3@pina.cat
