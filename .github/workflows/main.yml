@@ -78,7 +78,7 @@ jobs:
         run: mkdir src_install
         
       - name: copy files into src_install 1
-        run: cp -R src src_install
+        run: cp -R src/hypertrace src_install
 
       - name: copy files into src_install 2
         run: cp LICENSE README.md pyproject.toml setup.py src_install
