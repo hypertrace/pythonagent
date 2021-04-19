@@ -20,7 +20,7 @@ setuptools.setup(
         "License :: Apache",
         "Operating System :: OS Independent"
     },
-    package_dir={"": "src"}
+    package_dir={"": "src"},
     packages='setuptools.find_packages(where="hypertrace")',
     python_requires=">=3.7"
 )
