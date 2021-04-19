@@ -69,7 +69,7 @@ jobs:
         env:
           API_TOKEN_GITHUB: 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
         with:
-          source-directory: build
+          source-directory: dist
           destination-repository-name: hypertrace-pythonagent
           destination-github-username: rcbj
           target-branch: main   
