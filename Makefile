@@ -12,7 +12,7 @@ build:
 	python3 -m pip install --upgrade build
 	python -m build
 clean:
-	rm -Rf build dist
+	rm -Rf build dist src/hypertrace.egg-info
 docs:
 	tox -e pdoc
 lint:
