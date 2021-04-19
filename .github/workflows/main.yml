@@ -72,8 +72,5 @@ jobs:
           source-directory: build
           destination-repository-name: hypertrace-pythonagent
           destination-github-username: rcbjBlueMars
-          target-branch: main
-          
-          destination-github-username: 'cpina'
-          destination-repository-name: 'pandoc-test-output'
-          user-email: carles3@pina.cat
+          target-branch: main   
+          user-email: robert@iyasec.io
