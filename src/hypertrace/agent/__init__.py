@@ -5,7 +5,7 @@ import sys
 import logging
 import traceback
 from hypertrace.agent.init import AgentInit
-from hypertrace.agent.config import AgentConfig
+from hypertrace.agent.config import AgentConfig1
 from hypertrace.agent import constants
 
 # main logging modle configuration
@@ -60,7 +60,7 @@ class Agent:
         if not self.is_enabled():
             return
         try:
-            self._config = AgentConfig()
+            self._config = AgentConfig1()
             self._init = AgentInit(self)
         except Exception as err: # pylint: disable=W0703
             logger.error('Failed to initialize Agent: exception=%s, stacktrace=%s',

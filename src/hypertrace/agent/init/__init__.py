@@ -11,16 +11,15 @@ from opentelemetry.exporter.zipkin.proto.http import ZipkinExporter
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from hypertrace.agent.config import AgentConfig
 from hypertrace.agent import constants
-from hypertrace.agent.config import config_pb2
+from hypertrace.agent.config import config_pb2, AgentConfig1
 
 # Initialize logger
 logger = logging.getLogger(__name__) # pylint: disable=C0103
 
 class AgentInit:  # pylint: disable=R0902,R0903
     '''Initialize all the OTel components using configuration from AgentConfig'''
-    def __init__(self, agent):
+    def __init__(self, agent: AgentConfig1):
         '''constructor'''
         logger.debug('Initializing AgentInit object.')
         self._agent = agent
@@ -45,9 +44,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
             )
             trace.set_tracer_provider(self._tracer_provider)
 
-            self.set_console_span_processor()
 
-
+#            self.set_console_span_processor()
 
             self.set_zipkin_processor()
             self.set_otlp_processor()
@@ -86,7 +84,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self.init_instrumentor_wrapper_base_for_http(
                 self._flask_instrumentor_wrapper)
             if use_b3 \
-              or self._config.propagation_formats == config_pb2.PropagationFormat.B3:
+              or self._config.propagation_formats == 'B3':
                 self.enable_b3()
         except Exception as err: # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
@@ -198,7 +196,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self.init_instrumentor_wrapper_base_for_http(
                 self._requests_instrumentor_wrapper)
             if use_b3 \
-              or self._config.propagation_formats == config_pb2.PropagationFormat.B3:
+              or self._config.propagation_formats == 'B3':
                 self.enable_b3()
         except Exception as err: # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
@@ -219,7 +217,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self.init_instrumentor_wrapper_base_for_http(
                 self._aiohttp_client_instrumentor_wrapper)
             if use_b3 \
-              or self._config.propagation_formats == config_pb2.PropagationFormat.B3:
+              or self._config.propagation_formats == 'B3':
                 self.enable_b3()
         except Exception as err: # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
