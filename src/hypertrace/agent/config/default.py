@@ -16,8 +16,9 @@ DEFAULT_AGENT_CONFIG_ENABLED = True
 DEFAULT_AGENT_CONFIG = {
     'service_name': "pythonagent",
     'reporting': {
-        "endpoint": "",
-        "secure": False
+        "endpoint": "http://localhost:9411/api/v2/spans",
+        "secure": False,
+        "trace_reporter_type": "ZIPKIN"
     },
     'data_capture': {
         "http_headers": {
