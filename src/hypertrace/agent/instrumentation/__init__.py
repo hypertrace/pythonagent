@@ -32,6 +32,7 @@ class BaseInstrumentorWrapper:
         self._process_request_body = False
         self._process_response_body = False
         self._service_name = 'hypertrace-python-agent'
+        self._max_body_size = 128 * 1024
 
     # Dump object for troubleshooting purposes
     def introspect(self, obj):
@@ -71,6 +72,11 @@ class BaseInstrumentorWrapper:
         '''get service name'''
         return self._service_name
 
+    # Get the max body size that can be captured
+    def get_max_body_size(self):
+        '''get the max body size.'''
+        return self._max_body_size
+
     # Set whether request headers should be put in extended span, takes a BoolValue as input
     def set_process_request_headers(self, process_request_headers):
         '''Should it process request headers?'''
@@ -104,6 +110,12 @@ class BaseInstrumentorWrapper:
         '''Set the service name for this instrumentor.'''
         logger.debug('Setting self._service_name to \'%s\'', service_name)
         self._service_name = service_name
+
+    # Set max body size
+    def set_body_max_size(self, max_body_size):
+        '''Set the max body size that will be captured.'''
+        logger.debug('Setting self.body_max_size to %s.', max_body_size)
+        self._max_body_size = max_body_size
 
     # Generic HTTP Request Handler
     def generic_request_handler(self, # pylint: disable=R0912
@@ -155,12 +167,11 @@ class BaseInstrumentorWrapper:
                                 request_body_str = request_body.decode('UTF8')
                             else:
                                 request_body_str = request_body
+                            request_body_str = self.grab_first_n_bytes(request_body_str)
                             if content_type_header_tuple[0][1] == 'application/json' \
                               or content_type_header_tuple[0][1] == 'application/graphql':
-                                logger.info(
-                                    'decoded Request Body: %s', request_body_str)
                                 span.set_attribute(self.HTTP_REQUEST_BODY_PREFIX,\
-                                  json.dumps(json.loads(request_body_str.replace("'", '"'))))
+                                  request_body_str.replace("'", '"'))
                             else:
                                 span.set_attribute(
                                     self.HTTP_REQUEST_BODY_PREFIX, request_body_str)
@@ -193,7 +204,7 @@ class BaseInstrumentorWrapper:
                     logger.debug(str(header))
                     span.set_attribute(
                         self.HTTP_RESPONSE_HEADER_PREFIX + header[0].lower(), header[1])
-            # Log response body if requesed
+            # Log response body if requested
             if self.get_process_response_body():
                 logger.debug('Response Body: %s', str(response_body))
                 # Get content-type value
@@ -219,11 +230,12 @@ class BaseInstrumentorWrapper:
                                 response_body_str = response_body.decode('UTF8')
                             else:
                                 response_body_str = response_body
+                            response_body_str = self.grab_first_n_bytes(response_body_str)
                             # Format message body correctly
                             if content_type_header_tuple[0][1] == 'application/json'\
                               and content_type_header_tuple[0][1] == 'application/graphql':
                                 span.set_attribute(self.HTTP_RESPONSE_BODY_PREFIX,\
-                                  json.dumps(json.loads(response_body_str.replace("'", '"'))))
+                                  response_body_str.replace("'", '"'))
                             else:
                                 span.set_attribute(
                                     self.HTTP_RESPONSE_BODY_PREFIX, response_body_str)
@@ -278,9 +290,11 @@ class BaseInstrumentorWrapper:
                         self.RPC_REQUEST_METADATA_PREFIX + header[0].lower(), header[1])
             # Log rpc body if requested
             if self.get_process_request_body():
-                logger.debug('Request Body: %s', str(request_body))
+                request_body_str = str(request_body)
+                logger.debug('Request Body: %s', request_body_str)
+                request_body_str = self.grab_first_n_bytes(request_body_str)
                 span.set_attribute(self.RPC_REQUEST_BODY_PREFIX,
-                                   str(request_body))
+                                   request_body_str)
         except: # pylint: disable=W0702
             logger.error('An error occurred in genericRequestHandler: exception=%s, stacktrace=%s',
                          sys.exc_info()[0],
@@ -312,9 +326,11 @@ class BaseInstrumentorWrapper:
                         self.RPC_RESPONSE_METADATA_PREFIX + header[0].lower(), header[1])
             # Log rpc body if requested
             if self.get_process_response_body():
-                logger.debug('Response Body: %s', str(response_body))
+                response_body_str = str(response_body)
+                logger.debug('Response Body: %s', response_body_str)
+                response_body_str = self.grab_first_n_bytes(response_body_str)
                 span.set_attribute(
-                    self.RPC_RESPONSE_BODY_PREFIX, str(response_body))
+                    self.RPC_RESPONSE_BODY_PREFIX, response_body_str)
         except: # pylint: disable=W0702
             logger.error('An error occurred in genericResponseHandler: exception=%s, stacktrace=%s',
                          sys.exc_info()[0],
@@ -322,3 +338,24 @@ class BaseInstrumentorWrapper:
             # Not rethrowing to avoid causing runtime errors
         finally:
             return span # pylint: disable=W0150
+
+    # Check body size
+    def check_body_size(self, body):
+        '''Is the size of this message body larger than the configured max?'''
+        if body in (None, ''):
+            return False
+        body_len = len(body)
+        if body_len > self.get_max_body_size():
+            logger.debug('message body size is greater than max size.')
+            return True
+        return False
+
+    # grab first N bytes
+    def grab_first_n_bytes(self, body):
+        '''Return the first N (max_body_size) bytes of a request'''
+        if body in (None, ''):
+            return ''
+        if self.check_body_size(body): # pylint: disable=R1705
+            return body[0, self.get_max_body_size()]
+        else:
+            return body

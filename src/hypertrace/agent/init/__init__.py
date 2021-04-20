@@ -13,6 +13,7 @@ from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from hypertrace.agent.config import AgentConfig
 from hypertrace.agent import constants
+from hypertrace.agent.config import config_pb2
 
 # Initialize logger
 logger = logging.getLogger(__name__) # pylint: disable=C0103
@@ -78,7 +79,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self._flask_instrumentor_wrapper.instrument_app(app)
             self.init_instrumentor_wrapper_base_for_http(
                 self._flask_instrumentor_wrapper)
-            if use_b3:
+            if use_b3 \
+              or self._config.data_capture.propagation_formats == config_pb2.PropagationFormat.B3:
                 self.enable_b3()
         except Exception as err: # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
@@ -189,7 +191,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self._requests_instrumentor_wrapper = RequestsInstrumentorWrapper()
             self.init_instrumentor_wrapper_base_for_http(
                 self._requests_instrumentor_wrapper)
-            if use_b3:
+            if use_b3 \
+              or self._config.data_capture.propagation_formats == config_pb2.PropagationFormat.B3:
                 self.enable_b3()
         except Exception as err: # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
@@ -209,7 +212,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self._aiohttp_client_instrumentor_wrapper = AioHttpClientInstrumentorWrapper()
             self.init_instrumentor_wrapper_base_for_http(
                 self._aiohttp_client_instrumentor_wrapper)
-            if use_b3:
+            if use_b3 \
+              or self._config.data_capture.propagation_formats == config_pb2.PropagationFormat.B3:
                 self.enable_b3()
         except Exception as err: # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
@@ -230,6 +234,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self._config.data_capture.http_headers.response)
         instrumentor.set_process_response_body(
             self._config.data_capture.http_body.response)
+        instrumentor.set_body_max_size(
+            self._config.data_capture.body_max_size_bytes)
 
     def register_processor(self, processor):
         '''Register additional span exporter + processor'''
@@ -258,7 +264,6 @@ class AgentInit:  # pylint: disable=R0902,R0903
         try:
             zipkin_exporter = ZipkinExporter(
                 endpoint=self._config.reporting.endpoint
-                #insecure=self._config.reporting.secure
             )
 
             span_processor = BatchSpanProcessor(zipkin_exporter)

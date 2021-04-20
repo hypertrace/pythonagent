@@ -179,11 +179,13 @@ class AgentConfig:  # pylint: disable=R0902,R0903
             logger.debug(
                 &#34;[env] Loaded HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES from env&#34;)
             data_capture_max_size_bytes \
-                = os.environ[&#39;HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES&#39;]
+                = int(os.environ[&#39;HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES&#39;])
 
-        # if &#39;HT_PROPAGATION_FORMATS&#39; in os.environ:
-        #     logger.debug(&#34;[env] Loaded HT_PROPAGATION_FORMATS from env&#34;)
-        #     self.config[&#39;&#39;] = os.environ[&#39;HT_PROPAGATION_FORMATS&#39;]
+        if &#39;HT_PROPAGATION_FORMATS&#39; in os.environ:
+            logger.debug(&#34;[env] Loaded HT_PROPAGATION_FORMATS from env&#34;)
+            self._propagation_format = os.environ[&#39;HT_PROPAGATION_FORMATS&#39;]
+        else:
+            self._propagation_format = DEFAULT_PROPAGATION_FORMAT
 
         if &#39;HT_ENABLED&#39; in os.environ:
             logger.debug(&#34;[env] Loaded HT_ENABLED from env&#34;)
@@ -233,7 +235,10 @@ class AgentConfig:  # pylint: disable=R0902,R0903
         self.agent_config.service_name = self.config[&#39;service_name&#39;]
         self.agent_config.reporting = self.reporting
         self.agent_config.data_capture = self.data_capture
-        self.agent_config.propagation_formats = config_pb2.PropagationFormat.TRACECONTEXT
+        if self._propagation_format == &#39;TRACECONTEXT&#39;:
+            self.agent_config.propagation_formats = config_pb2.PropagationFormat.TRACECONTEXT
+        else:
+            self.agent_config.propagation_formats = config_pb2.PropagationFormat.B3
         self.agent_config.enabled = agent_config_enabled
         self.agent_config.resource_attributes = {
             &#39;service_name&#39;: self.config[&#39;service_name&#39;]}
@@ -436,11 +441,13 @@ If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></di
             logger.debug(
                 &#34;[env] Loaded HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES from env&#34;)
             data_capture_max_size_bytes \
-                = os.environ[&#39;HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES&#39;]
+                = int(os.environ[&#39;HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES&#39;])
 
-        # if &#39;HT_PROPAGATION_FORMATS&#39; in os.environ:
-        #     logger.debug(&#34;[env] Loaded HT_PROPAGATION_FORMATS from env&#34;)
-        #     self.config[&#39;&#39;] = os.environ[&#39;HT_PROPAGATION_FORMATS&#39;]
+        if &#39;HT_PROPAGATION_FORMATS&#39; in os.environ:
+            logger.debug(&#34;[env] Loaded HT_PROPAGATION_FORMATS from env&#34;)
+            self._propagation_format = os.environ[&#39;HT_PROPAGATION_FORMATS&#39;]
+        else:
+            self._propagation_format = DEFAULT_PROPAGATION_FORMAT
 
         if &#39;HT_ENABLED&#39; in os.environ:
             logger.debug(&#34;[env] Loaded HT_ENABLED from env&#34;)
@@ -490,7 +497,10 @@ If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></di
         self.agent_config.service_name = self.config[&#39;service_name&#39;]
         self.agent_config.reporting = self.reporting
         self.agent_config.data_capture = self.data_capture
-        self.agent_config.propagation_formats = config_pb2.PropagationFormat.TRACECONTEXT
+        if self._propagation_format == &#39;TRACECONTEXT&#39;:
+            self.agent_config.propagation_formats = config_pb2.PropagationFormat.TRACECONTEXT
+        else:
+            self.agent_config.propagation_formats = config_pb2.PropagationFormat.B3
         self.agent_config.enabled = agent_config_enabled
         self.agent_config.resource_attributes = {
             &#39;service_name&#39;: self.config[&#39;service_name&#39;]}

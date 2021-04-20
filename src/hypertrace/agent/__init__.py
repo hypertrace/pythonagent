@@ -1,6 +1,7 @@
 '''Main entry point for Hypertrace agent module.'''
-import sys
+import os
 import os.path
+import sys
 import logging
 import traceback
 from hypertrace.agent.init import AgentInit
@@ -19,8 +20,25 @@ def setup_custom_logger(name):
         handler.setFormatter(formatter)
         screen_handler = logging.StreamHandler(stream=sys.stdout)
         screen_handler.setFormatter(formatter)
+        log_level = logging.INFO
         logger_ = logging.getLogger(name)
-        logger_.setLevel(logging.INFO)
+        if 'HT_LOG_LEVEL' in os.environ:
+            ht_log_level = os.environ['HT_LOG_LEVEL']
+            if ht_log_level is None or ht_log_level == '':
+                log_level = logging.INFO
+            if ht_log_level == 'INFO':
+                log_level = logging.INFO
+            if ht_log_level == 'DEBUG':
+                log_level = logging.DEBUG
+            if ht_log_level == 'ERROR':
+                log_level = logging.ERROR
+            if ht_log_level == 'WARNING':
+                log_level = logging.WARNING
+            if ht_log_level == 'CRITICAL':
+                log_level = logging.CRITICAL
+            if ht_log_level == 'NOTSET':
+                log_level = logging.NOTSET
+        logger_.setLevel(log_level)
         logger_.addHandler(handler)
         logger_.addHandler(screen_handler)
         return logger_
@@ -28,7 +46,6 @@ def setup_custom_logger(name):
         print('Failed to customize logger: exception=%s, stacktrace=%s',
               err,
               traceback.format_exc())
-
 
 # create logger object
 logger = setup_custom_logger(__name__) # pylint: disable=C0103

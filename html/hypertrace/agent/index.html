@@ -28,8 +28,9 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">&#39;&#39;&#39;Main entry point for Hypertrace agent module.&#39;&#39;&#39;
-import sys
+import os
 import os.path
+import sys
 import logging
 import traceback
 from hypertrace.agent.init import AgentInit
@@ -48,8 +49,25 @@ def setup_custom_logger(name):
         handler.setFormatter(formatter)
         screen_handler = logging.StreamHandler(stream=sys.stdout)
         screen_handler.setFormatter(formatter)
+        log_level = logging.INFO
         logger_ = logging.getLogger(name)
-        logger_.setLevel(logging.INFO)
+        if &#39;HT_LOG_LEVEL&#39; in os.environ:
+            ht_log_level = os.environ[&#39;HT_LOG_LEVEL&#39;]
+            if ht_log_level is None or ht_log_level == &#39;&#39;:
+                log_level = logging.INFO
+            if ht_log_level == &#39;INFO&#39;:
+                log_level = logging.INFO
+            if ht_log_level == &#39;DEBUG&#39;:
+                log_level = logging.DEBUG
+            if ht_log_level == &#39;ERROR&#39;:
+                log_level = logging.ERROR
+            if ht_log_level == &#39;WARNING&#39;:
+                log_level = logging.WARNING
+            if ht_log_level == &#39;CRITICAL&#39;:
+                log_level = logging.CRITICAL
+            if ht_log_level == &#39;NOTSET&#39;:
+                log_level = logging.NOTSET
+        logger_.setLevel(log_level)
         logger_.addHandler(handler)
         logger_.addHandler(screen_handler)
         return logger_
@@ -57,7 +75,6 @@ def setup_custom_logger(name):
         print(&#39;Failed to customize logger: exception=%s, stacktrace=%s&#39;,
               err,
               traceback.format_exc())
-
 
 # create logger object
 logger = setup_custom_logger(__name__) # pylint: disable=C0103
@@ -243,8 +260,25 @@ environment variables, and the agent-config.yaml file.</p></div>
         handler.setFormatter(formatter)
         screen_handler = logging.StreamHandler(stream=sys.stdout)
         screen_handler.setFormatter(formatter)
+        log_level = logging.INFO
         logger_ = logging.getLogger(name)
-        logger_.setLevel(logging.INFO)
+        if &#39;HT_LOG_LEVEL&#39; in os.environ:
+            ht_log_level = os.environ[&#39;HT_LOG_LEVEL&#39;]
+            if ht_log_level is None or ht_log_level == &#39;&#39;:
+                log_level = logging.INFO
+            if ht_log_level == &#39;INFO&#39;:
+                log_level = logging.INFO
+            if ht_log_level == &#39;DEBUG&#39;:
+                log_level = logging.DEBUG
+            if ht_log_level == &#39;ERROR&#39;:
+                log_level = logging.ERROR
+            if ht_log_level == &#39;WARNING&#39;:
+                log_level = logging.WARNING
+            if ht_log_level == &#39;CRITICAL&#39;:
+                log_level = logging.CRITICAL
+            if ht_log_level == &#39;NOTSET&#39;:
+                log_level = logging.NOTSET
+        logger_.setLevel(log_level)
         logger_.addHandler(handler)
         logger_.addHandler(screen_handler)
         return logger_
