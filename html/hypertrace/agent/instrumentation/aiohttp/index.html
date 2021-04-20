@@ -49,6 +49,13 @@ from hypertrace.agent.instrumentation import BaseInstrumentorWrapper
 # Initialize logger with local module name
 logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
+def hypertrace_name_callback(trace_request_start_params):
+    &#39;&#39;&#39;Generate span name&#39;&#39;&#39;
+    logger.debug(&#39;Entering hypertrace_name_callback(), method=%s, url=%s.&#39;,
+                 trace_request_start_params.method,
+                 str(trace_request_start_params.url))
+    return trace_request_start_params.method + &#39; &#39; + str(trace_request_start_params.url)
+
 # aiohttp-client instrumentation module wrapper class
 class AioHttpClientInstrumentorWrapper(AioHttpClientInstrumentor, BaseInstrumentorWrapper):
     &#39;&#39;&#39;Hypertrace wrapper class around OpenTelemetry AioHttpClient Instrumentor class&#39;&#39;&#39;
@@ -64,7 +71,7 @@ class AioHttpClientInstrumentorWrapper(AioHttpClientInstrumentor, BaseInstrument
         super()._instrument(
             tracer_provider=kwargs.get(&#34;tracer_provider&#34;),
             url_filter=kwargs.get(&#34;url_filter&#34;),
-            span_name=kwargs.get(&#34;span_name&#34;),
+            span_name=hypertrace_name_callback
         )
         # Initialize HyperTrace instrumentor
         _instrument(
@@ -270,6 +277,23 @@ def _instrument(
     return trace_config</code></pre>
 </details>
 </dd>
+<dt id="hypertrace.agent.instrumentation.aiohttp.hypertrace_name_callback"><code class="name flex">
+<span>def <span class="ident">hypertrace_name_callback</span></span>(<span>trace_request_start_params)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generate span name</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def hypertrace_name_callback(trace_request_start_params):
+    &#39;&#39;&#39;Generate span name&#39;&#39;&#39;
+    logger.debug(&#39;Entering hypertrace_name_callback(), method=%s, url=%s.&#39;,
+                 trace_request_start_params.method,
+                 str(trace_request_start_params.url))
+    return trace_request_start_params.method + &#39; &#39; + str(trace_request_start_params.url)</code></pre>
+</details>
+</dd>
 </dl>
 </section>
 <section>
@@ -298,7 +322,7 @@ def _instrument(
         super()._instrument(
             tracer_provider=kwargs.get(&#34;tracer_provider&#34;),
             url_filter=kwargs.get(&#34;url_filter&#34;),
-            span_name=kwargs.get(&#34;span_name&#34;),
+            span_name=hypertrace_name_callback
         )
         # Initialize HyperTrace instrumentor
         _instrument(
@@ -364,6 +388,7 @@ def _instrument(
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="hypertrace.agent.instrumentation.aiohttp.create_trace_config" href="#hypertrace.agent.instrumentation.aiohttp.create_trace_config">create_trace_config</a></code></li>
+<li><code><a title="hypertrace.agent.instrumentation.aiohttp.hypertrace_name_callback" href="#hypertrace.agent.instrumentation.aiohttp.hypertrace_name_callback">hypertrace_name_callback</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>

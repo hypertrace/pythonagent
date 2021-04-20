@@ -45,7 +45,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             trace.set_tracer_provider(self._tracer_provider)
 
 
-#            self.set_console_span_processor()
+            self.set_console_span_processor()
 
             self.set_zipkin_processor()
             self.set_otlp_processor()

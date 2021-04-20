@@ -203,7 +203,10 @@ class AgentConfig1:  # pylint: disable=R0902,R0903
         self.reporting.secure = self.config[&#39;reporting&#39;][&#39;secure&#39;]
         self.reporting.token = reporting_token
         self.reporting.opa = self.opa
-        self.reporting.trace_reporter_type = config_pb2.TraceReporterType.OTLP
+        if self.config[&#39;reporting&#39;][&#39;trace_reporter_type&#39;]:
+            self.reporting.trace_reporter_type = self.config[&#39;reporting&#39;][&#39;trace_reporter_type&#39;]
+        else:
+            self.reporting.trace_reporter_type = config_pb2.TraceReporterType.OTLP
 
         self.rpc_body = config_pb2.Message(request=BoolValue( # pylint: disable=C0330
             value=self.config[&#39;data_capture&#39;][&#39;rpc_body&#39;][&#39;request&#39;]),
@@ -465,7 +468,10 @@ If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></di
         self.reporting.secure = self.config[&#39;reporting&#39;][&#39;secure&#39;]
         self.reporting.token = reporting_token
         self.reporting.opa = self.opa
-        self.reporting.trace_reporter_type = config_pb2.TraceReporterType.OTLP
+        if self.config[&#39;reporting&#39;][&#39;trace_reporter_type&#39;]:
+            self.reporting.trace_reporter_type = self.config[&#39;reporting&#39;][&#39;trace_reporter_type&#39;]
+        else:
+            self.reporting.trace_reporter_type = config_pb2.TraceReporterType.OTLP
 
         self.rpc_body = config_pb2.Message(request=BoolValue( # pylint: disable=C0330
             value=self.config[&#39;data_capture&#39;][&#39;rpc_body&#39;][&#39;request&#39;]),

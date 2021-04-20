@@ -51,6 +51,11 @@ def get_active_span_for_call_wrapper(requests_wrapper):
                 response_headers, response_content, span)
     return get_active_span_for_call
 
+def hypertrace_name_callback(method, url):
+    '''generate span name'''
+    logger.debug('Entering hypertrace_name_callback(), method=%s, url=%s.', method, url)
+    return method + ' ' + url
+
 class RequestsInstrumentorWrapper(RequestsInstrumentor, BaseInstrumentorWrapper):
     '''Hypertrace wrapper around OTel requests instrumentor class'''
     # Constructor
@@ -63,7 +68,7 @@ class RequestsInstrumentorWrapper(RequestsInstrumentor, BaseInstrumentorWrapper)
         super()._instrument(
             tracer_provider=kwargs.get("tracer_provider"),
             span_callback=get_active_span_for_call_wrapper(self),
-            name_callback=kwargs.get("name_callback"),
+            name_callback=hypertrace_name_callback
         )
 
     def _uninstrument(self, **kwargs):

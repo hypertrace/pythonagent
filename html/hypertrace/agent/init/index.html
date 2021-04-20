@@ -73,9 +73,14 @@ class AgentInit:  # pylint: disable=R0902,R0903
             )
             trace.set_tracer_provider(self._tracer_provider)
 
-#            self.set_console_span_processor()
+
+            self.set_console_span_processor()
+
             self.set_zipkin_processor()
             self.set_otlp_processor()
+
+
+
 
             self._flask_instrumentor_wrapper = None
             self._grpc_instrumentor_client_wrapper = None
@@ -287,7 +292,10 @@ class AgentInit:  # pylint: disable=R0902,R0903
             else:
                 return
         else:
-            logger.debug(&#39;Defaulting to Zipkin exporter.&#39;)
+            if self._config.reporting.trace_reporter_type == &#39;ZIPKIN&#39;:
+                logger.debug(&#34;Trace reporter type is zipkin, adding exporter.&#34;)
+            else:
+                return
 
         try:
             zipkin_exporter = ZipkinExporter(
@@ -311,7 +319,10 @@ class AgentInit:  # pylint: disable=R0902,R0903
             else:
                 return
         else:
-            return
+            if self._config.reporting.trace_reporter_type == &#39;OTLP&#39;:
+                logger.debug(&#34;Trace reporter type is otlp, adding exporter.&#34;)
+            else:
+                return
 
         try:
             otlp_exporter = OTLPSpanExporter(endpoint=self._config.reporting.endpoint,
@@ -379,9 +390,14 @@ class AgentInit:  # pylint: disable=R0902,R0903
             )
             trace.set_tracer_provider(self._tracer_provider)
 
-#            self.set_console_span_processor()
+
+            self.set_console_span_processor()
+
             self.set_zipkin_processor()
             self.set_otlp_processor()
+
+
+
 
             self._flask_instrumentor_wrapper = None
             self._grpc_instrumentor_client_wrapper = None
@@ -593,7 +609,10 @@ class AgentInit:  # pylint: disable=R0902,R0903
             else:
                 return
         else:
-            logger.debug(&#39;Defaulting to Zipkin exporter.&#39;)
+            if self._config.reporting.trace_reporter_type == &#39;ZIPKIN&#39;:
+                logger.debug(&#34;Trace reporter type is zipkin, adding exporter.&#34;)
+            else:
+                return
 
         try:
             zipkin_exporter = ZipkinExporter(
@@ -617,7 +636,10 @@ class AgentInit:  # pylint: disable=R0902,R0903
             else:
                 return
         else:
-            return
+            if self._config.reporting.trace_reporter_type == &#39;OTLP&#39;:
+                logger.debug(&#34;Trace reporter type is otlp, adding exporter.&#34;)
+            else:
+                return
 
         try:
             otlp_exporter = OTLPSpanExporter(endpoint=self._config.reporting.endpoint,
@@ -962,7 +984,10 @@ class AgentInit:  # pylint: disable=R0902,R0903
         else:
             return
     else:
-        return
+        if self._config.reporting.trace_reporter_type == &#39;OTLP&#39;:
+            logger.debug(&#34;Trace reporter type is otlp, adding exporter.&#34;)
+        else:
+            return
 
     try:
         otlp_exporter = OTLPSpanExporter(endpoint=self._config.reporting.endpoint,
@@ -995,7 +1020,10 @@ class AgentInit:  # pylint: disable=R0902,R0903
         else:
             return
     else:
-        logger.debug(&#39;Defaulting to Zipkin exporter.&#39;)
+        if self._config.reporting.trace_reporter_type == &#39;ZIPKIN&#39;:
+            logger.debug(&#34;Trace reporter type is zipkin, adding exporter.&#34;)
+        else:
+            return
 
     try:
         zipkin_exporter = ZipkinExporter(

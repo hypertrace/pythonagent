@@ -80,6 +80,11 @@ def get_active_span_for_call_wrapper(requests_wrapper):
                 response_headers, response_content, span)
     return get_active_span_for_call
 
+def hypertrace_name_callback(method, url):
+    &#39;&#39;&#39;generate span name&#39;&#39;&#39;
+    logger.debug(&#39;Entering hypertrace_name_callback(), method=%s, url=%s.&#39;, method, url)
+    return method + &#39; &#39; + url
+
 class RequestsInstrumentorWrapper(RequestsInstrumentor, BaseInstrumentorWrapper):
     &#39;&#39;&#39;Hypertrace wrapper around OTel requests instrumentor class&#39;&#39;&#39;
     # Constructor
@@ -92,7 +97,7 @@ class RequestsInstrumentorWrapper(RequestsInstrumentor, BaseInstrumentorWrapper)
         super()._instrument(
             tracer_provider=kwargs.get(&#34;tracer_provider&#34;),
             span_callback=get_active_span_for_call_wrapper(self),
-            name_callback=kwargs.get(&#34;name_callback&#34;),
+            name_callback=hypertrace_name_callback
         )
 
     def _uninstrument(self, **kwargs):
@@ -156,6 +161,21 @@ class RequestsInstrumentorWrapper(RequestsInstrumentor, BaseInstrumentorWrapper)
     return get_active_span_for_call</code></pre>
 </details>
 </dd>
+<dt id="hypertrace.agent.instrumentation.requests.hypertrace_name_callback"><code class="name flex">
+<span>def <span class="ident">hypertrace_name_callback</span></span>(<span>method, url)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>generate span name</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def hypertrace_name_callback(method, url):
+    &#39;&#39;&#39;generate span name&#39;&#39;&#39;
+    logger.debug(&#39;Entering hypertrace_name_callback(), method=%s, url=%s.&#39;, method, url)
+    return method + &#39; &#39; + url</code></pre>
+</details>
+</dd>
 </dl>
 </section>
 <section>
@@ -182,7 +202,7 @@ class RequestsInstrumentorWrapper(RequestsInstrumentor, BaseInstrumentorWrapper)
         super()._instrument(
             tracer_provider=kwargs.get(&#34;tracer_provider&#34;),
             span_callback=get_active_span_for_call_wrapper(self),
-            name_callback=kwargs.get(&#34;name_callback&#34;),
+            name_callback=hypertrace_name_callback
         )
 
     def _uninstrument(self, **kwargs):
@@ -241,6 +261,7 @@ class RequestsInstrumentorWrapper(RequestsInstrumentor, BaseInstrumentorWrapper)
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="hypertrace.agent.instrumentation.requests.get_active_span_for_call_wrapper" href="#hypertrace.agent.instrumentation.requests.get_active_span_for_call_wrapper">get_active_span_for_call_wrapper</a></code></li>
+<li><code><a title="hypertrace.agent.instrumentation.requests.hypertrace_name_callback" href="#hypertrace.agent.instrumentation.requests.hypertrace_name_callback">hypertrace_name_callback</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
