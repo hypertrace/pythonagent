@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)  # pylint: disable=C0103
 # Read agent-config file and override with environment variables as necessaary
 
 
-class AgentConfig:  # pylint: disable=R0902,R0903
+class AgentConfig1:  # pylint: disable=R0902,R0903
     '''A wrapper around the agent configuration logic'''
 
     def __init__(self): # pylint: disable=R0912,R0915
@@ -152,9 +152,9 @@ class AgentConfig:  # pylint: disable=R0902,R0903
 
         if 'HT_PROPAGATION_FORMATS' in os.environ:
             logger.debug("[env] Loaded HT_PROPAGATION_FORMATS from env")
-            self._propagation_format = os.environ['HT_PROPAGATION_FORMATS']
+            self.propagation_formats = os.environ['HT_PROPAGATION_FORMATS']
         else:
-            self._propagation_format = DEFAULT_PROPAGATION_FORMAT
+            self.propagation_formats = DEFAULT_PROPAGATION_FORMAT
 
         if 'HT_ENABLED' in os.environ:
             logger.debug("[env] Loaded HT_ENABLED from env")
@@ -199,12 +199,12 @@ class AgentConfig:  # pylint: disable=R0902,R0903
         self.data_capture.rpc_body = self.rpc_body
         self.data_capture.body_max_size_bytes = data_capture_max_size_bytes
 
-        self.agent_config = jf.Parse(jf.MessageToJson(
+        self.agent_config: config_pb2.AgentConfig = jf.Parse(jf.MessageToJson(
             config_pb2.AgentConfig()), config_pb2.AgentConfig)
         self.agent_config.service_name = self.config['service_name']
         self.agent_config.reporting = self.reporting
         self.agent_config.data_capture = self.data_capture
-        if self._propagation_format == 'TRACECONTEXT':
+        if self.propagation_formats == 'TRACECONTEXT':
             self.agent_config.propagation_formats = config_pb2.PropagationFormat.TRACECONTEXT
         else:
             self.agent_config.propagation_formats = config_pb2.PropagationFormat.B3
@@ -241,6 +241,6 @@ class AgentConfig:  # pylint: disable=R0902,R0903
         '''Dump configuration information.'''
         logger.debug(self.__dict__)
 
-    def get_config(self):
+    def get_config1(self) -> config_pb2.AgentConfig:
         '''Return configuration information.'''
         return self.agent_config
