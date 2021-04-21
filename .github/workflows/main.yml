@@ -67,28 +67,28 @@ jobs:
 #      - name: Push binary package to private package repo
 #        uses: cpina/github-action-push-to-another-repository@master
 #        env:
-#          API_TOKEN_GITHUB: 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
+#          API_TOKEN_GITHUB: 
 #        with:
 #          source-directory: dist
 #          destination-repository-name: hypertrace-pythonagent
 #          destination-github-username: rcbj
 #          target-branch: main
 
-      - name: Create src package to copy to repo for installs
-        run: mkdir -p src_install/src
-        
-      - name: copy files into src_install 1
-        run: cp -R src/hypertrace src/hypertrace.egg-info src_install/src
-
-      - name: copy files into src_install 2
-        run: cp LICENSE README.md pyproject.toml setup.py src_install
-
-      - name: Push src package to private package repo
-        uses: cpina/github-action-push-to-another-repository@master
-        env:
-          API_TOKEN_GITHUB: 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
-        with:
-          source-directory: src_install
-          destination-repository-name: hypertrace-pythonagent
-          destination-github-username: rcbj
-          target-branch: main
+#      - name: Create src package to copy to repo for installs
+#        run: mkdir -p src_install/src
+#        
+#      - name: copy files into src_install 1
+#        run: cp -R src/hypertrace src/hypertrace.egg-info src_install/src
+#
+#      - name: copy files into src_install 2
+#        run: cp LICENSE README.md pyproject.toml setup.py src_install
+#
+#      - name: Push src package to private package repo
+#        uses: cpina/github-action-push-to-another-repository@master
+#        env:
+#          API_TOKEN_GITHUB:
+#        with:
+#          source-directory: src_install
+#          destination-repository-name: hypertrace-pythonagent
+#          destination-github-username: rcbj
+#          target-branch: main

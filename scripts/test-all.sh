@@ -1,12 +1,16 @@
 #!/bin/bash
 
-DIRS=(flask \
+ DIRS=(flask \
       grpc  \
       mysql \
       postgresql \
       gunicorn \
       requests \
-      aiohttp)
+      aiohttp
+      flask_default \
+     docker)
+
+
 BASE_TEST_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 for DIR in ${DIRS[@]}
