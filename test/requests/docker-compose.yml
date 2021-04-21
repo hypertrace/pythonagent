@@ -11,3 +11,17 @@ services:
     ports:
       - "8000:8000"
     command: gunicorn -w 1 -b 0.0.0.0:8000 wsgi1:server
+    depends_on:
+      - collector
+  collector:
+    image: traceableai/oc-collector:latest
+    command:
+      - "/occollector_linux"
+      - "--config=/collector-config.yaml"
+      - "--log-level=debug"
+    ports:
+      - "9411:9411" # Zipkin HTTP
+      - "14267:14267" # Jaeger HTTP
+      - "14268:14268" # Jaeger Thrift
+      - "55678:55678" # Opencensus
+
