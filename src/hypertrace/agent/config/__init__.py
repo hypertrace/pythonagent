@@ -172,11 +172,12 @@ class AgentConfig1:  # pylint: disable=R0902,R0903
         self.reporting.secure = self.config['reporting']['secure']
         self.reporting.token = reporting_token
         self.reporting.opa = self.opa
-        if self.config['reporting']['trace_reporter_type']:
+
+        if "trace_reporter_type" in self.config['reporting'] and \
+                self.config['reporting']['trace_reporter_type']:
             self.reporting.trace_reporter_type = self.config['reporting']['trace_reporter_type']
         else:
             self.reporting.trace_reporter_type = config_pb2.TraceReporterType.OTLP
-
         self.rpc_body = config_pb2.Message(request=BoolValue( # pylint: disable=C0330
             value=self.config['data_capture']['rpc_body']['request']),
                                            response=BoolValue( # pylint: disable=C0330
