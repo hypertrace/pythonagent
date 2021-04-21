@@ -1,0 +1,8 @@
+version: '3.1'
+
+services:
+  flask_app:
+    container_name: flask_app
+    build:
+      context: ../..
+      dockerfile: test/docker/Dockerfile
