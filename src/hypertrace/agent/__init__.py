@@ -1,10 +1,11 @@
 '''Main entry point for Hypertrace agent module.'''
-import sys
+import os
 import os.path
+import sys
 import logging
 import traceback
 from hypertrace.agent.init import AgentInit
-from hypertrace.agent.config import AgentConfig
+from hypertrace.agent.config import AgentConfig1
 from hypertrace.agent import constants
 
 # main logging modle configuration
@@ -19,8 +20,25 @@ def setup_custom_logger(name):
         handler.setFormatter(formatter)
         screen_handler = logging.StreamHandler(stream=sys.stdout)
         screen_handler.setFormatter(formatter)
+        log_level = logging.INFO
         logger_ = logging.getLogger(name)
-        logger_.setLevel(logging.INFO)
+        if 'HT_LOG_LEVEL' in os.environ:
+            ht_log_level = os.environ['HT_LOG_LEVEL']
+            if ht_log_level is None or ht_log_level == '':
+                log_level = logging.INFO
+            if ht_log_level == 'INFO':
+                log_level = logging.INFO
+            if ht_log_level == 'DEBUG':
+                log_level = logging.DEBUG
+            if ht_log_level == 'ERROR':
+                log_level = logging.ERROR
+            if ht_log_level == 'WARNING':
+                log_level = logging.WARNING
+            if ht_log_level == 'CRITICAL':
+                log_level = logging.CRITICAL
+            if ht_log_level == 'NOTSET':
+                log_level = logging.NOTSET
+        logger_.setLevel(log_level)
         logger_.addHandler(handler)
         logger_.addHandler(screen_handler)
         return logger_
@@ -28,7 +46,6 @@ def setup_custom_logger(name):
         print('Failed to customize logger: exception=%s, stacktrace=%s',
               err,
               traceback.format_exc())
-
 
 # create logger object
 logger = setup_custom_logger(__name__) # pylint: disable=C0103
@@ -40,8 +57,10 @@ class Agent:
     def __init__(self):
         '''Constructor'''
         logger.debug('Initializing Agent.')
+        if not self.is_enabled():
+            return
         try:
-            self._config = AgentConfig()
+            self._config = AgentConfig1()
             self._init = AgentInit(self)
         except Exception as err: # pylint: disable=W0703
             logger.error('Failed to initialize Agent: exception=%s, stacktrace=%s',
@@ -51,6 +70,8 @@ class Agent:
     def register_flask_app(self, app, use_b3=False):
         '''Register the flask instrumentation module wrapper'''
         logger.debug('Calling Agent.register_flask_app.')
+        if not self.is_enabled():
+            return
         try:
             self._init.flask_init(app, use_b3)
             self._init.dump_config()
@@ -63,6 +84,8 @@ class Agent:
     def register_server_grpc(self):
         '''Register the grpc:server instrumentation module wrapper'''
         logger.debug('Calling Agent.register_server_grpc().')
+        if not self.is_enabled():
+            return
         try:
             self._init.grpc_server_init()
             self._init.dump_config()
@@ -75,6 +98,8 @@ class Agent:
     def register_client_grpc(self):
         '''Register the grpc:client instrumentation module wrapper'''
         logger.debug('Calling Agent.register_client_grpc().')
+        if not self.is_enabled():
+            return
         try:
             self._init.grpc_client_init()
             self._init.dump_config()
@@ -87,6 +112,8 @@ class Agent:
     def register_mysql(self):
         '''Register the mysql instrumentation module wrapper'''
         logger.debug('Calling Agent.register_mysql().')
+        if not self.is_enabled():
+            return
         try:
             self._init.mysql_init()
             self._init.dump_config()
@@ -99,6 +126,8 @@ class Agent:
     def register_postgresql(self):
         '''Register the postgresql instrumentation module wrapper'''
         logger.debug('Calling Agent.register_postgresql().')
+        if not self.is_enabled():
+            return
         try:
             self._init.postgresql_init()
             self._init.dump_config()
@@ -111,6 +140,8 @@ class Agent:
     def register_requests(self, use_b3=False):
         '''Register the requests instrumentation module wrapper'''
         logger.debug('Calling Agent.register_requests()')
+        if not self.is_enabled():
+            return
         try:
             self._init.requests_init(use_b3)
             self._init.dump_config()
@@ -123,6 +154,8 @@ class Agent:
     def register_aiohttp_client(self, use_b3=False):
         '''Register the aiohttp-client instrumentation module wrapper'''
         logger.debug('Calling Agent.register_aiohttp_client().')
+        if not self.is_enabled():
+            return
         try:
             self._init.aiohttp_client_init(use_b3)
             self._init.dump_config()
@@ -132,11 +165,22 @@ class Agent:
                          err,
                          traceback.format_exc())
 
-    def register_processor(self, processor):
+    def register_processor(self, processor): # pylint: disable=R1710
         '''Add additional span exporters + processors'''
         logger.debug('Entering Agent.register_processor().')
-        return self._init.register_processor(processor)
+        if not self.is_enabled():
+            return None
+        if self.is_enabled():
+            return self._init.register_processor(processor)
 
     def get_config(self):
         '''Return configuration object'''
         return self._config
+
+    def is_enabled(self): # pylint: disable=R0201
+        '''Is agent enabled?'''
+        if 'HT_ENABLED' in os.environ:
+            if os.environ['HT_ENABLED'] == 'false':
+                logger.debug("HT_ENABLED is disabled.")
+                return False
+        return True

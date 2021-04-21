@@ -47,7 +47,7 @@ logger = logging.getLogger(__name__)  # pylint: disable=C0103
 # Read agent-config file and override with environment variables as necessaary
 
 
-class AgentConfig:  # pylint: disable=R0902,R0903
+class AgentConfig1:  # pylint: disable=R0902,R0903
     &#39;&#39;&#39;A wrapper around the agent configuration logic&#39;&#39;&#39;
 
     def __init__(self): # pylint: disable=R0912,R0915
@@ -179,11 +179,13 @@ class AgentConfig:  # pylint: disable=R0902,R0903
             logger.debug(
                 &#34;[env] Loaded HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES from env&#34;)
             data_capture_max_size_bytes \
-                = os.environ[&#39;HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES&#39;]
+                = int(os.environ[&#39;HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES&#39;])
 
-        # if &#39;HT_PROPAGATION_FORMATS&#39; in os.environ:
-        #     logger.debug(&#34;[env] Loaded HT_PROPAGATION_FORMATS from env&#34;)
-        #     self.config[&#39;&#39;] = os.environ[&#39;HT_PROPAGATION_FORMATS&#39;]
+        if &#39;HT_PROPAGATION_FORMATS&#39; in os.environ:
+            logger.debug(&#34;[env] Loaded HT_PROPAGATION_FORMATS from env&#34;)
+            self.propagation_formats = os.environ[&#39;HT_PROPAGATION_FORMATS&#39;]
+        else:
+            self.propagation_formats = DEFAULT_PROPAGATION_FORMAT
 
         if &#39;HT_ENABLED&#39; in os.environ:
             logger.debug(&#34;[env] Loaded HT_ENABLED from env&#34;)
@@ -201,7 +203,10 @@ class AgentConfig:  # pylint: disable=R0902,R0903
         self.reporting.secure = self.config[&#39;reporting&#39;][&#39;secure&#39;]
         self.reporting.token = reporting_token
         self.reporting.opa = self.opa
-        self.reporting.trace_reporter_type = config_pb2.TraceReporterType.OTLP
+        if self.config[&#39;reporting&#39;][&#39;trace_reporter_type&#39;]:
+            self.reporting.trace_reporter_type = self.config[&#39;reporting&#39;][&#39;trace_reporter_type&#39;]
+        else:
+            self.reporting.trace_reporter_type = config_pb2.TraceReporterType.OTLP
 
         self.rpc_body = config_pb2.Message(request=BoolValue( # pylint: disable=C0330
             value=self.config[&#39;data_capture&#39;][&#39;rpc_body&#39;][&#39;request&#39;]),
@@ -228,12 +233,15 @@ class AgentConfig:  # pylint: disable=R0902,R0903
         self.data_capture.rpc_body = self.rpc_body
         self.data_capture.body_max_size_bytes = data_capture_max_size_bytes
 
-        self.agent_config = jf.Parse(jf.MessageToJson(
+        self.agent_config: config_pb2.AgentConfig = jf.Parse(jf.MessageToJson(
             config_pb2.AgentConfig()), config_pb2.AgentConfig)
         self.agent_config.service_name = self.config[&#39;service_name&#39;]
         self.agent_config.reporting = self.reporting
         self.agent_config.data_capture = self.data_capture
-        self.agent_config.propagation_formats = config_pb2.PropagationFormat.TRACECONTEXT
+        if self.propagation_formats == &#39;TRACECONTEXT&#39;:
+            self.agent_config.propagation_formats = config_pb2.PropagationFormat.TRACECONTEXT
+        else:
+            self.agent_config.propagation_formats = config_pb2.PropagationFormat.B3
         self.agent_config.enabled = agent_config_enabled
         self.agent_config.resource_attributes = {
             &#39;service_name&#39;: self.config[&#39;service_name&#39;]}
@@ -267,7 +275,7 @@ class AgentConfig:  # pylint: disable=R0902,R0903
         &#39;&#39;&#39;Dump configuration information.&#39;&#39;&#39;
         logger.debug(self.__dict__)
 
-    def get_config(self):
+    def get_config1(self) -&gt; config_pb2.AgentConfig:
         &#39;&#39;&#39;Return configuration information.&#39;&#39;&#39;
         return self.agent_config</code></pre>
 </details>
@@ -292,8 +300,8 @@ class AgentConfig:  # pylint: disable=R0902,R0903
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="hypertrace.agent.config.AgentConfig"><code class="flex name class">
-<span>class <span class="ident">AgentConfig</span></span>
+<dt id="hypertrace.agent.config.AgentConfig1"><code class="flex name class">
+<span>class <span class="ident">AgentConfig1</span></span>
 </code></dt>
 <dd>
 <div class="desc"><p>A wrapper around the agent configuration logic</p>
@@ -304,7 +312,7 @@ If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></di
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class AgentConfig:  # pylint: disable=R0902,R0903
+<pre><code class="python">class AgentConfig1:  # pylint: disable=R0902,R0903
     &#39;&#39;&#39;A wrapper around the agent configuration logic&#39;&#39;&#39;
 
     def __init__(self): # pylint: disable=R0912,R0915
@@ -436,11 +444,13 @@ If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></di
             logger.debug(
                 &#34;[env] Loaded HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES from env&#34;)
             data_capture_max_size_bytes \
-                = os.environ[&#39;HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES&#39;]
+                = int(os.environ[&#39;HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES&#39;])
 
-        # if &#39;HT_PROPAGATION_FORMATS&#39; in os.environ:
-        #     logger.debug(&#34;[env] Loaded HT_PROPAGATION_FORMATS from env&#34;)
-        #     self.config[&#39;&#39;] = os.environ[&#39;HT_PROPAGATION_FORMATS&#39;]
+        if &#39;HT_PROPAGATION_FORMATS&#39; in os.environ:
+            logger.debug(&#34;[env] Loaded HT_PROPAGATION_FORMATS from env&#34;)
+            self.propagation_formats = os.environ[&#39;HT_PROPAGATION_FORMATS&#39;]
+        else:
+            self.propagation_formats = DEFAULT_PROPAGATION_FORMAT
 
         if &#39;HT_ENABLED&#39; in os.environ:
             logger.debug(&#34;[env] Loaded HT_ENABLED from env&#34;)
@@ -458,7 +468,10 @@ If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></di
         self.reporting.secure = self.config[&#39;reporting&#39;][&#39;secure&#39;]
         self.reporting.token = reporting_token
         self.reporting.opa = self.opa
-        self.reporting.trace_reporter_type = config_pb2.TraceReporterType.OTLP
+        if self.config[&#39;reporting&#39;][&#39;trace_reporter_type&#39;]:
+            self.reporting.trace_reporter_type = self.config[&#39;reporting&#39;][&#39;trace_reporter_type&#39;]
+        else:
+            self.reporting.trace_reporter_type = config_pb2.TraceReporterType.OTLP
 
         self.rpc_body = config_pb2.Message(request=BoolValue( # pylint: disable=C0330
             value=self.config[&#39;data_capture&#39;][&#39;rpc_body&#39;][&#39;request&#39;]),
@@ -485,12 +498,15 @@ If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></di
         self.data_capture.rpc_body = self.rpc_body
         self.data_capture.body_max_size_bytes = data_capture_max_size_bytes
 
-        self.agent_config = jf.Parse(jf.MessageToJson(
+        self.agent_config: config_pb2.AgentConfig = jf.Parse(jf.MessageToJson(
             config_pb2.AgentConfig()), config_pb2.AgentConfig)
         self.agent_config.service_name = self.config[&#39;service_name&#39;]
         self.agent_config.reporting = self.reporting
         self.agent_config.data_capture = self.data_capture
-        self.agent_config.propagation_formats = config_pb2.PropagationFormat.TRACECONTEXT
+        if self.propagation_formats == &#39;TRACECONTEXT&#39;:
+            self.agent_config.propagation_formats = config_pb2.PropagationFormat.TRACECONTEXT
+        else:
+            self.agent_config.propagation_formats = config_pb2.PropagationFormat.B3
         self.agent_config.enabled = agent_config_enabled
         self.agent_config.resource_attributes = {
             &#39;service_name&#39;: self.config[&#39;service_name&#39;]}
@@ -524,13 +540,13 @@ If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></di
         &#39;&#39;&#39;Dump configuration information.&#39;&#39;&#39;
         logger.debug(self.__dict__)
 
-    def get_config(self):
+    def get_config1(self) -&gt; config_pb2.AgentConfig:
         &#39;&#39;&#39;Return configuration information.&#39;&#39;&#39;
         return self.agent_config</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
-<dt id="hypertrace.agent.config.AgentConfig.dump_config"><code class="name flex">
+<dt id="hypertrace.agent.config.AgentConfig1.dump_config"><code class="name flex">
 <span>def <span class="ident">dump_config</span></span>(<span>self)</span>
 </code></dt>
 <dd>
@@ -544,8 +560,8 @@ If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></di
     logger.debug(self.__dict__)</code></pre>
 </details>
 </dd>
-<dt id="hypertrace.agent.config.AgentConfig.get_config"><code class="name flex">
-<span>def <span class="ident">get_config</span></span>(<span>self)</span>
+<dt id="hypertrace.agent.config.AgentConfig1.get_config1"><code class="name flex">
+<span>def <span class="ident">get_config1</span></span>(<span>self) ‑> <a title="hypertrace.agent.config.config_pb2.AgentConfig" href="config_pb2.html#hypertrace.agent.config.config_pb2.AgentConfig">AgentConfig</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Return configuration information.</p></div>
@@ -553,12 +569,12 @@ If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></di
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_config(self):
+<pre><code class="python">def get_config1(self) -&gt; config_pb2.AgentConfig:
     &#39;&#39;&#39;Return configuration information.&#39;&#39;&#39;
     return self.agent_config</code></pre>
 </details>
 </dd>
-<dt id="hypertrace.agent.config.AgentConfig.parse_config1"><code class="name flex">
+<dt id="hypertrace.agent.config.AgentConfig1.parse_config1"><code class="name flex">
 <span>def <span class="ident">parse_config1</span></span>(<span>self, parent_key)</span>
 </code></dt>
 <dd>
@@ -615,11 +631,11 @@ If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></di
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="hypertrace.agent.config.AgentConfig" href="#hypertrace.agent.config.AgentConfig">AgentConfig</a></code></h4>
+<h4><code><a title="hypertrace.agent.config.AgentConfig1" href="#hypertrace.agent.config.AgentConfig1">AgentConfig1</a></code></h4>
 <ul class="">
-<li><code><a title="hypertrace.agent.config.AgentConfig.dump_config" href="#hypertrace.agent.config.AgentConfig.dump_config">dump_config</a></code></li>
-<li><code><a title="hypertrace.agent.config.AgentConfig.get_config" href="#hypertrace.agent.config.AgentConfig.get_config">get_config</a></code></li>
-<li><code><a title="hypertrace.agent.config.AgentConfig.parse_config1" href="#hypertrace.agent.config.AgentConfig.parse_config1">parse_config1</a></code></li>
+<li><code><a title="hypertrace.agent.config.AgentConfig1.dump_config" href="#hypertrace.agent.config.AgentConfig1.dump_config">dump_config</a></code></li>
+<li><code><a title="hypertrace.agent.config.AgentConfig1.get_config1" href="#hypertrace.agent.config.AgentConfig1.get_config1">get_config1</a></code></li>
+<li><code><a title="hypertrace.agent.config.AgentConfig1.parse_config1" href="#hypertrace.agent.config.AgentConfig1.parse_config1">parse_config1</a></code></li>
 </ul>
 </li>
 </ul>

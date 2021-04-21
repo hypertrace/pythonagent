@@ -1,8 +1,7 @@
 opentelemetry-api==1.0.0
 opentelemetry-instrumentation
 opentelemetry-exporter-zipkin
-opentelemetry-exporter-otlp
-opentelemetry-exporter-jaeger
+opentelemetry-exporter-otlp==1.0.0
 opentelemetry-instrumentation-flask
 opentelemetry-instrumentation-grpc
 opentelemetry-instrumentation-mysql
@@ -11,7 +10,6 @@ opentelemetry-instrumentation-wsgi
 opentelemetry-util-http
 google
 protobuf
-google-cloud
 pyyaml
 mysql.connector
 flask

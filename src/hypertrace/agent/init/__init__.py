@@ -11,15 +11,15 @@ from opentelemetry.exporter.zipkin.proto.http import ZipkinExporter
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from hypertrace.agent.config import AgentConfig
 from hypertrace.agent import constants
+from hypertrace.agent.config import config_pb2, AgentConfig1
 
 # Initialize logger
 logger = logging.getLogger(__name__) # pylint: disable=C0103
 
 class AgentInit:  # pylint: disable=R0902,R0903
     '''Initialize all the OTel components using configuration from AgentConfig'''
-    def __init__(self, agent):
+    def __init__(self, agent: AgentConfig1):
         '''constructor'''
         logger.debug('Initializing AgentInit object.')
         self._agent = agent
@@ -44,9 +44,14 @@ class AgentInit:  # pylint: disable=R0902,R0903
             )
             trace.set_tracer_provider(self._tracer_provider)
 
+
             self.set_console_span_processor()
+
             self.set_zipkin_processor()
             self.set_otlp_processor()
+
+
+
 
             self._flask_instrumentor_wrapper = None
             self._grpc_instrumentor_client_wrapper = None
@@ -78,7 +83,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self._flask_instrumentor_wrapper.instrument_app(app)
             self.init_instrumentor_wrapper_base_for_http(
                 self._flask_instrumentor_wrapper)
-            if use_b3:
+            if use_b3 \
+              or self._config.propagation_formats == 'B3':
                 self.enable_b3()
         except Exception as err: # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
@@ -189,7 +195,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self._requests_instrumentor_wrapper = RequestsInstrumentorWrapper()
             self.init_instrumentor_wrapper_base_for_http(
                 self._requests_instrumentor_wrapper)
-            if use_b3:
+            if use_b3 \
+              or self._config.propagation_formats == 'B3':
                 self.enable_b3()
         except Exception as err: # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
@@ -209,7 +216,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self._aiohttp_client_instrumentor_wrapper = AioHttpClientInstrumentorWrapper()
             self.init_instrumentor_wrapper_base_for_http(
                 self._aiohttp_client_instrumentor_wrapper)
-            if use_b3:
+            if use_b3 \
+              or self._config.propagation_formats == 'B3':
                 self.enable_b3()
         except Exception as err: # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
@@ -230,6 +238,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self._config.data_capture.http_headers.response)
         instrumentor.set_process_response_body(
             self._config.data_capture.http_body.response)
+        instrumentor.set_body_max_size(
+            self._config.data_capture.body_max_size_bytes)
 
     def register_processor(self, processor):
         '''Register additional span exporter + processor'''
@@ -246,18 +256,21 @@ class AgentInit:  # pylint: disable=R0902,R0903
 
     def set_zipkin_processor(self):
         '''configure zipkin span exporter + processor'''
-        if 'OTEL_TRACES_EXPORTER' in os.environ:
-            if os.environ['OTEL_TRACES_EXPORTER'] == 'zipkin':
+        if 'HT_TRACES_EXPORTER' in os.environ:
+            if os.environ['HT_TRACES_EXPORTER'] == 'zipkin':
                 logger.debug(
-                    "OTEL_TRACES_EXPORTER is zipkin, adding exporter.")
+                    "HT_TRACES_EXPORTER is zipkin, adding exporter.")
             else:
                 return
         else:
-            return
+            if self._config.reporting.trace_reporter_type == 'ZIPKIN':
+                logger.debug("Trace reporter type is zipkin, adding exporter.")
+            else:
+                return
 
         try:
             zipkin_exporter = ZipkinExporter(
-                endpoint=self._config.reporting.endpoint,
+                endpoint=self._config.reporting.endpoint
             )
 
             span_processor = BatchSpanProcessor(zipkin_exporter)
@@ -271,19 +284,20 @@ class AgentInit:  # pylint: disable=R0902,R0903
 
     def set_otlp_processor(self):
         '''configure otlp span exporter + processor'''
-        if 'OTEL_TRACES_EXPORTER' in os.environ:
-            if os.environ['OTEL_TRACES_EXPORTER'] == 'otlp':
-                logger.debug("OTEL_TRACES_EXPORTER is otlp, adding exporter.")
+        if 'HT_TRACES_EXPORTER' in os.environ:
+            if os.environ['HT_TRACES_EXPORTER'] == 'otlp':
+                logger.debug("HT_TRACES_EXPORTER is otlp, adding exporter.")
             else:
                 return
         else:
-            return
+            if self._config.reporting.trace_reporter_type == 'OTLP':
+                logger.debug("Trace reporter type is otlp, adding exporter.")
+            else:
+                return
 
         try:
-            otlp_exporter = OTLPSpanExporter(endpoint="http://localhost:16686")
-            # endpoint=self._config.reporting.endpoint,
-            # insecure=self._config.reporting.secure)
-
+            otlp_exporter = OTLPSpanExporter(endpoint=self._config.reporting.endpoint,
+                                             insecure=self._config.reporting.secure)
             span_processor = BatchSpanProcessor(otlp_exporter)
             self._tracer_provider.add_span_processor(span_processor)
 

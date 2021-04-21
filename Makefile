@@ -8,3 +8,14 @@ hypertrace_test:
 	cd ${TEST_DIR}/gunicorn; tox
 	cd ${TEST_DIR}/requests; tox
 	cd ${TEST_DIR}/aiohttp; tox
+build:
+	python3 -m pip install --upgrade build
+	python -m build
+clean:
+	rm -Rf build dist src/hypertrace.egg-info
+docs:
+	tox -e pdoc
+lint:
+	tox -e lint
+install:
+	pip install dist/hypertrace-0.1.0.tar.gz

@@ -20,6 +20,13 @@ from hypertrace.agent.instrumentation import BaseInstrumentorWrapper
 # Initialize logger with local module name
 logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
+def hypertrace_name_callback(trace_request_start_params):
+    '''Generate span name'''
+    logger.debug('Entering hypertrace_name_callback(), method=%s, url=%s.',
+                 trace_request_start_params.method,
+                 str(trace_request_start_params.url))
+    return trace_request_start_params.method + ' ' + str(trace_request_start_params.url)
+
 # aiohttp-client instrumentation module wrapper class
 class AioHttpClientInstrumentorWrapper(AioHttpClientInstrumentor, BaseInstrumentorWrapper):
     '''Hypertrace wrapper class around OpenTelemetry AioHttpClient Instrumentor class'''
@@ -35,7 +42,7 @@ class AioHttpClientInstrumentorWrapper(AioHttpClientInstrumentor, BaseInstrument
         super()._instrument(
             tracer_provider=kwargs.get("tracer_provider"),
             url_filter=kwargs.get("url_filter"),
-            span_name=kwargs.get("span_name"),
+            span_name=hypertrace_name_callback
         )
         # Initialize HyperTrace instrumentor
         _instrument(

@@ -45,8 +45,9 @@ DEFAULT_AGENT_CONFIG_ENABLED = True
 DEFAULT_AGENT_CONFIG = {
     &#39;service_name&#39;: &#34;pythonagent&#34;,
     &#39;reporting&#39;: {
-        &#34;endpoint&#34;: &#34;&#34;,
-        &#34;secure&#34;: False
+        &#34;endpoint&#34;: &#34;http://localhost:9411/api/v2/spans&#34;,
+        &#34;secure&#34;: False,
+        &#34;trace_reporter_type&#34;: &#34;ZIPKIN&#34;
     },
     &#39;data_capture&#39;: {
         &#34;http_headers&#34;: {
@@ -66,7 +67,10 @@ DEFAULT_AGENT_CONFIG = {
             &#34;response&#34;: False,
         }
     }
-}</code></pre>
+}
+
+#B3,TRACECONTEXT
+DEFAULT_PROPAGATION_FORMAT = &#39;TRACECONTEXT&#39;</code></pre>
 </details>
 </section>
 <section>

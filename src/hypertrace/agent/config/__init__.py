@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)  # pylint: disable=C0103
 # Read agent-config file and override with environment variables as necessaary
 
 
-class AgentConfig:  # pylint: disable=R0902,R0903
+class AgentConfig1:  # pylint: disable=R0902,R0903
     '''A wrapper around the agent configuration logic'''
 
     def __init__(self): # pylint: disable=R0912,R0915
@@ -148,11 +148,13 @@ class AgentConfig:  # pylint: disable=R0902,R0903
             logger.debug(
                 "[env] Loaded HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES from env")
             data_capture_max_size_bytes \
-                = os.environ['HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES']
+                = int(os.environ['HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES'])
 
-        # if 'HT_PROPAGATION_FORMATS' in os.environ:
-        #     logger.debug("[env] Loaded HT_PROPAGATION_FORMATS from env")
-        #     self.config[''] = os.environ['HT_PROPAGATION_FORMATS']
+        if 'HT_PROPAGATION_FORMATS' in os.environ:
+            logger.debug("[env] Loaded HT_PROPAGATION_FORMATS from env")
+            self.propagation_formats = os.environ['HT_PROPAGATION_FORMATS']
+        else:
+            self.propagation_formats = DEFAULT_PROPAGATION_FORMAT
 
         if 'HT_ENABLED' in os.environ:
             logger.debug("[env] Loaded HT_ENABLED from env")
@@ -170,7 +172,10 @@ class AgentConfig:  # pylint: disable=R0902,R0903
         self.reporting.secure = self.config['reporting']['secure']
         self.reporting.token = reporting_token
         self.reporting.opa = self.opa
-        self.reporting.trace_reporter_type = config_pb2.TraceReporterType.OTLP
+        if self.config['reporting']['trace_reporter_type']:
+            self.reporting.trace_reporter_type = self.config['reporting']['trace_reporter_type']
+        else:
+            self.reporting.trace_reporter_type = config_pb2.TraceReporterType.OTLP
 
         self.rpc_body = config_pb2.Message(request=BoolValue( # pylint: disable=C0330
             value=self.config['data_capture']['rpc_body']['request']),
@@ -197,12 +202,15 @@ class AgentConfig:  # pylint: disable=R0902,R0903
         self.data_capture.rpc_body = self.rpc_body
         self.data_capture.body_max_size_bytes = data_capture_max_size_bytes
 
-        self.agent_config = jf.Parse(jf.MessageToJson(
+        self.agent_config: config_pb2.AgentConfig = jf.Parse(jf.MessageToJson(
             config_pb2.AgentConfig()), config_pb2.AgentConfig)
         self.agent_config.service_name = self.config['service_name']
         self.agent_config.reporting = self.reporting
         self.agent_config.data_capture = self.data_capture
-        self.agent_config.propagation_formats = config_pb2.PropagationFormat.TRACECONTEXT
+        if self.propagation_formats == 'TRACECONTEXT':
+            self.agent_config.propagation_formats = config_pb2.PropagationFormat.TRACECONTEXT
+        else:
+            self.agent_config.propagation_formats = config_pb2.PropagationFormat.B3
         self.agent_config.enabled = agent_config_enabled
         self.agent_config.resource_attributes = {
             'service_name': self.config['service_name']}
@@ -236,6 +244,6 @@ class AgentConfig:  # pylint: disable=R0902,R0903
         '''Dump configuration information.'''
         logger.debug(self.__dict__)
 
-    def get_config(self):
+    def get_config1(self) -> config_pb2.AgentConfig:
         '''Return configuration information.'''
         return self.agent_config

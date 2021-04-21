@@ -80,6 +80,11 @@ def get_active_span_for_call_wrapper(requests_wrapper):
                 response_headers, response_content, span)
     return get_active_span_for_call
 
+def hypertrace_name_callback(method, url):
+    &#39;&#39;&#39;generate span name&#39;&#39;&#39;
+    logger.debug(&#39;Entering hypertrace_name_callback(), method=%s, url=%s.&#39;, method, url)
+    return method + &#39; &#39; + url
+
 class RequestsInstrumentorWrapper(RequestsInstrumentor, BaseInstrumentorWrapper):
     &#39;&#39;&#39;Hypertrace wrapper around OTel requests instrumentor class&#39;&#39;&#39;
     # Constructor
@@ -92,7 +97,7 @@ class RequestsInstrumentorWrapper(RequestsInstrumentor, BaseInstrumentorWrapper)
         super()._instrument(
             tracer_provider=kwargs.get(&#34;tracer_provider&#34;),
             span_callback=get_active_span_for_call_wrapper(self),
-            name_callback=kwargs.get(&#34;name_callback&#34;),
+            name_callback=hypertrace_name_callback
         )
 
     def _uninstrument(self, **kwargs):
@@ -156,6 +161,21 @@ class RequestsInstrumentorWrapper(RequestsInstrumentor, BaseInstrumentorWrapper)
     return get_active_span_for_call</code></pre>
 </details>
 </dd>
+<dt id="hypertrace.agent.instrumentation.requests.hypertrace_name_callback"><code class="name flex">
+<span>def <span class="ident">hypertrace_name_callback</span></span>(<span>method, url)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>generate span name</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def hypertrace_name_callback(method, url):
+    &#39;&#39;&#39;generate span name&#39;&#39;&#39;
+    logger.debug(&#39;Entering hypertrace_name_callback(), method=%s, url=%s.&#39;, method, url)
+    return method + &#39; &#39; + url</code></pre>
+</details>
+</dd>
 </dl>
 </section>
 <section>
@@ -182,7 +202,7 @@ class RequestsInstrumentorWrapper(RequestsInstrumentor, BaseInstrumentorWrapper)
         super()._instrument(
             tracer_provider=kwargs.get(&#34;tracer_provider&#34;),
             span_callback=get_active_span_for_call_wrapper(self),
-            name_callback=kwargs.get(&#34;name_callback&#34;),
+            name_callback=hypertrace_name_callback
         )
 
     def _uninstrument(self, **kwargs):
@@ -200,17 +220,21 @@ class RequestsInstrumentorWrapper(RequestsInstrumentor, BaseInstrumentorWrapper)
 <ul class="hlist">
 <li><code><b><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper">BaseInstrumentorWrapper</a></b></code>:
 <ul class="hlist">
+<li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.check_body_size" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.check_body_size">check_body_size</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.generic_request_handler" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.generic_request_handler">generic_request_handler</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.generic_response_handler" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.generic_response_handler">generic_response_handler</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.generic_rpc_request_handler" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.generic_rpc_request_handler">generic_rpc_request_handler</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.generic_rpc_response_handler" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.generic_rpc_response_handler">generic_rpc_response_handler</a></code></li>
+<li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_max_body_size" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_max_body_size">get_max_body_size</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_process_request_body" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_process_request_body">get_process_request_body</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_process_request_headers" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_process_request_headers">get_process_request_headers</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_process_response_body" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_process_response_body">get_process_response_body</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_process_response_headers" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_process_response_headers">get_process_response_headers</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_service_name" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_service_name">get_service_name</a></code></li>
+<li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.grab_first_n_bytes" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.grab_first_n_bytes">grab_first_n_bytes</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.introspect" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.introspect">introspect</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.is_interesting_content_type" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.is_interesting_content_type">is_interesting_content_type</a></code></li>
+<li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_body_max_size" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_body_max_size">set_body_max_size</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_process_request_body" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_process_request_body">set_process_request_body</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_process_request_headers" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_process_request_headers">set_process_request_headers</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_process_response_body" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_process_response_body">set_process_response_body</a></code></li>
@@ -237,6 +261,7 @@ class RequestsInstrumentorWrapper(RequestsInstrumentor, BaseInstrumentorWrapper)
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="hypertrace.agent.instrumentation.requests.get_active_span_for_call_wrapper" href="#hypertrace.agent.instrumentation.requests.get_active_span_for_call_wrapper">get_active_span_for_call_wrapper</a></code></li>
+<li><code><a title="hypertrace.agent.instrumentation.requests.hypertrace_name_callback" href="#hypertrace.agent.instrumentation.requests.hypertrace_name_callback">hypertrace_name_callback</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
