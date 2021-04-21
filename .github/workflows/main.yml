@@ -52,13 +52,6 @@ jobs:
       - name: Install tox
         run: pip install --user -r dev-requirements.txt
         
-<<<<<<< HEAD
-#      - name: Run pylint on this branch to generate a report
-#        run: tox -e lint
-
-      - name: Run Test Cases
-        run: make hypertrace_test
-=======
       - name: Run pylint on this branch to generate a report
         run: tox -e lint
 
@@ -99,4 +92,3 @@ jobs:
           destination-repository-name: hypertrace-pythonagent
           destination-github-username: rcbj
           target-branch: main
->>>>>>> feature/develop
