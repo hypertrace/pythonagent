@@ -11,7 +11,7 @@ import time
 import atexit
 import threading
 from flask import Flask
-from opentelemetry.exporter.jaeger.thrift import JaegerExporter
+#from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 from opentelemetry import trace as trace_api
 from opentelemetry.sdk.trace import TracerProvider, export
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
@@ -123,15 +123,15 @@ def test_run():
   agent.register_processor(simpleExportSpanProcessor)
   logger.info('Added in-memoy span exporter')
 
-  # Setup Jaeger Exporter
-  logger.info('Adding jaeger span exporter.')
-  jaegerExporter = JaegerExporter(
-      agent_host_name='localhost',
-      agent_port=6831,
-  )
-  batchExportSpanProcessor = BatchSpanProcessor(jaegerExporter)
-  agent.register_processor(batchExportSpanProcessor)
-  logger.info('Added jaeger span exporter.')
+#  # Setup Jaeger Exporter
+#  logger.info('Adding jaeger span exporter.')
+#  jaegerExporter = JaegerExporter(
+#      agent_host_name='localhost',
+#      agent_port=6831,
+#  )
+#  batchExportSpanProcessor = BatchSpanProcessor(jaegerExporter)
+#  agent.register_processor(batchExportSpanProcessor)
+#  logger.info('Added jaeger span exporter.')
 
   logger.info('Running test calls.')
   with app.test_client() as c:

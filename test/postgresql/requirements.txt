@@ -2,8 +2,7 @@ opentelemetry-api==1.0.0
 opentelemetry-sdk
 opentelemetry-instrumentation
 opentelemetry-exporter-zipkin
-opentelemetry-exporter-otlp
-opentelemetry-exporter-jaeger
+opentelemetry-exporter-otlp==1.0.0
 opentelemetry-instrumentation-flask
 opentelemetry-instrumentation-psycopg2
 opentelemetry-instrumentation-requests
@@ -14,6 +13,5 @@ protobuf
 pyyaml
 psycopg2-binary
 pytest-postgresql
-#psycopg2
 flask
 pytest

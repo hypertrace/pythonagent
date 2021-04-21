@@ -1,9 +1,8 @@
 opentelemetry-api==1.0.0
 opentelemetry-instrumentation
-opentelemetry-exporter-jaeger
 opentelemetry-exporter-zipkin
 opentelemetry-propagator-b3
-opentelemetry-exporter-otlp
+opentelemetry-exporter-otlp==1.0.0
 opentelemetry-instrumentation-flask
 opentelemetry-instrumentation-grpc
 opentelemetry-instrumentation-mysql
