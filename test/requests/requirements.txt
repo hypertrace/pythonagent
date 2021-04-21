@@ -12,7 +12,6 @@ opentelemetry-instrumentation-wsgi
 opentelemetry-util-http
 google
 protobuf
-google-cloud
 pyyaml
 flask
 pytest
