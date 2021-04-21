@@ -173,7 +173,8 @@ class AgentConfig1:  # pylint: disable=R0902,R0903
         self.reporting.token = reporting_token
         self.reporting.opa = self.opa
 
-        if "trace_reporter_type" in self.config['reporting'] and self.config['reporting']['trace_reporter_type']:
+        if "trace_reporter_type" in self.config['reporting'] and \
+                self.config['reporting']['trace_reporter_type']:
             self.reporting.trace_reporter_type = self.config['reporting']['trace_reporter_type']
         else:
             self.reporting.trace_reporter_type = config_pb2.TraceReporterType.OTLP
