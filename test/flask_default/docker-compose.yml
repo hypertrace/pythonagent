@@ -12,4 +12,3 @@ services:
       - "14267:14267" # Jaeger HTTP
       - "14268:14268" # Jaeger Thrift
       - "55678:55678" # Opencensus
-

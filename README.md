@@ -17,7 +17,7 @@ tox
 * Have access granted to your github.com id.
 * Install the hypertrace python agent:
 ```
-pip install git+https://github.com/rcbj/hypertrace-pythonagent.git@main#egg=hypertrace
+pip install git+https://github.com/traceableai/pythonagent.git@main#egg=hypertrace
 ```
 * Enter your github.com username and password when prompted.
 * Add the following to your app's entrypoint python file:
