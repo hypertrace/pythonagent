@@ -2,72 +2,69 @@
 
 name: Checks
 
-# Controls when the action will run. 
+# Controls when the action will run.
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    branches: [ feature/develop, main ]
+    branches: [feature/develop, main]
+    paths-ignore:
+      - "**/*.md"
+      - "LICENSE"
   pull_request:
-    branches: [ feature/develop, main ]
+    branches: [feature/develop, main]
+    paths-ignore:
+      - "**/*.md"
+      - "LICENSE"
 
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
   build:
-    # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
+    strategy:
+      matrix:
+        python: ["3.7", "3.8", "3.9"]
+
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
       - name: Run apt-get update
         run: sudo apt-get update
-        
+
       - name: Install make
         run: sudo apt-get install make
-        
+
       - name: install software-properties-common
         run: sudo apt install software-properties-common
 
       - name: setup repo
         run: sudo add-apt-repository ppa:deadsnakes/ppa -y
 
-      - name: install python3.7
-        run: sudo apt-get install python3.7
-        
-      - name: install python3.8
-        run: sudo apt-get install python3.8
-        
-      - name: install python3.9
-        run: sudo apt-get install python3.9
+      - name: install python
+        run: sudo apt-get install python${{ matrix.python }}
 
       - name: Install pip
         run: sudo apt-get install python3-pip
-        
+
       - name: Install tox
         run: pip install --user -r dev-requirements.txt
-        
-      - name: Run pylint on this branch to generate a report
-        run: tox -e lint
 
-      - name: Run Test Cases
-        run: make hypertrace_test
+      - name: Run pylint on this branch to generate a report
+        run: make lint
+
+      - name: Run tests
+        run: make test
 
       - name: Build package1
         run: python -m pip install --upgrade build
-        
+
       - name: Build package2
         run: python3 -m build
-        
 #      - name: Push binary package to private package repo
 #        uses: cpina/github-action-push-to-another-repository@master
 #        env:
-#          API_TOKEN_GITHUB: 
+#          API_TOKEN_GITHUB:
 #        with:
 #          source-directory: dist
 #          destination-repository-name: hypertrace-pythonagent
@@ -76,7 +73,7 @@ jobs:
 
 #      - name: Create src package to copy to repo for installs
 #        run: mkdir -p src_install/src
-#        
+#
 #      - name: copy files into src_install 1
 #        run: cp -R src/hypertrace src/hypertrace.egg-info src_install/src
 #
