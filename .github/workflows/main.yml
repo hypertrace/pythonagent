@@ -1,10 +1,4 @@
-# This is a basic workflow to help you get started with Actions
-
-name: Checks
-
-# Controls when the action will run.
 on:
-  # Triggers the workflow on push or pull request events but only for the main branch
   push:
     branches: [feature/develop, main]
     paths-ignore:
@@ -19,7 +13,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-20.04
 
     strategy:
@@ -27,8 +21,6 @@ jobs:
         python: ["3.7", "3.8", "3.9"]
 
     steps:
-      - uses: actions/checkout@v2
-
       - name: Run apt-get update
         run: sudo apt-get update
 
@@ -39,10 +31,11 @@ jobs:
         run: sudo apt install software-properties-common
 
       - name: setup repo
-        run: sudo add-apt-repository ppa:deadsnakes/ppa -y
+        run: |
+          sudo add-apt-repository ppa:deadsnakes/ppa -y &&
+          sudo apt-get install python${{ matrix.python }}
 
-      - name: install python
-        run: sudo apt-get install python${{ matrix.python }}
+      - uses: actions/checkout@v2
 
       - name: Install pip
         run: sudo apt-get install python3-pip
@@ -50,7 +43,7 @@ jobs:
       - name: Install tox
         run: pip install --user -r dev-requirements.txt
 
-      - name: Run pylint on this branch to generate a report
+      - name: Run lint
         run: make lint
 
       - name: Run tests
