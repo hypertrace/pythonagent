@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)  # pylint: disable=C0103
 class AgentConfig1:  # pylint: disable=R0902,R0903
     '''A wrapper around the agent configuration logic'''
 
-    def __init__(self): # pylint: disable=R0912,R0915
+    def __init__(self):  # pylint: disable=R0912,R0915
         """
         Returns a new instance of config_pb2.AgentConfig when a new AgentConfig() is created.
         If 'AGENT_YAML' is specified in the environment data would be loaded from that file.
@@ -42,14 +42,14 @@ class AgentConfig1:  # pylint: disable=R0902,R0903
         if self.new_config:
             for parent_key in DEFAULT_AGENT_CONFIG:
                 if parent_key in self.new_config \
-                  and isinstance(DEFAULT_AGENT_CONFIG[parent_key], dict):
+                        and isinstance(DEFAULT_AGENT_CONFIG[parent_key], dict):
                     self.parse_config1(parent_key)
                 else:
                     value = DEFAULT_AGENT_CONFIG[parent_key]
                     self.config[parent_key] = value
                     logger.debug("[DEFAULT] %s -> %s", parent_key, value)
 
-        reporting_token = DEFAULT_REPORTING_TOKEN
+        reporting_token = ""
         opa_endpoint = DEFAULT_OPA_ENDPOINT
         opa_poll_period_seconds = DEFAULT_OPA_POLL_PERIOD_SECONDS
         opa_enabled = DEFAULT_OPA_ENABLED
@@ -178,22 +178,22 @@ class AgentConfig1:  # pylint: disable=R0902,R0903
             self.reporting.trace_reporter_type = self.config['reporting']['trace_reporter_type']
         else:
             self.reporting.trace_reporter_type = config_pb2.TraceReporterType.OTLP
-        self.rpc_body = config_pb2.Message(request=BoolValue( # pylint: disable=C0330
+        self.rpc_body = config_pb2.Message(request=BoolValue(  # pylint: disable=C0330
             value=self.config['data_capture']['rpc_body']['request']),
-                                           response=BoolValue( # pylint: disable=C0330
-            value=self.config['data_capture']['rpc_body']['response'])) # pylint: disable=C0330
-        self.rpc_metadata = config_pb2.Message(request=BoolValue( # pylint: disable=C0330
+            response=BoolValue(  # pylint: disable=C0330
+            value=self.config['data_capture']['rpc_body']['response']))  # pylint: disable=C0330
+        self.rpc_metadata = config_pb2.Message(request=BoolValue(  # pylint: disable=C0330
             value=self.config['data_capture']['rpc_metadata']['request']),
-                                           response=BoolValue( # pylint: disable=C0330
-            value=self.config['data_capture']['rpc_metadata']['response'])) # pylint: disable=C0330
-        self.http_body = config_pb2.Message(request=BoolValue( # pylint: disable=C0330
+            response=BoolValue(  # pylint: disable=C0330
+            value=self.config['data_capture']['rpc_metadata']['response']))  # pylint: disable=C0330
+        self.http_body = config_pb2.Message(request=BoolValue(  # pylint: disable=C0330
             value=self.config['data_capture']['http_body']['request']),
-                                           response=BoolValue( # pylint: disable=C0330
-            value=self.config['data_capture']['http_body']['response'])) # pylint: disable=C0330
-        self.http_headers = config_pb2.Message(request=BoolValue( # pylint: disable=C0330
+            response=BoolValue(  # pylint: disable=C0330
+            value=self.config['data_capture']['http_body']['response']))  # pylint: disable=C0330
+        self.http_headers = config_pb2.Message(request=BoolValue(  # pylint: disable=C0330
             value=self.config['data_capture']['http_headers']['request']),
-                                           response=BoolValue( # pylint: disable=C0330
-            value=self.config['data_capture']['http_headers']['response'])) # pylint: disable=C0330
+            response=BoolValue(  # pylint: disable=C0330
+            value=self.config['data_capture']['http_headers']['response']))  # pylint: disable=C0330
 
         self.data_capture = jf.Parse(jf.MessageToJson(
             config_pb2.DataCapture()), config_pb2.DataCapture)
@@ -239,7 +239,6 @@ class AgentConfig1:  # pylint: disable=R0902,R0903
                 self.config[parent_key][sub_key] = value
                 logger.debug(
                     "[DEFAULT] %s.%s -> %s", parent_key, sub_key, value)
-
 
     def dump_config(self):
         '''Dump configuration information.'''
