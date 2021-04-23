@@ -1,13 +1,45 @@
 version: '3'
 
 services:
-  flask_app_a:
-    container_name: flask_app_a
+  flask_app_b:
+    container_name: flask_app_b
     build:
       context: ../..
-      dockerfile: test/requests/flask_app/Dockerfile
+      dockerfile: test/aiohttp/flask_app/Dockerfile
     environment:
       ENABLE_INSTRUMENTATION: ${ENABLE_INSTRUMENTATION}
+      HT_TRACES_EXPORTER: zipkin
+      HT_REPORTING_ENDPOINT: http://collector:9411/api/v2/spans
+      HT_LOG_LEVEL: DEBUG
     ports:
       - "8000:8000"
     command: gunicorn -w 1 -b 0.0.0.0:8000 wsgi1:server
+    depends_on:
+      - collector
+  flask_app_c:
+    container_name: flask_app_c
+    build:
+      context: ../..
+      dockerfile: test/aiohttp/flask_app/Dockerfile
+    environment:
+      ENABLE_INSTRUMENTATION: ${ENABLE_INSTRUMENTATION}
+      HT_TRACES_EXPORTER: zipkin
+      HT_REPORTING_ENDPOINT: http://collector:9411/api/v2/spans
+      HT_LOG_LEVEL: DEBUG
+    ports:
+      - "8000:8000"
+    command: gunicorn -w 1 -b 0.0.0.0:8000 wsgi2:server
+    depends_on:
+      - collector
+  collector:
+    image: traceableai/oc-collector:latest
+    command:
+      - "/occollector_linux"
+      - "--config=/collector-config.yaml"
+      - "--log-level=debug"
+    ports:
+      - "9411:9411" # Zipkin HTTP
+      - "14267:14267" # Jaeger HTTP
+      - "14268:14268" # Jaeger Thrift
+      - "55678:55678" # Opencensus
+

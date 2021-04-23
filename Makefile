@@ -8,6 +8,7 @@ hypertrace_test:
 	cd ${TEST_DIR}/gunicorn; tox
 	cd ${TEST_DIR}/requests; tox
 	cd ${TEST_DIR}/aiohttp; tox
+	cd ${TEST_DIR}/docker; tox
 build:
 	python3 -m pip install --upgrade build
 	python -m build
