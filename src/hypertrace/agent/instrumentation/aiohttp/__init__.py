@@ -20,6 +20,7 @@ from hypertrace.agent.instrumentation import BaseInstrumentorWrapper
 # Initialize logger with local module name
 logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
+
 def hypertrace_name_callback(trace_request_start_params):
     '''Generate span name'''
     logger.debug('Entering hypertrace_name_callback(), method=%s, url=%s.',
@@ -28,9 +29,12 @@ def hypertrace_name_callback(trace_request_start_params):
     return trace_request_start_params.method + ' ' + str(trace_request_start_params.url)
 
 # aiohttp-client instrumentation module wrapper class
+
+
 class AioHttpClientInstrumentorWrapper(AioHttpClientInstrumentor, BaseInstrumentorWrapper):
     '''Hypertrace wrapper class around OpenTelemetry AioHttpClient Instrumentor class'''
     # Constructor
+
     def __init__(self):
         logger.debug('Entering AioHttpClientInstrumentor.__init__().')
         super().__init__()
@@ -58,9 +62,11 @@ class AioHttpClientInstrumentorWrapper(AioHttpClientInstrumentor, BaseInstrument
 
 
 # aliases for type definitions
-_UrlFilterT = typing.Optional[typing.Callable[[str], str]]
-_SpanNameT = typing.Optional[
-    typing.Union[typing.Callable[[aiohttp.TraceRequestStartParams], str], str]
+_UrlFilterT = typing.Optional[typing.Callable[[  # pylint: disable=unsubscriptable-object
+    str], str]]
+_SpanNameT = typing.Optional[  # pylint: disable=unsubscriptable-object
+    typing.Union[typing.Callable[[aiohttp.TraceRequestStartParams],  # pylint: disable=unsubscriptable-object
+                                 str], str]
 ]
 
 # build an aiohttp trace config
@@ -111,11 +117,12 @@ def create_trace_config(
         logger.debug('Found span: %s', str(span))
         # Add headers & body to span
         if span.is_recording():
-            request_headers = [(k, v) for k, v in params.headers.items()] # pylint: disable=R1721
+            request_headers = [
+                (k, v) for k, v in params.headers.items()]  # pylint: disable=R1721
             aiohttp_client_wrapper.generic_request_handler(
                 request_headers, request_body, span)
             response_headers = [(k, v)
-                                for k, v in params.response.headers.items()] # pylint: disable=R1721
+                                for k, v in params.response.headers.items()]  # pylint: disable=R1721
             aiohttp_client_wrapper.generic_response_handler(
                 response_headers, response_body, span)
 
@@ -134,6 +141,7 @@ def create_trace_config(
 
     return trace_config
 
+
 def _instrument(
         tracer_provider: TracerProvider = None,
         url_filter: _UrlFilterT = None,
@@ -141,7 +149,7 @@ def _instrument(
         aiohttp_client_wrapper: AioHttpClientInstrumentorWrapper = None
 ):
     '''Setup details of trace config context'''
-    def instrumented_init(wrapped, instance, args, kwargs): # pylint: disable=W0613
+    def instrumented_init(wrapped, instance, args, kwargs):  # pylint: disable=W0613
         if context_api.get_value("suppress_instrumentation"):
             return wrapped(*args, **kwargs)
 
