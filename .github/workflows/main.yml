@@ -16,10 +16,6 @@ jobs:
   build-and-test:
     runs-on: ubuntu-20.04
 
-    strategy:
-      matrix:
-        python: ["3.7", "3.8", "3.9"]
-
     steps:
       - name: Run apt-get update
         run: sudo apt-get update
@@ -30,10 +26,12 @@ jobs:
       - name: install software-properties-common
         run: sudo apt install software-properties-common
 
-      - name: setup repo
+      - name: Install Python versions
         run: |
           sudo add-apt-repository ppa:deadsnakes/ppa -y &&
-          sudo apt-get install python${{ matrix.python }}
+          sudo apt-get install python3.7 &&
+          sudo apt-get install python3.8 &&
+          sudo apt-get install python3.9
 
       - uses: actions/checkout@v2
 
