@@ -63,6 +63,9 @@ jobs:
           pip install --upgrade pip
           pip install --upgrade protobuf
 
+      - name: Run unittest
+        run: make unittest
+
       - name: Run Python 3.7 Test Cases
         run: make test_py37
 
