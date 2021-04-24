@@ -25,7 +25,6 @@ build: build_protobuf
 clean:
 	rm -Rf build dist src/hypertrace.egg-info
 
-
 .PHONY: docs
 docs: ## Generates the docs
 	tox -e pdoc
