@@ -56,7 +56,9 @@ jobs:
         run: tox -e lint
         
       - name: Install protobuf compiler
-        run:  sudo apt-get install -y protobuf protobuf-compiler
+        run:  |
+          sudo apt-get install -y protobuf-compiler
+          protoc --version
 
 #      - name: Run Python 3.7 Test Cases
 #        run: make test_py37
