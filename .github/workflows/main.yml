@@ -54,6 +54,9 @@ jobs:
         
       - name: Run pylint on this branch to generate a report
         run: tox -e lint
+        
+      - name: Install protobuf compiler
+        run:  sudo apt-get install -y protobuf-compiler
 
 #      - name: Run Python 3.7 Test Cases
 #        run: make test_py37
@@ -63,9 +66,6 @@ jobs:
 
       - name: Run Python 3.9 Test Cases
         run: make test_py39
-
-      - name: Install protobuf compiler
-        run:  sudo apt-get install -y protobuf-compiler
         
       - name: Build packge
         run: make build
