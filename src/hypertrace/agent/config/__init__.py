@@ -22,14 +22,14 @@ class AgentConfig:  # pylint: disable=R0902,R0903
     def __init__(self):  # pylint: disable=R0912,R0915
         """
         Returns a new instance of config_pb2.AgentConfig when a new AgentConfig() is created.
-        If 'AGENT_YAML' is specified in the environment data would be loaded from that file.
+        If 'HT_CONFIG_FILE' is specified in the environment data would be loaded from that file.
         If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'
         """
 
         self.config = DEFAULT_AGENT_CONFIG
         self.new_config = None
-        if 'AGENT_YAML' in os.environ:
-            path = os.path.abspath(os.environ['AGENT_YAML'])
+        if 'HT_CONFIG_FILE' in os.environ:
+            path = os.path.abspath(os.environ['HT_CONFIG_FILE'])
             logger.debug("AgentConfig - using file from %s", path)
             file = open(path, 'r')
             self.new_config = yaml.load(file, Loader=yaml.FullLoader)
