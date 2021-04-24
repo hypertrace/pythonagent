@@ -12,7 +12,7 @@ opentelemetry-instrumentation-requests
 opentelemetry-instrumentation-grpc
 opentelemetry-util-http
 google
-protobuf
+protobuf==3.6.1
 pyyaml
 pylint==2.4.4
 tox
