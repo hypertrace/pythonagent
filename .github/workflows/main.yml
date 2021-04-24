@@ -48,12 +48,20 @@ jobs:
 
       - name: Install pip
         run: sudo apt-get install python3-pip
-        
+
       - name: Install tox
         run: pip install --user -r dev-requirements.txt
         
       - name: Run pylint on this branch to generate a report
         run: tox -e lint
+        
+      - name: Install protobuf compiler
+        run:  |
+          sudo apt-get install -y protobuf-compiler
+          protoc --version
+          pip uninstall protobuf python3-protobuf
+          pip install --upgrade pip
+          pip install --upgrade protobuf
 
       - name: Run Python 3.7 Test Cases
         run: make test_py37
@@ -63,9 +71,6 @@ jobs:
 
       - name: Run Python 3.9 Test Cases
         run: make test_py39
-
-      - name: Install protobuf compiler
-        run:  sudo apt-get install -y protobuf-compiler
         
       - name: Build packge
         run: make build
