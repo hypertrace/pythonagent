@@ -55,7 +55,7 @@ logger = setup_custom_logger(__name__)
 # Code snippet here represents the current initialization logic
 #
 logger.info('Initializing agent.')
-agent = Agent()
+agent = Agent(True)
 agent.register_server_grpc()
 logger.info('Agent initialized.')
 #

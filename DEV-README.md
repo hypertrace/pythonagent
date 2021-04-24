@@ -170,28 +170,6 @@ data_capture:
     }
 }
 ```
-# Environment Variables
-
-| Name | Description |
-|------|-------------|
-| HT_SERVICE_NAME | Identifies the service/process running e.g. "my service" |
-| HT_REPORTING_ENDPOINT | Represents the endpoint for reporting the traces For ZIPKIN reporter type use http://api.traceable.ai:9411/api/v2/spans For OTLP reporter type use http://api.traceable.ai:4317 |
-| HT_REPORTING_SECURE | When `true`, connects to endpoints over TLS. |
-| HT_REPORTING_TOKEN | User specific token to access Traceable API |
-| HT_DATA_CAPTURE_HTTP_HEADERS_REQUEST | When `false` it disables the capture for the request in a client/request operation |
-| HT_DATA_CAPTURE_HTTP_HEADERS_RESPONSE | When `false` it disables the capture for the response in a client/request operation |
-| HT_DATA_CAPTURE_HTTP_BODY_REQUEST | When `false` it disables the capture for the request in a client/request operation |
-| HT_DATA_CAPTURE_HTTP_BODY_RESPONSE | When `false` it disables the capture for the response in a client/request operation |
-| HT_DATA_CAPTURE_RPC_METADATA_REQUEST | When `false` it disables the capture for the request in a client/request operation |
-| HT_DATA_CAPTURE_RPC_METADATA_RESPONSE | When `false` it disables the capture for the response in a client/request operation |
-| HT_DATA_CAPTURE_RPC_BODY_REQUEST | When `false` it disables the capture for the request in a client/request operation |
-| HT_DATA_CAPTURE_RPC_BODY_RESPONSE | When `false` it disables the capture for the response in a client/request operation |
-| HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES | Maximum size of captured body in bytes. Default should be 131_072 (128 KiB). |
-| HT_PROPAGATION_FORMATS | List the supported propagation formats e.g. `HT_PROPAGATION_FORMATS="B3,TRACECONTEXT"`. |
-| HT_ENABLED | When `false`, disables the agent. |
-| HT_LOG_LEVEL | Represents log level. |
-| HT_TRACES_EXPORTER | Collector to export traces to e.g `Zipkin`. |
-| HT_CONFIG_FILE | When `HT_CONFIG_FILE` is specified in the environment data would be loaded from that file. |
 # Testing tools
 * [tox](https://tox.readthedocs.io/en/latest/)
 * [pytest](https://docs.pytest.org/en/stable/contents.html)

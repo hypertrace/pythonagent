@@ -12,14 +12,14 @@ from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExport
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from hypertrace.agent import constants
-from hypertrace.agent.config import config_pb2, AgentConfig1
+from hypertrace.agent.config import config_pb2, AgentConfig
 
 # Initialize logger
 logger = logging.getLogger(__name__) # pylint: disable=C0103
 
 class AgentInit:  # pylint: disable=R0902,R0903
     '''Initialize all the OTel components using configuration from AgentConfig'''
-    def __init__(self, agent: AgentConfig1):
+    def __init__(self, agent: AgentConfig, init_console_only: bool = False):
         '''constructor'''
         logger.debug('Initializing AgentInit object.')
         self._agent = agent
@@ -44,14 +44,13 @@ class AgentInit:  # pylint: disable=R0902,R0903
             )
             trace.set_tracer_provider(self._tracer_provider)
 
+            if self._config.use_console_span_exporter() \
+              or init_console_only:
+                self.set_console_span_processor()
 
-            self.set_console_span_processor()
-
-            self.set_zipkin_processor()
-            self.set_otlp_processor()
-
-
-
+            if not init_console_only:
+                self.set_zipkin_processor()
+                self.set_otlp_processor()
 
             self._flask_instrumentor_wrapper = None
             self._grpc_instrumentor_client_wrapper = None

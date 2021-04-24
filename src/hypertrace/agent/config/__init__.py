@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)  # pylint: disable=C0103
 # Read agent-config file and override with environment variables as necessaary
 
 
-class AgentConfig1:  # pylint: disable=R0902,R0903
+class AgentConfig:  # pylint: disable=R0902,R0903
     '''A wrapper around the agent configuration logic'''
 
     def __init__(self):  # pylint: disable=R0912,R0915
@@ -55,6 +55,8 @@ class AgentConfig1:  # pylint: disable=R0902,R0903
         opa_enabled = DEFAULT_OPA_ENABLED
         data_capture_max_size_bytes = DEFAULT_DATA_CAPTURE_MAX_SIZE_BYTES
         agent_config_enabled = DEFAULT_AGENT_CONFIG_ENABLED
+
+        self._use_console_span_exporter = False
 
         # Use variables from environment:
         if 'HT_SERVICE_NAME' in os.environ:
@@ -160,6 +162,12 @@ class AgentConfig1:  # pylint: disable=R0902,R0903
             logger.debug("[env] Loaded HT_ENABLED from env")
             agent_config_enabled = os.environ['HT_ENABLED'].lower() == 'true'
 
+        if 'HT_ENABLE_CONSOLE_SPAN_EXPORTER' in os.environ:
+            logger.debug("[env] Loaded HT_ENABLE_CONSOLE_SPAN_EXPORTER from env, %s",
+                         str(os.environ['HT_ENABLE_CONSOLE_SPAN_EXPORTER'].lower()))
+            self._use_console_span_exporter = \
+              os.environ['HT_ENABLE_CONSOLE_SPAN_EXPORTER'].lower() == 'true'
+
         self.opa = jf.Parse(jf.MessageToJson(config_pb2.Opa()), config_pb2.Opa)
         self.opa.endpoint = opa_endpoint
         self.opa.poll_period_seconds = opa_poll_period_seconds
@@ -247,3 +255,7 @@ class AgentConfig1:  # pylint: disable=R0902,R0903
     def get_config1(self) -> config_pb2.AgentConfig:
         '''Return configuration information.'''
         return self.agent_config
+
+    def use_console_span_exporter(self) -> bool:
+        '''Initialize InMemorySpanExporter'''
+        return self._use_console_span_exporter
