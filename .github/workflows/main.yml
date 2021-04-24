@@ -63,8 +63,8 @@ jobs:
           pip install --upgrade pip
           pip install --upgrade protobuf
 
-#      - name: Run Python 3.7 Test Cases
-#        run: make test_py37
+      - name: Run Python 3.7 Test Cases
+        run: make test_py37
 
       - name: Run Python 3.8 Test Cases
         run: make test_py38
