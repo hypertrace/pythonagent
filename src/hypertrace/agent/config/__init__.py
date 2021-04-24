@@ -228,28 +228,6 @@ class AgentConfig:  # pylint: disable=R0902,R0903
 
         self.service_name = self.config['service_name']
 
-    def parse_config1(self, parent_key):
-        '''configuration parsing helper'''
-        for sub_key in DEFAULT_AGENT_CONFIG[parent_key].keys():
-            if sub_key in self.new_config[parent_key] \
-                    and isinstance(DEFAULT_AGENT_CONFIG[parent_key][sub_key], dict):
-                for value_key in DEFAULT_AGENT_CONFIG[parent_key][sub_key].keys():
-                    if value_key in self.new_config[parent_key][sub_key]:
-                        value = self.new_config[parent_key][sub_key][value_key]
-                        self.config[parent_key][sub_key][value_key] = value
-                        logger.debug(
-                            "[YAML] %s.%s.%s -> %s", parent_key, sub_key, value_key, value)
-                    else:
-                        value = DEFAULT_AGENT_CONFIG[parent_key][sub_key][value_key]
-                        self.config[parent_key][sub_key][value_key] = value
-                        logger.debug(
-                            "[DEFAULT] %s.%s.%s -> %s", parent_key, sub_key, value_key, value)
-            else:
-                value = DEFAULT_AGENT_CONFIG[parent_key][sub_key]
-                self.config[parent_key][sub_key] = value
-                logger.debug(
-                    "[DEFAULT] %s.%s -> %s", parent_key, sub_key, value)
-
     def dump_config(self):
         '''Dump configuration information.'''
         logger.debug(self.__dict__)
