@@ -9,6 +9,7 @@ def test_merge_config():
             "trace_reporter_type": "ZIPKIN",
             "secure": False
         },
+        'propagation_formats': ['B3', 'TRACECONTEXT']
     }, {
         "service_name": "myservice",
         'reporting': {

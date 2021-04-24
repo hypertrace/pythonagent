@@ -11,7 +11,7 @@ DEFAULT_DATA_CAPTURE_MAX_SIZE_BYTES = 128 * 1024
 DEFAULT_AGENT_CONFIG_ENABLED = True
 
 DEFAULT_AGENT_CONFIG = {
-    'service_name': "pythonagent",
+    'service_name': '',
     'reporting': {
         "endpoint": "http://localhost:9411/api/v2/spans",
         "secure": False,

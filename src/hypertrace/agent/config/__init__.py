@@ -20,8 +20,9 @@ def merge_config(base_config, overriding_config):
 
     for key in overriding_config:
         if key in base_config and isinstance(base_config[key], dict):
-            base_config[key] = merge_config(
-                base_config[key], overriding_config[key])
+            if key in overriding_config:
+                base_config[key] = merge_config(
+                    base_config[key], overriding_config[key])
         else:
             base_config[key] = overriding_config[key]
     return base_config
