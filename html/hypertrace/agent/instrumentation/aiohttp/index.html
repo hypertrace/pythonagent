@@ -200,7 +200,7 @@ def _instrument(
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="hypertrace.agent.instrumentation.aiohttp.create_trace_config"><code class="name flex">
-<span>def <span class="ident">create_trace_config</span></span>(<span>url_filter: Union[Callable[[str], str], NoneType] = None, span_name: Union[Callable[[aiohttp.tracing.TraceRequestStartParams], str], str, NoneType] = None, tracer_provider: opentelemetry.trace.TracerProvider = None, aiohttp_client_wrapper: <a title="hypertrace.agent.instrumentation.aiohttp.AioHttpClientInstrumentorWrapper" href="#hypertrace.agent.instrumentation.aiohttp.AioHttpClientInstrumentorWrapper">AioHttpClientInstrumentorWrapper</a> = None) ‑> aiohttp.tracing.TraceConfig</span>
+<span>def <span class="ident">create_trace_config</span></span>(<span>url_filter: Optional[Callable[[str], str]] = None, span_name: Union[Callable[[aiohttp.tracing.TraceRequestStartParams], str], str, NoneType] = None, tracer_provider: opentelemetry.trace.TracerProvider = None, aiohttp_client_wrapper: <a title="hypertrace.agent.instrumentation.aiohttp.AioHttpClientInstrumentorWrapper" href="#hypertrace.agent.instrumentation.aiohttp.AioHttpClientInstrumentorWrapper">AioHttpClientInstrumentorWrapper</a> = None) ‑> aiohttp.tracing.TraceConfig</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Build an aiohttp-client trace config for use with Hypertrace</p></div>

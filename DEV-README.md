@@ -191,7 +191,7 @@ data_capture:
 | HT_ENABLED | When `false`, disables the agent. |
 | HT_LOG_LEVEL | Represents log level. |
 | HT_TRACES_EXPORTER | Collector to export traces to e.g `Zipkin`. |
-| AGENT_YAML | When `AGENT_YAML` is specified in the environment data would be loaded from that file. |
+| HT_CONFIG_FILE | When `HT_CONFIG_FILE` is specified in the environment data would be loaded from that file. |
 # Testing tools
 * [tox](https://tox.readthedocs.io/en/latest/)
 * [pytest](https://docs.pytest.org/en/stable/contents.html)
