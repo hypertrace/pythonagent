@@ -28,7 +28,7 @@ docs:
 	tox -e pdoc
 lint:
 	tox -e lint
-install:
+install: build
 	pip install dist/hypertrace-0.1.0.tar.gz
 
 build_protobuf:
