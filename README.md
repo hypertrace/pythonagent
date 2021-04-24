@@ -69,4 +69,4 @@ agent.registerGrpcServer()
 | HT_ENABLED | When `false`, disables the agent. |
 | HT_LOG_LEVEL | Represents log level. |
 | HT_TRACES_EXPORTER | Collector to export traces to e.g `Zipkin`. |
-| AGENT_YAML | When `AGENT_YAML` is specified in the environment configuartion information is loaded from that location. |
+| HT_CONFIG_FILE | When `HT_CONFIG_FILE` is specified in the environment configuartion information is loaded from that location. |

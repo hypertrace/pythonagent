@@ -14,8 +14,12 @@ build:
 	python -m build
 clean:
 	rm -Rf build dist src/hypertrace.egg-info
-docs:
+
+
+.PHONY: docs
+docs: # Generates the docs
 	tox -e pdoc
+
 lint:
 	tox -e lint
 install:
