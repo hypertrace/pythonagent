@@ -17,7 +17,7 @@ clean:
 
 
 .PHONY: docs
-docs: # Generates the docs
+docs: ## Generates the docs
 	tox -e pdoc
 
 lint:
