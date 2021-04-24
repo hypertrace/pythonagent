@@ -48,15 +48,15 @@ jobs:
 
       - name: Install pip
         run: sudo apt-get install python3-pip
-        
+
       - name: Install tox
         run: pip install --user -r dev-requirements.txt
         
       - name: Run pylint on this branch to generate a report
         run: tox -e lint
 
-      - name: Run Python 3.7 Test Cases
-        run: make test_py37
+#      - name: Run Python 3.7 Test Cases
+#        run: make test_py37
 
       - name: Run Python 3.8 Test Cases
         run: make test_py38
