@@ -34,12 +34,10 @@ import sys
 import logging
 import traceback
 from hypertrace.agent.init import AgentInit
-from hypertrace.agent.config import AgentConfig1
+from hypertrace.agent.config import AgentConfig
 from hypertrace.agent import constants
 
 # main logging modle configuration
-
-
 def setup_custom_logger(name):
     &#39;&#39;&#39;Agent logger configuration&#39;&#39;&#39;
     try:
@@ -89,7 +87,7 @@ class Agent:
         if not self.is_enabled():
             return
         try:
-            self._config = AgentConfig1()
+            self._config = AgentConfig()
             self._init = AgentInit(self)
         except Exception as err: # pylint: disable=W0703
             logger.error(&#39;Failed to initialize Agent: exception=%s, stacktrace=%s&#39;,
@@ -312,7 +310,7 @@ environment variables, and the agent-config.yaml file.</p></div>
         if not self.is_enabled():
             return
         try:
-            self._config = AgentConfig1()
+            self._config = AgentConfig()
             self._init = AgentInit(self)
         except Exception as err: # pylint: disable=W0703
             logger.error(&#39;Failed to initialize Agent: exception=%s, stacktrace=%s&#39;,
