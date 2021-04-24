@@ -1,6 +1,8 @@
+'''Unittest for merging config entries.'''
 from . import merge_config
 
 def test_merge_config():
+    '''Unittest function for merging config entries.'''
     cfg = merge_config({
         'reporting': {
             "endpoint": "http://localhost:9411/api/v2/spans",
