@@ -48,7 +48,7 @@ logger = logging.getLogger(__name__) # pylint: disable=C0103
 
 class AgentInit:  # pylint: disable=R0902,R0903
     &#39;&#39;&#39;Initialize all the OTel components using configuration from AgentConfig&#39;&#39;&#39;
-    def __init__(self, agent: AgentConfig):
+    def __init__(self, agent: AgentConfig, init_console_only: bool = False):
         &#39;&#39;&#39;constructor&#39;&#39;&#39;
         logger.debug(&#39;Initializing AgentInit object.&#39;)
         self._agent = agent
@@ -73,11 +73,13 @@ class AgentInit:  # pylint: disable=R0902,R0903
             )
             trace.set_tracer_provider(self._tracer_provider)
 
-            if self._config.use_console_span_exporter():
+            if self._config.use_console_span_exporter() \
+              or init_console_only:
                 self.set_console_span_processor()
 
-            self.set_zipkin_processor()
-            self.set_otlp_processor()
+            if not init_console_only:
+                self.set_zipkin_processor()
+                self.set_otlp_processor()
 
             self._flask_instrumentor_wrapper = None
             self._grpc_instrumentor_client_wrapper = None
@@ -354,7 +356,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
 <dl>
 <dt id="hypertrace.agent.init.AgentInit"><code class="flex name class">
 <span>class <span class="ident">AgentInit</span></span>
-<span>(</span><span>agent: <a title="hypertrace.agent.config.AgentConfig" href="../config/index.html#hypertrace.agent.config.AgentConfig">AgentConfig</a>)</span>
+<span>(</span><span>agent: <a title="hypertrace.agent.config.AgentConfig" href="../config/index.html#hypertrace.agent.config.AgentConfig">AgentConfig</a>, init_console_only: bool = False)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Initialize all the OTel components using configuration from AgentConfig</p>
@@ -365,7 +367,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
 </summary>
 <pre><code class="python">class AgentInit:  # pylint: disable=R0902,R0903
     &#39;&#39;&#39;Initialize all the OTel components using configuration from AgentConfig&#39;&#39;&#39;
-    def __init__(self, agent: AgentConfig):
+    def __init__(self, agent: AgentConfig, init_console_only: bool = False):
         &#39;&#39;&#39;constructor&#39;&#39;&#39;
         logger.debug(&#39;Initializing AgentInit object.&#39;)
         self._agent = agent
@@ -390,11 +392,13 @@ class AgentInit:  # pylint: disable=R0902,R0903
             )
             trace.set_tracer_provider(self._tracer_provider)
 
-            if self._config.use_console_span_exporter():
+            if self._config.use_console_span_exporter() \
+              or init_console_only:
                 self.set_console_span_processor()
 
-            self.set_zipkin_processor()
-            self.set_otlp_processor()
+            if not init_console_only:
+                self.set_zipkin_processor()
+                self.set_otlp_processor()
 
             self._flask_instrumentor_wrapper = None
             self._grpc_instrumentor_client_wrapper = None

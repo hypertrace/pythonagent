@@ -117,7 +117,7 @@ if ENABLE_INSTRUMENTATION == True:
   # Code snippet here represents the current initialization logic
   #
   logger.info('Initializing agent.')
-  agent = Agent()
+  agent = Agent(True)
   agent.register_flask_app(server, True)
   agent.register_aiohttp_client(True)
   #

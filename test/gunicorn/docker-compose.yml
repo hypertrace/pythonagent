@@ -47,15 +47,3 @@ services:
     volumes:
       - ./sql:/docker-entrypoint-initdb.d
 #  docker exec -it mysql_db_1 mysql -h mysql_db_1 -u root -p
-  collector:
-    image: traceableai/oc-collector:latest
-    command:
-      - "/occollector_linux"
-      - "--config=/collector-config.yaml"
-      - "--log-level=debug"
-    ports:
-      - "9411:9411" # Zipkin HTTP
-      - "14267:14267" # Jaeger HTTP
-      - "14268:14268" # Jaeger Thrift
-      - "55678:55678" # Opencensus
-
