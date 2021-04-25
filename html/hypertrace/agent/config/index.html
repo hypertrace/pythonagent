@@ -47,20 +47,20 @@ logger = logging.getLogger(__name__)  # pylint: disable=C0103
 # Read agent-config file and override with environment variables as necessaary
 
 
-class AgentConfig1:  # pylint: disable=R0902,R0903
+class AgentConfig:  # pylint: disable=R0902,R0903
     &#39;&#39;&#39;A wrapper around the agent configuration logic&#39;&#39;&#39;
 
-    def __init__(self): # pylint: disable=R0912,R0915
+    def __init__(self):  # pylint: disable=R0912,R0915
         &#34;&#34;&#34;
         Returns a new instance of config_pb2.AgentConfig when a new AgentConfig() is created.
-        If &#39;AGENT_YAML&#39; is specified in the environment data would be loaded from that file.
+        If &#39;HT_CONFIG_FILE&#39; is specified in the environment data would be loaded from that file.
         If not, data would be loaded from &#39;DEFAULT_AGENT_CONFIG&#39; on &#39;default.py&#39;
         &#34;&#34;&#34;
 
         self.config = DEFAULT_AGENT_CONFIG
         self.new_config = None
-        if &#39;AGENT_YAML&#39; in os.environ:
-            path = os.path.abspath(os.environ[&#39;AGENT_YAML&#39;])
+        if &#39;HT_CONFIG_FILE&#39; in os.environ:
+            path = os.path.abspath(os.environ[&#39;HT_CONFIG_FILE&#39;])
             logger.debug(&#34;AgentConfig - using file from %s&#34;, path)
             file = open(path, &#39;r&#39;)
             self.new_config = yaml.load(file, Loader=yaml.FullLoader)
@@ -73,19 +73,21 @@ class AgentConfig1:  # pylint: disable=R0902,R0903
         if self.new_config:
             for parent_key in DEFAULT_AGENT_CONFIG:
                 if parent_key in self.new_config \
-                  and isinstance(DEFAULT_AGENT_CONFIG[parent_key], dict):
+                        and isinstance(DEFAULT_AGENT_CONFIG[parent_key], dict):
                     self.parse_config1(parent_key)
                 else:
                     value = DEFAULT_AGENT_CONFIG[parent_key]
                     self.config[parent_key] = value
                     logger.debug(&#34;[DEFAULT] %s -&gt; %s&#34;, parent_key, value)
 
-        reporting_token = DEFAULT_REPORTING_TOKEN
+        reporting_token = &#34;&#34;
         opa_endpoint = DEFAULT_OPA_ENDPOINT
         opa_poll_period_seconds = DEFAULT_OPA_POLL_PERIOD_SECONDS
         opa_enabled = DEFAULT_OPA_ENABLED
         data_capture_max_size_bytes = DEFAULT_DATA_CAPTURE_MAX_SIZE_BYTES
         agent_config_enabled = DEFAULT_AGENT_CONFIG_ENABLED
+
+        self._use_console_span_exporter = False
 
         # Use variables from environment:
         if &#39;HT_SERVICE_NAME&#39; in os.environ:
@@ -191,6 +193,12 @@ class AgentConfig1:  # pylint: disable=R0902,R0903
             logger.debug(&#34;[env] Loaded HT_ENABLED from env&#34;)
             agent_config_enabled = os.environ[&#39;HT_ENABLED&#39;].lower() == &#39;true&#39;
 
+        if &#39;HT_ENABLE_CONSOLE_SPAN_EXPORTER&#39; in os.environ:
+            logger.debug(&#34;[env] Loaded HT_ENABLE_CONSOLE_SPAN_EXPORTER from env, %s&#34;,
+                         str(os.environ[&#39;HT_ENABLE_CONSOLE_SPAN_EXPORTER&#39;].lower()))
+            self._use_console_span_exporter = \
+              os.environ[&#39;HT_ENABLE_CONSOLE_SPAN_EXPORTER&#39;].lower() == &#39;true&#39;
+
         self.opa = jf.Parse(jf.MessageToJson(config_pb2.Opa()), config_pb2.Opa)
         self.opa.endpoint = opa_endpoint
         self.opa.poll_period_seconds = opa_poll_period_seconds
@@ -203,27 +211,28 @@ class AgentConfig1:  # pylint: disable=R0902,R0903
         self.reporting.secure = self.config[&#39;reporting&#39;][&#39;secure&#39;]
         self.reporting.token = reporting_token
         self.reporting.opa = self.opa
-        if self.config[&#39;reporting&#39;][&#39;trace_reporter_type&#39;]:
+
+        if &#34;trace_reporter_type&#34; in self.config[&#39;reporting&#39;] and \
+                self.config[&#39;reporting&#39;][&#39;trace_reporter_type&#39;]:
             self.reporting.trace_reporter_type = self.config[&#39;reporting&#39;][&#39;trace_reporter_type&#39;]
         else:
             self.reporting.trace_reporter_type = config_pb2.TraceReporterType.OTLP
-
-        self.rpc_body = config_pb2.Message(request=BoolValue( # pylint: disable=C0330
+        self.rpc_body = config_pb2.Message(request=BoolValue(  # pylint: disable=C0330
             value=self.config[&#39;data_capture&#39;][&#39;rpc_body&#39;][&#39;request&#39;]),
-                                           response=BoolValue( # pylint: disable=C0330
-            value=self.config[&#39;data_capture&#39;][&#39;rpc_body&#39;][&#39;response&#39;])) # pylint: disable=C0330
-        self.rpc_metadata = config_pb2.Message(request=BoolValue( # pylint: disable=C0330
+            response=BoolValue(  # pylint: disable=C0330
+            value=self.config[&#39;data_capture&#39;][&#39;rpc_body&#39;][&#39;response&#39;]))  # pylint: disable=C0330
+        self.rpc_metadata = config_pb2.Message(request=BoolValue(  # pylint: disable=C0330
             value=self.config[&#39;data_capture&#39;][&#39;rpc_metadata&#39;][&#39;request&#39;]),
-                                           response=BoolValue( # pylint: disable=C0330
-            value=self.config[&#39;data_capture&#39;][&#39;rpc_metadata&#39;][&#39;response&#39;])) # pylint: disable=C0330
-        self.http_body = config_pb2.Message(request=BoolValue( # pylint: disable=C0330
+            response=BoolValue(  # pylint: disable=C0330
+            value=self.config[&#39;data_capture&#39;][&#39;rpc_metadata&#39;][&#39;response&#39;]))  # pylint: disable=C0330
+        self.http_body = config_pb2.Message(request=BoolValue(  # pylint: disable=C0330
             value=self.config[&#39;data_capture&#39;][&#39;http_body&#39;][&#39;request&#39;]),
-                                           response=BoolValue( # pylint: disable=C0330
-            value=self.config[&#39;data_capture&#39;][&#39;http_body&#39;][&#39;response&#39;])) # pylint: disable=C0330
-        self.http_headers = config_pb2.Message(request=BoolValue( # pylint: disable=C0330
+            response=BoolValue(  # pylint: disable=C0330
+            value=self.config[&#39;data_capture&#39;][&#39;http_body&#39;][&#39;response&#39;]))  # pylint: disable=C0330
+        self.http_headers = config_pb2.Message(request=BoolValue(  # pylint: disable=C0330
             value=self.config[&#39;data_capture&#39;][&#39;http_headers&#39;][&#39;request&#39;]),
-                                           response=BoolValue( # pylint: disable=C0330
-            value=self.config[&#39;data_capture&#39;][&#39;http_headers&#39;][&#39;response&#39;])) # pylint: disable=C0330
+            response=BoolValue(  # pylint: disable=C0330
+            value=self.config[&#39;data_capture&#39;][&#39;http_headers&#39;][&#39;response&#39;]))  # pylint: disable=C0330
 
         self.data_capture = jf.Parse(jf.MessageToJson(
             config_pb2.DataCapture()), config_pb2.DataCapture)
@@ -270,14 +279,17 @@ class AgentConfig1:  # pylint: disable=R0902,R0903
                 logger.debug(
                     &#34;[DEFAULT] %s.%s -&gt; %s&#34;, parent_key, sub_key, value)
 
-
     def dump_config(self):
         &#39;&#39;&#39;Dump configuration information.&#39;&#39;&#39;
         logger.debug(self.__dict__)
 
     def get_config1(self) -&gt; config_pb2.AgentConfig:
         &#39;&#39;&#39;Return configuration information.&#39;&#39;&#39;
-        return self.agent_config</code></pre>
+        return self.agent_config
+
+    def use_console_span_exporter(self) -&gt; bool:
+        &#39;&#39;&#39;Initialize InMemorySpanExporter&#39;&#39;&#39;
+        return self._use_console_span_exporter</code></pre>
 </details>
 </section>
 <section>
@@ -300,32 +312,32 @@ class AgentConfig1:  # pylint: disable=R0902,R0903
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="hypertrace.agent.config.AgentConfig1"><code class="flex name class">
-<span>class <span class="ident">AgentConfig1</span></span>
+<dt id="hypertrace.agent.config.AgentConfig"><code class="flex name class">
+<span>class <span class="ident">AgentConfig</span></span>
 </code></dt>
 <dd>
 <div class="desc"><p>A wrapper around the agent configuration logic</p>
 <p>Returns a new instance of config_pb2.AgentConfig when a new AgentConfig() is created.
-If 'AGENT_YAML' is specified in the environment data would be loaded from that file.
+If 'HT_CONFIG_FILE' is specified in the environment data would be loaded from that file.
 If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class AgentConfig1:  # pylint: disable=R0902,R0903
+<pre><code class="python">class AgentConfig:  # pylint: disable=R0902,R0903
     &#39;&#39;&#39;A wrapper around the agent configuration logic&#39;&#39;&#39;
 
-    def __init__(self): # pylint: disable=R0912,R0915
+    def __init__(self):  # pylint: disable=R0912,R0915
         &#34;&#34;&#34;
         Returns a new instance of config_pb2.AgentConfig when a new AgentConfig() is created.
-        If &#39;AGENT_YAML&#39; is specified in the environment data would be loaded from that file.
+        If &#39;HT_CONFIG_FILE&#39; is specified in the environment data would be loaded from that file.
         If not, data would be loaded from &#39;DEFAULT_AGENT_CONFIG&#39; on &#39;default.py&#39;
         &#34;&#34;&#34;
 
         self.config = DEFAULT_AGENT_CONFIG
         self.new_config = None
-        if &#39;AGENT_YAML&#39; in os.environ:
-            path = os.path.abspath(os.environ[&#39;AGENT_YAML&#39;])
+        if &#39;HT_CONFIG_FILE&#39; in os.environ:
+            path = os.path.abspath(os.environ[&#39;HT_CONFIG_FILE&#39;])
             logger.debug(&#34;AgentConfig - using file from %s&#34;, path)
             file = open(path, &#39;r&#39;)
             self.new_config = yaml.load(file, Loader=yaml.FullLoader)
@@ -338,19 +350,21 @@ If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></di
         if self.new_config:
             for parent_key in DEFAULT_AGENT_CONFIG:
                 if parent_key in self.new_config \
-                  and isinstance(DEFAULT_AGENT_CONFIG[parent_key], dict):
+                        and isinstance(DEFAULT_AGENT_CONFIG[parent_key], dict):
                     self.parse_config1(parent_key)
                 else:
                     value = DEFAULT_AGENT_CONFIG[parent_key]
                     self.config[parent_key] = value
                     logger.debug(&#34;[DEFAULT] %s -&gt; %s&#34;, parent_key, value)
 
-        reporting_token = DEFAULT_REPORTING_TOKEN
+        reporting_token = &#34;&#34;
         opa_endpoint = DEFAULT_OPA_ENDPOINT
         opa_poll_period_seconds = DEFAULT_OPA_POLL_PERIOD_SECONDS
         opa_enabled = DEFAULT_OPA_ENABLED
         data_capture_max_size_bytes = DEFAULT_DATA_CAPTURE_MAX_SIZE_BYTES
         agent_config_enabled = DEFAULT_AGENT_CONFIG_ENABLED
+
+        self._use_console_span_exporter = False
 
         # Use variables from environment:
         if &#39;HT_SERVICE_NAME&#39; in os.environ:
@@ -456,6 +470,12 @@ If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></di
             logger.debug(&#34;[env] Loaded HT_ENABLED from env&#34;)
             agent_config_enabled = os.environ[&#39;HT_ENABLED&#39;].lower() == &#39;true&#39;
 
+        if &#39;HT_ENABLE_CONSOLE_SPAN_EXPORTER&#39; in os.environ:
+            logger.debug(&#34;[env] Loaded HT_ENABLE_CONSOLE_SPAN_EXPORTER from env, %s&#34;,
+                         str(os.environ[&#39;HT_ENABLE_CONSOLE_SPAN_EXPORTER&#39;].lower()))
+            self._use_console_span_exporter = \
+              os.environ[&#39;HT_ENABLE_CONSOLE_SPAN_EXPORTER&#39;].lower() == &#39;true&#39;
+
         self.opa = jf.Parse(jf.MessageToJson(config_pb2.Opa()), config_pb2.Opa)
         self.opa.endpoint = opa_endpoint
         self.opa.poll_period_seconds = opa_poll_period_seconds
@@ -468,27 +488,28 @@ If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></di
         self.reporting.secure = self.config[&#39;reporting&#39;][&#39;secure&#39;]
         self.reporting.token = reporting_token
         self.reporting.opa = self.opa
-        if self.config[&#39;reporting&#39;][&#39;trace_reporter_type&#39;]:
+
+        if &#34;trace_reporter_type&#34; in self.config[&#39;reporting&#39;] and \
+                self.config[&#39;reporting&#39;][&#39;trace_reporter_type&#39;]:
             self.reporting.trace_reporter_type = self.config[&#39;reporting&#39;][&#39;trace_reporter_type&#39;]
         else:
             self.reporting.trace_reporter_type = config_pb2.TraceReporterType.OTLP
-
-        self.rpc_body = config_pb2.Message(request=BoolValue( # pylint: disable=C0330
+        self.rpc_body = config_pb2.Message(request=BoolValue(  # pylint: disable=C0330
             value=self.config[&#39;data_capture&#39;][&#39;rpc_body&#39;][&#39;request&#39;]),
-                                           response=BoolValue( # pylint: disable=C0330
-            value=self.config[&#39;data_capture&#39;][&#39;rpc_body&#39;][&#39;response&#39;])) # pylint: disable=C0330
-        self.rpc_metadata = config_pb2.Message(request=BoolValue( # pylint: disable=C0330
+            response=BoolValue(  # pylint: disable=C0330
+            value=self.config[&#39;data_capture&#39;][&#39;rpc_body&#39;][&#39;response&#39;]))  # pylint: disable=C0330
+        self.rpc_metadata = config_pb2.Message(request=BoolValue(  # pylint: disable=C0330
             value=self.config[&#39;data_capture&#39;][&#39;rpc_metadata&#39;][&#39;request&#39;]),
-                                           response=BoolValue( # pylint: disable=C0330
-            value=self.config[&#39;data_capture&#39;][&#39;rpc_metadata&#39;][&#39;response&#39;])) # pylint: disable=C0330
-        self.http_body = config_pb2.Message(request=BoolValue( # pylint: disable=C0330
+            response=BoolValue(  # pylint: disable=C0330
+            value=self.config[&#39;data_capture&#39;][&#39;rpc_metadata&#39;][&#39;response&#39;]))  # pylint: disable=C0330
+        self.http_body = config_pb2.Message(request=BoolValue(  # pylint: disable=C0330
             value=self.config[&#39;data_capture&#39;][&#39;http_body&#39;][&#39;request&#39;]),
-                                           response=BoolValue( # pylint: disable=C0330
-            value=self.config[&#39;data_capture&#39;][&#39;http_body&#39;][&#39;response&#39;])) # pylint: disable=C0330
-        self.http_headers = config_pb2.Message(request=BoolValue( # pylint: disable=C0330
+            response=BoolValue(  # pylint: disable=C0330
+            value=self.config[&#39;data_capture&#39;][&#39;http_body&#39;][&#39;response&#39;]))  # pylint: disable=C0330
+        self.http_headers = config_pb2.Message(request=BoolValue(  # pylint: disable=C0330
             value=self.config[&#39;data_capture&#39;][&#39;http_headers&#39;][&#39;request&#39;]),
-                                           response=BoolValue( # pylint: disable=C0330
-            value=self.config[&#39;data_capture&#39;][&#39;http_headers&#39;][&#39;response&#39;])) # pylint: disable=C0330
+            response=BoolValue(  # pylint: disable=C0330
+            value=self.config[&#39;data_capture&#39;][&#39;http_headers&#39;][&#39;response&#39;]))  # pylint: disable=C0330
 
         self.data_capture = jf.Parse(jf.MessageToJson(
             config_pb2.DataCapture()), config_pb2.DataCapture)
@@ -535,18 +556,21 @@ If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></di
                 logger.debug(
                     &#34;[DEFAULT] %s.%s -&gt; %s&#34;, parent_key, sub_key, value)
 
-
     def dump_config(self):
         &#39;&#39;&#39;Dump configuration information.&#39;&#39;&#39;
         logger.debug(self.__dict__)
 
     def get_config1(self) -&gt; config_pb2.AgentConfig:
         &#39;&#39;&#39;Return configuration information.&#39;&#39;&#39;
-        return self.agent_config</code></pre>
+        return self.agent_config
+
+    def use_console_span_exporter(self) -&gt; bool:
+        &#39;&#39;&#39;Initialize InMemorySpanExporter&#39;&#39;&#39;
+        return self._use_console_span_exporter</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
-<dt id="hypertrace.agent.config.AgentConfig1.dump_config"><code class="name flex">
+<dt id="hypertrace.agent.config.AgentConfig.dump_config"><code class="name flex">
 <span>def <span class="ident">dump_config</span></span>(<span>self)</span>
 </code></dt>
 <dd>
@@ -560,7 +584,7 @@ If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></di
     logger.debug(self.__dict__)</code></pre>
 </details>
 </dd>
-<dt id="hypertrace.agent.config.AgentConfig1.get_config1"><code class="name flex">
+<dt id="hypertrace.agent.config.AgentConfig.get_config1"><code class="name flex">
 <span>def <span class="ident">get_config1</span></span>(<span>self) ‑> <a title="hypertrace.agent.config.config_pb2.AgentConfig" href="config_pb2.html#hypertrace.agent.config.config_pb2.AgentConfig">AgentConfig</a></span>
 </code></dt>
 <dd>
@@ -574,7 +598,7 @@ If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></di
     return self.agent_config</code></pre>
 </details>
 </dd>
-<dt id="hypertrace.agent.config.AgentConfig1.parse_config1"><code class="name flex">
+<dt id="hypertrace.agent.config.AgentConfig.parse_config1"><code class="name flex">
 <span>def <span class="ident">parse_config1</span></span>(<span>self, parent_key)</span>
 </code></dt>
 <dd>
@@ -606,6 +630,20 @@ If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></di
                 &#34;[DEFAULT] %s.%s -&gt; %s&#34;, parent_key, sub_key, value)</code></pre>
 </details>
 </dd>
+<dt id="hypertrace.agent.config.AgentConfig.use_console_span_exporter"><code class="name flex">
+<span>def <span class="ident">use_console_span_exporter</span></span>(<span>self) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Initialize InMemorySpanExporter</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def use_console_span_exporter(self) -&gt; bool:
+    &#39;&#39;&#39;Initialize InMemorySpanExporter&#39;&#39;&#39;
+    return self._use_console_span_exporter</code></pre>
+</details>
+</dd>
 </dl>
 </dd>
 </dl>
@@ -631,11 +669,12 @@ If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></di
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="hypertrace.agent.config.AgentConfig1" href="#hypertrace.agent.config.AgentConfig1">AgentConfig1</a></code></h4>
+<h4><code><a title="hypertrace.agent.config.AgentConfig" href="#hypertrace.agent.config.AgentConfig">AgentConfig</a></code></h4>
 <ul class="">
-<li><code><a title="hypertrace.agent.config.AgentConfig1.dump_config" href="#hypertrace.agent.config.AgentConfig1.dump_config">dump_config</a></code></li>
-<li><code><a title="hypertrace.agent.config.AgentConfig1.get_config1" href="#hypertrace.agent.config.AgentConfig1.get_config1">get_config1</a></code></li>
-<li><code><a title="hypertrace.agent.config.AgentConfig1.parse_config1" href="#hypertrace.agent.config.AgentConfig1.parse_config1">parse_config1</a></code></li>
+<li><code><a title="hypertrace.agent.config.AgentConfig.dump_config" href="#hypertrace.agent.config.AgentConfig.dump_config">dump_config</a></code></li>
+<li><code><a title="hypertrace.agent.config.AgentConfig.get_config1" href="#hypertrace.agent.config.AgentConfig.get_config1">get_config1</a></code></li>
+<li><code><a title="hypertrace.agent.config.AgentConfig.parse_config1" href="#hypertrace.agent.config.AgentConfig.parse_config1">parse_config1</a></code></li>
+<li><code><a title="hypertrace.agent.config.AgentConfig.use_console_span_exporter" href="#hypertrace.agent.config.AgentConfig.use_console_span_exporter">use_console_span_exporter</a></code></li>
 </ul>
 </li>
 </ul>

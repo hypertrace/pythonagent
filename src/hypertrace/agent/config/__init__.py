@@ -13,41 +13,44 @@ from hypertrace.agent.config.default import *
 # Initialize logger
 logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
+def merge_config(base_config, overriding_config):
+    """
+    Returns the merged result of two configs recursively
+    """
+
+    for key in overriding_config:
+        if key in base_config and isinstance(base_config[key], dict):
+            if key in overriding_config:
+                base_config[key] = merge_config(
+                    base_config[key], overriding_config[key])
+        else:
+            base_config[key] = overriding_config[key]
+    return base_config
+
+
 # Read agent-config file and override with environment variables as necessaary
 
-
-class AgentConfig1:  # pylint: disable=R0902,R0903
+class AgentConfig:  # pylint: disable=R0902,R0903
     '''A wrapper around the agent configuration logic'''
 
     def __init__(self):  # pylint: disable=R0912,R0915
         """
         Returns a new instance of config_pb2.AgentConfig when a new AgentConfig() is created.
-        If 'AGENT_YAML' is specified in the environment data would be loaded from that file.
+        If 'HT_CONFIG_FILE' is specified in the environment data would be loaded from that file.
         If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'
         """
 
-        self.config = DEFAULT_AGENT_CONFIG
-        self.new_config = None
-        if 'AGENT_YAML' in os.environ:
-            path = os.path.abspath(os.environ['AGENT_YAML'])
-            logger.debug("AgentConfig - using file from %s", path)
+        self.config = None
+        if 'HT_CONFIG_FILE' in os.environ:
+            path = os.path.abspath(os.environ['HT_CONFIG_FILE'])
             file = open(path, 'r')
-            self.new_config = yaml.load(file, Loader=yaml.FullLoader)
-            print(self.new_config)
-
+            from_file_config = yaml.load(file, Loader=yaml.FullLoader)
             file.close()
-        else:
-            logger.debug("AgentConfig - using default")
 
-        if self.new_config:
-            for parent_key in DEFAULT_AGENT_CONFIG:
-                if parent_key in self.new_config \
-                        and isinstance(DEFAULT_AGENT_CONFIG[parent_key], dict):
-                    self.parse_config1(parent_key)
-                else:
-                    value = DEFAULT_AGENT_CONFIG[parent_key]
-                    self.config[parent_key] = value
-                    logger.debug("[DEFAULT] %s -> %s", parent_key, value)
+            logger.debug("Loading config from %s", path)
+            self.config = merge_config(DEFAULT_AGENT_CONFIG, from_file_config)
+        else:
+            self.config = DEFAULT_AGENT_CONFIG
 
         reporting_token = ""
         opa_endpoint = DEFAULT_OPA_ENDPOINT
@@ -55,6 +58,8 @@ class AgentConfig1:  # pylint: disable=R0902,R0903
         opa_enabled = DEFAULT_OPA_ENABLED
         data_capture_max_size_bytes = DEFAULT_DATA_CAPTURE_MAX_SIZE_BYTES
         agent_config_enabled = DEFAULT_AGENT_CONFIG_ENABLED
+
+        self._use_console_span_exporter = False
 
         # Use variables from environment:
         if 'HT_SERVICE_NAME' in os.environ:
@@ -93,56 +98,56 @@ class AgentConfig1:  # pylint: disable=R0902,R0903
                 "[env] Loaded HT_DATA_CAPTURE_HTTP_HEADERS_REQUEST from env")
             self.config['data_capture']['http_headers']['request'] \
                 = os.environ['HT_DATA_CAPTURE_HTTP_HEADERS_REQUEST'].lower() \
-                == 'true'
+                  == 'true'
 
         if 'HT_DATA_CAPTURE_HTTP_HEADERS_RESPONSE' in os.environ:
             logger.debug(
                 "[env] Loaded HT_DATA_CAPTURE_HTTP_HEADERS_RESPONSE from env")
             self.config['data_capture']['http_headers']['response'] \
                 = os.environ['HT_DATA_CAPTURE_HTTP_HEADERS_RESPONSE'].lower() \
-                == 'true'
+                  == 'true'
 
         if 'HT_DATA_CAPTURE_HTTP_BODY_REQUEST' in os.environ:
             logger.debug(
                 "[env] Loaded HT_DATA_CAPTURE_HTTP_BODY_REQUEST from env")
             self.config['data_capture']['http_body']['request'] \
                 = os.environ['HT_DATA_CAPTURE_HTTP_BODY_REQUEST'].lower() \
-                == 'true'
+                  == 'true'
 
         if 'HT_DATA_CAPTURE_HTTP_BODY_RESPONSE' in os.environ:
             logger.debug(
                 "[env] Loaded HT_DATA_CAPTURE_HTTP_BODY_RESPONSE from env")
             self.config['data_capture']['http_body']['response'] \
                 = os.environ['HT_DATA_CAPTURE_HTTP_BODY_RESPONSE'].lower() \
-                == 'true'
+                  == 'true'
 
         if 'HT_DATA_CAPTURE_RPC_METADATA_REQUEST' in os.environ:
             logger.debug(
                 "[env] Loaded HT_DATA_CAPTURE_RPC_METADATA_REQUEST from env")
             self.config['data_capture']['rpc_metadata']['request'] \
                 = os.environ['HT_DATA_CAPTURE_RPC_METADATA_REQUEST'].lower() \
-                == 'true'
+                  == 'true'
 
         if 'HT_DATA_CAPTURE_RPC_METADATA_RESPONSE' in os.environ:
             logger.debug(
                 "[env] Loaded HT_DATA_CAPTURE_RPC_METADATA_RESPONSE from env")
             self.config['data_capture']['rpc_metadata']['response'] \
                 = os.environ['HT_DATA_CAPTURE_RPC_METADATA_RESPONSE'].lower() \
-                == 'true'
+                  == 'true'
 
         if 'HT_DATA_CAPTURE_RPC_BODY_REQUEST' in os.environ:
             logger.debug(
                 "[env] Loaded HT_DATA_CAPTURE_RPC_BODY_REQUEST from env")
             self.config['data_capture']['rpc_body']['request'] \
                 = os.environ['HT_DATA_CAPTURE_RPC_BODY_REQUEST'].lower() \
-                == 'true'
+                  == 'true'
 
         if 'HT_DATA_CAPTURE_RPC_BODY_RESPONSE' in os.environ:
             logger.debug(
                 "[env] Loaded HT_DATA_CAPTURE_RPC_BODY_RESPONSE from env")
             self.config['data_capture']['rpc_body']['response'] \
                 = os.environ['HT_DATA_CAPTURE_RPC_BODY_RESPONSE'].lower() \
-                == 'true'
+                  == 'true'
 
         if 'HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES' in os.environ:
             logger.debug(
@@ -159,6 +164,12 @@ class AgentConfig1:  # pylint: disable=R0902,R0903
         if 'HT_ENABLED' in os.environ:
             logger.debug("[env] Loaded HT_ENABLED from env")
             agent_config_enabled = os.environ['HT_ENABLED'].lower() == 'true'
+
+        if 'HT_ENABLE_CONSOLE_SPAN_EXPORTER' in os.environ:
+            logger.debug("[env] Loaded HT_ENABLE_CONSOLE_SPAN_EXPORTER from env, %s",
+                         str(os.environ['HT_ENABLE_CONSOLE_SPAN_EXPORTER'].lower()))
+            self._use_console_span_exporter = \
+              os.environ['HT_ENABLE_CONSOLE_SPAN_EXPORTER'].lower() == 'true'
 
         self.opa = jf.Parse(jf.MessageToJson(config_pb2.Opa()), config_pb2.Opa)
         self.opa.endpoint = opa_endpoint
@@ -181,19 +192,19 @@ class AgentConfig1:  # pylint: disable=R0902,R0903
         self.rpc_body = config_pb2.Message(request=BoolValue(  # pylint: disable=C0330
             value=self.config['data_capture']['rpc_body']['request']),
             response=BoolValue(  # pylint: disable=C0330
-            value=self.config['data_capture']['rpc_body']['response']))  # pylint: disable=C0330
+                value=self.config['data_capture']['rpc_body']['response']))  # pylint: disable=C0330
         self.rpc_metadata = config_pb2.Message(request=BoolValue(  # pylint: disable=C0330
             value=self.config['data_capture']['rpc_metadata']['request']),
             response=BoolValue(  # pylint: disable=C0330
-            value=self.config['data_capture']['rpc_metadata']['response']))  # pylint: disable=C0330
+                value=self.config['data_capture']['rpc_metadata']['response']))  # pylint: disable=C0330
         self.http_body = config_pb2.Message(request=BoolValue(  # pylint: disable=C0330
             value=self.config['data_capture']['http_body']['request']),
             response=BoolValue(  # pylint: disable=C0330
-            value=self.config['data_capture']['http_body']['response']))  # pylint: disable=C0330
+                value=self.config['data_capture']['http_body']['response']))  # pylint: disable=C0330
         self.http_headers = config_pb2.Message(request=BoolValue(  # pylint: disable=C0330
             value=self.config['data_capture']['http_headers']['request']),
             response=BoolValue(  # pylint: disable=C0330
-            value=self.config['data_capture']['http_headers']['response']))  # pylint: disable=C0330
+                value=self.config['data_capture']['http_headers']['response']))  # pylint: disable=C0330
 
         self.data_capture = jf.Parse(jf.MessageToJson(
             config_pb2.DataCapture()), config_pb2.DataCapture)
@@ -218,28 +229,6 @@ class AgentConfig1:  # pylint: disable=R0902,R0903
 
         self.service_name = self.config['service_name']
 
-    def parse_config1(self, parent_key):
-        '''configuration parsing helper'''
-        for sub_key in DEFAULT_AGENT_CONFIG[parent_key].keys():
-            if sub_key in self.new_config[parent_key] \
-                    and isinstance(DEFAULT_AGENT_CONFIG[parent_key][sub_key], dict):
-                for value_key in DEFAULT_AGENT_CONFIG[parent_key][sub_key].keys():
-                    if value_key in self.new_config[parent_key][sub_key]:
-                        value = self.new_config[parent_key][sub_key][value_key]
-                        self.config[parent_key][sub_key][value_key] = value
-                        logger.debug(
-                            "[YAML] %s.%s.%s -> %s", parent_key, sub_key, value_key, value)
-                    else:
-                        value = DEFAULT_AGENT_CONFIG[parent_key][sub_key][value_key]
-                        self.config[parent_key][sub_key][value_key] = value
-                        logger.debug(
-                            "[DEFAULT] %s.%s.%s -> %s", parent_key, sub_key, value_key, value)
-            else:
-                value = DEFAULT_AGENT_CONFIG[parent_key][sub_key]
-                self.config[parent_key][sub_key] = value
-                logger.debug(
-                    "[DEFAULT] %s.%s -> %s", parent_key, sub_key, value)
-
     def dump_config(self):
         '''Dump configuration information.'''
         logger.debug(self.__dict__)
@@ -247,3 +236,7 @@ class AgentConfig1:  # pylint: disable=R0902,R0903
     def get_config1(self) -> config_pb2.AgentConfig:
         '''Return configuration information.'''
         return self.agent_config
+
+    def use_console_span_exporter(self) -> bool:
+        '''Initialize InMemorySpanExporter'''
+        return self._use_console_span_exporter
