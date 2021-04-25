@@ -12,13 +12,15 @@ from opentelemetry.instrumentation.flask import (
     _teardown_request,
     _ENVIRON_SPAN_KEY,
 )
-from hypertrace.agent import constants # pylint: disable=R0801
+from hypertrace.agent import constants  # pylint: disable=R0801
 from hypertrace.agent.instrumentation import BaseInstrumentorWrapper
 
 # Initialize logger
-logger = logging.getLogger(__name__) # pylint: disable=C0103
+logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
 # Dump metadata about an object; useful for initial discovery of interestin ginfo
+
+
 def introspect(obj):
     '''Troubleshooting assistance function for inspecting new flask-related objects'''
     logger.debug('Describing object.')
@@ -33,6 +35,8 @@ def introspect(obj):
                      traceback.format_exc())
 
 # Per request pre-handler
+
+
 def _hypertrace_before_request(flask_wrapper):
     '''This function is invoked by flask to set the handler'''
     def hypertrace_before_request():
@@ -50,12 +54,12 @@ def _hypertrace_before_request(flask_wrapper):
             # Pull message body
             request_body = flask.request.data       # same
             logger.debug('span: %s', str(span))
-            logger.debug('Request Headers: %s', str(request_headers))
-            logger.debug('Request Body: %s', str(request_body))
+            logger.debug('Request headers: %s', str(request_headers))
+            logger.debug('Request body: %s', str(request_body))
             # Call base request handler
             flask_wrapper.generic_request_handler(
                 request_headers, request_body, span)
-        except Exception as err: # pylint: disable=W0703
+        except Exception as err:  # pylint: disable=W0703
             logger.error(constants.INST_RUNTIME_EXCEPTION_MSSG,
                          'flask before_request handler',
                          err,
@@ -64,6 +68,8 @@ def _hypertrace_before_request(flask_wrapper):
     return hypertrace_before_request
 
 # Per request post-handler
+
+
 def _hypertrace_after_request(flask_wrapper):
     '''This function is invoked by flask to set the handler'''
     def hypertrace_after_request(response):
@@ -83,7 +89,7 @@ def _hypertrace_after_request(flask_wrapper):
             flask_wrapper.generic_response_handler(
                 response_headers, response_body, span)
             return response
-        except Exception as err: # pylint: disable=W0703
+        except Exception as err:  # pylint: disable=W0703
             logger.error(constants.INST_RUNTIME_EXCEPTION_MSSG,
                          'flask after_request handler',
                          err,
@@ -94,8 +100,11 @@ def _hypertrace_after_request(flask_wrapper):
     return hypertrace_after_request
 
 # Main Flask Instrumentor Wrapper class.
+
+
 class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
     '''Hypertrace wrapper around OTel Flask instrumentor class'''
+
     def __init__(self):
         logger.debug('Entering FlaskInstrumentorWrapper constructor.')
         super().__init__()
@@ -113,7 +122,7 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
             app.before_request(_hypertrace_before_request(self))
             # Set post-response handler
             app.after_request(_hypertrace_after_request(self))
-        except Exception as err: # pylint: disable=W0703
+        except Exception as err:  # pylint: disable=W0703
             logger.error("""An error occurred initializing flask otel
                             instrumentor: exception=%s, stacktrace=%s""",
                          err,
@@ -126,9 +135,9 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
         logger.debug('Entering FlaskInstrumentorWrapper.uninstrument_app()')
         try:
             # Call parent's teardown logic
-            super()._uninstrument_app(self, app) # pylint: disable=E1101
+            super()._uninstrument_app(self, app)  # pylint: disable=E1101
             self._app = None
-        except Exception as err: # pylint: disable=W0703
+        except Exception as err:  # pylint: disable=W0703
             logger.error("""An error occurred while shutting down flask otel
                          instrumentor: exception=%s, stacktrace=%s""",
                          err,
