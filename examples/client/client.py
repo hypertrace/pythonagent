@@ -10,7 +10,7 @@ agent.register_aiohttp_client()
 async def main():
     async with aiohttp.ClientSession() as session:
         async with session.post(
-                'https://petstore.swagger.io/v2/pet',
+                'http://localhost:9000',
                 data='{"name":"Dave"}',
                 headers={'content-type': 'application/json'}
         ) as resp:
