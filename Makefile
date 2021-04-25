@@ -1,13 +1,13 @@
 TEST_DIR=test
 
-test_py37: PY_VERSION=py37
-test_py37: test
+test_py3.7: PY_VERSION=py37
+test_py3.7: test
 
-test_py38: PY_VERSION=py38
-test_py38: test
+test_py3.8: PY_VERSION=py38
+test_py3.8: test
 
-test_py39: PY_VERSION=py39
-test_py39: test
+test_py3.9: PY_VERSION=py39
+test_py3.9: test
 
 .PHONY: test
 test: # Call through test_py37 | test_py38 | test_py39
