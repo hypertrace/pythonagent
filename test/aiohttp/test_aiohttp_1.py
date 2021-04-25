@@ -56,7 +56,10 @@ async def test_run():
   #Make test call
   async with aiohttp.ClientSession() as session:
     async with session.post('https://petstore.swagger.io/v2/pet', data='{"id":0,"category":{"id":0,"name":"doggie"},"name":"doggie","photoUrls":["http://example.co"],"tags":[{"id":0,"name":"doggie"}],"status":"available"}', headers={ "Accept":"application/json", "Content-Type": "application/json", 'tester1': 'tester1', 'tester2':'tester2' }) as response:
-      await response.text()
+      response_body = await response.json()
+      logger.info('Received: %s', str(response_body))
+      name = response_body['category']['name']
+      assert name == 'doggie'
       span_list = memoryExporter.get_finished_spans()
       # Confirm something was returned.
       assert span_list

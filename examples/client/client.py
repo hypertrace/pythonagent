@@ -1,16 +1,16 @@
 import aiohttp
 import asyncio
-#from hypertrace.agent import Agent
+from hypertrace.agent import Agent
 
 
-#agent = Agent()
-#agent.register_aiohttp_client()
+agent = Agent(True)
+agent.register_aiohttp_client()
 
 
 async def main():
     async with aiohttp.ClientSession() as session:
         async with session.post(
-                'http://localhost:9000',
+                'https://petstore.swagger.io/v2/pet',
                 data='{"name":"Dave"}',
                 headers={'content-type': 'application/json'}
         ) as resp:

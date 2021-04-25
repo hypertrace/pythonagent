@@ -100,15 +100,18 @@ def create_trace_config(
         logger.debug('response headers: %s', str(params.response.headers))
         # utf8_decoder = codecs.getincrementaldecoder('utf-8')
         response_body = ''
-        if hasattr(params.response, 'content'):
+        if hasattr(params.response, 'content') and params.response.content is not None:
             content_stream = params.response.content
-            while not content_stream.at_eof():
-                response_body = await content_stream.read()
+            logger.debug('content_stream type: ' + str(type(content_stream)))
+            logger.debug('content_stream._buffer: ' + str(type(content_stream._buffer)))
+            for i in content_stream._buffer:
+                logger.debug('response content: ' + str(i))
+                response_body += str(i.decode())
             logger.debug('response_body: %s', str(response_body))
         request_body = ''
         if hasattr(trace_config_ctx, 'request_body') and trace_config_ctx.request_body is not None:
-            logger.debug('request_body: %s', trace_config_ctx.request_body)
             request_body = trace_config_ctx.request_body
+            logger.debug('request_body: %s', request_body)
         span = trace.get_current_span()
         logger.debug('Found span: %s', str(span))
         # Add headers & body to span
@@ -125,7 +128,12 @@ def create_trace_config(
     def _trace_config_ctx_factory(**kwargs):
         kwargs.setdefault("trace_request_ctx", {})
         return types.SimpleNamespace(
-            span_name=span_name, tracer=tracer, url_filter=url_filter, **kwargs, request_body=''
+            span_name=span_name,\
+            tracer=tracer, \
+            url_filter=url_filter, \
+            **kwargs, \
+            request_body='', \
+            response_body=''
         )
 
     trace_config = aiohttp.TraceConfig(
@@ -133,10 +141,10 @@ def create_trace_config(
     )
 
     trace_config.on_request_chunk_sent.append(on_request_chunk_sent)
+#    trace_config.on_response_chunk_received.append(on_response_chunk_received)
     trace_config.on_request_end.append(on_request_end)
 
     return trace_config
-
 
 def _instrument(
         tracer_provider: TracerProvider = None,

@@ -38,7 +38,8 @@ lint:
 	tox -e lint
 
 .PHONY: install
-install:
+install: build
+	pip uninstall hypertrace -y
 	pip install dist/hypertrace-0.1.0.tar.gz
 
 unittest:
