@@ -3,7 +3,7 @@ import asyncio
 from hypertrace.agent import Agent
 
 
-agent = Agent(True)
+agent = Agent()
 agent.register_aiohttp_client()
 
 
