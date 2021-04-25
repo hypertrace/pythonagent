@@ -3,7 +3,7 @@ install-deps:
 
 run:
 	@rm -rf __pycache__ || true
-	HT_LOG_LEVEL=DEBUG HT_CONFIG_FILE=./config.yaml python client.py
+	HT_CONFIG_FILE=./config.yaml python client.py
 
 run-hypertrace:
 	docker-compose up
