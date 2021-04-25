@@ -60,8 +60,8 @@ jobs:
       - name: Run unittest
         run: make unittest
 
-      - name: Run Python 3.7 Test Cases
-        run: make test_${{ matrix.python }}
+      - name: Run Python 3.X Test Cases
+        run: make test_py${{ matrix.python }}
 
 #      - name: Run Python 3.8 Test Cases
 #        run: make test_py38
