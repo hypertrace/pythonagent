@@ -189,22 +189,22 @@ class AgentConfig:  # pylint: disable=R0902,R0903
             self.reporting.trace_reporter_type = self.config['reporting']['trace_reporter_type']
         else:
             self.reporting.trace_reporter_type = config_pb2.TraceReporterType.OTLP
-        self.rpc_body = config_pb2.Message(request=BoolValue(  # pylint: disable=C0330
+        self.rpc_body = config_pb2.Message(request=BoolValue(
             value=self.config['data_capture']['rpc_body']['request']),
-            response=BoolValue(  # pylint: disable=C0330
-                value=self.config['data_capture']['rpc_body']['response']))  # pylint: disable=C0330
-        self.rpc_metadata = config_pb2.Message(request=BoolValue(  # pylint: disable=C0330
+            response=BoolValue(
+                value=self.config['data_capture']['rpc_body']['response']))
+        self.rpc_metadata = config_pb2.Message(request=BoolValue(
             value=self.config['data_capture']['rpc_metadata']['request']),
-            response=BoolValue(  # pylint: disable=C0330
-                value=self.config['data_capture']['rpc_metadata']['response']))  # pylint: disable=C0330
-        self.http_body = config_pb2.Message(request=BoolValue(  # pylint: disable=C0330
+            response=BoolValue(
+                value=self.config['data_capture']['rpc_metadata']['response']))
+        self.http_body = config_pb2.Message(request=BoolValue(
             value=self.config['data_capture']['http_body']['request']),
-            response=BoolValue(  # pylint: disable=C0330
-                value=self.config['data_capture']['http_body']['response']))  # pylint: disable=C0330
-        self.http_headers = config_pb2.Message(request=BoolValue(  # pylint: disable=C0330
+            response=BoolValue(
+                value=self.config['data_capture']['http_body']['response']))
+        self.http_headers = config_pb2.Message(request=BoolValue(
             value=self.config['data_capture']['http_headers']['request']),
-            response=BoolValue(  # pylint: disable=C0330
-                value=self.config['data_capture']['http_headers']['response']))  # pylint: disable=C0330
+            response=BoolValue(
+                value=self.config['data_capture']['http_headers']['response']))
 
         self.data_capture = jf.Parse(jf.MessageToJson(
             config_pb2.DataCapture()), config_pb2.DataCapture)

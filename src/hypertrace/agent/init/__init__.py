@@ -1,4 +1,4 @@
-'''Initialize all the OTel components using configuration from AgentConfig'''
+'''Initialize all the components using configuration from AgentConfig'''
 import sys
 import os
 import traceback
@@ -15,7 +15,8 @@ from hypertrace.agent import constants
 from hypertrace.agent.config import config_pb2, AgentConfig
 
 # Initialize logger
-logger = logging.getLogger(__name__) # pylint: disable=C0103
+logger = logging.getLogger(__name__)  # pylint: disable=C0103
+
 
 class AgentInit:  # pylint: disable=R0902,R0903
     '''Initialize all the OTel components using configuration from AgentConfig'''
@@ -59,8 +60,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self._postgresql_instrumentor_wrapper = None
             self._requests_instrumentor_wrapper = None
             self._aiohttp_client_instrumentor_wrapper = None
-        except Exception as err: # pylint: disable=W0703
-            logger.error('Failed to initialize opentelemetry: exception=%s, stacktrace=%s',
+        except Exception as err:  # pylint: disable=W0703
+            logger.error('Failed to initialize tracer: exception=%s, stacktrace=%s',
                          err,
                          traceback.format_exc())
             raise sys.exc_info()[0]
@@ -76,17 +77,17 @@ class AgentInit:  # pylint: disable=R0902,R0903
         '''Creates a flask instrumentation wrapper using the config defined in hypertraceconfig'''
         logger.debug('Calling AgentInit.flaskInit().')
         try:
-            from hypertrace.agent.instrumentation.flask import FlaskInstrumentorWrapper # pylint: disable=C0415
+            from hypertrace.agent.instrumentation.flask import FlaskInstrumentorWrapper  # pylint: disable=C0415
             self._module_initialized['flask'] = True
             self._flask_instrumentor_wrapper = FlaskInstrumentorWrapper()
             self._flask_instrumentor_wrapper.instrument_app(app)
             self.init_instrumentor_wrapper_base_for_http(
                 self._flask_instrumentor_wrapper)
             if use_b3 \
-              or self._config.propagation_formats == 'B3':
+                    or self._config.propagation_formats == 'B3':
                 logger.debug('Enable B3 context propagation protocol.')
                 self.enable_b3()
-        except Exception as err: # pylint: disable=W0703
+        except Exception as err:  # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
                          'flask',
                          err,
@@ -97,7 +98,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
         '''Creates a grpc server wrapper using the config defined in hypertraceconfig'''
         logger.debug('Calling AgentInit.grpcServerInit')
         try:
-            from hypertrace.agent.instrumentation.grpc import ( # pylint: disable=C0415
+            from hypertrace.agent.instrumentation.grpc import (  # pylint: disable=C0415
                 GrpcInstrumentorServerWrapper
             )
             self._module_initialized['grpc:server'] = True
@@ -113,7 +114,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
                 self._config.data_capture.http_headers.response)
             self._grpc_instrumentor_server_wrapper.set_process_response_body(
                 self._config.data_capture.http_body.response)
-        except Exception as err: # pylint: disable=W0703
+        except Exception as err:  # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
                          'grpc:server',
                          err,
@@ -124,7 +125,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
         '''Creates a grpc client wrapper using the config defined in hypertraceconfig'''
         logger.debug('Calling AgentInit.grpcClientInit')
         try:
-            from hypertrace.agent.instrumentation.grpc import ( # pylint: disable=C0415
+            from hypertrace.agent.instrumentation.grpc import (  # pylint: disable=C0415
                 GrpcInstrumentorClientWrapper
             )
             self._module_initialized['grpc:client'] = True
@@ -141,7 +142,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
                 self._config.data_capture.http_headers.response)
             self._grpc_instrumentor_client_wrapper.set_process_response_body(
                 self._config.data_capture.http_body.response)
-        except Exception as err: # pylint: disable=W0703
+        except Exception as err:  # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
                          'grpc:client',
                          err,
@@ -152,14 +153,14 @@ class AgentInit:  # pylint: disable=R0902,R0903
         '''Creates a mysql server wrapper using the config defined in hypertraceconfig'''
         logger.debug('Calling AgentInit.mysqlInit()')
         try:
-            from hypertrace.agent.instrumentation.mysql import ( # pylint: disable=C0415
+            from hypertrace.agent.instrumentation.mysql import (  # pylint: disable=C0415
                 MySQLInstrumentorWrapper
             )
             self._module_initialized['mysql'] = True
             self._mysql_instrumentor_wrapper = MySQLInstrumentorWrapper()
             self.init_instrumentor_wrapper_base_for_http(
                 self._mysql_instrumentor_wrapper)
-        except Exception as err: # pylint: disable=W0703
+        except Exception as err:  # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
                          'mysql',
                          err,
@@ -170,14 +171,14 @@ class AgentInit:  # pylint: disable=R0902,R0903
         '''Creates a postgresql client wrapper using the config defined in hypertraceconfig'''
         logger.debug('Calling AgentInit.postgreSQLInit()')
         try:
-            from hypertrace.agent.instrumentation.postgresql import ( # pylint: disable=C0415
+            from hypertrace.agent.instrumentation.postgresql import (  # pylint: disable=C0415
                 PostgreSQLInstrumentorWrapper
             )
             self._module_initialized['postgresql'] = True
             self._postgresql_instrumentor_wrapper = PostgreSQLInstrumentorWrapper()
             self.init_instrumentor_wrapper_base_for_http(
                 self._postgresql_instrumentor_wrapper)
-        except Exception as err: # pylint: disable=W0703
+        except Exception as err:  # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
                          'postgresql',
                          err,
@@ -188,7 +189,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
         '''Creates a requests client wrapper using the config defined in hypertraceconfig'''
         logger.debug('Calling AgentInit.requestsInit()')
         try:
-            from hypertrace.agent.instrumentation.requests import ( # pylint: disable=C0415
+            from hypertrace.agent.instrumentation.requests import (  # pylint: disable=C0415
                 RequestsInstrumentorWrapper
             )
             self._module_initialized['requests'] = True
@@ -196,10 +197,10 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self.init_instrumentor_wrapper_base_for_http(
                 self._requests_instrumentor_wrapper)
             if use_b3 \
-              or self._config.propagation_formats == 'B3':
+                    or self._config.propagation_formats == 'B3':
                 logger.debug('Enable B3 context propagation protocol.')
                 self.enable_b3()
-        except Exception as err: # pylint: disable=W0703
+        except Exception as err:  # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
                          'requests',
                          err,
@@ -210,7 +211,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
         '''Creates an aiohttp-client wrapper using the config defined in hypertraceconfig'''
         logger.debug('Calling AgentInit.aioHttpClientInit()')
         try:
-            from hypertrace.agent.instrumentation.aiohttp import ( # pylint: disable=C0415
+            from hypertrace.agent.instrumentation.aiohttp import (  # pylint: disable=C0415
                 AioHttpClientInstrumentorWrapper
             )
             self._module_initialized['aiohttp_client'] = True
@@ -218,10 +219,10 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self.init_instrumentor_wrapper_base_for_http(
                 self._aiohttp_client_instrumentor_wrapper)
             if use_b3 \
-              or self._config.propagation_formats == 'B3':
+                    or self._config.propagation_formats == 'B3':
                 logger.debug('Enable B3 context propagation protocol.')
                 self.enable_b3()
-        except Exception as err: # pylint: disable=W0703
+        except Exception as err:  # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
                          'aiohttp_client',
                          err,
@@ -253,7 +254,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
         logger.debug('Entering AgentInit.setConsoleSpanProcessor().')
         console_span_exporter = ConsoleSpanExporter(
             service_name=self._config.service_name)
-        simple_export_span_processor = SimpleSpanProcessor(console_span_exporter)
+        simple_export_span_processor = SimpleSpanProcessor(
+            console_span_exporter)
         self._tracer_provider.add_span_processor(simple_export_span_processor)
 
     def set_zipkin_processor(self):
@@ -279,7 +281,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self._tracer_provider.add_span_processor(span_processor)
 
             logger.info('Added ZipkinExporter span exporter')
-        except Exception as err: # pylint: disable=W0703
+        except Exception as err:  # pylint: disable=W0703
             logger.error('Failed to register_processor: exception=%s, stacktrace=%s',
                          err,
                          traceback.format_exc())
@@ -304,13 +306,13 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self._tracer_provider.add_span_processor(span_processor)
 
             logger.info('Added OtlpExporter span exporter')
-        except Exception as err: # pylint: disable=W0703
+        except Exception as err:  # pylint: disable=W0703
             logger.error('Failed to register_processor: exception=%s, stacktrace=%s',
                          err,
                          traceback.format_exc())
 
-    def enable_b3(self): # pylint: disable=R0201
+    def enable_b3(self):  # pylint: disable=R0201
         '''enable b3 protocol for context propagation'''
-        from opentelemetry.propagate import set_global_textmap # pylint: disable=C0415
-        from opentelemetry.propagators.b3 import B3Format # pylint: disable=C0415
+        from opentelemetry.propagate import set_global_textmap  # pylint: disable=C0415
+        from opentelemetry.propagators.b3 import B3Format  # pylint: disable=C0415
         set_global_textmap(B3Format())

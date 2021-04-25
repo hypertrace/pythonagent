@@ -89,6 +89,7 @@ def _hypertrace_after_request(flask_wrapper):
                          err,
                          traceback.format_exc())
             # Not rethrowing to avoid causing runtime errors for Flask.
+            return None
 
     return hypertrace_after_request
 

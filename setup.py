@@ -1,4 +1,3 @@
-#import setuptools
 from setuptools import setup, find_packages
 
 with open("README.md", "r", encoding="utf-8") as fh:
@@ -14,7 +13,7 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/Traceableai/pythonagent",
     project_urls={
-        "Bug Tracker":"https://github.com/Traceableai/pythonagent/issues",
+        "Bug Tracker": "https://github.com/Traceableai/pythonagent/issues",
     },
     classifiers=[
         "Programming Language :: Python :: 3",
@@ -25,20 +24,19 @@ setup(
     packages=find_packages(where="src"),
     python_requires=">=3.7",
     install_requires=[
-      "opentelemetry-api==1.0.0",
-      "opentelemetry-exporter-zipkin",
-      "opentelemetry-propagator-b3",
-      "opentelemetry-exporter-otlp==1.0.0",
-      "opentelemetry-instrumentation-flask",
-      "opentelemetry-instrumentation-grpc",
-      "opentelemetry-instrumentation-mysql",
-      "opentelemetry-instrumentation-psycopg2",
-      "opentelemetry-instrumentation-requests",
-      "opentelemetry-instrumentation-aiohttp_client",
-      "opentelemetry-util-http",
-      "google",
-      "protobuf",
-      "pyyaml"
+        "opentelemetry-api==1.0.0",
+        "opentelemetry-exporter-zipkin",
+        "opentelemetry-propagator-b3",
+        "opentelemetry-exporter-otlp==1.0.0",
+        "opentelemetry-instrumentation-flask",
+        "opentelemetry-instrumentation-grpc",
+        "opentelemetry-instrumentation-mysql",
+        "opentelemetry-instrumentation-psycopg2",
+        "opentelemetry-instrumentation-requests",
+        "opentelemetry-instrumentation-aiohttp_client",
+        "opentelemetry-util-http",
+        "google",
+        "protobuf",
+        "pyyaml"
     ]
-
 )

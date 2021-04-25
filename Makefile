@@ -1,15 +1,16 @@
 TEST_DIR=test
 
 test_py37: PY_VERSION=py37
-test_py37: hypertrace_test
+test_py37: test
 
 test_py38: PY_VERSION=py38
-test_py38: hypertrace_test
+test_py38: test
 
 test_py39: PY_VERSION=py39
-test_py39: hypertrace_test
+test_py39: test
 
-hypertrace_test:
+.PHONY: test
+test: # Call through test_py37 | test_py38 | test_py39
 	cd ${TEST_DIR}/flask; tox -e ${PY_VERSION}
 	cd ${TEST_DIR}/grpc; tox -e ${PY_VERSION}
 	cd ${TEST_DIR}/mysql; tox -e ${PY_VERSION}
@@ -19,23 +20,29 @@ hypertrace_test:
 	cd ${TEST_DIR}/aiohttp; tox -e ${PY_VERSION}
 	cd ${TEST_DIR}/docker; tox -e ${PY_VERSION}
 
+.PHONY: build
 build: build_protobuf
 	python3 -m pip install --upgrade build
 	python -m build
+
+.PHONY: clean
 clean:
 	rm -Rf build dist src/hypertrace.egg-info
 
-unittest:
-	tox -e unittest
-
 .PHONY: docs
-docs: ## Generates the docs
+docs:
 	tox -e pdoc
 
+.PHONY: lint
 lint:
 	tox -e lint
-install: build
+
+.PHONY: install
+install:
 	pip install dist/hypertrace-0.1.0.tar.gz
+
+unittest:
+	tox -e unittest
 
 build_protobuf:
 	protoc --python_out=src/hypertrace/agent/config \

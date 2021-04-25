@@ -14,7 +14,7 @@ opentelemetry-util-http
 google
 protobuf
 pyyaml
-pylint==2.4.4
+pylint==2.7.4
 tox
 pdoc3
 pytest
