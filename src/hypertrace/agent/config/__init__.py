@@ -4,6 +4,7 @@ environment variables, and the agent-config.yaml file.
 """
 import os
 import logging
+import traceback
 import yaml
 from google.protobuf import json_format as jf
 from google.protobuf.wrappers_pb2 import BoolValue
@@ -42,14 +43,25 @@ class AgentConfig:  # pylint: disable=R0902,R0903
 
         self.config = None
         if 'HT_CONFIG_FILE' in os.environ:
-            path = os.path.abspath(os.environ['HT_CONFIG_FILE'])
-            file = open(path, 'r')
-            from_file_config = yaml.load(file, Loader=yaml.FullLoader)
-            file.close()
-
-            logger.debug("Loading config from %s", path)
-            self.config = merge_config(DEFAULT_AGENT_CONFIG, from_file_config)
+            try:
+                logger.debug('HT_CONFIG_FILE is set. Attempting to load')
+                path = os.path.abspath(os.environ['HT_CONFIG_FILE'])
+                file = open(path, 'r')
+                from_file_config = yaml.load(file, Loader=yaml.FullLoader)
+                file.close()
+                logger.debug('Successfully read config file from %s', path)
+                logger.debug('Loading config from %s', path)
+                self.config = merge_config(DEFAULT_AGENT_CONFIG, from_file_config)
+                logger.debug('Successfully loaded config file from %s,config=%s',
+                             path,
+                             str(self.config))
+            except Exception as err: # pylint: disable=W0703
+                logger.error('Failed to load HT_CONFIG_FILE: exception=%s, stacktrace=%s',
+                      err,
+                traceback.format_exc())
+                logger.info('Loading default configuration.')
         else:
+            logger.info('Loading default configuration.')
             self.config = DEFAULT_AGENT_CONFIG
 
         reporting_token = ""
@@ -81,6 +93,7 @@ class AgentConfig:  # pylint: disable=R0902,R0903
 
         if 'HT_REPORTING_OPA_ENDPOINT' in os.environ:
             logger.debug("[env] Loaded HT_REPORTING_OPA_ENDPOINT from env")
+            self.config['opa']['endpoint'] = os.environ['HT_REPORTING_OPA_ENDPOINT']
             opa_endpoint = os.environ['HT_REPORTING_OPA_ENDPOINT']
 
         if 'HT_REPORTING_OPA_POLL_PERIOD_SECONDS' in os.environ:
@@ -157,9 +170,7 @@ class AgentConfig:  # pylint: disable=R0902,R0903
 
         if 'HT_PROPAGATION_FORMATS' in os.environ:
             logger.debug("[env] Loaded HT_PROPAGATION_FORMATS from env")
-            self.propagation_formats = os.environ['HT_PROPAGATION_FORMATS']
-        else:
-            self.propagation_formats = DEFAULT_PROPAGATION_FORMAT
+            self.config.propagation_formats = [os.environ['HT_PROPAGATION_FORMATS']]
 
         if 'HT_ENABLED' in os.environ:
             logger.debug("[env] Loaded HT_ENABLED from env")
@@ -171,6 +182,7 @@ class AgentConfig:  # pylint: disable=R0902,R0903
             self._use_console_span_exporter = \
               os.environ['HT_ENABLE_CONSOLE_SPAN_EXPORTER'].lower() == 'true'
 
+        # Build protobuf
         self.opa = jf.Parse(jf.MessageToJson(config_pb2.Opa()), config_pb2.Opa)
         self.opa.endpoint = opa_endpoint
         self.opa.poll_period_seconds = opa_poll_period_seconds
@@ -183,6 +195,8 @@ class AgentConfig:  # pylint: disable=R0902,R0903
         self.reporting.secure = self.config['reporting']['secure']
         self.reporting.token = reporting_token
         self.reporting.opa = self.opa
+
+        self.propagation_formats = self.config['propagation_formats']
 
         if "trace_reporter_type" in self.config['reporting'] and \
                 self.config['reporting']['trace_reporter_type']:
@@ -206,6 +220,8 @@ class AgentConfig:  # pylint: disable=R0902,R0903
             response=BoolValue(
                 value=self.config['data_capture']['http_headers']['response']))
 
+        self.service_name = self.config['service_name']
+
         self.data_capture = jf.Parse(jf.MessageToJson(
             config_pb2.DataCapture()), config_pb2.DataCapture)
         self.data_capture.http_headers = self.http_headers
@@ -219,15 +235,13 @@ class AgentConfig:  # pylint: disable=R0902,R0903
         self.agent_config.service_name = self.config['service_name']
         self.agent_config.reporting = self.reporting
         self.agent_config.data_capture = self.data_capture
-        if self.propagation_formats == 'TRACECONTEXT':
+        if self.propagation_formats[0] == 'TRACECONTEXT':
             self.agent_config.propagation_formats = config_pb2.PropagationFormat.TRACECONTEXT
         else:
             self.agent_config.propagation_formats = config_pb2.PropagationFormat.B3
         self.agent_config.enabled = agent_config_enabled
         self.agent_config.resource_attributes = {
             'service_name': self.config['service_name']}
-
-        self.service_name = self.config['service_name']
 
     def dump_config(self):
         '''Dump configuration information.'''
