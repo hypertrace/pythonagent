@@ -224,6 +224,7 @@ class OpenTelemetryServerInterceptorWrapper(_server.OpenTelemetryServerIntercept
                     if type(error) != Exception:
                         span.record_exception(error)
                         raise error
+                    return None
             return telemetry_interceptor
         return _server._wrap_rpc_behavior(continuation(handler_call_details), telemetry_wrapper) # pylint: disable=W0212
 

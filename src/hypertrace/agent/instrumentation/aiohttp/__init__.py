@@ -34,12 +34,13 @@ def hypertrace_name_callback(trace_request_start_params):
 class AioHttpClientInstrumentorWrapper(AioHttpClientInstrumentor, BaseInstrumentorWrapper):
     '''Hypertrace wrapper class around OpenTelemetry AioHttpClient Instrumentor class'''
     # Constructor
-
     def __init__(self):
+        '''Constructor'''
         logger.debug('Entering AioHttpClientInstrumentor.__init__().')
         super().__init__()
 
     def _instrument(self, **kwargs):
+        '''Enable instrumentation.'''
         logger.debug(
             'Entering AioHttpClientInstrumentorWrapper._instrument().')
         # Initialize OTel instrumentor
@@ -55,11 +56,6 @@ class AioHttpClientInstrumentorWrapper(AioHttpClientInstrumentor, BaseInstrument
             span_name=kwargs.get("span_name"),
             aiohttp_client_wrapper=self
         )
-
-    # disable instrumentation of aiohttp
-    def _uninstrument(self, **kwargs):
-        super()._uninstrument(kwargs)
-
 
 # aliases for type definitions
 _UrlFilterT = typing.Optional[typing.Callable[[  # pylint: disable=unsubscriptable-object

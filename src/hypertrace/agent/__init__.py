@@ -44,6 +44,7 @@ def setup_custom_logger(name):
         print('Failed to customize logger: exception=%s, stacktrace=%s',
               err,
               traceback.format_exc())
+        return None
 
 # create logger object
 logger = setup_custom_logger(__name__) # pylint: disable=C0103
