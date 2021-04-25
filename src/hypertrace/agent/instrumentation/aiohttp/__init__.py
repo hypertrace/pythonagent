@@ -102,10 +102,10 @@ def create_trace_config(
         response_body = ''
         if hasattr(params.response, 'content') and params.response.content is not None:
             content_stream = params.response.content
-            logger.debug('content_stream type: ' + str(type(content_stream)))
-            logger.debug('content_stream._buffer: ' + str(type(content_stream._buffer)))
-            for i in content_stream._buffer:
-                logger.debug('response content: ' + str(i))
+            logger.debug('content_stream type: %s', str(type(content_stream)))
+            logger.debug('content_stream._buffer: %s', str(type(content_stream._buffer))) # pylint: disable=W0212
+            for i in content_stream._buffer: # pylint: disable=W0212
+                logger.debug('response content: %s', str(i))
                 response_body += str(i.decode())
             logger.debug('response_body: %s', str(response_body))
         request_body = ''
