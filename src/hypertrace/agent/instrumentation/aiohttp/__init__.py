@@ -128,7 +128,7 @@ def create_trace_config(
             tmp_deque = deque()
             # Read all the data in the response buffer. This
             # will block until it receives the expected number of bytes
-            # or the connection times out
+            # or the connection times out and move on with already read data.
             logger.debug('Reading data---->')
             try:
                 while not content_stream.at_eof():
