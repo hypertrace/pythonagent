@@ -27,7 +27,28 @@ def merge_config(base_config, overriding_config):
             base_config[key] = overriding_config[key]
     return base_config
 
+def load_config_from_file(filepath):
+    """
+    Returns the config loaded from a providen config file
+    """
+    logger.debug(
+        'HT_CONFIG_FILE is set %s. Attempting to load the config file', filepath)
+    try:
+        path = os.path.abspath(filepath)
 
+        file = open(path, 'r')
+        from_file_config = yaml.load(file, Loader=yaml.FullLoader)
+        file.close()
+
+        logger.debug('Successfully load config from %s', path)
+
+        return from_file_config
+    except Exception as err:  # pylint: disable=W0703
+        logger.error('Failed to load HT_CONFIG_FILE: exception=%s, stacktrace=%s',
+                     err,
+                     traceback.format_exc())
+        logger.info('Loading default configuration.')
+        return DEFAULT_AGENT_CONFIG
 # Read agent-config file and override with environment variables as necessaary
 
 class AgentConfig:  # pylint: disable=R0902,R0903
@@ -42,13 +63,21 @@ class AgentConfig:  # pylint: disable=R0902,R0903
 
         self.config = None
         if 'HT_CONFIG_FILE' in os.environ:
-            path = os.path.abspath(os.environ['HT_CONFIG_FILE'])
-            file = open(path, 'r')
-            from_file_config = yaml.load(file, Loader=yaml.FullLoader)
-            file.close()
-            logger.debug("Loading config from %s", path)
-            self.config = merge_config(DEFAULT_AGENT_CONFIG, from_file_config)
+            if len(os.environ['HT_CONFIG_FILE']) == 0:
+                # HT_CONFIG_FILE can be passed as empty string which is invalid
+                logger.error(
+                    'Failed to load HT_CONFIG_FILE env var being empty')
+            else:
+                config_from_file = load_config_from_file(
+                    os.environ['HT_CONFIG_FILE'])
+
+                self.config = merge_config(
+                    DEFAULT_AGENT_CONFIG, config_from_file)
+
+                logger.debug(
+                    'Successfully loaded config, config=%s', str(self.config))
         else:
+            logger.info('Loading default configuration.')
             self.config = DEFAULT_AGENT_CONFIG
 
         # Use variables from environment:
