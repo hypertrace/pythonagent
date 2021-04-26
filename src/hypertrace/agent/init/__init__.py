@@ -84,7 +84,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self.init_instrumentor_wrapper_base_for_http(
                 self._flask_instrumentor_wrapper)
             if use_b3 \
-                    or self._config.propagation_formats[0] == 'B3':
+                    or self._config.agent_config.propagation_formats == config_pb2.PropagationFormat.B3:
                 logger.debug('Enable B3 context propagation protocol.')
                 self.enable_b3()
         except Exception as err:  # pylint: disable=W0703
@@ -197,7 +197,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self.init_instrumentor_wrapper_base_for_http(
                 self._requests_instrumentor_wrapper)
             if use_b3 \
-                    or self._config.propagation_formats[0] == 'B3':
+                    or self._config.propagation_formats == 'B3':
                 logger.debug('Enable B3 context propagation protocol.')
                 self.enable_b3()
         except Exception as err:  # pylint: disable=W0703
@@ -219,7 +219,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self.init_instrumentor_wrapper_base_for_http(
                 self._aiohttp_client_instrumentor_wrapper)
             if use_b3 \
-                    or self._config.propagation_formats[0] == 'B3':
+                    or self._config.propagation_formats == 'B3':
                 logger.debug('Enable B3 context propagation protocol.')
                 self.enable_b3()
         except Exception as err:  # pylint: disable=W0703

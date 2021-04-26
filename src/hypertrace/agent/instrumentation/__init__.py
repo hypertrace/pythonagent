@@ -345,7 +345,8 @@ class BaseInstrumentorWrapper:
         if body in (None, ''):
             return False
         body_len = len(body)
-        if body_len > self.get_max_body_size():
+        max_body_size = self.get_max_body_size()
+        if max_body_size and body_len > max_body_size:
             logger.debug('message body size is greater than max size.')
             return True
         return False

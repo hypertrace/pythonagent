@@ -1,16 +1,13 @@
-"""Default values for agent-config"""
-# config_pb2.Opa
-DEFAULT_OPA_ENDPOINT = 'https://localhost'  # "http://opa.traceableai:8181/"
-DEFAULT_OPA_POLL_PERIOD_SECONDS = 30
-DEFAULT_OPA_ENABLED = True
-
-# config_pb2.DataCapture
-DEFAULT_DATA_CAPTURE_MAX_SIZE_BYTES = 128 * 1024
-
-# config_pb2.AgentConfig
-DEFAULT_AGENT_CONFIG_ENABLED = True
-
 DEFAULT_AGENT_CONFIG = {
+    '_use_console_span_exporter': False,
+    'agent_config_enabled' : True,
+    'hypertrace_enabled': True,
+    'propagation_formats':'TRACECONTEXT',
+    'opa_endpoint': '',
+    'opa_poll_period_seconds':'',
+    'data_capture_max_size_bytes':'',
+    'opa_enabled' : '',
+    'reporting_token':'',
     'service_name': '',
     'reporting': {
         "endpoint": "http://localhost:9411/api/v2/spans",
@@ -34,9 +31,5 @@ DEFAULT_AGENT_CONFIG = {
             "request": True,
             "response": False,
         }
-    },
-    'propagation_formats': [ 'TRACECONTEXT' ]
+    }
 }
-
-# B3,TRACECONTEXT
-DEFAULT_PROPAGATION_FORMAT = 'TRACECONTEXT'
