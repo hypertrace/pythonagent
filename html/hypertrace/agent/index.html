@@ -73,6 +73,7 @@ def setup_custom_logger(name):
         print(&#39;Failed to customize logger: exception=%s, stacktrace=%s&#39;,
               err,
               traceback.format_exc())
+        return None
 
 # create logger object
 logger = setup_custom_logger(__name__) # pylint: disable=C0103
@@ -227,7 +228,7 @@ environment variables, and the agent-config.yaml file.</p></div>
 </dd>
 <dt><code class="name"><a title="hypertrace.agent.init" href="init/index.html">hypertrace.agent.init</a></code></dt>
 <dd>
-<div class="desc"><p>Initialize all the OTel components using configuration from AgentConfig</p></div>
+<div class="desc"><p>Initialize all the components using configuration from AgentConfig</p></div>
 </dd>
 <dt><code class="name"><a title="hypertrace.agent.instrumentation" href="instrumentation/index.html">hypertrace.agent.instrumentation</a></code></dt>
 <dd>
@@ -283,7 +284,8 @@ environment variables, and the agent-config.yaml file.</p></div>
     except Exception as err: # pylint: disable=W0703
         print(&#39;Failed to customize logger: exception=%s, stacktrace=%s&#39;,
               err,
-              traceback.format_exc())</code></pre>
+              traceback.format_exc())
+        return None</code></pre>
 </details>
 </dd>
 </dl>

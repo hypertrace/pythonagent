@@ -2,10 +2,8 @@ import aiohttp
 import asyncio
 from hypertrace.agent import Agent
 
-
 agent = Agent()
 agent.register_aiohttp_client()
-
 
 async def main():
     async with aiohttp.ClientSession() as session:

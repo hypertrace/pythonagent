@@ -1,7 +1,6 @@
 from flask import Flask, request, jsonify, make_response
 from hypertrace.agent import Agent
 
-
 def create_app():
     app = Flask(__name__)
     agent = Agent()
