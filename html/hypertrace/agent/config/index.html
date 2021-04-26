@@ -45,6 +45,7 @@ from hypertrace.agent.config.default import *
 # Initialize logger
 logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
+
 def merge_config(base_config, overriding_config):
     &#34;&#34;&#34;
     Returns the merged result of two configs recursively
@@ -60,7 +61,31 @@ def merge_config(base_config, overriding_config):
     return base_config
 
 
+def load_config_from_file(filepath):
+    &#34;&#34;&#34;
+    Returns the config loaded from a providen config file
+    &#34;&#34;&#34;
+    logger.debug(
+        &#39;HT_CONFIG_FILE is set &#34;%s&#34;. Attempting to load the config file&#39; % filepath)
+    try:
+        path = os.path.abspath(filepath)
+
+        file = open(path, &#39;r&#39;)
+        from_file_config = yaml.load(file, Loader=yaml.FullLoader)
+        file.close()
+
+        logger.debug(&#39;Successfully load config from &#34;%s&#34;&#39;, path)
+
+        return from_file_config
+    except Exception as err:  # pylint: disable=W0703
+        logger.error(&#39;Failed to load HT_CONFIG_FILE: exception=%s, stacktrace=%s&#39;,
+                     err,
+                     traceback.format_exc())
+        logger.info(&#39;Loading default configuration.&#39;)
+        return DEFAULT_AGENT_CONFIG
+
 # Read agent-config file and override with environment variables as necessaary
+
 
 class AgentConfig:  # pylint: disable=R0902,R0903
     &#39;&#39;&#39;A wrapper around the agent configuration logic&#39;&#39;&#39;
@@ -74,23 +99,20 @@ class AgentConfig:  # pylint: disable=R0902,R0903
 
         self.config = None
         if &#39;HT_CONFIG_FILE&#39; in os.environ:
-            try:
-                logger.debug(&#39;HT_CONFIG_FILE is set. Attempting to load&#39;)
-                path = os.path.abspath(os.environ[&#39;HT_CONFIG_FILE&#39;])
-                file = open(path, &#39;r&#39;)
-                from_file_config = yaml.load(file, Loader=yaml.FullLoader)
-                file.close()
-                logger.debug(&#39;Successfully read config file from %s&#39;, path)
-                logger.debug(&#39;Loading config from %s&#39;, path)
-                self.config = merge_config(DEFAULT_AGENT_CONFIG, from_file_config)
-                logger.debug(&#39;Successfully loaded config file from %s,config=%s&#39;,
+            if len(os.environ[&#39;HT_CONFIG_FILE&#39;]) == 0:
+                # HT_CONFIG_FILE can be passed as empty string which is envalid
+                logger.error(
+                    &#39;Failed to load HT_CONFIG_FILE env var being empty&#39;)
+            else:
+                config_from_file = load_config_from_file(
+                    os.environ[&#39;HT_CONFIG_FILE&#39;])
+
+                self.config = merge_config(
+                    DEFAULT_AGENT_CONFIG, config_from_file)
+
+                logger.debug(&#39;Successfully loaded config, config=%s&#39;,
                              path,
                              str(self.config))
-            except Exception as err: # pylint: disable=W0703
-                logger.error(&#39;Failed to load HT_CONFIG_FILE: exception=%s, stacktrace=%s&#39;,
-                      err,
-                traceback.format_exc())
-                logger.info(&#39;Loading default configuration.&#39;)
         else:
             logger.info(&#39;Loading default configuration.&#39;)
             self.config = DEFAULT_AGENT_CONFIG
@@ -142,56 +164,56 @@ class AgentConfig:  # pylint: disable=R0902,R0903
                 &#34;[env] Loaded HT_DATA_CAPTURE_HTTP_HEADERS_REQUEST from env&#34;)
             self.config[&#39;data_capture&#39;][&#39;http_headers&#39;][&#39;request&#39;] \
                 = os.environ[&#39;HT_DATA_CAPTURE_HTTP_HEADERS_REQUEST&#39;].lower() \
-                  == &#39;true&#39;
+                == &#39;true&#39;
 
         if &#39;HT_DATA_CAPTURE_HTTP_HEADERS_RESPONSE&#39; in os.environ:
             logger.debug(
                 &#34;[env] Loaded HT_DATA_CAPTURE_HTTP_HEADERS_RESPONSE from env&#34;)
             self.config[&#39;data_capture&#39;][&#39;http_headers&#39;][&#39;response&#39;] \
                 = os.environ[&#39;HT_DATA_CAPTURE_HTTP_HEADERS_RESPONSE&#39;].lower() \
-                  == &#39;true&#39;
+                == &#39;true&#39;
 
         if &#39;HT_DATA_CAPTURE_HTTP_BODY_REQUEST&#39; in os.environ:
             logger.debug(
                 &#34;[env] Loaded HT_DATA_CAPTURE_HTTP_BODY_REQUEST from env&#34;)
             self.config[&#39;data_capture&#39;][&#39;http_body&#39;][&#39;request&#39;] \
                 = os.environ[&#39;HT_DATA_CAPTURE_HTTP_BODY_REQUEST&#39;].lower() \
-                  == &#39;true&#39;
+                == &#39;true&#39;
 
         if &#39;HT_DATA_CAPTURE_HTTP_BODY_RESPONSE&#39; in os.environ:
             logger.debug(
                 &#34;[env] Loaded HT_DATA_CAPTURE_HTTP_BODY_RESPONSE from env&#34;)
             self.config[&#39;data_capture&#39;][&#39;http_body&#39;][&#39;response&#39;] \
                 = os.environ[&#39;HT_DATA_CAPTURE_HTTP_BODY_RESPONSE&#39;].lower() \
-                  == &#39;true&#39;
+                == &#39;true&#39;
 
         if &#39;HT_DATA_CAPTURE_RPC_METADATA_REQUEST&#39; in os.environ:
             logger.debug(
                 &#34;[env] Loaded HT_DATA_CAPTURE_RPC_METADATA_REQUEST from env&#34;)
             self.config[&#39;data_capture&#39;][&#39;rpc_metadata&#39;][&#39;request&#39;] \
                 = os.environ[&#39;HT_DATA_CAPTURE_RPC_METADATA_REQUEST&#39;].lower() \
-                  == &#39;true&#39;
+                == &#39;true&#39;
 
         if &#39;HT_DATA_CAPTURE_RPC_METADATA_RESPONSE&#39; in os.environ:
             logger.debug(
                 &#34;[env] Loaded HT_DATA_CAPTURE_RPC_METADATA_RESPONSE from env&#34;)
             self.config[&#39;data_capture&#39;][&#39;rpc_metadata&#39;][&#39;response&#39;] \
                 = os.environ[&#39;HT_DATA_CAPTURE_RPC_METADATA_RESPONSE&#39;].lower() \
-                  == &#39;true&#39;
+                == &#39;true&#39;
 
         if &#39;HT_DATA_CAPTURE_RPC_BODY_REQUEST&#39; in os.environ:
             logger.debug(
                 &#34;[env] Loaded HT_DATA_CAPTURE_RPC_BODY_REQUEST from env&#34;)
             self.config[&#39;data_capture&#39;][&#39;rpc_body&#39;][&#39;request&#39;] \
                 = os.environ[&#39;HT_DATA_CAPTURE_RPC_BODY_REQUEST&#39;].lower() \
-                  == &#39;true&#39;
+                == &#39;true&#39;
 
         if &#39;HT_DATA_CAPTURE_RPC_BODY_RESPONSE&#39; in os.environ:
             logger.debug(
                 &#34;[env] Loaded HT_DATA_CAPTURE_RPC_BODY_RESPONSE from env&#34;)
             self.config[&#39;data_capture&#39;][&#39;rpc_body&#39;][&#39;response&#39;] \
                 = os.environ[&#39;HT_DATA_CAPTURE_RPC_BODY_RESPONSE&#39;].lower() \
-                  == &#39;true&#39;
+                == &#39;true&#39;
 
         if &#39;HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES&#39; in os.environ:
             logger.debug(
@@ -201,7 +223,8 @@ class AgentConfig:  # pylint: disable=R0902,R0903
 
         if &#39;HT_PROPAGATION_FORMATS&#39; in os.environ:
             logger.debug(&#34;[env] Loaded HT_PROPAGATION_FORMATS from env&#34;)
-            self.config.propagation_formats = [os.environ[&#39;HT_PROPAGATION_FORMATS&#39;]]
+            self.config.propagation_formats = [
+                os.environ[&#39;HT_PROPAGATION_FORMATS&#39;]]
 
         if &#39;HT_ENABLED&#39; in os.environ:
             logger.debug(&#34;[env] Loaded HT_ENABLED from env&#34;)
@@ -211,7 +234,7 @@ class AgentConfig:  # pylint: disable=R0902,R0903
             logger.debug(&#34;[env] Loaded HT_ENABLE_CONSOLE_SPAN_EXPORTER from env, %s&#34;,
                          str(os.environ[&#39;HT_ENABLE_CONSOLE_SPAN_EXPORTER&#39;].lower()))
             self._use_console_span_exporter = \
-              os.environ[&#39;HT_ENABLE_CONSOLE_SPAN_EXPORTER&#39;].lower() == &#39;true&#39;
+                os.environ[&#39;HT_ENABLE_CONSOLE_SPAN_EXPORTER&#39;].lower() == &#39;true&#39;
 
         # Build protobuf
         self.opa = jf.Parse(jf.MessageToJson(config_pb2.Opa()), config_pb2.Opa)
@@ -309,6 +332,39 @@ class AgentConfig:  # pylint: disable=R0902,R0903
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="hypertrace.agent.config.load_config_from_file"><code class="name flex">
+<span>def <span class="ident">load_config_from_file</span></span>(<span>filepath)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Returns the config loaded from a providen config file</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def load_config_from_file(filepath):
+    &#34;&#34;&#34;
+    Returns the config loaded from a providen config file
+    &#34;&#34;&#34;
+    logger.debug(
+        &#39;HT_CONFIG_FILE is set &#34;%s&#34;. Attempting to load the config file&#39; % filepath)
+    try:
+        path = os.path.abspath(filepath)
+
+        file = open(path, &#39;r&#39;)
+        from_file_config = yaml.load(file, Loader=yaml.FullLoader)
+        file.close()
+
+        logger.debug(&#39;Successfully load config from &#34;%s&#34;&#39;, path)
+
+        return from_file_config
+    except Exception as err:  # pylint: disable=W0703
+        logger.error(&#39;Failed to load HT_CONFIG_FILE: exception=%s, stacktrace=%s&#39;,
+                     err,
+                     traceback.format_exc())
+        logger.info(&#39;Loading default configuration.&#39;)
+        return DEFAULT_AGENT_CONFIG</code></pre>
+</details>
+</dd>
 <dt id="hypertrace.agent.config.merge_config"><code class="name flex">
 <span>def <span class="ident">merge_config</span></span>(<span>base_config, overriding_config)</span>
 </code></dt>
@@ -362,23 +418,20 @@ If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></di
 
         self.config = None
         if &#39;HT_CONFIG_FILE&#39; in os.environ:
-            try:
-                logger.debug(&#39;HT_CONFIG_FILE is set. Attempting to load&#39;)
-                path = os.path.abspath(os.environ[&#39;HT_CONFIG_FILE&#39;])
-                file = open(path, &#39;r&#39;)
-                from_file_config = yaml.load(file, Loader=yaml.FullLoader)
-                file.close()
-                logger.debug(&#39;Successfully read config file from %s&#39;, path)
-                logger.debug(&#39;Loading config from %s&#39;, path)
-                self.config = merge_config(DEFAULT_AGENT_CONFIG, from_file_config)
-                logger.debug(&#39;Successfully loaded config file from %s,config=%s&#39;,
+            if len(os.environ[&#39;HT_CONFIG_FILE&#39;]) == 0:
+                # HT_CONFIG_FILE can be passed as empty string which is envalid
+                logger.error(
+                    &#39;Failed to load HT_CONFIG_FILE env var being empty&#39;)
+            else:
+                config_from_file = load_config_from_file(
+                    os.environ[&#39;HT_CONFIG_FILE&#39;])
+
+                self.config = merge_config(
+                    DEFAULT_AGENT_CONFIG, config_from_file)
+
+                logger.debug(&#39;Successfully loaded config, config=%s&#39;,
                              path,
                              str(self.config))
-            except Exception as err: # pylint: disable=W0703
-                logger.error(&#39;Failed to load HT_CONFIG_FILE: exception=%s, stacktrace=%s&#39;,
-                      err,
-                traceback.format_exc())
-                logger.info(&#39;Loading default configuration.&#39;)
         else:
             logger.info(&#39;Loading default configuration.&#39;)
             self.config = DEFAULT_AGENT_CONFIG
@@ -430,56 +483,56 @@ If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></di
                 &#34;[env] Loaded HT_DATA_CAPTURE_HTTP_HEADERS_REQUEST from env&#34;)
             self.config[&#39;data_capture&#39;][&#39;http_headers&#39;][&#39;request&#39;] \
                 = os.environ[&#39;HT_DATA_CAPTURE_HTTP_HEADERS_REQUEST&#39;].lower() \
-                  == &#39;true&#39;
+                == &#39;true&#39;
 
         if &#39;HT_DATA_CAPTURE_HTTP_HEADERS_RESPONSE&#39; in os.environ:
             logger.debug(
                 &#34;[env] Loaded HT_DATA_CAPTURE_HTTP_HEADERS_RESPONSE from env&#34;)
             self.config[&#39;data_capture&#39;][&#39;http_headers&#39;][&#39;response&#39;] \
                 = os.environ[&#39;HT_DATA_CAPTURE_HTTP_HEADERS_RESPONSE&#39;].lower() \
-                  == &#39;true&#39;
+                == &#39;true&#39;
 
         if &#39;HT_DATA_CAPTURE_HTTP_BODY_REQUEST&#39; in os.environ:
             logger.debug(
                 &#34;[env] Loaded HT_DATA_CAPTURE_HTTP_BODY_REQUEST from env&#34;)
             self.config[&#39;data_capture&#39;][&#39;http_body&#39;][&#39;request&#39;] \
                 = os.environ[&#39;HT_DATA_CAPTURE_HTTP_BODY_REQUEST&#39;].lower() \
-                  == &#39;true&#39;
+                == &#39;true&#39;
 
         if &#39;HT_DATA_CAPTURE_HTTP_BODY_RESPONSE&#39; in os.environ:
             logger.debug(
                 &#34;[env] Loaded HT_DATA_CAPTURE_HTTP_BODY_RESPONSE from env&#34;)
             self.config[&#39;data_capture&#39;][&#39;http_body&#39;][&#39;response&#39;] \
                 = os.environ[&#39;HT_DATA_CAPTURE_HTTP_BODY_RESPONSE&#39;].lower() \
-                  == &#39;true&#39;
+                == &#39;true&#39;
 
         if &#39;HT_DATA_CAPTURE_RPC_METADATA_REQUEST&#39; in os.environ:
             logger.debug(
                 &#34;[env] Loaded HT_DATA_CAPTURE_RPC_METADATA_REQUEST from env&#34;)
             self.config[&#39;data_capture&#39;][&#39;rpc_metadata&#39;][&#39;request&#39;] \
                 = os.environ[&#39;HT_DATA_CAPTURE_RPC_METADATA_REQUEST&#39;].lower() \
-                  == &#39;true&#39;
+                == &#39;true&#39;
 
         if &#39;HT_DATA_CAPTURE_RPC_METADATA_RESPONSE&#39; in os.environ:
             logger.debug(
                 &#34;[env] Loaded HT_DATA_CAPTURE_RPC_METADATA_RESPONSE from env&#34;)
             self.config[&#39;data_capture&#39;][&#39;rpc_metadata&#39;][&#39;response&#39;] \
                 = os.environ[&#39;HT_DATA_CAPTURE_RPC_METADATA_RESPONSE&#39;].lower() \
-                  == &#39;true&#39;
+                == &#39;true&#39;
 
         if &#39;HT_DATA_CAPTURE_RPC_BODY_REQUEST&#39; in os.environ:
             logger.debug(
                 &#34;[env] Loaded HT_DATA_CAPTURE_RPC_BODY_REQUEST from env&#34;)
             self.config[&#39;data_capture&#39;][&#39;rpc_body&#39;][&#39;request&#39;] \
                 = os.environ[&#39;HT_DATA_CAPTURE_RPC_BODY_REQUEST&#39;].lower() \
-                  == &#39;true&#39;
+                == &#39;true&#39;
 
         if &#39;HT_DATA_CAPTURE_RPC_BODY_RESPONSE&#39; in os.environ:
             logger.debug(
                 &#34;[env] Loaded HT_DATA_CAPTURE_RPC_BODY_RESPONSE from env&#34;)
             self.config[&#39;data_capture&#39;][&#39;rpc_body&#39;][&#39;response&#39;] \
                 = os.environ[&#39;HT_DATA_CAPTURE_RPC_BODY_RESPONSE&#39;].lower() \
-                  == &#39;true&#39;
+                == &#39;true&#39;
 
         if &#39;HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES&#39; in os.environ:
             logger.debug(
@@ -489,7 +542,8 @@ If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></di
 
         if &#39;HT_PROPAGATION_FORMATS&#39; in os.environ:
             logger.debug(&#34;[env] Loaded HT_PROPAGATION_FORMATS from env&#34;)
-            self.config.propagation_formats = [os.environ[&#39;HT_PROPAGATION_FORMATS&#39;]]
+            self.config.propagation_formats = [
+                os.environ[&#39;HT_PROPAGATION_FORMATS&#39;]]
 
         if &#39;HT_ENABLED&#39; in os.environ:
             logger.debug(&#34;[env] Loaded HT_ENABLED from env&#34;)
@@ -499,7 +553,7 @@ If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></di
             logger.debug(&#34;[env] Loaded HT_ENABLE_CONSOLE_SPAN_EXPORTER from env, %s&#34;,
                          str(os.environ[&#39;HT_ENABLE_CONSOLE_SPAN_EXPORTER&#39;].lower()))
             self._use_console_span_exporter = \
-              os.environ[&#39;HT_ENABLE_CONSOLE_SPAN_EXPORTER&#39;].lower() == &#39;true&#39;
+                os.environ[&#39;HT_ENABLE_CONSOLE_SPAN_EXPORTER&#39;].lower() == &#39;true&#39;
 
         # Build protobuf
         self.opa = jf.Parse(jf.MessageToJson(config_pb2.Opa()), config_pb2.Opa)
@@ -643,6 +697,7 @@ If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></di
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="hypertrace.agent.config.load_config_from_file" href="#hypertrace.agent.config.load_config_from_file">load_config_from_file</a></code></li>
 <li><code><a title="hypertrace.agent.config.merge_config" href="#hypertrace.agent.config.merge_config">merge_config</a></code></li>
 </ul>
 </li>
