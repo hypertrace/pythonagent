@@ -35,7 +35,7 @@ def load_config_from_file(filepath):
     Returns the config loaded from a providen config file
     """
     logger.debug(
-        'HT_CONFIG_FILE is set "%s". Attempting to load the config file' % filepath)
+        'HT_CONFIG_FILE is set %s. Attempting to load the config file', filepath)
     try:
         path = os.path.abspath(filepath)
 
@@ -43,7 +43,7 @@ def load_config_from_file(filepath):
         from_file_config = yaml.load(file, Loader=yaml.FullLoader)
         file.close()
 
-        logger.debug('Successfully load config from "%s"', path)
+        logger.debug('Successfully load config from %s', path)
 
         return from_file_config
     except Exception as err:  # pylint: disable=W0703
@@ -79,9 +79,8 @@ class AgentConfig:  # pylint: disable=R0902,R0903
                 self.config = merge_config(
                     DEFAULT_AGENT_CONFIG, config_from_file)
 
-                logger.debug('Successfully loaded config, config=%s',
-                             path,
-                             str(self.config))
+                logger.debug(
+                    'Successfully loaded config, config=%s', str(self.config))
         else:
             logger.info('Loading default configuration.')
             self.config = DEFAULT_AGENT_CONFIG
