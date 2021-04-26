@@ -3,7 +3,7 @@ install-deps:
 
 run:
 	@rm -rf __pycache__ || true
-	HT_CONFIG_FILE=./config.yaml python client.py
+	STREAM=${STREAM} HT_CONFIG_FILE=./config.yaml python client.py
 
 run-hypertrace:
 	docker-compose up
