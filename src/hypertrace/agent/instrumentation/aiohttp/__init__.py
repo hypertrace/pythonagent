@@ -39,16 +39,9 @@ def introspect(obj):
                      err,
                      traceback.print_exc())
 
-#def hypertrace_name_callback(trace_request_start_params):
-#    '''Generate span name'''
-#    logger.debug('Entering hypertrace_name_callback(), method=%s, url=%s.',
-#                 trace_request_start_params.method,
-#                 str(trace_request_start_params.url))
-#    return trace_request_start_params.method + ' ' + str(trace_request_start_params.url)
-
 # aiohttp-client instrumentation module wrapper class
 class AioHttpClientInstrumentorWrapper(AioHttpClientInstrumentor, BaseInstrumentorWrapper):
-    '''Hypertrace wrapper class around OpenTelemetry AioHttpClient Instrumentor class'''
+    """Hypertrace wrapper class around OpenTelemetry AioHttpClient Instrumentor class"""
     # Constructor
     def __init__(self):
         '''Constructor'''
