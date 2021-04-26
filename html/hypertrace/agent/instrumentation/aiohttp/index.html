@@ -32,9 +32,12 @@ import sys
 import os.path
 import logging
 import traceback
+import inspect
 import types
 import typing
 import codecs
+from collections import deque
+import asyncio
 import aiohttp
 import wrapt
 from opentelemetry import context as context_api
@@ -49,29 +52,40 @@ from hypertrace.agent.instrumentation import BaseInstrumentorWrapper
 # Initialize logger with local module name
 logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
-def hypertrace_name_callback(trace_request_start_params):
-    &#39;&#39;&#39;Generate span name&#39;&#39;&#39;
-    logger.debug(&#39;Entering hypertrace_name_callback(), method=%s, url=%s.&#39;,
-                 trace_request_start_params.method,
-                 str(trace_request_start_params.url))
-    return trace_request_start_params.method + &#39; &#39; + str(trace_request_start_params.url)
+# Max time to wait for response data to be read.
+MAX_WAIT_TIME = 0.1 # seconds
+# Object introspection, used for debugging purposes
+def introspect(obj):
+    &#39;&#39;&#39;Object introspection, used for debugging purposes&#39;&#39;&#39;
+    logger.debug(&#39;Describing object.&#39;)
+    try:
+        for func in [type, id, dir, vars, callable]:
+            logger.debug(&#34;%s(%s):\t\t%s&#34;,
+                         func.__name__, introspect.__code__.co_varnames[0], func(obj))
+        logger.debug(&#34;%s: %s&#34;, func.__name__, inspect.getmembers(obj))
+    except Exception as err: # pylint: disable=W0703
+        logger.error(&#39;No data to display, exception=%s, stacktrace=%s&#39;,
+                     err,
+                     traceback.print_exc())
 
 # aiohttp-client instrumentation module wrapper class
 class AioHttpClientInstrumentorWrapper(AioHttpClientInstrumentor, BaseInstrumentorWrapper):
-    &#39;&#39;&#39;Hypertrace wrapper class around OpenTelemetry AioHttpClient Instrumentor class&#39;&#39;&#39;
+    &#34;&#34;&#34;Hypertrace wrapper class around OpenTelemetry AioHttpClient Instrumentor class&#34;&#34;&#34;
     # Constructor
     def __init__(self):
+        &#39;&#39;&#39;Constructor&#39;&#39;&#39;
         logger.debug(&#39;Entering AioHttpClientInstrumentor.__init__().&#39;)
         super().__init__()
 
     def _instrument(self, **kwargs):
+        &#39;&#39;&#39;Enable instrumentation.&#39;&#39;&#39;
         logger.debug(
             &#39;Entering AioHttpClientInstrumentorWrapper._instrument().&#39;)
         # Initialize OTel instrumentor
         super()._instrument(
             tracer_provider=kwargs.get(&#34;tracer_provider&#34;),
             url_filter=kwargs.get(&#34;url_filter&#34;),
-            span_name=hypertrace_name_callback
+            span_name=kwargs.get(&#39;span_name&#39;)
         )
         # Initialize HyperTrace instrumentor
         _instrument(
@@ -81,15 +95,12 @@ class AioHttpClientInstrumentorWrapper(AioHttpClientInstrumentor, BaseInstrument
             aiohttp_client_wrapper=self
         )
 
-    # disable instrumentation of aiohttp
-    def _uninstrument(self, **kwargs):
-        super()._uninstrument(kwargs)
-
-
 # aliases for type definitions
-_UrlFilterT = typing.Optional[typing.Callable[[str], str]]
-_SpanNameT = typing.Optional[
-    typing.Union[typing.Callable[[aiohttp.TraceRequestStartParams], str], str]
+_UrlFilterT = typing.Optional[typing.Callable[[  # pylint: disable=unsubscriptable-object
+    str], str]]
+_SpanNameT = typing.Optional[  # pylint: disable=unsubscriptable-object
+    typing.Union[typing.Callable[[aiohttp.TraceRequestStartParams],  # pylint: disable=unsubscriptable-object
+                                 str], str]
 ]
 
 # build an aiohttp trace config
@@ -104,6 +115,8 @@ def create_trace_config(
     &#39;&#39;&#39;Build an aiohttp-client trace config for use with Hypertrace&#39;&#39;&#39;
     tracer = get_tracer(__name__, __version__, tracer_provider)
 
+    # https://docs.aiohttp.org/en/stable/tracing_reference.html describes
+    # the events/signals and handlers that can be registered
     # This runs after each chunk of request data is sent
     async def on_request_chunk_sent(
             unused_session: aiohttp.ClientSession,
@@ -116,6 +129,15 @@ def create_trace_config(
             logger.debug(&#39;request chunk: %s&#39;, decoded_chunk)
             trace_config_ctx.request_body += decoded_chunk
 
+    # This runs after an exception occurs
+    async def on_request_exception( # pylint: disable=W0613
+            unused_session: aiohttp.ClientSession,
+            trace_config_ctx: types.SimpleNamespace,
+            params: aiohttp.TraceRequestExceptionParams,
+    ):
+        logger.debug(&#39;Entering on_request_exception().&#39;)
+
+
     # This runs after the request
     async def on_request_end(
             unused_session: aiohttp.ClientSession,
@@ -126,32 +148,62 @@ def create_trace_config(
         logger.debug(&#39;request headers: %s&#39;, str(params.headers))
         logger.debug(&#39;response headers: %s&#39;, str(params.response.headers))
         # utf8_decoder = codecs.getincrementaldecoder(&#39;utf-8&#39;)
-        response_body = &#39;&#39;
-        if hasattr(params.response, &#39;content&#39;):
+        response_body = b&#39;&#39;
+        if hasattr(params.response, &#39;content&#39;) \
+          and params.response.content is not None:
             content_stream = params.response.content
-            while not content_stream.at_eof():
-                response_body = await content_stream.read()
-            logger.debug(&#39;response_body: %s&#39;, str(response_body))
+            # A temporary dual end queue to copy data into
+            # and use to reset the stream.
+            tmp_deque = deque()
+            # Read all the data in the response buffer. This
+            # will block until it receives the expected number of bytes
+            # or the connection times out and move on with already read data.
+            logger.debug(&#39;Reading data----&gt;&#39;)
+            try:
+                while not content_stream.at_eof():
+                    response_chunk = b&#39;&#39;
+                    response_chunk = await asyncio.wait_for(
+                       content_stream.read(),
+                       MAX_WAIT_TIME
+                    )
+                    tmp_deque.append(response_chunk)
+                    response_body += response_chunk
+            except asyncio.TimeoutError as err: # pylint: disable=W0703
+                logger.error(&#39;No data to display, exception=%s, stacktrace=%s&#39;,
+                             err,
+                             traceback.print_exc())
+            finally:
+                logger.debug(&#39;response_body: %s&#39;, str(response_body))
+                # Reset response.content_stream
+                content_stream._cursor = 0 # pylint: disable=W0212
+                content_stream._buffer = tmp_deque # pylint: disable=W0212
         request_body = &#39;&#39;
         if hasattr(trace_config_ctx, &#39;request_body&#39;) and trace_config_ctx.request_body is not None:
-            logger.debug(&#39;request_body: %s&#39;, trace_config_ctx.request_body)
             request_body = trace_config_ctx.request_body
+            logger.debug(&#39;request_body: %s&#39;, request_body)
         span = trace.get_current_span()
         logger.debug(&#39;Found span: %s&#39;, str(span))
         # Add headers &amp; body to span
         if span.is_recording():
-            request_headers = [(k, v) for k, v in params.headers.items()] # pylint: disable=R1721
+            request_headers = [
+                (k, v) for k, v in params.headers.items()]  # pylint: disable=R1721
             aiohttp_client_wrapper.generic_request_handler(
                 request_headers, request_body, span)
             response_headers = [(k, v)
-                                for k, v in params.response.headers.items()] # pylint: disable=R1721
+                                for k, v in params.response.headers.items()]  # pylint: disable=R1721
             aiohttp_client_wrapper.generic_response_handler(
                 response_headers, response_body, span)
+        trace_config_ctx.end_callback_called = True
+        trace_config_ctx.span = span
 
     def _trace_config_ctx_factory(**kwargs):
         kwargs.setdefault(&#34;trace_request_ctx&#34;, {})
         return types.SimpleNamespace(
-            span_name=span_name, tracer=tracer, url_filter=url_filter, **kwargs, request_body=&#39;&#39;
+            span_name=span_name,\
+            tracer=tracer, \
+            url_filter=url_filter, \
+            **kwargs, \
+            request_body=&#39;&#39;, \
         )
 
     trace_config = aiohttp.TraceConfig(
@@ -160,6 +212,7 @@ def create_trace_config(
 
     trace_config.on_request_chunk_sent.append(on_request_chunk_sent)
     trace_config.on_request_end.append(on_request_end)
+    trace_config.on_request_exception.append(on_request_exception)
 
     return trace_config
 
@@ -170,7 +223,7 @@ def _instrument(
         aiohttp_client_wrapper: AioHttpClientInstrumentorWrapper = None
 ):
     &#39;&#39;&#39;Setup details of trace config context&#39;&#39;&#39;
-    def instrumented_init(wrapped, instance, args, kwargs): # pylint: disable=W0613
+    def instrumented_init(wrapped, instance, args, kwargs):  # pylint: disable=W0613
         if context_api.get_value(&#34;suppress_instrumentation&#34;):
             return wrapped(*args, **kwargs)
 
@@ -200,7 +253,7 @@ def _instrument(
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="hypertrace.agent.instrumentation.aiohttp.create_trace_config"><code class="name flex">
-<span>def <span class="ident">create_trace_config</span></span>(<span>url_filter: Union[Callable[[str], str], NoneType] = None, span_name: Union[Callable[[aiohttp.tracing.TraceRequestStartParams], str], str, NoneType] = None, tracer_provider: opentelemetry.trace.TracerProvider = None, aiohttp_client_wrapper: <a title="hypertrace.agent.instrumentation.aiohttp.AioHttpClientInstrumentorWrapper" href="#hypertrace.agent.instrumentation.aiohttp.AioHttpClientInstrumentorWrapper">AioHttpClientInstrumentorWrapper</a> = None) ‑> aiohttp.tracing.TraceConfig</span>
+<span>def <span class="ident">create_trace_config</span></span>(<span>url_filter: Optional[Callable[[str], str]] = None, span_name: Union[Callable[[aiohttp.tracing.TraceRequestStartParams], str], str, NoneType] = None, tracer_provider: opentelemetry.trace.TracerProvider = None, aiohttp_client_wrapper: <a title="hypertrace.agent.instrumentation.aiohttp.AioHttpClientInstrumentorWrapper" href="#hypertrace.agent.instrumentation.aiohttp.AioHttpClientInstrumentorWrapper">AioHttpClientInstrumentorWrapper</a> = None) ‑> aiohttp.tracing.TraceConfig</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Build an aiohttp-client trace config for use with Hypertrace</p></div>
@@ -217,6 +270,8 @@ def _instrument(
     &#39;&#39;&#39;Build an aiohttp-client trace config for use with Hypertrace&#39;&#39;&#39;
     tracer = get_tracer(__name__, __version__, tracer_provider)
 
+    # https://docs.aiohttp.org/en/stable/tracing_reference.html describes
+    # the events/signals and handlers that can be registered
     # This runs after each chunk of request data is sent
     async def on_request_chunk_sent(
             unused_session: aiohttp.ClientSession,
@@ -229,6 +284,15 @@ def _instrument(
             logger.debug(&#39;request chunk: %s&#39;, decoded_chunk)
             trace_config_ctx.request_body += decoded_chunk
 
+    # This runs after an exception occurs
+    async def on_request_exception( # pylint: disable=W0613
+            unused_session: aiohttp.ClientSession,
+            trace_config_ctx: types.SimpleNamespace,
+            params: aiohttp.TraceRequestExceptionParams,
+    ):
+        logger.debug(&#39;Entering on_request_exception().&#39;)
+
+
     # This runs after the request
     async def on_request_end(
             unused_session: aiohttp.ClientSession,
@@ -239,32 +303,62 @@ def _instrument(
         logger.debug(&#39;request headers: %s&#39;, str(params.headers))
         logger.debug(&#39;response headers: %s&#39;, str(params.response.headers))
         # utf8_decoder = codecs.getincrementaldecoder(&#39;utf-8&#39;)
-        response_body = &#39;&#39;
-        if hasattr(params.response, &#39;content&#39;):
+        response_body = b&#39;&#39;
+        if hasattr(params.response, &#39;content&#39;) \
+          and params.response.content is not None:
             content_stream = params.response.content
-            while not content_stream.at_eof():
-                response_body = await content_stream.read()
-            logger.debug(&#39;response_body: %s&#39;, str(response_body))
+            # A temporary dual end queue to copy data into
+            # and use to reset the stream.
+            tmp_deque = deque()
+            # Read all the data in the response buffer. This
+            # will block until it receives the expected number of bytes
+            # or the connection times out and move on with already read data.
+            logger.debug(&#39;Reading data----&gt;&#39;)
+            try:
+                while not content_stream.at_eof():
+                    response_chunk = b&#39;&#39;
+                    response_chunk = await asyncio.wait_for(
+                       content_stream.read(),
+                       MAX_WAIT_TIME
+                    )
+                    tmp_deque.append(response_chunk)
+                    response_body += response_chunk
+            except asyncio.TimeoutError as err: # pylint: disable=W0703
+                logger.error(&#39;No data to display, exception=%s, stacktrace=%s&#39;,
+                             err,
+                             traceback.print_exc())
+            finally:
+                logger.debug(&#39;response_body: %s&#39;, str(response_body))
+                # Reset response.content_stream
+                content_stream._cursor = 0 # pylint: disable=W0212
+                content_stream._buffer = tmp_deque # pylint: disable=W0212
         request_body = &#39;&#39;
         if hasattr(trace_config_ctx, &#39;request_body&#39;) and trace_config_ctx.request_body is not None:
-            logger.debug(&#39;request_body: %s&#39;, trace_config_ctx.request_body)
             request_body = trace_config_ctx.request_body
+            logger.debug(&#39;request_body: %s&#39;, request_body)
         span = trace.get_current_span()
         logger.debug(&#39;Found span: %s&#39;, str(span))
         # Add headers &amp; body to span
         if span.is_recording():
-            request_headers = [(k, v) for k, v in params.headers.items()] # pylint: disable=R1721
+            request_headers = [
+                (k, v) for k, v in params.headers.items()]  # pylint: disable=R1721
             aiohttp_client_wrapper.generic_request_handler(
                 request_headers, request_body, span)
             response_headers = [(k, v)
-                                for k, v in params.response.headers.items()] # pylint: disable=R1721
+                                for k, v in params.response.headers.items()]  # pylint: disable=R1721
             aiohttp_client_wrapper.generic_response_handler(
                 response_headers, response_body, span)
+        trace_config_ctx.end_callback_called = True
+        trace_config_ctx.span = span
 
     def _trace_config_ctx_factory(**kwargs):
         kwargs.setdefault(&#34;trace_request_ctx&#34;, {})
         return types.SimpleNamespace(
-            span_name=span_name, tracer=tracer, url_filter=url_filter, **kwargs, request_body=&#39;&#39;
+            span_name=span_name,\
+            tracer=tracer, \
+            url_filter=url_filter, \
+            **kwargs, \
+            request_body=&#39;&#39;, \
         )
 
     trace_config = aiohttp.TraceConfig(
@@ -273,25 +367,32 @@ def _instrument(
 
     trace_config.on_request_chunk_sent.append(on_request_chunk_sent)
     trace_config.on_request_end.append(on_request_end)
+    trace_config.on_request_exception.append(on_request_exception)
 
     return trace_config</code></pre>
 </details>
 </dd>
-<dt id="hypertrace.agent.instrumentation.aiohttp.hypertrace_name_callback"><code class="name flex">
-<span>def <span class="ident">hypertrace_name_callback</span></span>(<span>trace_request_start_params)</span>
+<dt id="hypertrace.agent.instrumentation.aiohttp.introspect"><code class="name flex">
+<span>def <span class="ident">introspect</span></span>(<span>obj)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Generate span name</p></div>
+<div class="desc"><p>Object introspection, used for debugging purposes</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def hypertrace_name_callback(trace_request_start_params):
-    &#39;&#39;&#39;Generate span name&#39;&#39;&#39;
-    logger.debug(&#39;Entering hypertrace_name_callback(), method=%s, url=%s.&#39;,
-                 trace_request_start_params.method,
-                 str(trace_request_start_params.url))
-    return trace_request_start_params.method + &#39; &#39; + str(trace_request_start_params.url)</code></pre>
+<pre><code class="python">def introspect(obj):
+    &#39;&#39;&#39;Object introspection, used for debugging purposes&#39;&#39;&#39;
+    logger.debug(&#39;Describing object.&#39;)
+    try:
+        for func in [type, id, dir, vars, callable]:
+            logger.debug(&#34;%s(%s):\t\t%s&#34;,
+                         func.__name__, introspect.__code__.co_varnames[0], func(obj))
+        logger.debug(&#34;%s: %s&#34;, func.__name__, inspect.getmembers(obj))
+    except Exception as err: # pylint: disable=W0703
+        logger.error(&#39;No data to display, exception=%s, stacktrace=%s&#39;,
+                     err,
+                     traceback.print_exc())</code></pre>
 </details>
 </dd>
 </dl>
@@ -303,26 +404,29 @@ def _instrument(
 <span>class <span class="ident">AioHttpClientInstrumentorWrapper</span></span>
 </code></dt>
 <dd>
-<div class="desc"><p>Hypertrace wrapper class around OpenTelemetry AioHttpClient Instrumentor class</p></div>
+<div class="desc"><p>Hypertrace wrapper class around OpenTelemetry AioHttpClient Instrumentor class</p>
+<p>Constructor</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class AioHttpClientInstrumentorWrapper(AioHttpClientInstrumentor, BaseInstrumentorWrapper):
-    &#39;&#39;&#39;Hypertrace wrapper class around OpenTelemetry AioHttpClient Instrumentor class&#39;&#39;&#39;
+    &#34;&#34;&#34;Hypertrace wrapper class around OpenTelemetry AioHttpClient Instrumentor class&#34;&#34;&#34;
     # Constructor
     def __init__(self):
+        &#39;&#39;&#39;Constructor&#39;&#39;&#39;
         logger.debug(&#39;Entering AioHttpClientInstrumentor.__init__().&#39;)
         super().__init__()
 
     def _instrument(self, **kwargs):
+        &#39;&#39;&#39;Enable instrumentation.&#39;&#39;&#39;
         logger.debug(
             &#39;Entering AioHttpClientInstrumentorWrapper._instrument().&#39;)
         # Initialize OTel instrumentor
         super()._instrument(
             tracer_provider=kwargs.get(&#34;tracer_provider&#34;),
             url_filter=kwargs.get(&#34;url_filter&#34;),
-            span_name=hypertrace_name_callback
+            span_name=kwargs.get(&#39;span_name&#39;)
         )
         # Initialize HyperTrace instrumentor
         _instrument(
@@ -330,11 +434,7 @@ def _instrument(
             url_filter=kwargs.get(&#34;url_filter&#34;),
             span_name=kwargs.get(&#34;span_name&#34;),
             aiohttp_client_wrapper=self
-        )
-
-    # disable instrumentation of aiohttp
-    def _uninstrument(self, **kwargs):
-        super()._uninstrument(kwargs)</code></pre>
+        )</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -388,7 +488,7 @@ def _instrument(
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="hypertrace.agent.instrumentation.aiohttp.create_trace_config" href="#hypertrace.agent.instrumentation.aiohttp.create_trace_config">create_trace_config</a></code></li>
-<li><code><a title="hypertrace.agent.instrumentation.aiohttp.hypertrace_name_callback" href="#hypertrace.agent.instrumentation.aiohttp.hypertrace_name_callback">hypertrace_name_callback</a></code></li>
+<li><code><a title="hypertrace.agent.instrumentation.aiohttp.introspect" href="#hypertrace.agent.instrumentation.aiohttp.introspect">introspect</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>

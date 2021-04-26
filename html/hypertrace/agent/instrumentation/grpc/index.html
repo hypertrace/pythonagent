@@ -253,6 +253,7 @@ class OpenTelemetryServerInterceptorWrapper(_server.OpenTelemetryServerIntercept
                     if type(error) != Exception:
                         span.record_exception(error)
                         raise error
+                    return None
             return telemetry_interceptor
         return _server._wrap_rpc_behavior(continuation(handler_call_details), telemetry_wrapper) # pylint: disable=W0212
 
@@ -646,7 +647,8 @@ class OpenTelemetryClientInterceptorWrapper(_client.OpenTelemetryClientIntercept
     ):
         &#39;&#39;&#39;process streaming request for hypertrace&#39;&#39;&#39;
         logger.debug(
-            &#39;Entering OpenTelemetryClientInterceptorWrapper.intercept_stream().&#39;)</code></pre>
+            &#39;Entering OpenTelemetryClientInterceptorWrapper.intercept_stream().&#39;)
+        # COME_BACK -- need to implement this</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -675,7 +677,8 @@ class OpenTelemetryClientInterceptorWrapper(_client.OpenTelemetryClientIntercept
 ):
     &#39;&#39;&#39;process streaming request for hypertrace&#39;&#39;&#39;
     logger.debug(
-        &#39;Entering OpenTelemetryClientInterceptorWrapper.intercept_stream().&#39;)</code></pre>
+        &#39;Entering OpenTelemetryClientInterceptorWrapper.intercept_stream().&#39;)
+    # COME_BACK -- need to implement this</code></pre>
 </details>
 </dd>
 <dt id="hypertrace.agent.instrumentation.grpc.OpenTelemetryClientInterceptorWrapper.intercept_unary"><code class="name flex">
@@ -776,6 +779,7 @@ class OpenTelemetryClientInterceptorWrapper(_client.OpenTelemetryClientIntercept
                     if type(error) != Exception:
                         span.record_exception(error)
                         raise error
+                    return None
             return telemetry_interceptor
         return _server._wrap_rpc_behavior(continuation(handler_call_details), telemetry_wrapper) # pylint: disable=W0212
 
@@ -787,7 +791,8 @@ class OpenTelemetryClientInterceptorWrapper(_client.OpenTelemetryClientIntercept
             context):
         &#39;&#39;&#39;Setup interceptor helper for streaming requests.&#39;&#39;&#39;
         logger.debug(
-            &#39;Entering OpenTelemetryServerInterceptorWrapper.intercept_server_stream().&#39;)</code></pre>
+            &#39;Entering OpenTelemetryServerInterceptorWrapper.intercept_server_stream().&#39;)
+        # COME_BACK -- need to implement this</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -853,6 +858,7 @@ class OpenTelemetryClientInterceptorWrapper(_client.OpenTelemetryClientIntercept
                 if type(error) != Exception:
                     span.record_exception(error)
                     raise error
+                return None
         return telemetry_interceptor
     return _server._wrap_rpc_behavior(continuation(handler_call_details), telemetry_wrapper) # pylint: disable=W0212</code></pre>
 </details>

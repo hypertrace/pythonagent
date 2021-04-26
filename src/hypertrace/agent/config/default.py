@@ -1,5 +1,5 @@
-# config_pb2.Opa
 """Default values for agent-config"""
+# config_pb2.Opa
 DEFAULT_OPA_ENDPOINT = 'https://localhost'  # "http://opa.traceableai:8181/"
 DEFAULT_OPA_POLL_PERIOD_SECONDS = 30
 DEFAULT_OPA_ENABLED = True
@@ -34,7 +34,8 @@ DEFAULT_AGENT_CONFIG = {
             "request": True,
             "response": False,
         }
-    }
+    },
+    'propagation_formats': [ 'TRACECONTEXT' ]
 }
 
 # B3,TRACECONTEXT
