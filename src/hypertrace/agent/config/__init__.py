@@ -4,12 +4,17 @@ environment variables, and the agent-config.yaml file.
 """
 import os
 import logging
-import yaml
 import traceback
+import yaml
 from google.protobuf import json_format as jf
 from google.protobuf.wrappers_pb2 import BoolValue
 from hypertrace.agent.config import config_pb2
 from hypertrace.agent.config.default import *
+
+# Configuration attributes specific to pythonagent
+PYTHON_SPECIFIC_ATTRIBUTES: list = [
+    '_use_console_span_exporter'
+]
 
 # Initialize logger
 logger = logging.getLogger(__name__) # pylint: disable=C0103
@@ -107,7 +112,8 @@ class AgentConfig:  # pylint: disable=R0902,R0903
         if 'HT_REPORTING_OPA_POLL_PERIOD_SECONDS' in os.environ:
             logger.debug(
                 "[env] Loaded HT_REPORTING_OPA_POLL_PERIOD_SECONDS from env")
-            self.config['opa']['poll_period_seconds'] = os.environ['HT_REPORTING_OPA_POLL_PERIOD_SECONDS']
+            self.config['opa']['poll_period_seconds'] \
+              = os.environ['HT_REPORTING_OPA_POLL_PERIOD_SECONDS']
 
         if 'HT_REPORTING_OPA_ENABLED' in os.environ:
             logger.debug("[env] Loaded HT_REPORTING_OPA_ENABLED from env")
@@ -261,9 +267,53 @@ class AgentConfig:  # pylint: disable=R0902,R0903
         self.agent_config.resource_attributes = {
             'service_name': self.config['service_name']}
 
-#        # Check for configuration entries that do not belong
-#        for key in self.config:
-#            logger.debug('Checking: ' + key
+        # Validate configuration
+        self.validate_config_elements(self.config, self.agent_config)
+
+    def validate_config_elements(self, config_element, agent_config_base):
+        """Validate that all present elements in the parse configuration are
+        defined in the config_pb2.AgentConfig"""
+        # Check for configuration entries that do not belong
+        logger.debug('Entering AgentConfig.validate_config_elements().')
+        for key in config_element:
+            logger.debug('Checking: %s', key)
+            logger.debug('type: %s', str(type(config_element[key])))
+            if isinstance(config_element[key], dict):
+                logger.debug('Found dictioanry. Recursing into it.')
+                try:
+                    if not hasattr(agent_config_base,key):
+                        logger.error('Unknown attribute encountered. key=%s', key)
+                        raise AttributeError
+                    logger.debug('config_element=%s, agent_config_base=%s',
+                                 str(config_element),
+                                 str(agent_config_base))
+                    self.validate_config_elements(config_element[key], \
+                      eval('agent_config_base.' + key)) # pylint: disable=W0123
+                    continue
+                except AttributeError as err:
+                    logger.error('Unknown attribute encountered: exception=%s, stacktrace=%s',
+                                 err,
+                                 traceback.format_exc())
+                    continue
+            if isinstance(config_element[key], (str, bool, int, list)):
+                logger.debug('is string')
+                if key in PYTHON_SPECIFIC_ATTRIBUTES:
+                    logger.debug('Found pythonagent-specific attribute, attr=%s', key)
+                    continue
+                try:
+                    if hasattr(agent_config_base, key):
+                        logger.debug('Is valid: %s', key)
+                    else:
+                        logger.debug('Not valid: %s', key)
+                        raise AttributeError
+                except AttributeError as err:
+                    logger.error('Unknown attribute encountered: exception=%s, stacktrace=%s',
+                                 err,
+                                 traceback.format_exc())
+            else:
+                logger.error('Unknown attribute type encountered: exception=%s, stacktrace=%s',
+                             err,
+                             traceback.format_exc())
 
     def dump_config(self):
         '''Dump configuration information.'''
@@ -271,8 +321,8 @@ class AgentConfig:  # pylint: disable=R0902,R0903
 
     def get_config(self) -> config_pb2.AgentConfig:
         '''Return configuration information.'''
-        return AgentConfigWrapped(self.agent_config, self.config['_use_console_span_exporter'])
+        return self.agent_config
 
     def use_console_span_exporter(self) -> bool:
         '''Initialize InMemorySpanExporter'''
-        self.config['_use_console_span_exporter']
+        return self.config['_use_console_span_exporter']

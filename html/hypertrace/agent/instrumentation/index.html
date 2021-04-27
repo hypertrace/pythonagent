@@ -374,7 +374,8 @@ class BaseInstrumentorWrapper:
         if body in (None, &#39;&#39;):
             return False
         body_len = len(body)
-        if body_len &gt; self.get_max_body_size():
+        max_body_size = self.get_max_body_size()
+        if max_body_size and body_len &gt; max_body_size:
             logger.debug(&#39;message body size is greater than max size.&#39;)
             return True
         return False
@@ -771,7 +772,8 @@ class BaseInstrumentorWrapper:
         if body in (None, &#39;&#39;):
             return False
         body_len = len(body)
-        if body_len &gt; self.get_max_body_size():
+        max_body_size = self.get_max_body_size()
+        if max_body_size and body_len &gt; max_body_size:
             logger.debug(&#39;message body size is greater than max size.&#39;)
             return True
         return False
@@ -847,7 +849,8 @@ class BaseInstrumentorWrapper:
     if body in (None, &#39;&#39;):
         return False
     body_len = len(body)
-    if body_len &gt; self.get_max_body_size():
+    max_body_size = self.get_max_body_size()
+    if max_body_size and body_len &gt; max_body_size:
         logger.debug(&#39;message body size is greater than max size.&#39;)
         return True
     return False</code></pre>
