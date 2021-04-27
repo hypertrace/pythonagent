@@ -11,9 +11,9 @@ setup(
     description="The Hypertrace Python Agent",
     long_description="file: README.md",
     long_description_content_type="text/markdown",
-    url="https://github.com/Traceableai/pythonagent",
+    url="https://github.com/hypertrace/pythonagent",
     project_urls={
-        "Bug Tracker": "https://github.com/Traceableai/pythonagent/issues",
+        "Bug Tracker": "https://github.com/hypertrace/pythonagent/issues",
     },
     classifiers=[
         "Programming Language :: Python :: 3",
