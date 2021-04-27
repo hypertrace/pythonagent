@@ -4,14 +4,17 @@ reporting:
   secure: true
 data_capture:
   http_headers:
-    request: true
-    response: true
+    request: false
+    response: false
   http_body:
-    request: true
-    response: true
+    request: false
+    response: false
   rpc_metadata:
-    request: true
-    response: true
+    request: false
+    response: false
   rpc_body:
-    request: true
-    response: true
+    request: false
+    response: false
+propagation_formats: "B3"
+_use_console_span_exporter: true
+enabled: false
