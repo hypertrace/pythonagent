@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 #
 logger.info('Initializing agent.')
 agent = Agent(True)
-agent.register_client_grpc()
+agent.register_grpc_client()
 logger.info('Agent initialized.')
 #
 # End initialization logic for Python Agent
@@ -46,14 +46,16 @@ simpleExportSpanProcessor = SimpleSpanProcessor(memoryExporter)
 agent.register_processor(simpleExportSpanProcessor)
 logger.info('Added in-memoy span exporter')
 
+
 class Greeter(helloworld_pb2_grpc.GreeterServicer):
     def SayHello(self, request, context):
         logger.debug('Received request.')
-        metadata = ( ('tester3', 'tester3'), ('tester4', 'tester4'))
+        metadata = (('tester3', 'tester3'), ('tester4', 'tester4'))
         logger.debug('Setting custom headers.')
         context.set_trailing_metadata(metadata)
         logger.debug('Returning response.')
         return helloworld_pb2.HelloReply(message='Hello, %s!' % request.name)
+
 
 def serve():
     logger.info('Creating server.')
@@ -64,27 +66,31 @@ def serve():
     server.add_insecure_port('[::]:50051')
     logger.info('Starting server.')
     server.start()
-    logger.info('Waiting for termination.') 
+    logger.info('Waiting for termination.')
     server.wait_for_termination()
 
-def exit_callback(): 
+
+def exit_callback():
     # NOTE(gRPC Python Team): .close() is possible on a channel and should be
     # used in circumstances in which the with statement does not fit the needs
     # of the code.
     try:
-      with grpc.insecure_channel('localhost:50051') as channel:
-        stub = helloworld_pb2_grpc.GreeterStub(channel)
-        metadata = (('tester1', 'tester1'),
-                    ('tester2', 'tester2'))
-        response = stub.SayHello(helloworld_pb2.HelloRequest(name='you'), metadata=metadata)
-        logger.info("Greeter client received: " + response.message)
-        os._exit(0)
+        with grpc.insecure_channel('localhost:50051') as channel:
+            stub = helloworld_pb2_grpc.GreeterStub(channel)
+            metadata = (('tester1', 'tester1'),
+                        ('tester2', 'tester2'))
+            response = stub.SayHello(
+                helloworld_pb2.HelloRequest(name='you'), metadata=metadata)
+            logger.info("Greeter client received: " + response.message)
+            os._exit(0)
     except:
-      logger.error('An error occurred while calling greeter client: exception=%s, stacktrace=%s', sys.exc_info()[0], traceback.format_exc())
-      os._exit(1)
+        logger.error('An error occurred while calling greeter client: exception=%s, stacktrace=%s',
+                     sys.exc_info()[0], traceback.format_exc())
+        os._exit(1)
+
 
 def test_run():
-  logger.info('Starting Test Run.')
-  timer = threading.Timer(4.0, exit_callback)
-  timer.start()
-  serve()
+    logger.info('Starting Test Run.')
+    timer = threading.Timer(4.0, exit_callback)
+    timer.start()
+    serve()

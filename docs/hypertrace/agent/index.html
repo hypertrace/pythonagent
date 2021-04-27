@@ -38,6 +38,8 @@ from hypertrace.agent.config import AgentConfig
 from hypertrace.agent import constants
 
 # main logging modle configuration
+
+
 def setup_custom_logger(name):
     &#39;&#39;&#39;Agent logger configuration&#39;&#39;&#39;
     try:
@@ -69,16 +71,19 @@ def setup_custom_logger(name):
         logger_.addHandler(handler)
         logger_.addHandler(screen_handler)
         return logger_
-    except Exception as err: # pylint: disable=W0703
+    except Exception as err:  # pylint: disable=W0703
         print(&#39;Failed to customize logger: exception=%s, stacktrace=%s&#39;,
               err,
               traceback.format_exc())
         return None
 
+
 # create logger object
-logger = setup_custom_logger(__name__) # pylint: disable=C0103
+logger = setup_custom_logger(__name__)  # pylint: disable=C0103
 
 # The Hypertrace Python Agent class
+
+
 class Agent:
     &#39;&#39;&#39;Top-level entry point for Hypertrace agent.&#39;&#39;&#39;
 
@@ -89,8 +94,13 @@ class Agent:
             return
         try:
             self._config = AgentConfig()
+<<<<<<< HEAD:html/hypertrace/agent/index.html
             self._init = AgentInit(self._config, init_console_only)
         except Exception as err: # pylint: disable=W0703
+=======
+            self._init = AgentInit(self, init_console_only)
+        except Exception as err:  # pylint: disable=W0703
+>>>>>>> main:docs/hypertrace/agent/index.html
             logger.error(&#39;Failed to initialize Agent: exception=%s, stacktrace=%s&#39;,
                          err,
                          traceback.format_exc())
@@ -103,35 +113,35 @@ class Agent:
         try:
             self._init.flask_init(app, use_b3)
             self._init.dump_config()
-        except Exception as err: # pylint: disable=W0703
+        except Exception as err:  # pylint: disable=W0703
             logger.error(constants.EXCEPTION_MESSAGE,
                          &#39;flask&#39;,
                          err,
                          traceback.format_exc())
 
-    def register_server_grpc(self):
+    def register_grpc_server(self):
         &#39;&#39;&#39;Register the grpc:server instrumentation module wrapper&#39;&#39;&#39;
-        logger.debug(&#39;Calling Agent.register_server_grpc().&#39;)
+        logger.debug(&#39;Calling Agent.register_grpc_server().&#39;)
         if not self.is_enabled():
             return
         try:
             self._init.grpc_server_init()
             self._init.dump_config()
-        except Exception as err: # pylint: disable=W0703
+        except Exception as err:  # pylint: disable=W0703
             logger.error(constants.EXCEPTION_MESSAGE,
                          &#39;grpc:server&#39;,
                          err,
                          traceback.format_exc())
 
-    def register_client_grpc(self):
+    def register_grpc_client(self):
         &#39;&#39;&#39;Register the grpc:client instrumentation module wrapper&#39;&#39;&#39;
-        logger.debug(&#39;Calling Agent.register_client_grpc().&#39;)
+        logger.debug(&#39;Calling Agent.register_grpc_client().&#39;)
         if not self.is_enabled():
             return
         try:
             self._init.grpc_client_init()
             self._init.dump_config()
-        except Exception as err: # pylint: disable=W0703
+        except Exception as err:  # pylint: disable=W0703
             logger.error(constants.EXCEPTION_MESSAGE,
                          &#39;grpc:client&#39;,
                          err,
@@ -145,7 +155,7 @@ class Agent:
         try:
             self._init.mysql_init()
             self._init.dump_config()
-        except Exception as err: # pylint: disable=W0703
+        except Exception as err:  # pylint: disable=W0703
             logger.error(constants.EXCEPTION_MESSAGE,
                          &#39;flask&#39;,
                          err,
@@ -159,7 +169,7 @@ class Agent:
         try:
             self._init.postgresql_init()
             self._init.dump_config()
-        except Exception as err: # pylint: disable=W0703
+        except Exception as err:  # pylint: disable=W0703
             logger.error(constants.EXCEPTION_MESSAGE,
                          &#39;flask&#39;,
                          err,
@@ -173,7 +183,7 @@ class Agent:
         try:
             self._init.requests_init(use_b3)
             self._init.dump_config()
-        except Exception as err: # pylint: disable=W0703
+        except Exception as err:  # pylint: disable=W0703
             logger.error(constants.EXCEPTION_MESSAGE,
                          &#39;flask&#39;,
                          err,
@@ -187,13 +197,13 @@ class Agent:
         try:
             self._init.aiohttp_client_init(use_b3)
             self._init.dump_config()
-        except Exception as err: # pylint: disable=W0703
+        except Exception as err:  # pylint: disable=W0703
             logger.error(constants.EXCEPTION_MESSAGE,
                          &#39;flask&#39;,
                          err,
                          traceback.format_exc())
 
-    def register_processor(self, processor): # pylint: disable=R1710
+    def register_processor(self, processor):  # pylint: disable=R1710
         &#39;&#39;&#39;Add additional span exporters + processors&#39;&#39;&#39;
         logger.debug(&#39;Entering Agent.register_processor().&#39;)
         if not self.is_enabled():
@@ -205,7 +215,11 @@ class Agent:
 #        &#39;&#39;&#39;Return configuration object&#39;&#39;&#39;
 #        return self._config.get_config()
 
+<<<<<<< HEAD:html/hypertrace/agent/index.html
     def is_enabled(self) -&gt; bool: # pylint: disable=R0201
+=======
+    def is_enabled(self):  # pylint: disable=R0201
+>>>>>>> main:docs/hypertrace/agent/index.html
         &#39;&#39;&#39;Is agent enabled?&#39;&#39;&#39;
         if &#39;HT_ENABLED&#39; in os.environ:
             if os.environ[&#39;HT_ENABLED&#39;] == &#39;false&#39;:
@@ -281,7 +295,7 @@ environment variables, and the agent-config.yaml file.</p></div>
         logger_.addHandler(handler)
         logger_.addHandler(screen_handler)
         return logger_
-    except Exception as err: # pylint: disable=W0703
+    except Exception as err:  # pylint: disable=W0703
         print(&#39;Failed to customize logger: exception=%s, stacktrace=%s&#39;,
               err,
               traceback.format_exc())
@@ -314,8 +328,13 @@ environment variables, and the agent-config.yaml file.</p></div>
             return
         try:
             self._config = AgentConfig()
+<<<<<<< HEAD:html/hypertrace/agent/index.html
             self._init = AgentInit(self._config, init_console_only)
         except Exception as err: # pylint: disable=W0703
+=======
+            self._init = AgentInit(self, init_console_only)
+        except Exception as err:  # pylint: disable=W0703
+>>>>>>> main:docs/hypertrace/agent/index.html
             logger.error(&#39;Failed to initialize Agent: exception=%s, stacktrace=%s&#39;,
                          err,
                          traceback.format_exc())
@@ -328,35 +347,35 @@ environment variables, and the agent-config.yaml file.</p></div>
         try:
             self._init.flask_init(app, use_b3)
             self._init.dump_config()
-        except Exception as err: # pylint: disable=W0703
+        except Exception as err:  # pylint: disable=W0703
             logger.error(constants.EXCEPTION_MESSAGE,
                          &#39;flask&#39;,
                          err,
                          traceback.format_exc())
 
-    def register_server_grpc(self):
+    def register_grpc_server(self):
         &#39;&#39;&#39;Register the grpc:server instrumentation module wrapper&#39;&#39;&#39;
-        logger.debug(&#39;Calling Agent.register_server_grpc().&#39;)
+        logger.debug(&#39;Calling Agent.register_grpc_server().&#39;)
         if not self.is_enabled():
             return
         try:
             self._init.grpc_server_init()
             self._init.dump_config()
-        except Exception as err: # pylint: disable=W0703
+        except Exception as err:  # pylint: disable=W0703
             logger.error(constants.EXCEPTION_MESSAGE,
                          &#39;grpc:server&#39;,
                          err,
                          traceback.format_exc())
 
-    def register_client_grpc(self):
+    def register_grpc_client(self):
         &#39;&#39;&#39;Register the grpc:client instrumentation module wrapper&#39;&#39;&#39;
-        logger.debug(&#39;Calling Agent.register_client_grpc().&#39;)
+        logger.debug(&#39;Calling Agent.register_grpc_client().&#39;)
         if not self.is_enabled():
             return
         try:
             self._init.grpc_client_init()
             self._init.dump_config()
-        except Exception as err: # pylint: disable=W0703
+        except Exception as err:  # pylint: disable=W0703
             logger.error(constants.EXCEPTION_MESSAGE,
                          &#39;grpc:client&#39;,
                          err,
@@ -370,7 +389,7 @@ environment variables, and the agent-config.yaml file.</p></div>
         try:
             self._init.mysql_init()
             self._init.dump_config()
-        except Exception as err: # pylint: disable=W0703
+        except Exception as err:  # pylint: disable=W0703
             logger.error(constants.EXCEPTION_MESSAGE,
                          &#39;flask&#39;,
                          err,
@@ -384,7 +403,7 @@ environment variables, and the agent-config.yaml file.</p></div>
         try:
             self._init.postgresql_init()
             self._init.dump_config()
-        except Exception as err: # pylint: disable=W0703
+        except Exception as err:  # pylint: disable=W0703
             logger.error(constants.EXCEPTION_MESSAGE,
                          &#39;flask&#39;,
                          err,
@@ -398,7 +417,7 @@ environment variables, and the agent-config.yaml file.</p></div>
         try:
             self._init.requests_init(use_b3)
             self._init.dump_config()
-        except Exception as err: # pylint: disable=W0703
+        except Exception as err:  # pylint: disable=W0703
             logger.error(constants.EXCEPTION_MESSAGE,
                          &#39;flask&#39;,
                          err,
@@ -412,13 +431,13 @@ environment variables, and the agent-config.yaml file.</p></div>
         try:
             self._init.aiohttp_client_init(use_b3)
             self._init.dump_config()
-        except Exception as err: # pylint: disable=W0703
+        except Exception as err:  # pylint: disable=W0703
             logger.error(constants.EXCEPTION_MESSAGE,
                          &#39;flask&#39;,
                          err,
                          traceback.format_exc())
 
-    def register_processor(self, processor): # pylint: disable=R1710
+    def register_processor(self, processor):  # pylint: disable=R1710
         &#39;&#39;&#39;Add additional span exporters + processors&#39;&#39;&#39;
         logger.debug(&#39;Entering Agent.register_processor().&#39;)
         if not self.is_enabled():
@@ -430,7 +449,11 @@ environment variables, and the agent-config.yaml file.</p></div>
 #        &#39;&#39;&#39;Return configuration object&#39;&#39;&#39;
 #        return self._config.get_config()
 
+<<<<<<< HEAD:html/hypertrace/agent/index.html
     def is_enabled(self) -&gt; bool: # pylint: disable=R0201
+=======
+    def is_enabled(self):  # pylint: disable=R0201
+>>>>>>> main:docs/hypertrace/agent/index.html
         &#39;&#39;&#39;Is agent enabled?&#39;&#39;&#39;
         if &#39;HT_ENABLED&#39; in os.environ:
             if os.environ[&#39;HT_ENABLED&#39;] == &#39;false&#39;:
@@ -449,7 +472,11 @@ environment variables, and the agent-config.yaml file.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
+<<<<<<< HEAD:html/hypertrace/agent/index.html
 <pre><code class="python">def is_enabled(self) -&gt; bool: # pylint: disable=R0201
+=======
+<pre><code class="python">def is_enabled(self):  # pylint: disable=R0201
+>>>>>>> main:docs/hypertrace/agent/index.html
     &#39;&#39;&#39;Is agent enabled?&#39;&#39;&#39;
     if &#39;HT_ENABLED&#39; in os.environ:
         if os.environ[&#39;HT_ENABLED&#39;] == &#39;false&#39;:
@@ -475,33 +502,9 @@ environment variables, and the agent-config.yaml file.</p></div>
     try:
         self._init.aiohttp_client_init(use_b3)
         self._init.dump_config()
-    except Exception as err: # pylint: disable=W0703
+    except Exception as err:  # pylint: disable=W0703
         logger.error(constants.EXCEPTION_MESSAGE,
                      &#39;flask&#39;,
-                     err,
-                     traceback.format_exc())</code></pre>
-</details>
-</dd>
-<dt id="hypertrace.agent.Agent.register_client_grpc"><code class="name flex">
-<span>def <span class="ident">register_client_grpc</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Register the grpc:client instrumentation module wrapper</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def register_client_grpc(self):
-    &#39;&#39;&#39;Register the grpc:client instrumentation module wrapper&#39;&#39;&#39;
-    logger.debug(&#39;Calling Agent.register_client_grpc().&#39;)
-    if not self.is_enabled():
-        return
-    try:
-        self._init.grpc_client_init()
-        self._init.dump_config()
-    except Exception as err: # pylint: disable=W0703
-        logger.error(constants.EXCEPTION_MESSAGE,
-                     &#39;grpc:client&#39;,
                      err,
                      traceback.format_exc())</code></pre>
 </details>
@@ -523,9 +526,57 @@ environment variables, and the agent-config.yaml file.</p></div>
     try:
         self._init.flask_init(app, use_b3)
         self._init.dump_config()
-    except Exception as err: # pylint: disable=W0703
+    except Exception as err:  # pylint: disable=W0703
         logger.error(constants.EXCEPTION_MESSAGE,
                      &#39;flask&#39;,
+                     err,
+                     traceback.format_exc())</code></pre>
+</details>
+</dd>
+<dt id="hypertrace.agent.Agent.register_grpc_client"><code class="name flex">
+<span>def <span class="ident">register_grpc_client</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Register the grpc:client instrumentation module wrapper</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def register_grpc_client(self):
+    &#39;&#39;&#39;Register the grpc:client instrumentation module wrapper&#39;&#39;&#39;
+    logger.debug(&#39;Calling Agent.register_grpc_client().&#39;)
+    if not self.is_enabled():
+        return
+    try:
+        self._init.grpc_client_init()
+        self._init.dump_config()
+    except Exception as err:  # pylint: disable=W0703
+        logger.error(constants.EXCEPTION_MESSAGE,
+                     &#39;grpc:client&#39;,
+                     err,
+                     traceback.format_exc())</code></pre>
+</details>
+</dd>
+<dt id="hypertrace.agent.Agent.register_grpc_server"><code class="name flex">
+<span>def <span class="ident">register_grpc_server</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Register the grpc:server instrumentation module wrapper</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def register_grpc_server(self):
+    &#39;&#39;&#39;Register the grpc:server instrumentation module wrapper&#39;&#39;&#39;
+    logger.debug(&#39;Calling Agent.register_grpc_server().&#39;)
+    if not self.is_enabled():
+        return
+    try:
+        self._init.grpc_server_init()
+        self._init.dump_config()
+    except Exception as err:  # pylint: disable=W0703
+        logger.error(constants.EXCEPTION_MESSAGE,
+                     &#39;grpc:server&#39;,
                      err,
                      traceback.format_exc())</code></pre>
 </details>
@@ -547,7 +598,7 @@ environment variables, and the agent-config.yaml file.</p></div>
     try:
         self._init.mysql_init()
         self._init.dump_config()
-    except Exception as err: # pylint: disable=W0703
+    except Exception as err:  # pylint: disable=W0703
         logger.error(constants.EXCEPTION_MESSAGE,
                      &#39;flask&#39;,
                      err,
@@ -571,7 +622,7 @@ environment variables, and the agent-config.yaml file.</p></div>
     try:
         self._init.postgresql_init()
         self._init.dump_config()
-    except Exception as err: # pylint: disable=W0703
+    except Exception as err:  # pylint: disable=W0703
         logger.error(constants.EXCEPTION_MESSAGE,
                      &#39;flask&#39;,
                      err,
@@ -587,7 +638,7 @@ environment variables, and the agent-config.yaml file.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def register_processor(self, processor): # pylint: disable=R1710
+<pre><code class="python">def register_processor(self, processor):  # pylint: disable=R1710
     &#39;&#39;&#39;Add additional span exporters + processors&#39;&#39;&#39;
     logger.debug(&#39;Entering Agent.register_processor().&#39;)
     if not self.is_enabled():
@@ -613,33 +664,9 @@ environment variables, and the agent-config.yaml file.</p></div>
     try:
         self._init.requests_init(use_b3)
         self._init.dump_config()
-    except Exception as err: # pylint: disable=W0703
+    except Exception as err:  # pylint: disable=W0703
         logger.error(constants.EXCEPTION_MESSAGE,
                      &#39;flask&#39;,
-                     err,
-                     traceback.format_exc())</code></pre>
-</details>
-</dd>
-<dt id="hypertrace.agent.Agent.register_server_grpc"><code class="name flex">
-<span>def <span class="ident">register_server_grpc</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Register the grpc:server instrumentation module wrapper</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def register_server_grpc(self):
-    &#39;&#39;&#39;Register the grpc:server instrumentation module wrapper&#39;&#39;&#39;
-    logger.debug(&#39;Calling Agent.register_server_grpc().&#39;)
-    if not self.is_enabled():
-        return
-    try:
-        self._init.grpc_server_init()
-        self._init.dump_config()
-    except Exception as err: # pylint: disable=W0703
-        logger.error(constants.EXCEPTION_MESSAGE,
-                     &#39;grpc:server&#39;,
                      err,
                      traceback.format_exc())</code></pre>
 </details>
@@ -680,13 +707,13 @@ environment variables, and the agent-config.yaml file.</p></div>
 <ul class="">
 <li><code><a title="hypertrace.agent.Agent.is_enabled" href="#hypertrace.agent.Agent.is_enabled">is_enabled</a></code></li>
 <li><code><a title="hypertrace.agent.Agent.register_aiohttp_client" href="#hypertrace.agent.Agent.register_aiohttp_client">register_aiohttp_client</a></code></li>
-<li><code><a title="hypertrace.agent.Agent.register_client_grpc" href="#hypertrace.agent.Agent.register_client_grpc">register_client_grpc</a></code></li>
 <li><code><a title="hypertrace.agent.Agent.register_flask_app" href="#hypertrace.agent.Agent.register_flask_app">register_flask_app</a></code></li>
+<li><code><a title="hypertrace.agent.Agent.register_grpc_client" href="#hypertrace.agent.Agent.register_grpc_client">register_grpc_client</a></code></li>
+<li><code><a title="hypertrace.agent.Agent.register_grpc_server" href="#hypertrace.agent.Agent.register_grpc_server">register_grpc_server</a></code></li>
 <li><code><a title="hypertrace.agent.Agent.register_mysql" href="#hypertrace.agent.Agent.register_mysql">register_mysql</a></code></li>
 <li><code><a title="hypertrace.agent.Agent.register_postgresql" href="#hypertrace.agent.Agent.register_postgresql">register_postgresql</a></code></li>
 <li><code><a title="hypertrace.agent.Agent.register_processor" href="#hypertrace.agent.Agent.register_processor">register_processor</a></code></li>
 <li><code><a title="hypertrace.agent.Agent.register_requests" href="#hypertrace.agent.Agent.register_requests">register_requests</a></code></li>
-<li><code><a title="hypertrace.agent.Agent.register_server_grpc" href="#hypertrace.agent.Agent.register_server_grpc">register_server_grpc</a></code></li>
 </ul>
 </li>
 </ul>
