@@ -181,11 +181,7 @@ class Agent:
 #        '''Return configuration object'''
 #        return self._config.get_config()
 
-<<<<<<< HEAD
     def is_enabled(self) -> bool: # pylint: disable=R0201
-=======
-    def is_enabled(self):  # pylint: disable=R0201
->>>>>>> main
         '''Is agent enabled?'''
         if 'HT_ENABLED' in os.environ:
             if os.environ['HT_ENABLED'] == 'false':
