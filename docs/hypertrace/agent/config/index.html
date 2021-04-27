@@ -66,7 +66,7 @@ def load_config_from_file(filepath):
     Returns the config loaded from a providen config file
     &#34;&#34;&#34;
     logger.debug(
-        &#39;HT_CONFIG_FILE is set &#34;%s&#34;. Attempting to load the config file&#39; % filepath)
+        &#39;HT_CONFIG_FILE is set %s. Attempting to load the config file&#39;, filepath)
     try:
         path = os.path.abspath(filepath)
 
@@ -74,7 +74,7 @@ def load_config_from_file(filepath):
         from_file_config = yaml.load(file, Loader=yaml.FullLoader)
         file.close()
 
-        logger.debug(&#39;Successfully load config from &#34;%s&#34;&#39;, path)
+        logger.debug(&#39;Successfully load config from %s&#39;, path)
 
         return from_file_config
     except Exception as err:  # pylint: disable=W0703
@@ -100,7 +100,7 @@ class AgentConfig:  # pylint: disable=R0902,R0903
         self.config = None
         if &#39;HT_CONFIG_FILE&#39; in os.environ:
             if len(os.environ[&#39;HT_CONFIG_FILE&#39;]) == 0:
-                # HT_CONFIG_FILE can be passed as empty string which is envalid
+                # HT_CONFIG_FILE can be passed as empty string which is invalid
                 logger.error(
                     &#39;Failed to load HT_CONFIG_FILE env var being empty&#39;)
             else:
@@ -110,9 +110,8 @@ class AgentConfig:  # pylint: disable=R0902,R0903
                 self.config = merge_config(
                     DEFAULT_AGENT_CONFIG, config_from_file)
 
-                logger.debug(&#39;Successfully loaded config, config=%s&#39;,
-                             path,
-                             str(self.config))
+                logger.debug(
+                    &#39;Successfully loaded config, config=%s&#39;, str(self.config))
         else:
             logger.info(&#39;Loading default configuration.&#39;)
             self.config = DEFAULT_AGENT_CONFIG
@@ -346,7 +345,7 @@ class AgentConfig:  # pylint: disable=R0902,R0903
     Returns the config loaded from a providen config file
     &#34;&#34;&#34;
     logger.debug(
-        &#39;HT_CONFIG_FILE is set &#34;%s&#34;. Attempting to load the config file&#39; % filepath)
+        &#39;HT_CONFIG_FILE is set %s. Attempting to load the config file&#39;, filepath)
     try:
         path = os.path.abspath(filepath)
 
@@ -354,7 +353,7 @@ class AgentConfig:  # pylint: disable=R0902,R0903
         from_file_config = yaml.load(file, Loader=yaml.FullLoader)
         file.close()
 
-        logger.debug(&#39;Successfully load config from &#34;%s&#34;&#39;, path)
+        logger.debug(&#39;Successfully load config from %s&#39;, path)
 
         return from_file_config
     except Exception as err:  # pylint: disable=W0703
@@ -419,7 +418,7 @@ If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></di
         self.config = None
         if &#39;HT_CONFIG_FILE&#39; in os.environ:
             if len(os.environ[&#39;HT_CONFIG_FILE&#39;]) == 0:
-                # HT_CONFIG_FILE can be passed as empty string which is envalid
+                # HT_CONFIG_FILE can be passed as empty string which is invalid
                 logger.error(
                     &#39;Failed to load HT_CONFIG_FILE env var being empty&#39;)
             else:
@@ -429,9 +428,8 @@ If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></di
                 self.config = merge_config(
                     DEFAULT_AGENT_CONFIG, config_from_file)
 
-                logger.debug(&#39;Successfully loaded config, config=%s&#39;,
-                             path,
-                             str(self.config))
+                logger.debug(
+                    &#39;Successfully loaded config, config=%s&#39;, str(self.config))
         else:
             logger.info(&#39;Loading default configuration.&#39;)
             self.config = DEFAULT_AGENT_CONFIG
