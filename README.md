@@ -24,12 +24,10 @@ This agent supports these frameworks and adds following capabilities:
 
 Currently, this agent does not support auto-instrumentation. That will be available in a future release. In the meantime, the following code snippet must be added to the entry point of your python application.
 
-- Have access granted to your github.com id.
 - Install the hypertrace python agent:
 ```bash
 pip install git+https://github.com/hypertrace/pythonagent.git@main#egg=hypertrace
 ```
-- Enter your github.com username and password when prompted.
 - Add the following to your app's entrypoint python file:
 
 ```python
