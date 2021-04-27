@@ -1,3 +1,4 @@
+'''The default configuration for pythonagent'''
 DEFAULT_AGENT_CONFIG = {
     '_use_console_span_exporter': False,
     'enabled': True,
