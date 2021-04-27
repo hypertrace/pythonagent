@@ -102,16 +102,16 @@ class AgentConfig:  # pylint: disable=R0902,R0903
 
         if 'HT_REPORTING_OPA_ENDPOINT' in os.environ:
             logger.debug("[env] Loaded HT_REPORTING_OPA_ENDPOINT from env")
-            self.config['opa']['endpoint'] = os.environ['HT_REPORTING_OPA_ENDPOINT']
+            self.config['reporting']['opa']['endpoint'] = os.environ['HT_REPORTING_OPA_ENDPOINT']
 
         if 'HT_REPORTING_OPA_POLL_PERIOD_SECONDS' in os.environ:
             logger.debug(
                 "[env] Loaded HT_REPORTING_OPA_POLL_PERIOD_SECONDS from env")
-            self.config['opa']['poll_period_seconds'] = os.environ['HT_REPORTING_OPA_POLL_PERIOD_SECONDS']
+            self.config['reporting']['opa']['poll_period_seconds'] = int(os.environ['HT_REPORTING_OPA_POLL_PERIOD_SECONDS'])
 
         if 'HT_REPORTING_OPA_ENABLED' in os.environ:
             logger.debug("[env] Loaded HT_REPORTING_OPA_ENABLED from env")
-            self.config['opa']['enabled'] = os.environ['HT_REPORTING_OPA_ENABLED'].lower(
+            self.config['reporting']['opa']['enabled'] = os.environ['HT_REPORTING_OPA_ENABLED'].lower(
             ) == 'true'
 
         if 'HT_DATA_CAPTURE_HTTP_HEADERS_REQUEST' in os.environ:
