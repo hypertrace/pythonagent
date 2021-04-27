@@ -9,7 +9,7 @@ from . import DEFAULT_AGENT_CONFIG
 def test_merge_config():
     '''Unittest functionx for merging config entries.'''
     # set Environment Variable
-    os.environ["HT_CONFIG_FILE"] = "agent-config.yaml"
+    os.environ["HT_CONFIG_FILE"] = "./src/hypertrace/agent/config/agent-config.yaml"
     config_from_file = load_config_from_file(
         os.environ['HT_CONFIG_FILE'])
 
@@ -42,7 +42,7 @@ def test_merge_config():
 def test_agent_config():
     '''Unittest functionx for agent config entries.'''
     # set Environment Variable
-    os.environ["HT_CONFIG_FILE"] = "agent-config.yaml"
+    os.environ["HT_CONFIG_FILE"] = "./src/hypertrace/agent/config/agent-config.yaml"
     print('Initializing agent.')
     config = AgentConfig()
     assert config.agent_config.service_name == "pythonagent_001"
