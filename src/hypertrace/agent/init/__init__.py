@@ -20,11 +20,10 @@ logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
 class AgentInit:  # pylint: disable=R0902,R0903
     '''Initialize all the OTel components using configuration from AgentConfig'''
-    def __init__(self, agent: AgentConfig, init_console_only: bool = False):
+    def __init__(self, agentConfig: AgentConfig, init_console_only: bool = False):
         '''constructor'''
         logger.debug('Initializing AgentInit object.')
-        self._agent = agent
-        self._config = agent.get_config()
+        self._config = agentConfig
         self._module_initialized = {
             "flask": False,
             "grpc:server": False,
@@ -35,11 +34,9 @@ class AgentInit:  # pylint: disable=R0902,R0903
             "aiohttp_client": False
         }
         try:
-            self._config.dump_config()
-
             self._tracer_provider = TracerProvider(
                 resource=Resource.create({
-                    "service.name": self._config.service_name,
+                    "service.name": self._config.agent_config.service_name,
                     "service.instance.id": os.getpid(),
                 })
             )
@@ -106,14 +103,14 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self._grpc_instrumentor_server_wrapper.instrument()
 
             self._grpc_instrumentor_server_wrapper.set_process_request_headers(
-                self._config.data_capture.http_headers.request)
+                self._config.agent_config.data_capture.http_headers.request)
             self._grpc_instrumentor_server_wrapper.set_process_request_body(
-                self._config.data_capture.http_body.request)
+                self._config.agent_config.data_capture.http_body.request)
 
             self._grpc_instrumentor_server_wrapper.set_process_response_headers(
-                self._config.data_capture.http_headers.response)
+                self._config.agent_config.data_capture.http_headers.response)
             self._grpc_instrumentor_server_wrapper.set_process_response_body(
-                self._config.data_capture.http_body.response)
+                self._config.agent_config.data_capture.http_body.response)
         except Exception as err:  # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
                          'grpc:server',
@@ -134,14 +131,14 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self._grpc_instrumentor_client_wrapper.instrument()
 
             self._grpc_instrumentor_client_wrapper.set_process_request_headers(
-                self._config.data_capture.http_headers.request)
+                self._config.agent_config.data_capture.http_headers.request)
             self._grpc_instrumentor_client_wrapper.set_process_request_body(
-                self._config.data_capture.http_body.request)
+                self._config.agent_config.data_capture.http_body.request)
 
             self._grpc_instrumentor_client_wrapper.set_process_response_headers(
-                self._config.data_capture.http_headers.response)
+                self._config.agent_config.data_capture.http_headers.response)
             self._grpc_instrumentor_client_wrapper.set_process_response_body(
-                self._config.data_capture.http_body.response)
+                self._config.agent_config.data_capture.http_body.response)
         except Exception as err:  # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
                          'grpc:client',
@@ -197,7 +194,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self.init_instrumentor_wrapper_base_for_http(
                 self._requests_instrumentor_wrapper)
             if use_b3 \
-                    or self._config.propagation_formats == 'B3':
+                    or self._config.agent_config.propagation_formats == 'B3':
                 logger.debug('Enable B3 context propagation protocol.')
                 self.enable_b3()
         except Exception as err:  # pylint: disable=W0703
@@ -219,7 +216,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self.init_instrumentor_wrapper_base_for_http(
                 self._aiohttp_client_instrumentor_wrapper)
             if use_b3 \
-                    or self._config.propagation_formats == 'B3':
+                    or self._config.agent_config.propagation_formats == 'B3':
                 logger.debug('Enable B3 context propagation protocol.')
                 self.enable_b3()
         except Exception as err:  # pylint: disable=W0703
@@ -234,15 +231,15 @@ class AgentInit:  # pylint: disable=R0902,R0903
         logger.debug('Calling AgentInit.initInstrumentorWrapperBaseForHTTP().')
         instrumentor.instrument()
         instrumentor.set_process_request_headers(
-            self._config.data_capture.http_headers.request)
+            self._config.agent_config.data_capture.http_headers.request)
         instrumentor.set_process_request_body(
-            self._config.data_capture.http_body.request)
+            self._config.agent_config.data_capture.http_body.request)
         instrumentor.set_process_response_headers(
-            self._config.data_capture.http_headers.response)
+            self._config.agent_config.data_capture.http_headers.response)
         instrumentor.set_process_response_body(
-            self._config.data_capture.http_body.response)
+            self._config.agent_config.data_capture.http_body.response)
         instrumentor.set_body_max_size(
-            self._config.data_capture.body_max_size_bytes)
+            self._config.agent_config.data_capture.body_max_size_bytes)
 
     def register_processor(self, processor):
         '''Register additional span exporter + processor'''
@@ -253,7 +250,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
         '''Register the console span processor for debugging purposes.'''
         logger.debug('Entering AgentInit.setConsoleSpanProcessor().')
         console_span_exporter = ConsoleSpanExporter(
-            service_name=self._config.service_name)
+            service_name=self._config.agent_config.service_name)
         simple_export_span_processor = SimpleSpanProcessor(
             console_span_exporter)
         self._tracer_provider.add_span_processor(simple_export_span_processor)
@@ -267,14 +264,14 @@ class AgentInit:  # pylint: disable=R0902,R0903
             else:
                 return
         else:
-            if self._config.reporting.trace_reporter_type == 'ZIPKIN':
+            if self._config.agent_config.reporting.trace_reporter_type == 'ZIPKIN':
                 logger.debug("Trace reporter type is zipkin, adding exporter.")
             else:
                 return
 
         try:
             zipkin_exporter = ZipkinExporter(
-                endpoint=self._config.reporting.endpoint
+                endpoint=self._config.agent_config.reporting.endpoint
             )
 
             span_processor = BatchSpanProcessor(zipkin_exporter)
@@ -294,14 +291,14 @@ class AgentInit:  # pylint: disable=R0902,R0903
             else:
                 return
         else:
-            if self._config.reporting.trace_reporter_type == 'OTLP':
+            if self._config.agent_config.reporting.trace_reporter_type == 'OTLP':
                 logger.debug("Trace reporter type is otlp, adding exporter.")
             else:
                 return
 
         try:
-            otlp_exporter = OTLPSpanExporter(endpoint=self._config.reporting.endpoint,
-                                             insecure=self._config.reporting.secure)
+            otlp_exporter = OTLPSpanExporter(endpoint=self._config.agent_config.reporting.endpoint,
+                                             insecure=self._config.agent_config.reporting.secure)
             span_processor = BatchSpanProcessor(otlp_exporter)
             self._tracer_provider.add_span_processor(span_processor)
 

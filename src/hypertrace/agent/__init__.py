@@ -60,7 +60,7 @@ class Agent:
             return
         try:
             self._config = AgentConfig()
-            self._init = AgentInit(self, init_console_only)
+            self._init = AgentInit(self._config, init_console_only)
         except Exception as err: # pylint: disable=W0703
             logger.error('Failed to initialize Agent: exception=%s, stacktrace=%s',
                          err,
@@ -172,11 +172,11 @@ class Agent:
         if self.is_enabled():
             return self._init.register_processor(processor)
 
-    def get_config(self):
-        '''Return configuration object'''
-        return self._config
+#    def get_config(self) -> r:
+#        '''Return configuration object'''
+#        return self._config.get_config()
 
-    def is_enabled(self): # pylint: disable=R0201
+    def is_enabled(self) -> bool: # pylint: disable=R0201
         '''Is agent enabled?'''
         if 'HT_ENABLED' in os.environ:
             if os.environ['HT_ENABLED'] == 'false':
