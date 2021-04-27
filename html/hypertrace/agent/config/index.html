@@ -138,18 +138,19 @@ class AgentConfig:  # pylint: disable=R0902,R0903
 
         if &#39;HT_REPORTING_OPA_ENDPOINT&#39; in os.environ:
             logger.debug(&#34;[env] Loaded HT_REPORTING_OPA_ENDPOINT from env&#34;)
-            self.config[&#39;opa&#39;][&#39;endpoint&#39;] = os.environ[&#39;HT_REPORTING_OPA_ENDPOINT&#39;]
+            self.config[&#39;reporting&#39;][&#39;opa&#39;][&#39;endpoint&#39;] = os.environ[&#39;HT_REPORTING_OPA_ENDPOINT&#39;]
 
         if &#39;HT_REPORTING_OPA_POLL_PERIOD_SECONDS&#39; in os.environ:
             logger.debug(
                 &#34;[env] Loaded HT_REPORTING_OPA_POLL_PERIOD_SECONDS from env&#34;)
-            self.config[&#39;opa&#39;][&#39;poll_period_seconds&#39;] \
-              = os.environ[&#39;HT_REPORTING_OPA_POLL_PERIOD_SECONDS&#39;]
+            self.config[&#39;reporting&#39;][&#39;opa&#39;][&#39;poll_period_seconds&#39;] \
+                = int(os.environ[&#39;HT_REPORTING_OPA_POLL_PERIOD_SECONDS&#39;])
 
         if &#39;HT_REPORTING_OPA_ENABLED&#39; in os.environ:
             logger.debug(&#34;[env] Loaded HT_REPORTING_OPA_ENABLED from env&#34;)
-            self.config[&#39;opa&#39;][&#39;enabled&#39;] = os.environ[&#39;HT_REPORTING_OPA_ENABLED&#39;].lower(
-            ) == &#39;true&#39;
+            self.config[&#39;reporting&#39;][&#39;opa&#39;][&#39;enabled&#39;] \
+                = os.environ[&#39;HT_REPORTING_OPA_ENABLED&#39;].lower() \
+                  == &#39;true&#39;
 
         if &#39;HT_DATA_CAPTURE_HTTP_HEADERS_REQUEST&#39; in os.environ:
             logger.debug(
@@ -342,7 +343,9 @@ class AgentConfig:  # pylint: disable=R0902,R0903
                                  err,
                                  traceback.format_exc())
             else:
-                raise Exception(&#39;Unkown type&#39;)
+                logger.error(&#39;Unknown attribute type encountered: exception=%s, stacktrace=%s&#39;,
+                             err,
+                             traceback.format_exc())
 
     def dump_config(self):
         &#39;&#39;&#39;Dump configuration information.&#39;&#39;&#39;
@@ -368,7 +371,7 @@ class AgentConfig:  # pylint: disable=R0902,R0903
 <dd>
 <div class="desc"><p>The default configuration for pythonagent</p></div>
 </dd>
-<dt><code class="name"><a title="hypertrace.agent.config.test_merge_config" href="test_merge_config.html">hypertrace.agent.config.test_merge_config</a></code></dt>
+<dt><code class="name"><a title="hypertrace.agent.config.test_unittests" href="test_unittests.html">hypertrace.agent.config.test_unittests</a></code></dt>
 <dd>
 <div class="desc"><p>Unittest for merging config entries.</p></div>
 </dd>
@@ -503,18 +506,19 @@ If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></di
 
         if &#39;HT_REPORTING_OPA_ENDPOINT&#39; in os.environ:
             logger.debug(&#34;[env] Loaded HT_REPORTING_OPA_ENDPOINT from env&#34;)
-            self.config[&#39;opa&#39;][&#39;endpoint&#39;] = os.environ[&#39;HT_REPORTING_OPA_ENDPOINT&#39;]
+            self.config[&#39;reporting&#39;][&#39;opa&#39;][&#39;endpoint&#39;] = os.environ[&#39;HT_REPORTING_OPA_ENDPOINT&#39;]
 
         if &#39;HT_REPORTING_OPA_POLL_PERIOD_SECONDS&#39; in os.environ:
             logger.debug(
                 &#34;[env] Loaded HT_REPORTING_OPA_POLL_PERIOD_SECONDS from env&#34;)
-            self.config[&#39;opa&#39;][&#39;poll_period_seconds&#39;] \
-              = os.environ[&#39;HT_REPORTING_OPA_POLL_PERIOD_SECONDS&#39;]
+            self.config[&#39;reporting&#39;][&#39;opa&#39;][&#39;poll_period_seconds&#39;] \
+                = int(os.environ[&#39;HT_REPORTING_OPA_POLL_PERIOD_SECONDS&#39;])
 
         if &#39;HT_REPORTING_OPA_ENABLED&#39; in os.environ:
             logger.debug(&#34;[env] Loaded HT_REPORTING_OPA_ENABLED from env&#34;)
-            self.config[&#39;opa&#39;][&#39;enabled&#39;] = os.environ[&#39;HT_REPORTING_OPA_ENABLED&#39;].lower(
-            ) == &#39;true&#39;
+            self.config[&#39;reporting&#39;][&#39;opa&#39;][&#39;enabled&#39;] \
+                = os.environ[&#39;HT_REPORTING_OPA_ENABLED&#39;].lower() \
+                  == &#39;true&#39;
 
         if &#39;HT_DATA_CAPTURE_HTTP_HEADERS_REQUEST&#39; in os.environ:
             logger.debug(
@@ -707,7 +711,9 @@ If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></di
                                  err,
                                  traceback.format_exc())
             else:
-                raise Exception(&#39;Unkown type&#39;)
+                logger.error(&#39;Unknown attribute type encountered: exception=%s, stacktrace=%s&#39;,
+                             err,
+                             traceback.format_exc())
 
     def dump_config(self):
         &#39;&#39;&#39;Dump configuration information.&#39;&#39;&#39;
@@ -816,7 +822,9 @@ defined in the config_pb2.AgentConfig</p></div>
                              err,
                              traceback.format_exc())
         else:
-            raise Exception(&#39;Unkown type&#39;)</code></pre>
+            logger.error(&#39;Unknown attribute type encountered: exception=%s, stacktrace=%s&#39;,
+                         err,
+                         traceback.format_exc())</code></pre>
 </details>
 </dd>
 </dl>
@@ -839,7 +847,7 @@ defined in the config_pb2.AgentConfig</p></div>
 <ul>
 <li><code><a title="hypertrace.agent.config.config_pb2" href="config_pb2.html">hypertrace.agent.config.config_pb2</a></code></li>
 <li><code><a title="hypertrace.agent.config.default" href="default.html">hypertrace.agent.config.default</a></code></li>
-<li><code><a title="hypertrace.agent.config.test_merge_config" href="test_merge_config.html">hypertrace.agent.config.test_merge_config</a></code></li>
+<li><code><a title="hypertrace.agent.config.test_unittests" href="test_unittests.html">hypertrace.agent.config.test_unittests</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
