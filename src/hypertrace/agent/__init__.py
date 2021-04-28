@@ -65,7 +65,7 @@ class Agent:
             return
         try:
             self._config = AgentConfig()
-            self._init = AgentInit(self, init_console_only)
+            self._init = AgentInit(self._config, init_console_only)
         except Exception as err:  # pylint: disable=W0703
             logger.error('Failed to initialize Agent: exception=%s, stacktrace=%s',
                          err,

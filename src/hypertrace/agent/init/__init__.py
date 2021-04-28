@@ -20,10 +20,10 @@ logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
 class AgentInit:  # pylint: disable=R0902,R0903
     '''Initialize all the OTel components using configuration from AgentConfig'''
-    def __init__(self, agentConfig: AgentConfig, init_console_only: bool = False):
+    def __init__(self, agent_config: AgentConfig, init_console_only: bool = False):
         '''constructor'''
         logger.debug('Initializing AgentInit object.')
-        self._config = agentConfig
+        self._config = agent_config
         self._module_initialized = {
             "flask": False,
             "grpc:server": False,

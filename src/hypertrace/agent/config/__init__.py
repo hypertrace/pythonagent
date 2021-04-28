@@ -271,6 +271,8 @@ class AgentConfig:  # pylint: disable=R0902,R0903
         # Validate configuration
         self.validate_config_elements(self.config, self.agent_config)
 
+        logger.debug('Merged configuration loaded successfully.')
+
     def validate_config_elements(self, config_element, agent_config_base):
         """Validate that all present elements in the parse configuration are
         defined in the config_pb2.AgentConfig"""
@@ -297,7 +299,7 @@ class AgentConfig:  # pylint: disable=R0902,R0903
                                  traceback.format_exc())
                     continue
             if isinstance(config_element[key], (str, bool, int, list)):
-                logger.debug('is string')
+                logger.debug('is a known configuration data type')
                 if key in PYTHON_SPECIFIC_ATTRIBUTES:
                     logger.debug('Found pythonagent-specific attribute, attr=%s', key)
                     continue
