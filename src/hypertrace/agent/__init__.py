@@ -9,7 +9,9 @@ from hypertrace.agent.config import AgentConfig
 from hypertrace.agent import constants
 
 # main logging modle configuration
-def setup_custom_logger(name):
+
+
+def setup_custom_logger(name: str) -> logging.Logger:
     '''Agent logger configuration'''
     try:
         formatter = logging.Formatter(fmt='%(asctime)s %(levelname)-8s %(message)s',
@@ -61,12 +63,12 @@ class Agent:
         try:
             self._config = AgentConfig()
             self._init = AgentInit(self._config, init_console_only)
-        except Exception as err: # pylint: disable=W0703
+        except Exception as err:  # pylint: disable=W0703
             logger.error('Failed to initialize Agent: exception=%s, stacktrace=%s',
                          err,
                          traceback.format_exc())
 
-    def register_flask_app(self, app, use_b3=False):
+    def register_flask_app(self, app, use_b3=False) -> None:
         '''Register the flask instrumentation module wrapper'''
         logger.debug('Calling Agent.register_flask_app.')
         if not self.is_enabled():
@@ -80,7 +82,7 @@ class Agent:
                          err,
                          traceback.format_exc())
 
-    def register_server_grpc(self):
+    def register_grpc_server(self) -> None:
         '''Register the grpc:server instrumentation module wrapper'''
         logger.debug('Calling Agent.register_server_grpc().')
         if not self.is_enabled():
@@ -94,7 +96,8 @@ class Agent:
                          err,
                          traceback.format_exc())
 
-    def register_client_grpc(self):
+
+    def register_grpc_client(self) -> None:
         '''Register the grpc:client instrumentation module wrapper'''
         logger.debug('Calling Agent.register_client_grpc().')
         if not self.is_enabled():
@@ -108,7 +111,7 @@ class Agent:
                          err,
                          traceback.format_exc())
 
-    def register_mysql(self):
+    def register_mysql(self) -> None:
         '''Register the mysql instrumentation module wrapper'''
         logger.debug('Calling Agent.register_mysql().')
         if not self.is_enabled():
@@ -122,7 +125,7 @@ class Agent:
                          err,
                          traceback.format_exc())
 
-    def register_postgresql(self):
+    def register_postgresql(self) -> None:
         '''Register the postgresql instrumentation module wrapper'''
         logger.debug('Calling Agent.register_postgresql().')
         if not self.is_enabled():
@@ -136,7 +139,7 @@ class Agent:
                          err,
                          traceback.format_exc())
 
-    def register_requests(self, use_b3=False):
+    def register_requests(self, use_b3=False) -> None:
         '''Register the requests instrumentation module wrapper'''
         logger.debug('Calling Agent.register_requests()')
         if not self.is_enabled():
@@ -150,7 +153,7 @@ class Agent:
                          err,
                          traceback.format_exc())
 
-    def register_aiohttp_client(self, use_b3=False):
+    def register_aiohttp_client(self, use_b3=False) -> None:
         '''Register the aiohttp-client instrumentation module wrapper'''
         logger.debug('Calling Agent.register_aiohttp_client().')
         if not self.is_enabled():
@@ -164,17 +167,14 @@ class Agent:
                          err,
                          traceback.format_exc())
 
-    def register_processor(self, processor): # pylint: disable=R1710
+    def register_processor(self, processor) -> None:  # pylint: disable=R1710
+
         '''Add additional span exporters + processors'''
         logger.debug('Entering Agent.register_processor().')
         if not self.is_enabled():
             return None
         if self.is_enabled():
             return self._init.register_processor(processor)
-
-#    def get_config(self) -> r:
-#        '''Return configuration object'''
-#        return self._config.get_config()
 
     def is_enabled(self) -> bool: # pylint: disable=R0201
         '''Is agent enabled?'''

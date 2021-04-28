@@ -26,7 +26,7 @@ from hypertrace.agent.instrumentation import BaseInstrumentorWrapper
 logger = logging.getLogger(__name__) # pylint: disable=C0103
 
 # Object introspection, used for debugging purposes
-def introspect(obj):
+def introspect(obj) -> None:
     '''Object introspection, used for debugging purposes'''
     logger.debug('Describing object.')
     try:
@@ -40,8 +40,6 @@ def introspect(obj):
                      traceback.print_exc())
 
 # The main entry point for a wrapper around the OTel grpc:server instrumentation module
-
-
 class GrpcInstrumentorServerWrapper(GrpcInstrumentorServer, BaseInstrumentorWrapper):
     '''Hypertrace wrapper around OTel grpc:server instrumentor class'''
     # Construtor
@@ -52,25 +50,25 @@ class GrpcInstrumentorServerWrapper(GrpcInstrumentorServer, BaseInstrumentorWrap
         self._original_wrapper_func = None
 
     # Enable wrapper instrumentation
-    def instrument(self, **kwargs):
+    def instrument(self, **kwargs) -> None:
         '''instrument grpc:server'''
         logger.debug('Entering GrpcInstrumentorServerWrapper.instument().')
         super().instrument()
 
     # Remove wrapper instrumentation
-    def uninstrument(self, **kwargs):
+    def uninstrument(self, **kwargs) -> None:
         '''disable grpc:server instrumentation.'''
         logger.debug('Entering GrpcInstrumentorServerWrapper.uninstrument()')
         super().uninstrument()
 
     # Internal enable wrapper instrumentation
-    def _instrument(self, **kwargs):
+    def _instrument(self, **kwargs) -> None:
         '''Enable wrapper instrumentation internal call'''
         logger.debug('Entering GrpcInstrumentorServerWrapper._instument().')
         super()._instrument(**kwargs)
         self._original_wrapper_func = grpc.server
 
-        def server_wrapper(*args, **kwargs):
+        def server_wrapper(*args, **kwargs) -> None:
             logger.debug('Entering wrapper interceptors set')
             logger.debug(
                 'Setting server_interceptor_wrapper() as interceptor.')
@@ -79,7 +77,7 @@ class GrpcInstrumentorServerWrapper(GrpcInstrumentorServer, BaseInstrumentorWrap
         grpc.server = server_wrapper
 
     # Internal disable wrapper instrumentation
-    def _uninstrument(self, **kwargs):
+    def _uninstrument(self, **kwargs) -> None:
         '''Disable wrapper instrumentation internal call'''
         logger.debug('Entering GrpcInstrumentorServerWrapper._uninstrument()')
         super()._uninstrument(**kwargs)
@@ -94,7 +92,7 @@ class GrpcInstrumentorClientWrapper(GrpcInstrumentorClient, BaseInstrumentorWrap
         super().__init__()
 
     # Internal initialize instrumentation
-    def _instrument(self, **kwargs):
+    def _instrument(self, **kwargs) -> None:
         '''Internal initialize instrumentation'''
         logger.debug('Entering GrpcInstrumentorClientWrapper._instrument().')
         super()._instrument(**kwargs)
@@ -105,13 +103,13 @@ class GrpcInstrumentorClientWrapper(GrpcInstrumentorClient, BaseInstrumentorWrap
 #    )
 
     # Internal disable instrumentation
-    def _uninstrument(self, **kwargs):
+    def _uninstrument(self, **kwargs) -> None:
         '''Internal disable instrumentation'''
         logger.debug('Entering GrpcInstrumentorClientWrapper._uninstrument().')
         super()._uninstrument(**kwargs)
 
     # Wrap function for initializing the the request handler
-    def wrapper_fn_wrapper(self, original_func, instance, args, kwargs): # pylint: disable=W0613,R0201
+    def wrapper_fn_wrapper(self, original_func, instance, args, kwargs) -> None: # pylint: disable=W0613,R0201
         '''Wrap function for initializing the the request handler'''
         channel = original_func(*args, **kwargs)
         tracer_provider = kwargs.get("tracer_provider")
@@ -121,26 +119,20 @@ class GrpcInstrumentorClientWrapper(GrpcInstrumentorClient, BaseInstrumentorWrap
         )
 
 # Initialize the server handler
-
-
-def server_interceptor_wrapper(gisw, tracer_provider=None):
+def server_interceptor_wrapper(gisw, tracer_provider=None) -> None:
     '''Helper function to set interceptor.'''
     logger.debug('Entering server_interceptor_wrapper().')
     tracer = trace.get_tracer(__name__, __version__, tracer_provider)
     return OpenTelemetryServerInterceptorWrapper(tracer, gisw)
 
 # Initialize the client handler
-
-
-def client_interceptor_wrapper(tracer_provider):
+def client_interceptor_wrapper(tracer_provider) -> None:
     '''Helper function to set interceptor.'''
     logger.debug('Entering client_interceptor_wrapper().')
     tracer = trace.get_tracer(__name__, __version__, tracer_provider)
     return OpenTelemetryClientInterceptorWrapper(tracer)
 
 # Wrapper around Server-side telemetry context
-
-
 class _OpenTelemetryWrapperServicerContext(_server._OpenTelemetryServicerContext): # pylint: disable=W0212
     '''grpc:server telemetry context'''
     def __init__(self, servicer_context, active_span):
@@ -150,7 +142,7 @@ class _OpenTelemetryWrapperServicerContext(_server._OpenTelemetryServicerContext
         super().__init__(servicer_context, active_span)
         self._response_headers = ()
 
-    def set_trailing_metadata(self, *args, **kwargs):
+    def set_trailing_metadata(self, *args, **kwargs) -> None:
         """Override trailing metadata(response headers) method.
         Allows us to capture the response headers"""
         logger.debug(
@@ -160,7 +152,7 @@ class _OpenTelemetryWrapperServicerContext(_server._OpenTelemetryServicerContext
         self._response_headers = args
         return self._servicer_context.set_trailing_metadata(*args, **kwargs)
 
-    def get_trailing_metadata(self):
+    def get_trailing_metadata(self) -> tuple:
         '''Return response headers'''
         return self._response_headers
 
@@ -186,7 +178,7 @@ class OpenTelemetryServerInterceptorWrapper(_server.OpenTelemetryServerIntercept
             logger.debug(
                 'Entering OpenTelemetryServerInterceptorWrapper.telemetry_wrapper().')
 
-            def telemetry_interceptor(request_or_iterator, context):
+            def telemetry_interceptor(request_or_iterator, context) -> None:
                 '''Process request for hypertrace.'''
                 logger.debug(
                     'Entering OpenTelemetryServerInterceptorWrapper.telemetry_interceptor().')
@@ -233,7 +225,7 @@ class OpenTelemetryServerInterceptorWrapper(_server.OpenTelemetryServerIntercept
             behavior,
             handler_call_details,
             request_or_iterator,
-            context):
+            context) -> None:
         '''Setup interceptor helper for streaming requests.'''
         logger.debug(
             'Entering OpenTelemetryServerInterceptorWrapper.intercept_server_stream().')
@@ -248,7 +240,7 @@ class OpenTelemetryClientInterceptorWrapper(_client.OpenTelemetryClientIntercept
             'Entering OpenTelemetryClientInterceptorWrapper.__init__().')
         super().__init__(tracer)
 
-    def intercept_unary(self, request, metadata, client_info, invoker):
+    def intercept_unary(self, request, metadata, client_info, invoker) -> None:
         '''Process unary request for hypertrace.'''
         logger.debug(
             'Entering OpenTelemetryClientInterceptorWrapper.intercept_unary().')
@@ -274,7 +266,7 @@ class OpenTelemetryClientInterceptorWrapper(_client.OpenTelemetryClientIntercept
             metadata,
             client_info,
             invoker
-    ):
+    ) -> None:
         '''process streaming request for hypertrace'''
         logger.debug(
             'Entering OpenTelemetryClientInterceptorWrapper.intercept_stream().')

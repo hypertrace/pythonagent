@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)  # pylint: disable=C0103
 # Max time to wait for response data to be read.
 MAX_WAIT_TIME = 0.1 # seconds
 # Object introspection, used for debugging purposes
-def introspect(obj):
+def introspect(obj) -> None:
     '''Object introspection, used for debugging purposes'''
     logger.debug('Describing object.')
     try:
@@ -48,7 +48,7 @@ class AioHttpClientInstrumentorWrapper(AioHttpClientInstrumentor, BaseInstrument
         logger.debug('Entering AioHttpClientInstrumentor.__init__().')
         super().__init__()
 
-    def _instrument(self, **kwargs):
+    def _instrument(self, **kwargs) -> None:
         '''Enable instrumentation.'''
         logger.debug(
             'Entering AioHttpClientInstrumentorWrapper._instrument().')
@@ -114,7 +114,7 @@ def create_trace_config(
             unused_session: aiohttp.ClientSession,
             trace_config_ctx: types.SimpleNamespace,
             params: aiohttp.TraceRequestEndParams,
-    ):
+    ) -> None:
         logger.debug('Entering hypertrace on_request_end().')
         logger.debug('request headers: %s', str(params.headers))
         logger.debug('response headers: %s', str(params.response.headers))
@@ -192,9 +192,9 @@ def _instrument(
         url_filter: _UrlFilterT = None,
         span_name: _SpanNameT = None,
         aiohttp_client_wrapper: AioHttpClientInstrumentorWrapper = None
-):
+) -> None:
     '''Setup details of trace config context'''
-    def instrumented_init(wrapped, instance, args, kwargs):  # pylint: disable=W0613
+    def instrumented_init(wrapped, instance, args, kwargs) -> None:  # pylint: disable=W0613
         if context_api.get_value("suppress_instrumentation"):
             return wrapped(*args, **kwargs)
 

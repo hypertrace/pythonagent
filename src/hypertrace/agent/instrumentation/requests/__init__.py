@@ -16,7 +16,7 @@ def get_active_span_for_call_wrapper(requests_wrapper):
     '''Helper function to setup call wrapper function'''
     logger.debug('Entering get_active_span_for_call_wrapper().')
 
-    def get_active_span_for_call(span, response):
+    def get_active_span_for_call(span, response) -> None:
         '''Hypertrace call wrapper function'''
         logger.debug('Entering get_active_span_for_request().')
         logger.debug('span: %s', str(span))
@@ -51,7 +51,7 @@ def get_active_span_for_call_wrapper(requests_wrapper):
                 response_headers, response_content, span)
     return get_active_span_for_call
 
-def hypertrace_name_callback(method, url):
+def hypertrace_name_callback(method, url) -> str:
     '''generate span name'''
     logger.debug('Entering hypertrace_name_callback(), method=%s, url=%s.', method, url)
     return method + ' ' + url
@@ -63,7 +63,7 @@ class RequestsInstrumentorWrapper(RequestsInstrumentor, BaseInstrumentorWrapper)
         logger.debug('Entering RequestsInstrumentorWrapper.__init__().')
         super().__init__()
 
-    def _instrument(self, **kwargs):
+    def _instrument(self, **kwargs) -> None:
         '''internal enable instrumentation'''
         super()._instrument(
             tracer_provider=kwargs.get("tracer_provider"),
@@ -71,6 +71,6 @@ class RequestsInstrumentorWrapper(RequestsInstrumentor, BaseInstrumentorWrapper)
             name_callback=hypertrace_name_callback
         )
 
-    def _uninstrument(self, **kwargs):
+    def _uninstrument(self, **kwargs) -> None:
         '''internal disable instrumentation'''
         super()._uninstrument()

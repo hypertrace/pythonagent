@@ -25,5 +25,5 @@ data_capture:
 propagation_formats: "B3"
 _use_console_span_exporter: true
 enabled: false
-resource_attributes: {'service_name': 'pythonagent_001'}
+resource_attributes: {}
 

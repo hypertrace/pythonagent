@@ -1,0 +1,6 @@
+[submodule "src/agent-config"]
+	path = src/protobuf-config/agent-config
+	url = https://github.com/hypertrace/agent-config.git
+[submodule "src/protobuf-config/agent-config/tools/env-vars-generator/protobuf"]
+	path = src/protobuf-config/agent-config/tools/env-vars-generator/protobuf
+	url = https://github.com/protocolbuffers/protobuf.git

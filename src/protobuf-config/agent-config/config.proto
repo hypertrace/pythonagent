@@ -52,7 +52,7 @@ message Reporting {
     // opa describes the setting related to the Open Policy Agent
     Opa opa = 4;
 
-    // reporter type. Defaults to zipkin, in the future it will change to otlp.
+    // reporter type for traces.
     TraceReporterType trace_reporter_type = 5;
 }
 
@@ -109,13 +109,17 @@ enum PropagationFormat {
 
 // TraceReporterType represents the reporting format for trace data.
 enum TraceReporterType {
+
+    // Default to none. Agent will use it's default reporting type
+    UNSPECIFIED = 0;
+
     // Zipkin protobuf reporting format.
     // see https://github.com/openzipkin/zipkin-api
-    ZIPKIN = 0;
+    ZIPKIN = 1;
 
     // OpenTelemetry protobuf reporting format.
     // see https://github.com/open-telemetry/opentelemetry-proto
-    OTLP = 1;
+    OTLP = 2;
 }
 
 // JavaAgent has the configs specific to javaagent
