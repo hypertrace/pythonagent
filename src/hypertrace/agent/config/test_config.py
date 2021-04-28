@@ -110,4 +110,3 @@ def test_env_config():
     assert config.agent_config.propagation_formats == 0
     assert not config.agent_config.enabled
     assert config.agent_config.resource_attributes == {'service_name': 'pythonagent_002'}
-    
