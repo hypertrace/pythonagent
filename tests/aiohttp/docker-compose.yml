@@ -5,7 +5,7 @@ services:
     container_name: flask_app_b
     build:
       context: ../..
-      dockerfile: test/aiohttp/flask_app/Dockerfile
+      dockerfile: tests/aiohttp/flask_app/Dockerfile
     environment:
       ENABLE_INSTRUMENTATION: ${ENABLE_INSTRUMENTATION}
       HT_TRACES_EXPORTER: zipkin
@@ -19,7 +19,7 @@ services:
     container_name: flask_app_c
     build:
       context: ../..
-      dockerfile: test/aiohttp/flask_app/Dockerfile
+      dockerfile: tests/aiohttp/flask_app/Dockerfile
     environment:
       ENABLE_INSTRUMENTATION: ${ENABLE_INSTRUMENTATION}
       HT_TRACES_EXPORTER: zipkin
