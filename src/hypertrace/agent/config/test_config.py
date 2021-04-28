@@ -1,9 +1,10 @@
 '''Unittest for merging config entries.'''
 import os
+from hypertrace.agent.config import AgentConfig
 from . import DEFAULT_AGENT_CONFIG
 from . import merge_config
 from . import load_config_from_file
-from hypertrace.agent.config import AgentConfig
+
 
 
 def test_merge_config() -> None:
@@ -114,43 +115,42 @@ def test_env_config() -> None:
     assert config.agent_config.propagation_formats == 0
     assert not config.agent_config.enabled
     assert config.agent_config.resource_attributes == {'service_name': 'pythonagent_002'}
-
-def unset_env_variables():
-
+# reset Environment variables
+def unset_env_variables(): # pylint: disable=R0902,R0903,R0912
+    '''Reset environment variables.'''
     if hasattr(os, 'HT_SERVICE_NAME'):
         del os.environ["HT_SERVICE_NAME"]
     if hasattr(os, 'HT_REPORTING_ENDPOINT'):
-            del os.environ["HT_REPORTING_ENDPOINT"]
+        del os.environ["HT_REPORTING_ENDPOINT"]
     if hasattr(os, 'HT_TRACES_EXPORTER'):
         del os.environ["HT_TRACES_EXPORTER"]
     if hasattr(os, 'HT_REPORTING_SECURE'):
-            del os.environ["HT_REPORTING_SECURE"]
+        del os.environ["HT_REPORTING_SECURE"]
     if hasattr(os, 'HT_REPORTING_TOKEN'):
         del os.environ["HT_REPORTING_TOKEN"]
     if hasattr(os, 'HT_REPORTING_OPA_ENDPOINT'):
-            del os.environ["HT_REPORTING_OPA_ENDPOINT"]
+        del os.environ["HT_REPORTING_OPA_ENDPOINT"]
     if hasattr(os, 'HT_REPORTING_OPA_POLL_PERIOD_SECONDS'):
         del os.environ["HT_REPORTING_OPA_POLL_PERIOD_SECONDS"]
     if hasattr(os, 'HT_REPORTING_OPA_ENABLED'):
-            del os.environ["HT_REPORTING_OPA_ENABLED"]
+        del os.environ["HT_REPORTING_OPA_ENABLED"]
     if hasattr(os, 'HT_DATA_CAPTURE_HTTP_HEADERS_REQUEST'):
         del os.environ["HT_DATA_CAPTURE_HTTP_HEADERS_REQUEST"]
     if hasattr(os, 'HT_DATA_CAPTURE_HTTP_HEADERS_RESPONSE'):
-            del os.environ["HT_DATA_CAPTURE_HTTP_HEADERS_RESPONSE"]
+        del os.environ["HT_DATA_CAPTURE_HTTP_HEADERS_RESPONSE"]
     if hasattr(os, 'HT_DATA_CAPTURE_RPC_METADATA_REQUEST'):
-            del os.environ["HT_DATA_CAPTURE_RPC_METADATA_REQUEST"]
+        del os.environ["HT_DATA_CAPTURE_RPC_METADATA_REQUEST"]
     if hasattr(os, 'HT_DATA_CAPTURE_RPC_METADATA_RESPONSE'):
-            del os.environ["HT_DATA_CAPTURE_RPC_METADATA_RESPONSE"]
+        del os.environ["HT_DATA_CAPTURE_RPC_METADATA_RESPONSE"]
     if hasattr(os, 'HT_DATA_CAPTURE_RPC_BODY_REQUEST'):
-            del os.environ["HT_DATA_CAPTURE_RPC_BODY_REQUEST"]
+        del os.environ["HT_DATA_CAPTURE_RPC_BODY_REQUEST"]
     if hasattr(os, 'HT_DATA_CAPTURE_HTTP_HEADERS_RESPONSE'):
-            del os.environ["HT_DATA_CAPTURE_HTTP_HEADERS_RESPONSE"]
+        del os.environ["HT_DATA_CAPTURE_HTTP_HEADERS_RESPONSE"]
     if hasattr(os, 'HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES'):
-            del os.environ["HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES"]
+        del os.environ["HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES"]
     if hasattr(os, 'HT_PROPAGATION_FORMATS'):
-            del os.environ["HT_PROPAGATION_FORMATS"]
+        del os.environ["HT_PROPAGATION_FORMATS"]
     if hasattr(os, 'HT_ENABLED'):
-                del os.environ["HT_ENABLED"]
+        del os.environ["HT_ENABLED"]
     if hasattr(os, 'HT_ENABLE_CONSOLE_SPAN_EXPORTER'):
-                del os.environ["HT_ENABLE_CONSOLE_SPAN_EXPORTER"]
-
+        del os.environ["HT_ENABLE_CONSOLE_SPAN_EXPORTER"]
