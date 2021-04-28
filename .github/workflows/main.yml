@@ -55,7 +55,7 @@ jobs:
           pip install --upgrade protobuf
 
       - name: Run tests
-        run: PY_TARGET=$(echo "${{ matrix.python }}" | sed -e 's/\.//g') make test
+        run: PYTHON_VERSION=${{ matrix.python }} make test
 #      - name: Build packge
 #        run: make build
 

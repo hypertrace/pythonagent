@@ -1,12 +1,17 @@
+#!/bin/bash
+
 TEST_DIR=tests
+
+PYTHON_VERSION ?= $(shell python --version | cut -c8- | cut -d'.' -f 1-2) # e.g. 3.9
+PY_TARGET=py$(subst .,,$(PYTHON_VERSION)) # e.g. py39
 
 .PHONY: test-unit
 test-unit:
 	tox -e test-unit
 
 .PHONY: test-integration
-test-integration: # Call through tests_py37 | tests_py38 | tests_py39
-	@echo "Running tests over ${PY_TARGET}" 
+test-integration:
+	@echo "Running tests over $(PY_TARGET)" 
 	cd ${TEST_DIR}/flask; tox -e ${PY_TARGET}
 	cd ${TEST_DIR}/grpc; tox -e ${PY_TARGET}
 	cd ${TEST_DIR}/mysql; tox -e ${PY_TARGET}
