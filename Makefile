@@ -1,16 +1,21 @@
 TEST_DIR=test
 
 test_py3.7: PY_VERSION=py37
-test_py3.7: test
+test_py3.7: tests
 
 test_py3.8: PY_VERSION=py38
-test_py3.8: test
+test_py3.8: tests
 
 test_py3.9: PY_VERSION=py39
-test_py3.9: test
+test_py3.9: tests
 
-.PHONY: test
-test: # Call through test_py37 | test_py38 | test_py39
+.PHONY: test-unit
+test-unit:
+	tox -e test-unit
+
+.PHONY: test-integration
+test-integration:
+	@# Call through test_py37 | test_py38 | test_py39
 	cd ${TEST_DIR}/flask; tox -e ${PY_VERSION}
 	cd ${TEST_DIR}/grpc; tox -e ${PY_VERSION}
 	cd ${TEST_DIR}/mysql; tox -e ${PY_VERSION}
@@ -19,6 +24,9 @@ test: # Call through test_py37 | test_py38 | test_py39
 	cd ${TEST_DIR}/requests; tox -e ${PY_VERSION}
 	cd ${TEST_DIR}/aiohttp; tox -e ${PY_VERSION}
 	cd ${TEST_DIR}/docker; tox -e ${PY_VERSION}
+
+.PHONY: test
+test: test-unit test-integration
 
 .PHONY: build
 build: build_protobuf
@@ -41,9 +49,6 @@ lint:
 install: build
 	pip uninstall hypertrace -y
 	pip install dist/hypertrace-0.1.0.tar.gz
-
-unittest:
-	tox -e unittest
 
 build_protobuf:
 	protoc --python_out=src/hypertrace/agent/config \
