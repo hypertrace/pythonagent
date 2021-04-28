@@ -1,0 +1,3 @@
+[submodule "src/agent-config"]
+	path = src/protobuf-config/agent-config
+	url = https://github.com/hypertrace/agent-config.git
