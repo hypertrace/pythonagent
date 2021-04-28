@@ -1,42 +1,38 @@
-"""Default values for agent-config"""
-# config_pb2.Opa
-DEFAULT_OPA_ENDPOINT = 'https://localhost'  # "http://opa.traceableai:8181/"
-DEFAULT_OPA_POLL_PERIOD_SECONDS = 30
-DEFAULT_OPA_ENABLED = True
-
-# config_pb2.DataCapture
-DEFAULT_DATA_CAPTURE_MAX_SIZE_BYTES = 128 * 1024
-
-# config_pb2.AgentConfig
-DEFAULT_AGENT_CONFIG_ENABLED = True
-
+'''The default configuration for pythonagent'''
 DEFAULT_AGENT_CONFIG = {
-    'service_name': '',
+    '_use_console_span_exporter': False,
+    'enabled': True,
+    'propagation_formats':'TRACECONTEXT',
+    'service_name': 'pythonagent',
     'reporting': {
-        "endpoint": "http://localhost:9411/api/v2/spans",
-        "secure": False,
-        "trace_reporter_type": "ZIPKIN"
+        'endpoint': 'http://localhost:9411/api/v2/spans',
+        'secure': False,
+        'trace_reporter_type': 'ZIPKIN',
+        'token': '',
+        'opa': {
+            'endpoint': 'http://opa.traceableai:8181/',
+            'poll_period_seconds': 60,
+            'enabled' : False,
+      }
     },
     'data_capture': {
-        "http_headers": {
-            "request": True,
-            "response": True,
+        'http_headers': {
+            'request': True,
+            'response': True,
         },
-        "http_body": {
-            "request": True,
-            "response": False,
+        'http_body': {
+            'request': True,
+            'response': True,
         },
-        "rpc_metadata": {
-            "request": True,
-            "response": False,
+        'rpc_metadata': {
+            'request': True,
+            'response': True,
         },
-        "rpc_body": {
-            "request": True,
-            "response": False,
-        }
+        'rpc_body': {
+            'request': True,
+            'response': True,
+        },
+        'body_max_size_bytes': 131072
     },
-    'propagation_formats': [ 'TRACECONTEXT' ]
+    'resource_attributes': {}
 }
-
-# B3,TRACECONTEXT
-DEFAULT_PROPAGATION_FORMAT = 'TRACECONTEXT'

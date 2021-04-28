@@ -55,7 +55,7 @@ logger = logging.getLogger(__name__)  # pylint: disable=C0103
 # Max time to wait for response data to be read.
 MAX_WAIT_TIME = 0.1 # seconds
 # Object introspection, used for debugging purposes
-def introspect(obj):
+def introspect(obj) -&gt; None:
     &#39;&#39;&#39;Object introspection, used for debugging purposes&#39;&#39;&#39;
     logger.debug(&#39;Describing object.&#39;)
     try:
@@ -77,7 +77,7 @@ class AioHttpClientInstrumentorWrapper(AioHttpClientInstrumentor, BaseInstrument
         logger.debug(&#39;Entering AioHttpClientInstrumentor.__init__().&#39;)
         super().__init__()
 
-    def _instrument(self, **kwargs):
+    def _instrument(self, **kwargs) -&gt; None:
         &#39;&#39;&#39;Enable instrumentation.&#39;&#39;&#39;
         logger.debug(
             &#39;Entering AioHttpClientInstrumentorWrapper._instrument().&#39;)
@@ -143,7 +143,7 @@ def create_trace_config(
             unused_session: aiohttp.ClientSession,
             trace_config_ctx: types.SimpleNamespace,
             params: aiohttp.TraceRequestEndParams,
-    ):
+    ) -&gt; None:
         logger.debug(&#39;Entering hypertrace on_request_end().&#39;)
         logger.debug(&#39;request headers: %s&#39;, str(params.headers))
         logger.debug(&#39;response headers: %s&#39;, str(params.response.headers))
@@ -221,9 +221,9 @@ def _instrument(
         url_filter: _UrlFilterT = None,
         span_name: _SpanNameT = None,
         aiohttp_client_wrapper: AioHttpClientInstrumentorWrapper = None
-):
+) -&gt; None:
     &#39;&#39;&#39;Setup details of trace config context&#39;&#39;&#39;
-    def instrumented_init(wrapped, instance, args, kwargs):  # pylint: disable=W0613
+    def instrumented_init(wrapped, instance, args, kwargs) -&gt; None:  # pylint: disable=W0613
         if context_api.get_value(&#34;suppress_instrumentation&#34;):
             return wrapped(*args, **kwargs)
 
@@ -253,7 +253,7 @@ def _instrument(
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="hypertrace.agent.instrumentation.aiohttp.create_trace_config"><code class="name flex">
-<span>def <span class="ident">create_trace_config</span></span>(<span>url_filter: Optional[Callable[[str], str]] = None, span_name: Union[Callable[[aiohttp.tracing.TraceRequestStartParams], str], str, NoneType] = None, tracer_provider: opentelemetry.trace.TracerProvider = None, aiohttp_client_wrapper: <a title="hypertrace.agent.instrumentation.aiohttp.AioHttpClientInstrumentorWrapper" href="#hypertrace.agent.instrumentation.aiohttp.AioHttpClientInstrumentorWrapper">AioHttpClientInstrumentorWrapper</a> = None) ‑> aiohttp.tracing.TraceConfig</span>
+<span>def <span class="ident">create_trace_config</span></span>(<span>url_filter: Union[Callable[[str], str], NoneType] = None, span_name: Union[Callable[[aiohttp.tracing.TraceRequestStartParams], str], str, NoneType] = None, tracer_provider: opentelemetry.trace.TracerProvider = None, aiohttp_client_wrapper: <a title="hypertrace.agent.instrumentation.aiohttp.AioHttpClientInstrumentorWrapper" href="#hypertrace.agent.instrumentation.aiohttp.AioHttpClientInstrumentorWrapper">AioHttpClientInstrumentorWrapper</a> = None) ‑> aiohttp.tracing.TraceConfig</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Build an aiohttp-client trace config for use with Hypertrace</p></div>
@@ -298,7 +298,7 @@ def _instrument(
             unused_session: aiohttp.ClientSession,
             trace_config_ctx: types.SimpleNamespace,
             params: aiohttp.TraceRequestEndParams,
-    ):
+    ) -&gt; None:
         logger.debug(&#39;Entering hypertrace on_request_end().&#39;)
         logger.debug(&#39;request headers: %s&#39;, str(params.headers))
         logger.debug(&#39;response headers: %s&#39;, str(params.response.headers))
@@ -373,7 +373,7 @@ def _instrument(
 </details>
 </dd>
 <dt id="hypertrace.agent.instrumentation.aiohttp.introspect"><code class="name flex">
-<span>def <span class="ident">introspect</span></span>(<span>obj)</span>
+<span>def <span class="ident">introspect</span></span>(<span>obj) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Object introspection, used for debugging purposes</p></div>
@@ -381,7 +381,7 @@ def _instrument(
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def introspect(obj):
+<pre><code class="python">def introspect(obj) -&gt; None:
     &#39;&#39;&#39;Object introspection, used for debugging purposes&#39;&#39;&#39;
     logger.debug(&#39;Describing object.&#39;)
     try:
@@ -418,7 +418,7 @@ def _instrument(
         logger.debug(&#39;Entering AioHttpClientInstrumentor.__init__().&#39;)
         super().__init__()
 
-    def _instrument(self, **kwargs):
+    def _instrument(self, **kwargs) -&gt; None:
         &#39;&#39;&#39;Enable instrumentation.&#39;&#39;&#39;
         logger.debug(
             &#39;Entering AioHttpClientInstrumentorWrapper._instrument().&#39;)

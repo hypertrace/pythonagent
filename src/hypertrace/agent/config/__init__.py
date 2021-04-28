@@ -11,9 +11,13 @@ from google.protobuf.wrappers_pb2 import BoolValue
 from hypertrace.agent.config import config_pb2
 from hypertrace.agent.config.default import *
 
-# Initialize logger
-logger = logging.getLogger(__name__)  # pylint: disable=C0103
+# Configuration attributes specific to pythonagent
+PYTHON_SPECIFIC_ATTRIBUTES: list = [
+    '_use_console_span_exporter'
+]
 
+# Initialize logger
+logger = logging.getLogger(__name__) # pylint: disable=C0103
 
 def merge_config(base_config, overriding_config):
     """
@@ -29,10 +33,9 @@ def merge_config(base_config, overriding_config):
             base_config[key] = overriding_config[key]
     return base_config
 
-
 def load_config_from_file(filepath):
     """
-    Returns the config loaded from a providen config file
+    Returns the config loaded from a provided config file
     """
     logger.debug(
         'HT_CONFIG_FILE is set %s. Attempting to load the config file', filepath)
@@ -54,8 +57,6 @@ def load_config_from_file(filepath):
         return DEFAULT_AGENT_CONFIG
 
 # Read agent-config file and override with environment variables as necessaary
-
-
 class AgentConfig:  # pylint: disable=R0902,R0903
     '''A wrapper around the agent configuration logic'''
 
@@ -85,23 +86,22 @@ class AgentConfig:  # pylint: disable=R0902,R0903
             logger.info('Loading default configuration.')
             self.config = DEFAULT_AGENT_CONFIG
 
-        reporting_token = ""
-        opa_endpoint = DEFAULT_OPA_ENDPOINT
-        opa_poll_period_seconds = DEFAULT_OPA_POLL_PERIOD_SECONDS
-        opa_enabled = DEFAULT_OPA_ENABLED
-        data_capture_max_size_bytes = DEFAULT_DATA_CAPTURE_MAX_SIZE_BYTES
-        agent_config_enabled = DEFAULT_AGENT_CONFIG_ENABLED
-
-        self._use_console_span_exporter = False
-
+        if "reporting" not in self.config:
+            self.config['reporting'] = {}
+            self.config['reporting']['opa'] = {}
         # Use variables from environment:
         if 'HT_SERVICE_NAME' in os.environ:
             logger.debug("[env] Loaded HT_SERVICE_NAME from env")
+            # set local variable
             self.config['service_name'] = os.environ['HT_SERVICE_NAME']
 
         if 'HT_REPORTING_ENDPOINT' in os.environ:
             logger.debug("[env] Loaded HT_REPORTING_ENDPOINT from env")
             self.config['reporting']['endpoint'] = os.environ['HT_REPORTING_ENDPOINT']
+
+        if 'HT_TRACES_EXPORTER' in os.environ:
+            logger.debug("[env] Loaded HT_TRACES_EXPORTER from env")
+            self.config['reporting']['trace_reporter_type'] = os.environ['HT_TRACES_EXPORTER']
 
         if 'HT_REPORTING_SECURE' in os.environ:
             logger.debug("[env] Loaded HT_REPORTING_SECURE from env")
@@ -110,169 +110,227 @@ class AgentConfig:  # pylint: disable=R0902,R0903
 
         if 'HT_REPORTING_TOKEN' in os.environ:
             logger.debug("[env] Loaded HT_REPORTING_TOKEN from env")
-            reporting_token = os.environ['HT_REPORTING_TOKEN']
+            self.config['reporting']['token'] = os.environ['HT_REPORTING_TOKEN']
 
         if 'HT_REPORTING_OPA_ENDPOINT' in os.environ:
             logger.debug("[env] Loaded HT_REPORTING_OPA_ENDPOINT from env")
-            self.config['opa']['endpoint'] = os.environ['HT_REPORTING_OPA_ENDPOINT']
-            opa_endpoint = os.environ['HT_REPORTING_OPA_ENDPOINT']
+            self.config['reporting']['opa']['endpoint'] = os.environ['HT_REPORTING_OPA_ENDPOINT']
 
         if 'HT_REPORTING_OPA_POLL_PERIOD_SECONDS' in os.environ:
             logger.debug(
                 "[env] Loaded HT_REPORTING_OPA_POLL_PERIOD_SECONDS from env")
-            opa_poll_period_seconds = os.environ['HT_REPORTING_OPA_POLL_PERIOD_SECONDS']
+            self.config['reporting']['opa']['poll_period_seconds'] \
+                = int(os.environ['HT_REPORTING_OPA_POLL_PERIOD_SECONDS'])
 
         if 'HT_REPORTING_OPA_ENABLED' in os.environ:
             logger.debug("[env] Loaded HT_REPORTING_OPA_ENABLED from env")
-            opa_enabled = os.environ['HT_REPORTING_OPA_ENABLED'].lower(
-            ) == 'true'
+            self.config['reporting']['opa']['enabled'] \
+                = os.environ['HT_REPORTING_OPA_ENABLED'].lower() \
+                  == 'true'
 
         if 'HT_DATA_CAPTURE_HTTP_HEADERS_REQUEST' in os.environ:
             logger.debug(
                 "[env] Loaded HT_DATA_CAPTURE_HTTP_HEADERS_REQUEST from env")
             self.config['data_capture']['http_headers']['request'] \
                 = os.environ['HT_DATA_CAPTURE_HTTP_HEADERS_REQUEST'].lower() \
-                == 'true'
+                  == 'true'
 
         if 'HT_DATA_CAPTURE_HTTP_HEADERS_RESPONSE' in os.environ:
             logger.debug(
                 "[env] Loaded HT_DATA_CAPTURE_HTTP_HEADERS_RESPONSE from env")
             self.config['data_capture']['http_headers']['response'] \
                 = os.environ['HT_DATA_CAPTURE_HTTP_HEADERS_RESPONSE'].lower() \
-                == 'true'
+                  == 'true'
 
         if 'HT_DATA_CAPTURE_HTTP_BODY_REQUEST' in os.environ:
             logger.debug(
                 "[env] Loaded HT_DATA_CAPTURE_HTTP_BODY_REQUEST from env")
             self.config['data_capture']['http_body']['request'] \
                 = os.environ['HT_DATA_CAPTURE_HTTP_BODY_REQUEST'].lower() \
-                == 'true'
+                  == 'true'
 
         if 'HT_DATA_CAPTURE_HTTP_BODY_RESPONSE' in os.environ:
             logger.debug(
                 "[env] Loaded HT_DATA_CAPTURE_HTTP_BODY_RESPONSE from env")
             self.config['data_capture']['http_body']['response'] \
                 = os.environ['HT_DATA_CAPTURE_HTTP_BODY_RESPONSE'].lower() \
-                == 'true'
+                  == 'true'
 
         if 'HT_DATA_CAPTURE_RPC_METADATA_REQUEST' in os.environ:
             logger.debug(
                 "[env] Loaded HT_DATA_CAPTURE_RPC_METADATA_REQUEST from env")
             self.config['data_capture']['rpc_metadata']['request'] \
                 = os.environ['HT_DATA_CAPTURE_RPC_METADATA_REQUEST'].lower() \
-                == 'true'
+                  == 'true'
 
         if 'HT_DATA_CAPTURE_RPC_METADATA_RESPONSE' in os.environ:
             logger.debug(
                 "[env] Loaded HT_DATA_CAPTURE_RPC_METADATA_RESPONSE from env")
             self.config['data_capture']['rpc_metadata']['response'] \
                 = os.environ['HT_DATA_CAPTURE_RPC_METADATA_RESPONSE'].lower() \
-                == 'true'
+                  == 'true'
 
         if 'HT_DATA_CAPTURE_RPC_BODY_REQUEST' in os.environ:
             logger.debug(
                 "[env] Loaded HT_DATA_CAPTURE_RPC_BODY_REQUEST from env")
             self.config['data_capture']['rpc_body']['request'] \
                 = os.environ['HT_DATA_CAPTURE_RPC_BODY_REQUEST'].lower() \
-                == 'true'
+                  == 'true'
 
         if 'HT_DATA_CAPTURE_RPC_BODY_RESPONSE' in os.environ:
             logger.debug(
                 "[env] Loaded HT_DATA_CAPTURE_RPC_BODY_RESPONSE from env")
             self.config['data_capture']['rpc_body']['response'] \
                 = os.environ['HT_DATA_CAPTURE_RPC_BODY_RESPONSE'].lower() \
-                == 'true'
+                  == 'true'
 
         if 'HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES' in os.environ:
             logger.debug(
                 "[env] Loaded HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES from env")
-            data_capture_max_size_bytes \
+            self.config['data_capture']['body_max_size_bytes'] \
                 = int(os.environ['HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES'])
 
+        #Valid values are 'TRACECONTEXT' or 'B3'
         if 'HT_PROPAGATION_FORMATS' in os.environ:
             logger.debug("[env] Loaded HT_PROPAGATION_FORMATS from env")
-            self.config.propagation_formats = [
-                os.environ['HT_PROPAGATION_FORMATS']]
+            self.config['propagation_formats'] = os.environ['HT_PROPAGATION_FORMATS']
 
         if 'HT_ENABLED' in os.environ:
             logger.debug("[env] Loaded HT_ENABLED from env")
-            agent_config_enabled = os.environ['HT_ENABLED'].lower() == 'true'
+            self.config['enabled'] = os.environ['HT_ENABLED'].lower() == 'true'
 
         if 'HT_ENABLE_CONSOLE_SPAN_EXPORTER' in os.environ:
             logger.debug("[env] Loaded HT_ENABLE_CONSOLE_SPAN_EXPORTER from env, %s",
                          str(os.environ['HT_ENABLE_CONSOLE_SPAN_EXPORTER'].lower()))
-            self._use_console_span_exporter = \
-                os.environ['HT_ENABLE_CONSOLE_SPAN_EXPORTER'].lower() == 'true'
+            self.config['_use_console_span_exporter'] = \
+              os.environ['HT_ENABLE_CONSOLE_SPAN_EXPORTER'].lower() == 'true'
 
-        # Build protobuf
-        self.opa = jf.Parse(jf.MessageToJson(config_pb2.Opa()), config_pb2.Opa)
-        self.opa.endpoint = opa_endpoint
-        self.opa.poll_period_seconds = opa_poll_period_seconds
-        self.opa.enabled = opa_enabled
+        # Create Protobuf AgentConfig object
+        #
+        # Create Protobuf Opa object
+        opa = jf.Parse(jf.MessageToJson(config_pb2.Opa()), config_pb2.Opa)
+        opa.endpoint = self.config['reporting']['opa']['endpoint']
+        opa.poll_period_seconds = self.config['reporting']['opa']['poll_period_seconds']
+        opa.enabled = self.config['reporting']['opa']['enabled']
 
-        self.reporting = jf.Parse(jf.MessageToJson(
+        # Create protobuf Reporting object
+        reporting = jf.Parse(jf.MessageToJson(
             config_pb2.Reporting()), config_pb2.Reporting)
-        # 'https://localhost'
-        self.reporting.endpoint = self.config['reporting']['endpoint']
-        self.reporting.secure = self.config['reporting']['secure']
-        self.reporting.token = reporting_token
-        self.reporting.opa = self.opa
+        reporting.endpoint = self.config['reporting']['endpoint']
+        reporting.secure = self.config['reporting']['secure']
+        reporting.token = self.config['reporting']['token']
+        reporting.opa = opa
 
-        self.propagation_formats = self.config['propagation_formats']
-
-        if "trace_reporter_type" in self.config['reporting'] and \
-                self.config['reporting']['trace_reporter_type']:
-            self.reporting.trace_reporter_type = self.config['reporting']['trace_reporter_type']
+        # Set trace_reporter_type
+        if self.config['reporting']['trace_reporter_type'] == 'OTLP':
+            reporting.trace_reporter_type = config_pb2.TraceReporterType.OTLP
+        elif self.config['reporting']['trace_reporter_type'] == 'ZIPKIN':
+            reporting.trace_reporter_type = config_pb2.TraceReporterType.ZIPKIN
         else:
-            self.reporting.trace_reporter_type = config_pb2.TraceReporterType.OTLP
-        self.rpc_body = config_pb2.Message(request=BoolValue(
+            # Default to ZIPKIN
+            reporting.trace_reporter_type = config_pb2.TraceReporterType.ZIPKIN
+
+        # Create DataCapture Message components
+        rpc_body = config_pb2.Message(request=BoolValue(
             value=self.config['data_capture']['rpc_body']['request']),
             response=BoolValue(
                 value=self.config['data_capture']['rpc_body']['response']))
-        self.rpc_metadata = config_pb2.Message(request=BoolValue(
+        rpc_metadata = config_pb2.Message(request=BoolValue(
             value=self.config['data_capture']['rpc_metadata']['request']),
             response=BoolValue(
                 value=self.config['data_capture']['rpc_metadata']['response']))
-        self.http_body = config_pb2.Message(request=BoolValue(
+        http_body = config_pb2.Message(request=BoolValue(
             value=self.config['data_capture']['http_body']['request']),
             response=BoolValue(
                 value=self.config['data_capture']['http_body']['response']))
-        self.http_headers = config_pb2.Message(request=BoolValue(
+        http_headers = config_pb2.Message(request=BoolValue(
             value=self.config['data_capture']['http_headers']['request']),
             response=BoolValue(
                 value=self.config['data_capture']['http_headers']['response']))
 
-        self.service_name = self.config['service_name']
-
-        self.data_capture = jf.Parse(jf.MessageToJson(
+        # Create Protobuf DataCapture object
+        data_capture = jf.Parse(jf.MessageToJson(
             config_pb2.DataCapture()), config_pb2.DataCapture)
-        self.data_capture.http_headers = self.http_headers
-        self.data_capture.http_body = self.http_body
-        self.data_capture.rpc_metadata = self.rpc_metadata
-        self.data_capture.rpc_body = self.rpc_body
-        self.data_capture.body_max_size_bytes = data_capture_max_size_bytes
+        data_capture.http_headers = http_headers
+        data_capture.http_body = http_body
+        data_capture.rpc_metadata = rpc_metadata
+        data_capture.rpc_body = rpc_body
+        data_capture.body_max_size_bytes = self.config['data_capture']['body_max_size_bytes']
 
+        # Create Protobuf AgentConfig object
         self.agent_config: config_pb2.AgentConfig = jf.Parse(jf.MessageToJson(
             config_pb2.AgentConfig()), config_pb2.AgentConfig)
         self.agent_config.service_name = self.config['service_name']
-        self.agent_config.reporting = self.reporting
-        self.agent_config.data_capture = self.data_capture
-        if self.propagation_formats[0] == 'TRACECONTEXT':
+        self.agent_config.reporting = reporting
+        self.agent_config.data_capture = data_capture
+        if self.config['propagation_formats']  == 'TRACECONTEXT':
             self.agent_config.propagation_formats = config_pb2.PropagationFormat.TRACECONTEXT
-        else:
+        elif self.config['propagation_formats'] == 'B3':
             self.agent_config.propagation_formats = config_pb2.PropagationFormat.B3
-        self.agent_config.enabled = agent_config_enabled
+        else:
+            # Default to TRACECONTEXT
+            self.agent_config.propagation_formats = config_pb2.PropagationFormat.TRACECONTEXT
+        self.agent_config.enabled = self.config['enabled']
+
         self.agent_config.resource_attributes = {
             'service_name': self.config['service_name']}
+
+        # Validate configuration
+        self.validate_config_elements(self.config, self.agent_config)
+
+    def validate_config_elements(self, config_element, agent_config_base):
+        """Validate that all present elements in the parse configuration are
+        defined in the config_pb2.AgentConfig"""
+        # Check for configuration entries that do not belong
+        logger.debug('Entering AgentConfig.validate_config_elements().')
+        for key in config_element:
+            logger.debug('Checking: %s', key)
+            logger.debug('type: %s', str(type(config_element[key])))
+            if isinstance(config_element[key], dict):
+                logger.debug('Found dictioanry. Recursing into it.')
+                try:
+                    if not hasattr(agent_config_base,key):
+                        logger.error('Unknown attribute encountered. key=%s', key)
+                        raise AttributeError
+                    logger.debug('config_element=%s, agent_config_base=%s',
+                                 str(config_element),
+                                 str(agent_config_base))
+                    self.validate_config_elements(config_element[key], \
+                      eval('agent_config_base.' + key)) # pylint: disable=W0123
+                    continue
+                except AttributeError as err:
+                    logger.error('Unknown attribute encountered: exception=%s, stacktrace=%s',
+                                 err,
+                                 traceback.format_exc())
+                    continue
+            if isinstance(config_element[key], (str, bool, int, list)):
+                logger.debug('is string')
+                if key in PYTHON_SPECIFIC_ATTRIBUTES:
+                    logger.debug('Found pythonagent-specific attribute, attr=%s', key)
+                    continue
+                try:
+                    if hasattr(agent_config_base, key):
+                        logger.debug('Is valid: %s', key)
+                    else:
+                        logger.debug('Not valid: %s', key)
+                        raise AttributeError
+                except AttributeError as err:
+                    logger.error('Unknown attribute encountered: exception=%s, stacktrace=%s',
+                                 err,
+                                 traceback.format_exc())
+            else:
+                logger.error('Unknown attribute type encountered: exception=%s, stacktrace=%s',
+                             err,
+                             traceback.format_exc())
 
     def dump_config(self):
         '''Dump configuration information.'''
         logger.debug(self.__dict__)
 
-    def get_config1(self) -> config_pb2.AgentConfig:
+    def get_config(self) -> config_pb2.AgentConfig:
         '''Return configuration information.'''
         return self.agent_config
 
     def use_console_span_exporter(self) -> bool:
         '''Initialize InMemorySpanExporter'''
-        return self._use_console_span_exporter
+        return self.config['_use_console_span_exporter']

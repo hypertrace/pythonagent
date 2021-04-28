@@ -1,10 +1,3 @@
-# Architecture
-![diagram](images/HyperTrace%20Agent%20Architecture.jpg)
-# Wrapping OpenTelemetry Instrumentation Modules
-![diagram](images/OpenTelemetry%20Instrumentation%20Module%20Wrapper.jpg)
-# Flask Instrumentation Wrapper Architecture
-![diagram](images/FlaskInstrumentationWrapper.jpg)
-
 # Developer Setup
 1. clone this repo.
 2. run tests: ```scripts/test-all.sh```
@@ -17,7 +10,7 @@ tox
 * Have access granted to your github.com id.
 * Install the hypertrace python agent:
 ```
-pip install git+https://github.com/traceableai/pythonagent.git@main#egg=hypertrace
+pip install git+https://github.com/hypertrace/pythonagent.git@main#egg=hypertrace
 ```
 * Enter your github.com username and password when prompted.
 * Add the following to your app's entrypoint python file:

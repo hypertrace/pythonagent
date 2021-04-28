@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)  # pylint: disable=C0103
 # Dump metadata about an object; useful for initial discovery of interestin ginfo
 
 
-def introspect(obj):
+def introspect(obj) -> None:
     '''Troubleshooting assistance function for inspecting new flask-related objects'''
     logger.debug('Describing object.')
     try:
@@ -35,11 +35,9 @@ def introspect(obj):
                      traceback.format_exc())
 
 # Per request pre-handler
-
-
 def _hypertrace_before_request(flask_wrapper):
     '''This function is invoked by flask to set the handler'''
-    def hypertrace_before_request():
+    def hypertrace_before_request() -> None:
         '''Hypertrace before_request() method'''
         logger.debug('Entering _hypertrace_before_request().')
         try:
@@ -70,7 +68,7 @@ def _hypertrace_before_request(flask_wrapper):
 # Per request post-handler
 
 
-def _hypertrace_after_request(flask_wrapper):
+def _hypertrace_after_request(flask_wrapper) -> flask.wrappers.Response:
     '''This function is invoked by flask to set the handler'''
     def hypertrace_after_request(response):
         '''Hypertrace after_request method.'''
@@ -95,13 +93,11 @@ def _hypertrace_after_request(flask_wrapper):
                          err,
                          traceback.format_exc())
             # Not rethrowing to avoid causing runtime errors for Flask.
-            return None
+            return response
 
     return hypertrace_after_request
 
 # Main Flask Instrumentor Wrapper class.
-
-
 class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
     '''Hypertrace wrapper around OTel Flask instrumentor class'''
 
@@ -111,7 +107,7 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
         self._app = None
 
     # Initialize instrumentation wrapper
-    def instrument_app(self, app, name_callback=get_default_span_name):
+    def instrument_app(self, app, name_callback=get_default_span_name) -> None:
         '''Initialize instrumentation'''
         logger.debug('Entering FlaskInstrumentorWrapper.instument_app().')
         try:
@@ -130,7 +126,7 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
             raise err
 
     # Teardown instrumentation wrapper
-    def uninstrument_app(self, app):
+    def uninstrument_app(self, app) -> None:
         '''Disable instrumentation'''
         logger.debug('Entering FlaskInstrumentorWrapper.uninstrument_app()')
         try:
@@ -145,6 +141,6 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
             raise err
 
     # retrieve flask app
-    def get_app(self):
+    def get_app(self) -> flask.Flask:
         '''Return the flask app object.'''
         return self._app
