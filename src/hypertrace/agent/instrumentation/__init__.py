@@ -5,6 +5,7 @@ import inspect
 import traceback
 import json
 import logging
+from opentelemetry.trace.span import Span
 
 # Setup logger name
 logger = logging.getLogger(__name__) # pylint: disable=C0103
@@ -35,7 +36,7 @@ class BaseInstrumentorWrapper:
         self._max_body_size = 128 * 1024
 
     # Dump object for troubleshooting purposes
-    def introspect(self, obj):
+    def introspect(self, obj) -> None:
         '''Dump object for troubleshooting purposes'''
         logger.debug('Describing object.')
         for func in [type, id, dir, vars, callable]:
@@ -48,80 +49,80 @@ class BaseInstrumentorWrapper:
                 logger.error("No data to display")
 
     # Log request headers in extended options?
-    def get_process_request_headers(self):
+    def get_process_request_headers(self) -> bool:
         '''Should it process request headers?'''
         return self._process_request_headers
 
     # Log response headers in extended options?
-    def get_process_response_headers(self):
+    def get_process_response_headers(self) -> bool:
         '''Should it process response headers?'''
         return self._process_response_headers
 
     # Log request body in extended options?
-    def get_process_request_body(self):
+    def get_process_request_body(self) -> bool:
         '''Should it process request body?'''
         return self._process_request_body
 
     # Log response body in extended options?
-    def get_process_response_body(self):
+    def get_process_response_body(self) -> bool:
         '''Should it process response body?'''
         return self._process_response_body
 
     # Get the configured service name
-    def get_service_name(self):
+    def get_service_name(self) -> str:
         '''get service name'''
         return self._service_name
 
     # Get the max body size that can be captured
-    def get_max_body_size(self):
+    def get_max_body_size(self) -> int:
         '''get the max body size.'''
         return self._max_body_size
 
     # Set whether request headers should be put in extended span, takes a BoolValue as input
-    def set_process_request_headers(self, process_request_headers):
+    def set_process_request_headers(self, process_request_headers) -> None:
         '''Should it process request headers?'''
         logger.debug('Setting self._process_request_headers to \'%s\'',
                      process_request_headers.value)
         self._process_request_headers = process_request_headers
 
     # Set whether response headers should be put in extended span, takes a BoolValue as input
-    def set_process_response_headers(self, process_response_headers):
+    def set_process_response_headers(self, process_response_headers) -> None:
         '''Should it process response headers?'''
         logger.debug('Setting self._process_response_headers to \'%s\'',
                      process_response_headers.value)
         self._process_response_headers = process_response_headers
 
     # Set whether request body should be put in extended span, takes a BoolValue as input
-    def set_process_request_body(self, process_request_body):
+    def set_process_request_body(self, process_request_body) -> None:
         '''should it process request body?'''
         logger.debug('Setting self._process_request_body to \'%s\'',
                      process_request_body.value)
         self._process_request_body = process_request_body
 
     # Set whether response body should be put in extended span, takes a BoolValue as input
-    def set_process_response_body(self, process_response_body):
+    def set_process_response_body(self, process_response_body) -> None:
         '''should it process response body?'''
         logger.debug('Setting self._process_response_body to \'%s\'',
                      process_response_body.value)
         self._process_response_body = process_response_body
 
     # Set service name
-    def set_service_name(self, service_name):
+    def set_service_name(self, service_name) -> None:
         '''Set the service name for this instrumentor.'''
         logger.debug('Setting self._service_name to \'%s\'', service_name)
         self._service_name = service_name
 
     # Set max body size
-    def set_body_max_size(self, max_body_size):
+    def set_body_max_size(self, max_body_size) -> None:
         '''Set the max body size that will be captured.'''
         logger.debug('Setting self.body_max_size to %s.', max_body_size)
         self._max_body_size = max_body_size
 
     # Generic HTTP Request Handler
     def generic_request_handler(self, # pylint: disable=R0912
-                                request_headers,
+                                request_headers: tuple,
                                 request_body,
-                                span):
+                                span: Span) -> Span :
         '''Add extended request data to the span'''
         logger.debug(
             'Entering BaseInstrumentationWrapper.genericRequestHandler().')
@@ -184,7 +185,10 @@ class BaseInstrumentorWrapper:
             return span # pylint: disable=W0150
 
     # Generic HTTP Response Handler
-    def generic_response_handler(self, response_headers, response_body, span): # pylint: disable=R0912
+    def generic_response_handler(self, # pylint: disable=R0912
+                                 response_headers: tuple,
+                                 response_body,
+                                 span: Span) -> Span: # pylint: disable=R0912
         '''Add extended response data to span.'''
         logger.debug(
             'Entering BaseInstrumentationWrapper.genericResponseHandler().')
@@ -248,7 +252,7 @@ class BaseInstrumentorWrapper:
             return span # pylint: disable=W0150
 
     # Should this mimetype be put in the extended span?
-    def is_interesting_content_type(self, content_type): # pylint: disable=R0201
+    def is_interesting_content_type(self, content_type: str) -> bool: # pylint: disable=R0201
         '''Is this a content-type we want to write to the span?'''
         logger.debug(
             'Entering BaseInstrumentorWrapper.isInterestingContentType().')
@@ -268,7 +272,10 @@ class BaseInstrumentorWrapper:
             return False
 
     # Generic RPC Request Handler
-    def generic_rpc_request_handler(self, request_headers, request_body, span):
+    def generic_rpc_request_handler(self,
+                                    request_headers: tuple,
+                                    request_body,
+                                    span: Span) -> Span:
         '''Add extended request rpc data to span.'''
         logger.debug(
             'Entering BaseInstrumentationWrapper.genericRpcRequestHandler().')
@@ -304,7 +311,10 @@ class BaseInstrumentorWrapper:
             return span # pylint: disable=W0150
 
     # Generic RPC Response Handler
-    def generic_rpc_response_handler(self, response_headers, response_body, span):
+    def generic_rpc_response_handler(self,
+                                     response_headers: tuple,
+                                     response_body,
+                                     span: Span) -> Span:
         '''Add extended response rpc data to span'''
         logger.debug(
             'Entering BaseInstrumentationWrapper.genericRpcResponseHandler().')
@@ -340,7 +350,7 @@ class BaseInstrumentorWrapper:
             return span # pylint: disable=W0150
 
     # Check body size
-    def check_body_size(self, body):
+    def check_body_size(self, body: str) -> bool:
         '''Is the size of this message body larger than the configured max?'''
         if body in (None, ''):
             return False
@@ -352,7 +362,7 @@ class BaseInstrumentorWrapper:
         return False
 
     # grab first N bytes
-    def grab_first_n_bytes(self, body):
+    def grab_first_n_bytes(self, body: str) -> str:
         '''Return the first N (max_body_size) bytes of a request'''
         if body in (None, ''):
             return ''

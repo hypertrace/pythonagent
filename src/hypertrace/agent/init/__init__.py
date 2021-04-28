@@ -63,14 +63,14 @@ class AgentInit:  # pylint: disable=R0902,R0903
                          traceback.format_exc())
             raise sys.exc_info()[0]
 
-    def dump_config(self):
+    def dump_config(self) -> None:
         '''dump the current state of AgentInit.'''
         logger.debug('Calling DumpConfig().')
         for mod in self._module_initialized:
             logger.debug(' %s : %s', mod, str(self._module_initialized[mod]))
 
     # Creates a flask wrapper using the config defined in hypertraceconfig
-    def flask_init(self, app, use_b3=False):
+    def flask_init(self, app, use_b3=False) -> None:
         '''Creates a flask instrumentation wrapper using the config defined in hypertraceconfig'''
         logger.debug('Calling AgentInit.flaskInit().')
         try:
@@ -92,7 +92,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
                          traceback.format_exc())
 
     # Creates a grpc server wrapper using the config defined in hypertraceconfig
-    def grpc_server_init(self):
+    def grpc_server_init(self) -> None:
         '''Creates a grpc server wrapper using the config defined in hypertraceconfig'''
         logger.debug('Calling AgentInit.grpcServerInit')
         try:
@@ -119,7 +119,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
                          traceback.format_exc())
 
     # Creates a grpc client wrapper using the config defined in hypertraceconfig
-    def grpc_client_init(self):
+    def grpc_client_init(self) -> None:
         '''Creates a grpc client wrapper using the config defined in hypertraceconfig'''
         logger.debug('Calling AgentInit.grpcClientInit')
         try:
@@ -147,7 +147,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
                          traceback.format_exc())
 
     # Creates a mysql server wrapper using the config defined in hypertraceconfig
-    def mysql_init(self):
+    def mysql_init(self) -> None:
         '''Creates a mysql server wrapper using the config defined in hypertraceconfig'''
         logger.debug('Calling AgentInit.mysqlInit()')
         try:
@@ -165,7 +165,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
                          traceback.format_exc())
 
     # Creates a postgresql client wrapper using the config defined in hypertraceconfig
-    def postgresql_init(self):
+    def postgresql_init(self) -> None:
         '''Creates a postgresql client wrapper using the config defined in hypertraceconfig'''
         logger.debug('Calling AgentInit.postgreSQLInit()')
         try:
@@ -183,7 +183,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
                          traceback.format_exc())
 
     # Creates a requests client wrapper using the config defined in hypertraceconfig
-    def requests_init(self, use_b3=False):
+    def requests_init(self, use_b3=False) -> None:
         '''Creates a requests client wrapper using the config defined in hypertraceconfig'''
         logger.debug('Calling AgentInit.requestsInit()')
         try:
@@ -205,7 +205,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
                          traceback.format_exc())
 
     # Creates an aiohttp-client wrapper using the config defined in hypertraceconfig
-    def aiohttp_client_init(self, use_b3=False):
+    def aiohttp_client_init(self, use_b3=False) -> None:
         '''Creates an aiohttp-client wrapper using the config defined in hypertraceconfig'''
         logger.debug('Calling AgentInit.aioHttpClientInit()')
         try:
@@ -227,7 +227,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
                          traceback.format_exc())
 
     # Common wrapper initialization logic
-    def init_instrumentor_wrapper_base_for_http(self, instrumentor):
+    def init_instrumentor_wrapper_base_for_http(self, instrumentor) -> None:
         '''Common wrapper initialization logic'''
         logger.debug('Calling AgentInit.initInstrumentorWrapperBaseForHTTP().')
         instrumentor.instrument()
@@ -242,12 +242,12 @@ class AgentInit:  # pylint: disable=R0902,R0903
         instrumentor.set_body_max_size(
             self._config.agent_config.data_capture.body_max_size_bytes)
 
-    def register_processor(self, processor):
+    def register_processor(self, processor) -> None:
         '''Register additional span exporter + processor'''
         logger.debug('Entering AgentInit.register_processor().')
         self._tracer_provider.add_span_processor(processor)
 
-    def set_console_span_processor(self):
+    def set_console_span_processor(self) -> None:
         '''Register the console span processor for debugging purposes.'''
         logger.debug('Entering AgentInit.setConsoleSpanProcessor().')
         console_span_exporter = ConsoleSpanExporter(
@@ -256,7 +256,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             console_span_exporter)
         self._tracer_provider.add_span_processor(simple_export_span_processor)
 
-    def set_zipkin_processor(self):
+    def set_zipkin_processor(self) -> None:
         '''configure zipkin span exporter + processor'''
         if 'HT_TRACES_EXPORTER' in os.environ:
             if os.environ['HT_TRACES_EXPORTER'] == 'zipkin':
@@ -284,7 +284,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
                          err,
                          traceback.format_exc())
 
-    def set_otlp_processor(self):
+    def set_otlp_processor(self) -> None:
         '''configure otlp span exporter + processor'''
         if 'HT_TRACES_EXPORTER' in os.environ:
             if os.environ['HT_TRACES_EXPORTER'] == 'otlp':
@@ -309,7 +309,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
                          err,
                          traceback.format_exc())
 
-    def enable_b3(self):  # pylint: disable=R0201
+    def enable_b3(self) -> None:  # pylint: disable=R0201
         '''enable b3 protocol for context propagation'''
         from opentelemetry.propagate import set_global_textmap  # pylint: disable=C0415
         from opentelemetry.propagators.b3 import B3Format  # pylint: disable=C0415

@@ -7,7 +7,7 @@ from . import load_config_from_file
 
 
 
-def test_merge_config():
+def test_merge_config() -> None:
     '''Unittest for merging config results.'''
     # set Environment Variable
     os.environ["HT_CONFIG_FILE"] = "./src/hypertrace/agent/config/agent-config.yaml"
@@ -38,7 +38,7 @@ def test_merge_config():
     assert not cfg["enabled"]
     assert cfg["_use_console_span_exporter"] is True
 
-def test_agent_config():
+def test_agent_config() -> None:
     '''Unittest functionx for agent config entries.'''
     # set Environment Variable
     os.environ["HT_CONFIG_FILE"] = "./src/hypertrace/agent/config/agent-config.yaml"
@@ -66,7 +66,7 @@ def test_agent_config():
     assert config.agent_config.resource_attributes == {'service_name': 'pythonagent_001'}
 
 
-def test_env_config():
+def test_env_config() -> None:
     '''Unittest functionx for env config entries.'''
     print('Initializing agent.')
     os.environ["HT_SERVICE_NAME"] = "pythonagent_002"

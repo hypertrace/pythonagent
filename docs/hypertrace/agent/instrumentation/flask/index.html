@@ -50,7 +50,7 @@ logger = logging.getLogger(__name__)  # pylint: disable=C0103
 # Dump metadata about an object; useful for initial discovery of interestin ginfo
 
 
-def introspect(obj):
+def introspect(obj) -&gt; None:
     &#39;&#39;&#39;Troubleshooting assistance function for inspecting new flask-related objects&#39;&#39;&#39;
     logger.debug(&#39;Describing object.&#39;)
     try:
@@ -64,11 +64,9 @@ def introspect(obj):
                      traceback.format_exc())
 
 # Per request pre-handler
-
-
 def _hypertrace_before_request(flask_wrapper):
     &#39;&#39;&#39;This function is invoked by flask to set the handler&#39;&#39;&#39;
-    def hypertrace_before_request():
+    def hypertrace_before_request() -&gt; None:
         &#39;&#39;&#39;Hypertrace before_request() method&#39;&#39;&#39;
         logger.debug(&#39;Entering _hypertrace_before_request().&#39;)
         try:
@@ -99,7 +97,7 @@ def _hypertrace_before_request(flask_wrapper):
 # Per request post-handler
 
 
-def _hypertrace_after_request(flask_wrapper):
+def _hypertrace_after_request(flask_wrapper) -&gt; flask.wrappers.Response:
     &#39;&#39;&#39;This function is invoked by flask to set the handler&#39;&#39;&#39;
     def hypertrace_after_request(response):
         &#39;&#39;&#39;Hypertrace after_request method.&#39;&#39;&#39;
@@ -124,13 +122,11 @@ def _hypertrace_after_request(flask_wrapper):
                          err,
                          traceback.format_exc())
             # Not rethrowing to avoid causing runtime errors for Flask.
-            return None
+            return response
 
     return hypertrace_after_request
 
 # Main Flask Instrumentor Wrapper class.
-
-
 class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
     &#39;&#39;&#39;Hypertrace wrapper around OTel Flask instrumentor class&#39;&#39;&#39;
 
@@ -140,7 +136,7 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
         self._app = None
 
     # Initialize instrumentation wrapper
-    def instrument_app(self, app, name_callback=get_default_span_name):
+    def instrument_app(self, app, name_callback=get_default_span_name) -&gt; None:
         &#39;&#39;&#39;Initialize instrumentation&#39;&#39;&#39;
         logger.debug(&#39;Entering FlaskInstrumentorWrapper.instument_app().&#39;)
         try:
@@ -159,7 +155,7 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
             raise err
 
     # Teardown instrumentation wrapper
-    def uninstrument_app(self, app):
+    def uninstrument_app(self, app) -&gt; None:
         &#39;&#39;&#39;Disable instrumentation&#39;&#39;&#39;
         logger.debug(&#39;Entering FlaskInstrumentorWrapper.uninstrument_app()&#39;)
         try:
@@ -174,7 +170,7 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
             raise err
 
     # retrieve flask app
-    def get_app(self):
+    def get_app(self) -&gt; flask.Flask:
         &#39;&#39;&#39;Return the flask app object.&#39;&#39;&#39;
         return self._app</code></pre>
 </details>
@@ -187,7 +183,7 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="hypertrace.agent.instrumentation.flask.introspect"><code class="name flex">
-<span>def <span class="ident">introspect</span></span>(<span>obj)</span>
+<span>def <span class="ident">introspect</span></span>(<span>obj) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Troubleshooting assistance function for inspecting new flask-related objects</p></div>
@@ -195,7 +191,7 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def introspect(obj):
+<pre><code class="python">def introspect(obj) -&gt; None:
     &#39;&#39;&#39;Troubleshooting assistance function for inspecting new flask-related objects&#39;&#39;&#39;
     logger.debug(&#39;Describing object.&#39;)
     try:
@@ -232,7 +228,7 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
         self._app = None
 
     # Initialize instrumentation wrapper
-    def instrument_app(self, app, name_callback=get_default_span_name):
+    def instrument_app(self, app, name_callback=get_default_span_name) -&gt; None:
         &#39;&#39;&#39;Initialize instrumentation&#39;&#39;&#39;
         logger.debug(&#39;Entering FlaskInstrumentorWrapper.instument_app().&#39;)
         try:
@@ -251,7 +247,7 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
             raise err
 
     # Teardown instrumentation wrapper
-    def uninstrument_app(self, app):
+    def uninstrument_app(self, app) -&gt; None:
         &#39;&#39;&#39;Disable instrumentation&#39;&#39;&#39;
         logger.debug(&#39;Entering FlaskInstrumentorWrapper.uninstrument_app()&#39;)
         try:
@@ -266,7 +262,7 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
             raise err
 
     # retrieve flask app
-    def get_app(self):
+    def get_app(self) -&gt; flask.Flask:
         &#39;&#39;&#39;Return the flask app object.&#39;&#39;&#39;
         return self._app</code></pre>
 </details>
@@ -280,7 +276,7 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
 <h3>Methods</h3>
 <dl>
 <dt id="hypertrace.agent.instrumentation.flask.FlaskInstrumentorWrapper.get_app"><code class="name flex">
-<span>def <span class="ident">get_app</span></span>(<span>self)</span>
+<span>def <span class="ident">get_app</span></span>(<span>self) ‑> flask.app.Flask</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Return the flask app object.</p></div>
@@ -288,13 +284,13 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_app(self):
+<pre><code class="python">def get_app(self) -&gt; flask.Flask:
     &#39;&#39;&#39;Return the flask app object.&#39;&#39;&#39;
     return self._app</code></pre>
 </details>
 </dd>
 <dt id="hypertrace.agent.instrumentation.flask.FlaskInstrumentorWrapper.instrument_app"><code class="name flex">
-<span>def <span class="ident">instrument_app</span></span>(<span>self, app, name_callback=&lt;function get_default_span_name&gt;)</span>
+<span>def <span class="ident">instrument_app</span></span>(<span>self, app, name_callback=&lt;function get_default_span_name&gt;) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Initialize instrumentation</p></div>
@@ -302,7 +298,7 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def instrument_app(self, app, name_callback=get_default_span_name):
+<pre><code class="python">def instrument_app(self, app, name_callback=get_default_span_name) -&gt; None:
     &#39;&#39;&#39;Initialize instrumentation&#39;&#39;&#39;
     logger.debug(&#39;Entering FlaskInstrumentorWrapper.instument_app().&#39;)
     try:
@@ -322,7 +318,7 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
 </details>
 </dd>
 <dt id="hypertrace.agent.instrumentation.flask.FlaskInstrumentorWrapper.uninstrument_app"><code class="name flex">
-<span>def <span class="ident">uninstrument_app</span></span>(<span>self, app)</span>
+<span>def <span class="ident">uninstrument_app</span></span>(<span>self, app) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Disable instrumentation</p></div>
@@ -330,7 +326,7 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def uninstrument_app(self, app):
+<pre><code class="python">def uninstrument_app(self, app) -&gt; None:
     &#39;&#39;&#39;Disable instrumentation&#39;&#39;&#39;
     logger.debug(&#39;Entering FlaskInstrumentorWrapper.uninstrument_app()&#39;)
     try:

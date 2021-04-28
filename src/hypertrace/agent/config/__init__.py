@@ -19,7 +19,7 @@ PYTHON_SPECIFIC_ATTRIBUTES: list = [
 # Initialize logger
 logger = logging.getLogger(__name__) # pylint: disable=C0103
 
-def merge_config(base_config, overriding_config):
+def merge_config(base_config, overriding_config) -> dict:
     """
     Returns the merged result of two configs recursively
     """
@@ -33,7 +33,7 @@ def merge_config(base_config, overriding_config):
             base_config[key] = overriding_config[key]
     return base_config
 
-def load_config_from_file(filepath):
+def load_config_from_file(filepath) -> dict:
     """
     Returns the config loaded from a provided config file
     """
@@ -273,7 +273,7 @@ class AgentConfig:  # pylint: disable=R0902,R0903
 
         logger.debug('Merged configuration loaded successfully.')
 
-    def validate_config_elements(self, config_element, agent_config_base):
+    def validate_config_elements(self, config_element, agent_config_base) -> None:
         """Validate that all present elements in the parse configuration are
         defined in the config_pb2.AgentConfig"""
         # Check for configuration entries that do not belong
@@ -318,7 +318,7 @@ class AgentConfig:  # pylint: disable=R0902,R0903
                              err,
                              traceback.format_exc())
 
-    def dump_config(self):
+    def dump_config(self) -> None:
         '''Dump configuration information.'''
         logger.debug(self.__dict__)
 
