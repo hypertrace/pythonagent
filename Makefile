@@ -1,29 +1,20 @@
-TEST_DIR=test
-
-test_py3.7: PY_VERSION=py37
-test_py3.7: tests
-
-test_py3.8: PY_VERSION=py38
-test_py3.8: tests
-
-test_py3.9: PY_VERSION=py39
-test_py3.9: tests
+TEST_DIR=tests
 
 .PHONY: test-unit
 test-unit:
 	tox -e test-unit
 
 .PHONY: test-integration
-test-integration:
-	@# Call through test_py37 | test_py38 | test_py39
-	cd ${TEST_DIR}/flask; tox -e ${PY_VERSION}
-	cd ${TEST_DIR}/grpc; tox -e ${PY_VERSION}
-	cd ${TEST_DIR}/mysql; tox -e ${PY_VERSION}
-	cd ${TEST_DIR}/postgresql; tox -e ${PY_VERSION}
-	cd ${TEST_DIR}/gunicorn; tox -e ${PY_VERSION}
-	cd ${TEST_DIR}/requests; tox -e ${PY_VERSION}
-	cd ${TEST_DIR}/aiohttp; tox -e ${PY_VERSION}
-	cd ${TEST_DIR}/docker; tox -e ${PY_VERSION}
+test-integration: # Call through tests_py37 | tests_py38 | tests_py39
+	@echo "Running tests over ${PY_TARGET}" 
+	cd ${TEST_DIR}/flask; tox -e ${PY_TARGET}
+	cd ${TEST_DIR}/grpc; tox -e ${PY_TARGET}
+	cd ${TEST_DIR}/mysql; tox -e ${PY_TARGET}
+	cd ${TEST_DIR}/postgresql; tox -e ${PY_TARGET}
+	cd ${TEST_DIR}/gunicorn; tox -e ${PY_TARGET}
+	cd ${TEST_DIR}/requests; tox -e ${PY_TARGET}
+	cd ${TEST_DIR}/aiohttp; tox -e ${PY_TARGET}
+	cd ${TEST_DIR}/docker; tox -e ${PY_TARGET}
 
 .PHONY: test
 test: test-unit test-integration
