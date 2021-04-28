@@ -8,7 +8,7 @@ from . import load_config_from_file
 
 
 def test_merge_config():
-    '''Unittest functionx for merging config entries.'''
+    '''Unittest for merging config results.'''
     # set Environment Variable
     os.environ["HT_CONFIG_FILE"] = "./src/hypertrace/agent/config/agent-config.yaml"
     config_from_file = load_config_from_file(
