@@ -24,9 +24,14 @@ test-integration:
 .PHONY: test
 test: test-unit test-integration
 
+.PHONY: build-proto
+build-proto:
+	protoc --python_out=src/hypertrace/agent/config \
+          -Isrc/protobuf-config/agent-config \
+          src/protobuf-config/agent-config/config.proto
+
 .PHONY: build
-build: build_protobuf
-	python3 -m pip install --upgrade build
+build: build-proto
 	python -m build
 
 .PHONY: clean
@@ -45,9 +50,3 @@ lint:
 install: build
 	pip uninstall hypertrace -y
 	pip install dist/hypertrace-0.1.0.tar.gz
-
-build_protobuf:
-	protoc --python_out=src/hypertrace/agent/config \
-          -I src/protobuf-config/agent-config/tools/env-vars-generator/protobuf/src \
-          -Isrc/protobuf-config/agent-config \
-          src/protobuf-config/agent-config/config.proto

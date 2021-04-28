@@ -1,11 +1,13 @@
 from setuptools import setup, find_packages
 
+exec(open('version.py').read())
+
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
     name="hypertrace",
-    version="0.1.0",
+    version= __version__,
     author="Robert C. Broeckelmann Jr.",
     author_email="robert@iyasec.io",
     description="The Hypertrace Python Agent",

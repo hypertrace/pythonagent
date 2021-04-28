@@ -1,0 +1,29 @@
+name: Release
+on:
+  release:
+    types: [published]
+
+jobs:
+  release:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Setup python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "pypy-3.7"
+
+      - run: python3 -m pip install --upgrade build
+
+      - name: Build package
+        run: make build
+
+      - name: Publish a Python distribution to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_TOKEN }}
