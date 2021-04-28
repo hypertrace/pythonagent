@@ -23,6 +23,7 @@ jobs:
         run: make build
 
       - name: Publish a Python distribution to PyPI
+        # This action relies on the package files being present in ./dist folder
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
