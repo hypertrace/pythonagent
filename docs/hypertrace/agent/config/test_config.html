@@ -66,16 +66,21 @@ def test_merge_config() -&gt; None:
     assert cfg[&#34;propagation_formats&#34;] == &#34;B3&#34;
     assert not cfg[&#34;enabled&#34;]
     assert cfg[&#34;_use_console_span_exporter&#34;] is True
+    assert cfg[&#34;resource_attributes&#34;] == {}
+
 
 def test_agent_config() -&gt; None:
     &#39;&#39;&#39;Unittest functionx for agent config entries.&#39;&#39;&#39;
     # set Environment Variable
+
+    unset_env_variables()
+
     os.environ[&#34;HT_CONFIG_FILE&#34;] = &#34;./src/hypertrace/agent/config/agent-config.yaml&#34;
     print(&#39;Initializing agent.&#39;)
     config = AgentConfig()
     assert config.agent_config.service_name == &#34;pythonagent_001&#34;
     assert config.agent_config.reporting.endpoint == &#34;http://localhost:9411/api/v2/spans1&#34;
-    assert config.agent_config.reporting.trace_reporter_type == 0
+    assert config.agent_config.reporting.trace_reporter_type == 1
     assert config.agent_config.reporting.secure is True
     assert config.agent_config.reporting.token == &#34;TestToken&#34;
     assert config.agent_config.reporting.opa.endpoint == &#34;https://opa.traceableai:8181/&#34;
@@ -100,7 +105,7 @@ def test_env_config() -&gt; None:
     print(&#39;Initializing agent.&#39;)
     os.environ[&#34;HT_SERVICE_NAME&#34;] = &#34;pythonagent_002&#34;
     os.environ[&#34;HT_REPORTING_ENDPOINT&#34;] = &#34;http://localhost:9411/api/v2/spans2&#34;
-    os.environ[&#34;HT_TRACES_EXPORTER&#34;] = &#34;Zikpin&#34;
+    os.environ[&#34;HT_TRACES_EXPORTER&#34;] = &#34;OTLP&#34;
     os.environ[&#34;HT_REPORTING_SECURE&#34;] = &#34;True&#34;
     os.environ[&#34;HT_REPORTING_TOKEN&#34;] = &#34;&#34;
     os.environ[&#34;HT_REPORTING_OPA_ENDPOINT&#34;] = &#34;https://opa.traceableai:8181/&#34;
@@ -121,7 +126,7 @@ def test_env_config() -&gt; None:
     config = AgentConfig()
     assert config.agent_config.service_name == &#34;pythonagent_002&#34;
     assert config.agent_config.reporting.endpoint == &#34;http://localhost:9411/api/v2/spans2&#34;
-    assert config.agent_config.reporting.trace_reporter_type == 0
+    assert config.agent_config.reporting.trace_reporter_type == 2
     assert config.agent_config.reporting.secure is True
     assert config.agent_config.reporting.token == &#34;&#34;
     assert config.agent_config.reporting.opa.endpoint == &#34;https://opa.traceableai:8181/&#34;
@@ -138,7 +143,46 @@ def test_env_config() -&gt; None:
     assert config.agent_config.data_capture.body_max_size_bytes == 123456
     assert config.agent_config.propagation_formats == 0
     assert not config.agent_config.enabled
-    assert config.agent_config.resource_attributes == {&#39;service_name&#39;: &#39;pythonagent_002&#39;}</code></pre>
+    assert config.agent_config.resource_attributes == {&#39;service_name&#39;: &#39;pythonagent_002&#39;}
+# reset Environment variables
+def unset_env_variables(): # pylint: disable=R0902,R0903,R0912
+    &#39;&#39;&#39;Reset environment variables.&#39;&#39;&#39;
+    if hasattr(os, &#39;HT_SERVICE_NAME&#39;):
+        del os.environ[&#34;HT_SERVICE_NAME&#34;]
+    if hasattr(os, &#39;HT_REPORTING_ENDPOINT&#39;):
+        del os.environ[&#34;HT_REPORTING_ENDPOINT&#34;]
+    if hasattr(os, &#39;HT_TRACES_EXPORTER&#39;):
+        del os.environ[&#34;HT_TRACES_EXPORTER&#34;]
+    if hasattr(os, &#39;HT_REPORTING_SECURE&#39;):
+        del os.environ[&#34;HT_REPORTING_SECURE&#34;]
+    if hasattr(os, &#39;HT_REPORTING_TOKEN&#39;):
+        del os.environ[&#34;HT_REPORTING_TOKEN&#34;]
+    if hasattr(os, &#39;HT_REPORTING_OPA_ENDPOINT&#39;):
+        del os.environ[&#34;HT_REPORTING_OPA_ENDPOINT&#34;]
+    if hasattr(os, &#39;HT_REPORTING_OPA_POLL_PERIOD_SECONDS&#39;):
+        del os.environ[&#34;HT_REPORTING_OPA_POLL_PERIOD_SECONDS&#34;]
+    if hasattr(os, &#39;HT_REPORTING_OPA_ENABLED&#39;):
+        del os.environ[&#34;HT_REPORTING_OPA_ENABLED&#34;]
+    if hasattr(os, &#39;HT_DATA_CAPTURE_HTTP_HEADERS_REQUEST&#39;):
+        del os.environ[&#34;HT_DATA_CAPTURE_HTTP_HEADERS_REQUEST&#34;]
+    if hasattr(os, &#39;HT_DATA_CAPTURE_HTTP_HEADERS_RESPONSE&#39;):
+        del os.environ[&#34;HT_DATA_CAPTURE_HTTP_HEADERS_RESPONSE&#34;]
+    if hasattr(os, &#39;HT_DATA_CAPTURE_RPC_METADATA_REQUEST&#39;):
+        del os.environ[&#34;HT_DATA_CAPTURE_RPC_METADATA_REQUEST&#34;]
+    if hasattr(os, &#39;HT_DATA_CAPTURE_RPC_METADATA_RESPONSE&#39;):
+        del os.environ[&#34;HT_DATA_CAPTURE_RPC_METADATA_RESPONSE&#34;]
+    if hasattr(os, &#39;HT_DATA_CAPTURE_RPC_BODY_REQUEST&#39;):
+        del os.environ[&#34;HT_DATA_CAPTURE_RPC_BODY_REQUEST&#34;]
+    if hasattr(os, &#39;HT_DATA_CAPTURE_HTTP_HEADERS_RESPONSE&#39;):
+        del os.environ[&#34;HT_DATA_CAPTURE_HTTP_HEADERS_RESPONSE&#34;]
+    if hasattr(os, &#39;HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES&#39;):
+        del os.environ[&#34;HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES&#34;]
+    if hasattr(os, &#39;HT_PROPAGATION_FORMATS&#39;):
+        del os.environ[&#34;HT_PROPAGATION_FORMATS&#34;]
+    if hasattr(os, &#39;HT_ENABLED&#39;):
+        del os.environ[&#34;HT_ENABLED&#34;]
+    if hasattr(os, &#39;HT_ENABLE_CONSOLE_SPAN_EXPORTER&#39;):
+        del os.environ[&#34;HT_ENABLE_CONSOLE_SPAN_EXPORTER&#34;]</code></pre>
 </details>
 </section>
 <section>
@@ -160,12 +204,15 @@ def test_env_config() -&gt; None:
 <pre><code class="python">def test_agent_config() -&gt; None:
     &#39;&#39;&#39;Unittest functionx for agent config entries.&#39;&#39;&#39;
     # set Environment Variable
+
+    unset_env_variables()
+
     os.environ[&#34;HT_CONFIG_FILE&#34;] = &#34;./src/hypertrace/agent/config/agent-config.yaml&#34;
     print(&#39;Initializing agent.&#39;)
     config = AgentConfig()
     assert config.agent_config.service_name == &#34;pythonagent_001&#34;
     assert config.agent_config.reporting.endpoint == &#34;http://localhost:9411/api/v2/spans1&#34;
-    assert config.agent_config.reporting.trace_reporter_type == 0
+    assert config.agent_config.reporting.trace_reporter_type == 1
     assert config.agent_config.reporting.secure is True
     assert config.agent_config.reporting.token == &#34;TestToken&#34;
     assert config.agent_config.reporting.opa.endpoint == &#34;https://opa.traceableai:8181/&#34;
@@ -199,7 +246,7 @@ def test_env_config() -&gt; None:
     print(&#39;Initializing agent.&#39;)
     os.environ[&#34;HT_SERVICE_NAME&#34;] = &#34;pythonagent_002&#34;
     os.environ[&#34;HT_REPORTING_ENDPOINT&#34;] = &#34;http://localhost:9411/api/v2/spans2&#34;
-    os.environ[&#34;HT_TRACES_EXPORTER&#34;] = &#34;Zikpin&#34;
+    os.environ[&#34;HT_TRACES_EXPORTER&#34;] = &#34;OTLP&#34;
     os.environ[&#34;HT_REPORTING_SECURE&#34;] = &#34;True&#34;
     os.environ[&#34;HT_REPORTING_TOKEN&#34;] = &#34;&#34;
     os.environ[&#34;HT_REPORTING_OPA_ENDPOINT&#34;] = &#34;https://opa.traceableai:8181/&#34;
@@ -220,7 +267,7 @@ def test_env_config() -&gt; None:
     config = AgentConfig()
     assert config.agent_config.service_name == &#34;pythonagent_002&#34;
     assert config.agent_config.reporting.endpoint == &#34;http://localhost:9411/api/v2/spans2&#34;
-    assert config.agent_config.reporting.trace_reporter_type == 0
+    assert config.agent_config.reporting.trace_reporter_type == 2
     assert config.agent_config.reporting.secure is True
     assert config.agent_config.reporting.token == &#34;&#34;
     assert config.agent_config.reporting.opa.endpoint == &#34;https://opa.traceableai:8181/&#34;
@@ -278,7 +325,57 @@ def test_env_config() -&gt; None:
     assert cfg[&#34;data_capture&#34;][&#34;body_max_size_bytes&#34;] == 123457
     assert cfg[&#34;propagation_formats&#34;] == &#34;B3&#34;
     assert not cfg[&#34;enabled&#34;]
-    assert cfg[&#34;_use_console_span_exporter&#34;] is True</code></pre>
+    assert cfg[&#34;_use_console_span_exporter&#34;] is True
+    assert cfg[&#34;resource_attributes&#34;] == {}</code></pre>
+</details>
+</dd>
+<dt id="hypertrace.agent.config.test_config.unset_env_variables"><code class="name flex">
+<span>def <span class="ident">unset_env_variables</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Reset environment variables.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def unset_env_variables(): # pylint: disable=R0902,R0903,R0912
+    &#39;&#39;&#39;Reset environment variables.&#39;&#39;&#39;
+    if hasattr(os, &#39;HT_SERVICE_NAME&#39;):
+        del os.environ[&#34;HT_SERVICE_NAME&#34;]
+    if hasattr(os, &#39;HT_REPORTING_ENDPOINT&#39;):
+        del os.environ[&#34;HT_REPORTING_ENDPOINT&#34;]
+    if hasattr(os, &#39;HT_TRACES_EXPORTER&#39;):
+        del os.environ[&#34;HT_TRACES_EXPORTER&#34;]
+    if hasattr(os, &#39;HT_REPORTING_SECURE&#39;):
+        del os.environ[&#34;HT_REPORTING_SECURE&#34;]
+    if hasattr(os, &#39;HT_REPORTING_TOKEN&#39;):
+        del os.environ[&#34;HT_REPORTING_TOKEN&#34;]
+    if hasattr(os, &#39;HT_REPORTING_OPA_ENDPOINT&#39;):
+        del os.environ[&#34;HT_REPORTING_OPA_ENDPOINT&#34;]
+    if hasattr(os, &#39;HT_REPORTING_OPA_POLL_PERIOD_SECONDS&#39;):
+        del os.environ[&#34;HT_REPORTING_OPA_POLL_PERIOD_SECONDS&#34;]
+    if hasattr(os, &#39;HT_REPORTING_OPA_ENABLED&#39;):
+        del os.environ[&#34;HT_REPORTING_OPA_ENABLED&#34;]
+    if hasattr(os, &#39;HT_DATA_CAPTURE_HTTP_HEADERS_REQUEST&#39;):
+        del os.environ[&#34;HT_DATA_CAPTURE_HTTP_HEADERS_REQUEST&#34;]
+    if hasattr(os, &#39;HT_DATA_CAPTURE_HTTP_HEADERS_RESPONSE&#39;):
+        del os.environ[&#34;HT_DATA_CAPTURE_HTTP_HEADERS_RESPONSE&#34;]
+    if hasattr(os, &#39;HT_DATA_CAPTURE_RPC_METADATA_REQUEST&#39;):
+        del os.environ[&#34;HT_DATA_CAPTURE_RPC_METADATA_REQUEST&#34;]
+    if hasattr(os, &#39;HT_DATA_CAPTURE_RPC_METADATA_RESPONSE&#39;):
+        del os.environ[&#34;HT_DATA_CAPTURE_RPC_METADATA_RESPONSE&#34;]
+    if hasattr(os, &#39;HT_DATA_CAPTURE_RPC_BODY_REQUEST&#39;):
+        del os.environ[&#34;HT_DATA_CAPTURE_RPC_BODY_REQUEST&#34;]
+    if hasattr(os, &#39;HT_DATA_CAPTURE_HTTP_HEADERS_RESPONSE&#39;):
+        del os.environ[&#34;HT_DATA_CAPTURE_HTTP_HEADERS_RESPONSE&#34;]
+    if hasattr(os, &#39;HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES&#39;):
+        del os.environ[&#34;HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES&#34;]
+    if hasattr(os, &#39;HT_PROPAGATION_FORMATS&#39;):
+        del os.environ[&#34;HT_PROPAGATION_FORMATS&#34;]
+    if hasattr(os, &#39;HT_ENABLED&#39;):
+        del os.environ[&#34;HT_ENABLED&#34;]
+    if hasattr(os, &#39;HT_ENABLE_CONSOLE_SPAN_EXPORTER&#39;):
+        del os.environ[&#34;HT_ENABLE_CONSOLE_SPAN_EXPORTER&#34;]</code></pre>
 </details>
 </dd>
 </dl>
@@ -302,6 +399,7 @@ def test_env_config() -&gt; None:
 <li><code><a title="hypertrace.agent.config.test_config.test_agent_config" href="#hypertrace.agent.config.test_config.test_agent_config">test_agent_config</a></code></li>
 <li><code><a title="hypertrace.agent.config.test_config.test_env_config" href="#hypertrace.agent.config.test_config.test_env_config">test_env_config</a></code></li>
 <li><code><a title="hypertrace.agent.config.test_config.test_merge_config" href="#hypertrace.agent.config.test_config.test_merge_config">test_merge_config</a></code></li>
+<li><code><a title="hypertrace.agent.config.test_config.unset_env_variables" href="#hypertrace.agent.config.test_config.unset_env_variables">unset_env_variables</a></code></li>
 </ul>
 </li>
 </ul>
