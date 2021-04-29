@@ -15,9 +15,7 @@ jobs:
       - name: Setup python
         uses: actions/setup-python@v2
         with:
-          python-version: "pypy-3.7"
-
-      - run: python3 -m pip install --upgrade build
+          python-version: "3.7"
 
       - name: Build package
         run: make build
