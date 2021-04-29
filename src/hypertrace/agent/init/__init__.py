@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
 class AgentInit:  # pylint: disable=R0902,R0903
     '''Initialize all the OTel components using configuration from AgentConfig'''
-    def __init__(self, agent_config: AgentConfig, init_console_only: bool = False):
+    def __init__(self, agent_config: AgentConfig):
         '''constructor'''
         logger.debug('Initializing AgentInit object.')
         self._config = agent_config
@@ -42,11 +42,10 @@ class AgentInit:  # pylint: disable=R0902,R0903
             )
             trace.set_tracer_provider(self._tracer_provider)
 
-            if self._config.use_console_span_exporter() \
-              or init_console_only:
+            if self._config.use_console_span_exporter():
                 self.set_console_span_processor()
 
-            if not init_console_only:
+            if not self._config.use_console_span_exporter():
                 self.set_zipkin_processor()
                 self.set_otlp_processor()
 

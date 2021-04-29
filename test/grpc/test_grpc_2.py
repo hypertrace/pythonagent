@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 # Code snippet here represents the current initialization logic
 #
 logger.info('Initializing agent.')
-agent = Agent(True)
+agent = Agent()
 agent.register_grpc_client()
 logger.info('Agent initialized.')
 #

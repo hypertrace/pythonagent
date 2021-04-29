@@ -55,14 +55,14 @@ logger = setup_custom_logger(__name__) # pylint: disable=C0103
 class Agent:
     '''Top-level entry point for Hypertrace agent.'''
 
-    def __init__(self, init_console_only: bool = False):
+    def __init__(self):
         '''Constructor'''
         logger.debug('Initializing Agent.')
         if not self.is_enabled():
             return
         try:
             self._config = AgentConfig()
-            self._init = AgentInit(self._config, init_console_only)
+            self._init = AgentInit(self._config)
         except Exception as err:  # pylint: disable=W0703
             logger.error('Failed to initialize Agent: exception=%s, stacktrace=%s',
                          err,
