@@ -1,24 +1,28 @@
-TEST_DIR=test
+#!/bin/bash
 
-test_py3.7: PY_VERSION=py37
-test_py3.7: test
+TEST_DIR=tests
 
-test_py3.8: PY_VERSION=py38
-test_py3.8: test
+PYTHON_VERSION ?= $(shell python --version | cut -c8- | cut -d'.' -f 1-2) # e.g. 3.9
+PY_TARGET=py$(subst .,,$(PYTHON_VERSION)) # e.g. py39
 
-test_py3.9: PY_VERSION=py39
-test_py3.9: test
+.PHONY: test-unit
+test-unit:
+	tox -e test-unit
+
+.PHONY: test-integration
+test-integration:
+	@echo "Running tests over $(PY_TARGET)" 
+	cd ${TEST_DIR}/flask; tox -e ${PY_TARGET}
+	cd ${TEST_DIR}/grpc; tox -e ${PY_TARGET}
+	cd ${TEST_DIR}/mysql; tox -e ${PY_TARGET}
+	cd ${TEST_DIR}/postgresql; tox -e ${PY_TARGET}
+	cd ${TEST_DIR}/gunicorn; tox -e ${PY_TARGET}
+	cd ${TEST_DIR}/requests; tox -e ${PY_TARGET}
+	cd ${TEST_DIR}/aiohttp; tox -e ${PY_TARGET}
+	cd ${TEST_DIR}/docker; tox -e ${PY_TARGET}
 
 .PHONY: test
-test: # Call through test_py37 | test_py38 | test_py39
-	cd ${TEST_DIR}/flask; tox -e ${PY_VERSION}
-	cd ${TEST_DIR}/grpc; tox -e ${PY_VERSION}
-	cd ${TEST_DIR}/mysql; tox -e ${PY_VERSION}
-	cd ${TEST_DIR}/postgresql; tox -e ${PY_VERSION}
-	cd ${TEST_DIR}/gunicorn; tox -e ${PY_VERSION}
-	cd ${TEST_DIR}/requests; tox -e ${PY_VERSION}
-	cd ${TEST_DIR}/aiohttp; tox -e ${PY_VERSION}
-	cd ${TEST_DIR}/docker; tox -e ${PY_VERSION}
+test: test-unit test-integration
 
 .PHONY: build
 build: build_protobuf
@@ -41,9 +45,6 @@ lint:
 install: build
 	pip uninstall hypertrace -y
 	pip install dist/hypertrace-0.1.0.tar.gz
-
-unittest:
-	tox -e unittest
 
 build_protobuf:
 	protoc --python_out=src/hypertrace/agent/config \

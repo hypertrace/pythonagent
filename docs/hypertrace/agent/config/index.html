@@ -50,7 +50,7 @@ PYTHON_SPECIFIC_ATTRIBUTES: list = [
 # Initialize logger
 logger = logging.getLogger(__name__) # pylint: disable=C0103
 
-def merge_config(base_config, overriding_config) -&gt; dict:
+def merge_config(base_config, overriding_config):
     &#34;&#34;&#34;
     Returns the merged result of two configs recursively
     &#34;&#34;&#34;
@@ -64,7 +64,7 @@ def merge_config(base_config, overriding_config) -&gt; dict:
             base_config[key] = overriding_config[key]
     return base_config
 
-def load_config_from_file(filepath) -&gt; dict:
+def load_config_from_file(filepath):
     &#34;&#34;&#34;
     Returns the config loaded from a provided config file
     &#34;&#34;&#34;
@@ -117,6 +117,9 @@ class AgentConfig:  # pylint: disable=R0902,R0903
             logger.info(&#39;Loading default configuration.&#39;)
             self.config = DEFAULT_AGENT_CONFIG
 
+        if &#34;reporting&#34; not in self.config:
+            self.config[&#39;reporting&#39;] = {}
+            self.config[&#39;reporting&#39;][&#39;opa&#39;] = {}
         # Use variables from environment:
         if &#39;HT_SERVICE_NAME&#39; in os.environ:
             logger.debug(&#34;[env] Loaded HT_SERVICE_NAME from env&#34;)
@@ -126,6 +129,10 @@ class AgentConfig:  # pylint: disable=R0902,R0903
         if &#39;HT_REPORTING_ENDPOINT&#39; in os.environ:
             logger.debug(&#34;[env] Loaded HT_REPORTING_ENDPOINT from env&#34;)
             self.config[&#39;reporting&#39;][&#39;endpoint&#39;] = os.environ[&#39;HT_REPORTING_ENDPOINT&#39;]
+
+        if &#39;HT_TRACES_EXPORTER&#39; in os.environ:
+            logger.debug(&#34;[env] Loaded HT_TRACES_EXPORTER from env&#34;)
+            self.config[&#39;reporting&#39;][&#39;trace_reporter_type&#39;] = os.environ[&#39;HT_TRACES_EXPORTER&#39;]
 
         if &#39;HT_REPORTING_SECURE&#39; in os.environ:
             logger.debug(&#34;[env] Loaded HT_REPORTING_SECURE from env&#34;)
@@ -302,9 +309,7 @@ class AgentConfig:  # pylint: disable=R0902,R0903
         # Validate configuration
         self.validate_config_elements(self.config, self.agent_config)
 
-        logger.debug(&#39;Merged configuration loaded successfully.&#39;)
-
-    def validate_config_elements(self, config_element, agent_config_base) -&gt; None:
+    def validate_config_elements(self, config_element, agent_config_base):
         &#34;&#34;&#34;Validate that all present elements in the parse configuration are
         defined in the config_pb2.AgentConfig&#34;&#34;&#34;
         # Check for configuration entries that do not belong
@@ -330,7 +335,7 @@ class AgentConfig:  # pylint: disable=R0902,R0903
                                  traceback.format_exc())
                     continue
             if isinstance(config_element[key], (str, bool, int, list)):
-                logger.debug(&#39;is a known configuration data type&#39;)
+                logger.debug(&#39;is string&#39;)
                 if key in PYTHON_SPECIFIC_ATTRIBUTES:
                     logger.debug(&#39;Found pythonagent-specific attribute, attr=%s&#39;, key)
                     continue
@@ -349,7 +354,7 @@ class AgentConfig:  # pylint: disable=R0902,R0903
                              err,
                              traceback.format_exc())
 
-    def dump_config(self) -&gt; None:
+    def dump_config(self):
         &#39;&#39;&#39;Dump configuration information.&#39;&#39;&#39;
         logger.debug(self.__dict__)
 
@@ -385,7 +390,7 @@ class AgentConfig:  # pylint: disable=R0902,R0903
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="hypertrace.agent.config.load_config_from_file"><code class="name flex">
-<span>def <span class="ident">load_config_from_file</span></span>(<span>filepath) ‑> dict</span>
+<span>def <span class="ident">load_config_from_file</span></span>(<span>filepath)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Returns the config loaded from a provided config file</p></div>
@@ -393,7 +398,7 @@ class AgentConfig:  # pylint: disable=R0902,R0903
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def load_config_from_file(filepath) -&gt; dict:
+<pre><code class="python">def load_config_from_file(filepath):
     &#34;&#34;&#34;
     Returns the config loaded from a provided config file
     &#34;&#34;&#34;
@@ -418,7 +423,7 @@ class AgentConfig:  # pylint: disable=R0902,R0903
 </details>
 </dd>
 <dt id="hypertrace.agent.config.merge_config"><code class="name flex">
-<span>def <span class="ident">merge_config</span></span>(<span>base_config, overriding_config) ‑> dict</span>
+<span>def <span class="ident">merge_config</span></span>(<span>base_config, overriding_config)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Returns the merged result of two configs recursively</p></div>
@@ -426,7 +431,7 @@ class AgentConfig:  # pylint: disable=R0902,R0903
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def merge_config(base_config, overriding_config) -&gt; dict:
+<pre><code class="python">def merge_config(base_config, overriding_config):
     &#34;&#34;&#34;
     Returns the merged result of two configs recursively
     &#34;&#34;&#34;
@@ -487,6 +492,9 @@ If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></di
             logger.info(&#39;Loading default configuration.&#39;)
             self.config = DEFAULT_AGENT_CONFIG
 
+        if &#34;reporting&#34; not in self.config:
+            self.config[&#39;reporting&#39;] = {}
+            self.config[&#39;reporting&#39;][&#39;opa&#39;] = {}
         # Use variables from environment:
         if &#39;HT_SERVICE_NAME&#39; in os.environ:
             logger.debug(&#34;[env] Loaded HT_SERVICE_NAME from env&#34;)
@@ -496,6 +504,10 @@ If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></di
         if &#39;HT_REPORTING_ENDPOINT&#39; in os.environ:
             logger.debug(&#34;[env] Loaded HT_REPORTING_ENDPOINT from env&#34;)
             self.config[&#39;reporting&#39;][&#39;endpoint&#39;] = os.environ[&#39;HT_REPORTING_ENDPOINT&#39;]
+
+        if &#39;HT_TRACES_EXPORTER&#39; in os.environ:
+            logger.debug(&#34;[env] Loaded HT_TRACES_EXPORTER from env&#34;)
+            self.config[&#39;reporting&#39;][&#39;trace_reporter_type&#39;] = os.environ[&#39;HT_TRACES_EXPORTER&#39;]
 
         if &#39;HT_REPORTING_SECURE&#39; in os.environ:
             logger.debug(&#34;[env] Loaded HT_REPORTING_SECURE from env&#34;)
@@ -672,9 +684,7 @@ If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></di
         # Validate configuration
         self.validate_config_elements(self.config, self.agent_config)
 
-        logger.debug(&#39;Merged configuration loaded successfully.&#39;)
-
-    def validate_config_elements(self, config_element, agent_config_base) -&gt; None:
+    def validate_config_elements(self, config_element, agent_config_base):
         &#34;&#34;&#34;Validate that all present elements in the parse configuration are
         defined in the config_pb2.AgentConfig&#34;&#34;&#34;
         # Check for configuration entries that do not belong
@@ -700,7 +710,7 @@ If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></di
                                  traceback.format_exc())
                     continue
             if isinstance(config_element[key], (str, bool, int, list)):
-                logger.debug(&#39;is a known configuration data type&#39;)
+                logger.debug(&#39;is string&#39;)
                 if key in PYTHON_SPECIFIC_ATTRIBUTES:
                     logger.debug(&#39;Found pythonagent-specific attribute, attr=%s&#39;, key)
                     continue
@@ -719,7 +729,7 @@ If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></di
                              err,
                              traceback.format_exc())
 
-    def dump_config(self) -&gt; None:
+    def dump_config(self):
         &#39;&#39;&#39;Dump configuration information.&#39;&#39;&#39;
         logger.debug(self.__dict__)
 
@@ -734,7 +744,7 @@ If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></di
 <h3>Methods</h3>
 <dl>
 <dt id="hypertrace.agent.config.AgentConfig.dump_config"><code class="name flex">
-<span>def <span class="ident">dump_config</span></span>(<span>self) ‑> NoneType</span>
+<span>def <span class="ident">dump_config</span></span>(<span>self)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Dump configuration information.</p></div>
@@ -742,7 +752,7 @@ If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></di
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def dump_config(self) -&gt; None:
+<pre><code class="python">def dump_config(self):
     &#39;&#39;&#39;Dump configuration information.&#39;&#39;&#39;
     logger.debug(self.__dict__)</code></pre>
 </details>
@@ -776,7 +786,7 @@ If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></di
 </details>
 </dd>
 <dt id="hypertrace.agent.config.AgentConfig.validate_config_elements"><code class="name flex">
-<span>def <span class="ident">validate_config_elements</span></span>(<span>self, config_element, agent_config_base) ‑> NoneType</span>
+<span>def <span class="ident">validate_config_elements</span></span>(<span>self, config_element, agent_config_base)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Validate that all present elements in the parse configuration are
@@ -785,7 +795,7 @@ defined in the config_pb2.AgentConfig</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def validate_config_elements(self, config_element, agent_config_base) -&gt; None:
+<pre><code class="python">def validate_config_elements(self, config_element, agent_config_base):
     &#34;&#34;&#34;Validate that all present elements in the parse configuration are
     defined in the config_pb2.AgentConfig&#34;&#34;&#34;
     # Check for configuration entries that do not belong
@@ -811,7 +821,7 @@ defined in the config_pb2.AgentConfig</p></div>
                              traceback.format_exc())
                 continue
         if isinstance(config_element[key], (str, bool, int, list)):
-            logger.debug(&#39;is a known configuration data type&#39;)
+            logger.debug(&#39;is string&#39;)
             if key in PYTHON_SPECIFIC_ATTRIBUTES:
                 logger.debug(&#39;Found pythonagent-specific attribute, attr=%s&#39;, key)
                 continue

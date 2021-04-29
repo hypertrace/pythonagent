@@ -5,7 +5,7 @@ services:
     container_name: flask_app_a
     build:
       context: ../..
-      dockerfile: test/requests/flask_app/Dockerfile
+      dockerfile: tests/requests/flask_app/Dockerfile
     environment:
       ENABLE_INSTRUMENTATION: ${ENABLE_INSTRUMENTATION}
       HT_ENABLE_CONSOLE_SPAN_EXPORTER: "True"
