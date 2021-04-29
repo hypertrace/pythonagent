@@ -16,3 +16,5 @@ pyyaml
 flask
 pytest
 gunicorn
+pytest-asyncio
+pytest-env

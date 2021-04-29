@@ -264,11 +264,16 @@ class AgentConfig:  # pylint: disable=R0902,R0903
         self.agent_config.reporting = reporting
         self.agent_config.data_capture = data_capture
         if self.config['propagation_formats']  == 'TRACECONTEXT':
+            logger.debug('Enabling TRACECONTEXT propagation protocol.')
             self.agent_config.propagation_formats = config_pb2.PropagationFormat.TRACECONTEXT
         elif self.config['propagation_formats'] == 'B3':
+            logger.debug('Enabling B3 propagation protocol')
             self.agent_config.propagation_formats = config_pb2.PropagationFormat.B3
+            logger.debug('self.agent_config.propagation_formats: %s',
+              str(self.agent_config.propagation_formats))
         else:
             # Default to TRACECONTEXT
+            logger.debug('Defautingto TRACECONTEXT propagation protocol.')
             self.agent_config.propagation_formats = config_pb2.PropagationFormat.TRACECONTEXT
         self.agent_config.enabled = self.config['enabled']
 

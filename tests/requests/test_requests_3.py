@@ -37,7 +37,7 @@ def test_run():
   #
   logger.info('Initializing agent.')
   agent = Agent()
-  agent.register_requests(True)
+  agent.register_requests()
   #
   # End initialization logic for Python Agent
   #

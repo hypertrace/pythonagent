@@ -39,7 +39,7 @@ async def test_run():
   #
   logger.info('Initializing agent.')
   agent = Agent()
-  agent.register_aiohttp_client(False)
+  agent.register_aiohttp_client()
   #
   # End initialization logic for Python Agent
   #

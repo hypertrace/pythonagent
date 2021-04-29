@@ -69,7 +69,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             logger.debug(' %s : %s', mod, str(self._module_initialized[mod]))
 
     # Creates a flask wrapper using the config defined in hypertraceconfig
-    def flask_init(self, app, use_b3=False) -> None:
+    def flask_init(self, app) -> None:
         '''Creates a flask instrumentation wrapper using the config defined in hypertraceconfig'''
         logger.debug('Calling AgentInit.flaskInit().')
         try:
@@ -79,8 +79,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self._flask_instrumentor_wrapper.instrument_app(app)
             self.init_instrumentor_wrapper_base_for_http(
                 self._flask_instrumentor_wrapper)
-            if use_b3 \
-              or self._config.agent_config.propagation_formats \
+            if self._config.agent_config.propagation_formats \
               == config_pb2.PropagationFormat.B3:
                 logger.debug('Enable B3 context propagation protocol.')
                 self.enable_b3()
@@ -182,7 +181,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
                          traceback.format_exc())
 
     # Creates a requests client wrapper using the config defined in hypertraceconfig
-    def requests_init(self, use_b3=False) -> None:
+    def requests_init(self) -> None:
         '''Creates a requests client wrapper using the config defined in hypertraceconfig'''
         logger.debug('Calling AgentInit.requestsInit()')
         try:
@@ -193,8 +192,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self._requests_instrumentor_wrapper = RequestsInstrumentorWrapper()
             self.init_instrumentor_wrapper_base_for_http(
                 self._requests_instrumentor_wrapper)
-            if use_b3 \
-                    or self._config.agent_config.propagation_formats == 'B3':
+            if self._config.agent_config.propagation_formats == config_pb2.PropagationFormat.B3:
                 logger.debug('Enable B3 context propagation protocol.')
                 self.enable_b3()
         except Exception as err:  # pylint: disable=W0703
@@ -204,7 +202,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
                          traceback.format_exc())
 
     # Creates an aiohttp-client wrapper using the config defined in hypertraceconfig
-    def aiohttp_client_init(self, use_b3=False) -> None:
+    def aiohttp_client_init(self) -> None:
         '''Creates an aiohttp-client wrapper using the config defined in hypertraceconfig'''
         logger.debug('Calling AgentInit.aioHttpClientInit()')
         try:
@@ -215,8 +213,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self._aiohttp_client_instrumentor_wrapper = AioHttpClientInstrumentorWrapper()
             self.init_instrumentor_wrapper_base_for_http(
                 self._aiohttp_client_instrumentor_wrapper)
-            if use_b3 \
-                    or self._config.agent_config.propagation_formats == 'B3':
+            if self._config.agent_config.propagation_formats == config_pb2.PropagationFormat.B3:
                 logger.debug('Enable B3 context propagation protocol.')
                 self.enable_b3()
         except Exception as err:  # pylint: disable=W0703
