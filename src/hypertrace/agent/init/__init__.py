@@ -13,16 +13,13 @@ from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from hypertrace.agent import constants
 from hypertrace.agent.config import config_pb2, AgentConfig
-
-from ..constants import TELEMETRY_SDK_NAME
-from ..constants import TELEMETRY_SDK_VERSION
-from ..constants import TELEMETRY_SDK_LANGUAGE
+from .. import constants
 
 # Initialize logger
 logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
 
-class AgentInit:  # pylint: disable=R0902,R0903
+class AgentInit:  # pylint: disable=R0902,R0903,E0602
     '''Initialize all the OTel components using configuration from AgentConfig'''
     def __init__(self, agent_config: AgentConfig, init_console_only: bool = False):
         '''constructor'''
