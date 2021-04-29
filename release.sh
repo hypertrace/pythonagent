@@ -5,6 +5,8 @@
 # Usage:
 # ./release.sh <version_number>
 
+# Note: this is script is adapted from https://github.com/hypertrace/goagent/blob/main/release.sh
+
 set -e
 
 MAIN_BRANCH="main"
