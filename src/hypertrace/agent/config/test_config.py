@@ -4,6 +4,9 @@ from hypertrace.agent.config import AgentConfig
 from . import DEFAULT_AGENT_CONFIG
 from . import merge_config
 from . import load_config_from_file
+from ..constants import TELEMETRY_SDK_NAME
+from ..constants import TELEMETRY_SDK_LANGUAGE
+from ..constants import TELEMETRY_SDK_VERSION
 
 
 def test_merge_config() -> None:
@@ -121,3 +124,10 @@ def unset_env_variables():
     for key in os.environ:
         if key[0:3] == "HT_":
             del os.environ[key]
+
+
+def test_telemetry_constants():
+    """Test Telemetry Constants."""
+    assert TELEMETRY_SDK_NAME == "hypertrace"
+    assert TELEMETRY_SDK_LANGUAGE == "python"
+    assert TELEMETRY_SDK_VERSION == "0.20.dev0"
