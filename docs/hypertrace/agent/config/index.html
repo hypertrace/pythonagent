@@ -308,8 +308,7 @@ class AgentConfig:  # pylint: disable=R0902,R0903
             self.agent_config.propagation_formats = config_pb2.PropagationFormat.TRACECONTEXT
         self.agent_config.enabled = self.config[&#39;enabled&#39;]
 
-        self.agent_config.resource_attributes = {
-            &#39;service_name&#39;: self.config[&#39;service_name&#39;]}
+        self.agent_config.resource_attributes = self.config[&#39;resource_attributes&#39;]
 
         # Validate configuration
         self.validate_config_elements(self.config, self.agent_config)
@@ -351,7 +350,8 @@ class AgentConfig:  # pylint: disable=R0902,R0903
                         logger.debug(&#39;Not valid: %s&#39;, key)
                         raise AttributeError
                 except AttributeError as err:
-                    logger.error(&#39;Unknown attribute encountered: exception=%s, stacktrace=%s&#39;,
+                    logger.error(&#39;Unknown attribute %s encountered: exception=%s, stacktrace=%s&#39;,
+                                 key,
                                  err,
                                  traceback.format_exc())
             else:
@@ -377,7 +377,7 @@ class AgentConfig:  # pylint: disable=R0902,R0903
 <dl>
 <dt><code class="name"><a title="hypertrace.agent.config.config_pb2" href="config_pb2.html">hypertrace.agent.config.config_pb2</a></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Generated protocol buffer code.</p></div>
 </dd>
 <dt><code class="name"><a title="hypertrace.agent.config.default" href="default.html">hypertrace.agent.config.default</a></code></dt>
 <dd>
@@ -688,8 +688,7 @@ If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></di
             self.agent_config.propagation_formats = config_pb2.PropagationFormat.TRACECONTEXT
         self.agent_config.enabled = self.config[&#39;enabled&#39;]
 
-        self.agent_config.resource_attributes = {
-            &#39;service_name&#39;: self.config[&#39;service_name&#39;]}
+        self.agent_config.resource_attributes = self.config[&#39;resource_attributes&#39;]
 
         # Validate configuration
         self.validate_config_elements(self.config, self.agent_config)
@@ -731,7 +730,8 @@ If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></di
                         logger.debug(&#39;Not valid: %s&#39;, key)
                         raise AttributeError
                 except AttributeError as err:
-                    logger.error(&#39;Unknown attribute encountered: exception=%s, stacktrace=%s&#39;,
+                    logger.error(&#39;Unknown attribute %s encountered: exception=%s, stacktrace=%s&#39;,
+                                 key,
                                  err,
                                  traceback.format_exc())
             else:
@@ -842,7 +842,8 @@ defined in the config_pb2.AgentConfig</p></div>
                     logger.debug(&#39;Not valid: %s&#39;, key)
                     raise AttributeError
             except AttributeError as err:
-                logger.error(&#39;Unknown attribute encountered: exception=%s, stacktrace=%s&#39;,
+                logger.error(&#39;Unknown attribute %s encountered: exception=%s, stacktrace=%s&#39;,
+                             key,
                              err,
                              traceback.format_exc())
         else:

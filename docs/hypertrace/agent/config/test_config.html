@@ -34,7 +34,6 @@ from . import DEFAULT_AGENT_CONFIG
 from . import merge_config
 from . import load_config_from_file
 
-
 def test_merge_config() -&gt; None:
     &#39;&#39;&#39;Unittest for merging config results.&#39;&#39;&#39;
     # set Environment Variable
@@ -64,7 +63,9 @@ def test_merge_config() -&gt; None:
     assert cfg[&#34;propagation_formats&#34;] == &#34;B3&#34;
     assert not cfg[&#34;enabled&#34;]
     assert cfg[&#34;_use_console_span_exporter&#34;] is True
-    assert cfg[&#34;resource_attributes&#34;] == {}
+    assert cfg[&#34;resource_attributes&#34;] == {
+        &#39;tester01&#39;: &#39;tester01&#39;
+    }
     unset_env_variables()
 
 def test_agent_config() -&gt; None:
@@ -96,7 +97,7 @@ def test_agent_config() -&gt; None:
     assert config.agent_config.propagation_formats == 0
     assert not config.agent_config.enabled
     assert config.agent_config.resource_attributes == {
-        &#39;service_name&#39;: &#39;pythonagent_001&#39;}
+        &#39;tester01&#39;: &#39;tester01&#39;}
     unset_env_variables()
 
 def test_env_config() -&gt; None:
@@ -120,7 +121,7 @@ def test_env_config() -&gt; None:
     os.environ[&#34;HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES&#34;] = &#34;123456&#34;
     os.environ[&#34;HT_PROPAGATION_FORMATS&#34;] = &#34;B3&#34;
     os.environ[&#34;HT_ENABLED&#34;] = &#34;False&#34;
-    os.environ[&#34;HT_ENABLE_CONSOLE_SPAN_EXPORTER&#34;] = &#34;{&#39;service_name&#39;: &#39;pythonagent_002&#39;}&#34;
+    os.environ[&#34;HT_ENABLE_CONSOLE_SPAN_EXPORTER&#34;] = &#34;True&#34;
     config = AgentConfig()
     assert config.agent_config.service_name == &#34;pythonagent_002&#34;
     assert config.agent_config.reporting.endpoint == &#34;http://localhost:9411/api/v2/spans2&#34;
@@ -141,8 +142,9 @@ def test_env_config() -&gt; None:
     assert config.agent_config.data_capture.body_max_size_bytes == 123456
     assert config.agent_config.propagation_formats == 0
     assert not config.agent_config.enabled
+    assert config.use_console_span_exporter()
     assert config.agent_config.resource_attributes == {
-        &#39;service_name&#39;: &#39;pythonagent_002&#39;}
+        &#39;tester01&#39;: &#39;tester01&#39;}
     unset_env_variables()
 
 def unset_env_variables():
@@ -197,7 +199,7 @@ def unset_env_variables():
     assert config.agent_config.propagation_formats == 0
     assert not config.agent_config.enabled
     assert config.agent_config.resource_attributes == {
-        &#39;service_name&#39;: &#39;pythonagent_001&#39;}
+        &#39;tester01&#39;: &#39;tester01&#39;}
     unset_env_variables()</code></pre>
 </details>
 </dd>
@@ -231,7 +233,7 @@ def unset_env_variables():
     os.environ[&#34;HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES&#34;] = &#34;123456&#34;
     os.environ[&#34;HT_PROPAGATION_FORMATS&#34;] = &#34;B3&#34;
     os.environ[&#34;HT_ENABLED&#34;] = &#34;False&#34;
-    os.environ[&#34;HT_ENABLE_CONSOLE_SPAN_EXPORTER&#34;] = &#34;{&#39;service_name&#39;: &#39;pythonagent_002&#39;}&#34;
+    os.environ[&#34;HT_ENABLE_CONSOLE_SPAN_EXPORTER&#34;] = &#34;True&#34;
     config = AgentConfig()
     assert config.agent_config.service_name == &#34;pythonagent_002&#34;
     assert config.agent_config.reporting.endpoint == &#34;http://localhost:9411/api/v2/spans2&#34;
@@ -252,8 +254,9 @@ def unset_env_variables():
     assert config.agent_config.data_capture.body_max_size_bytes == 123456
     assert config.agent_config.propagation_formats == 0
     assert not config.agent_config.enabled
+    assert config.use_console_span_exporter()
     assert config.agent_config.resource_attributes == {
-        &#39;service_name&#39;: &#39;pythonagent_002&#39;}
+        &#39;tester01&#39;: &#39;tester01&#39;}
     unset_env_variables()</code></pre>
 </details>
 </dd>
@@ -295,7 +298,9 @@ def unset_env_variables():
     assert cfg[&#34;propagation_formats&#34;] == &#34;B3&#34;
     assert not cfg[&#34;enabled&#34;]
     assert cfg[&#34;_use_console_span_exporter&#34;] is True
-    assert cfg[&#34;resource_attributes&#34;] == {}
+    assert cfg[&#34;resource_attributes&#34;] == {
+        &#39;tester01&#39;: &#39;tester01&#39;
+    }
     unset_env_variables()</code></pre>
 </details>
 </dd>
