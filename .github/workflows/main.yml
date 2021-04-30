@@ -24,28 +24,40 @@ jobs:
       - name: Run apt-get update
         run: sudo apt-get update
 
-      - name: Install make
+      - name: Install Make
         run: sudo apt-get install make
 
-      - name: Setup python
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
+      - name: Install Python
+        run: |
+          sudo apt install software-properties-common
+          sudo add-apt-repository ppa:deadsnakes/ppa -y
+          sudo apt-get install python${{ matrix.python-version }}
+          python --version
 
       - name: Install pip
         run: sudo apt-get install python3-pip
+
+      - name: Install pip build
+        run: python3 -m pip install --upgrade build
 
       - uses: actions/checkout@v2
 
       - name: Install tox
         run: pip install --user -r dev-requirements.txt
 
-      - name: Run pylint on this branch to generate a report
+      - name: Lint files
         run: make lint
 
       - name: Install protobuf compiler
         run: |
           sudo apt-get install -y protobuf-compiler
+          protoc --version
+          pip uninstall protobuf python3-protobuf
+          pip install --upgrade pip
+          pip install --upgrade protobuf
 
       - name: Run tests
         run: PYTHON_VERSION=${{ matrix.python }} make test
+
+      - name: Build package
+        run: make build
