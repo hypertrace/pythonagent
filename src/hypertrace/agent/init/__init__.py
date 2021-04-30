@@ -14,10 +14,6 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from hypertrace.agent import constants
 from hypertrace.agent.config import config_pb2, AgentConfig
 
-from ..constants import TELEMETRY_SDK_NAME
-from ..constants import TELEMETRY_SDK_VERSION
-from ..constants import TELEMETRY_SDK_LANGUAGE
-
 # Initialize logger
 logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -39,20 +35,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
         }
 
         try:
-            resource_attributes = {
-                    "service.name": self._config.agent_config.service_name,
-                    "service.instance.id": os.getpid(),
-                    "telemetry.sdk.version": TELEMETRY_SDK_VERSION,
-                    "telemetry.sdk.name": TELEMETRY_SDK_NAME,
-                    "telemetry.sdk.language": TELEMETRY_SDK_LANGUAGE
-            }
-            if self._config.agent_config.resource_attributes:
-                logger.debug('Custom attributes found. Adding to resource attributes dict.')
-                resource_attributes.update(self._config.agent_config.resource_attributes)
-            self._tracer_provider = TracerProvider(
-                resource=Resource.create(resource_attributes)
-            )
-            trace.set_tracer_provider(self._tracer_provider)
+            self._tracer_provider = None
+            self.init_trace_provider()
 
             if self._config.use_console_span_exporter():
                 self.set_console_span_processor()
@@ -76,21 +60,26 @@ class AgentInit:  # pylint: disable=R0902,R0903
             raise sys.exc_info()[0]
 
     def init_trace_provider(self) -> None:
-        self._tracer_provider = TracerProvider(
-            resource=Resource.create({
-                "service.name": self._config.agent_config.service_name,
+        '''Initialize trace provider and set resource attributes.'''
+        resource_attributes = {
+            "service.name": self._config.agent_config.service_name,
                 "service.instance.id": os.getpid(),
-            })
+                "telemetry.sdk.version": constants.TELEMETRY_SDK_VERSION,
+                "telemetry.sdk.name": constants.TELEMETRY_SDK_NAME,
+                "telemetry.sdk.language": constants.TELEMETRY_SDK_LANGUAGE
+        }
+        if self._config.agent_config.resource_attributes:
+            logger.debug('Custom attributes found. Adding to resource attributes dict.')
+            resource_attributes.update(self._config.agent_config.resource_attributes)
+        self._tracer_provider = TracerProvider(
+            resource=Resource.create(resource_attributes)
         )
-
         trace.set_tracer_provider(self._tracer_provider)
 
     def init_propagation(self) -> None:
-        print('------')
-        print(type(self._config.agent_config.propagation_formats))
-        print('------')
-        for f in self._config.agent_config.propagation_formats:
-            if f == 'B3':
+        '''Initialize requested context propagation protocols.'''
+        for prop_format in self._config.agent_config.propagation_formats:
+            if prop_format == config_pb2.PropagationFormat.B3:
                 from opentelemetry.propagate import set_global_textmap  # pylint: disable=C0415
                 from opentelemetry.propagators.b3 import B3Format  # pylint: disable=C0415
                 set_global_textmap(B3Format())
@@ -112,10 +101,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self._flask_instrumentor_wrapper.instrument_app(app)
             self.init_instrumentor_wrapper_base_for_http(
                 self._flask_instrumentor_wrapper)
-            if self._config.agent_config.propagation_formats \
-              == config_pb2.PropagationFormat.B3:
-                logger.debug('Enable B3 context propagation protocol.')
-                self.enable_b3()
+            self.init_propagation()
         except Exception as err:  # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
                          'flask',
@@ -224,9 +210,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self._requests_instrumentor_wrapper = RequestsInstrumentorWrapper()
             self.init_instrumentor_wrapper_base_for_http(
                 self._requests_instrumentor_wrapper)
-            if self._config.agent_config.propagation_formats == config_pb2.PropagationFormat.B3:
-                logger.debug('Enable B3 context propagation protocol.')
-                self.enable_b3()
+            self.init_propagation()
         except Exception as err:  # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
                          'requests',
@@ -245,9 +229,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self._aiohttp_client_instrumentor_wrapper = AioHttpClientInstrumentorWrapper()
             self.init_instrumentor_wrapper_base_for_http(
                 self._aiohttp_client_instrumentor_wrapper)
-            if self._config.agent_config.propagation_formats == config_pb2.PropagationFormat.B3:
-                logger.debug('Enable B3 context propagation protocol.')
-                self.enable_b3()
+            self.init_propagation()
         except Exception as err:  # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
                          'aiohttp_client',

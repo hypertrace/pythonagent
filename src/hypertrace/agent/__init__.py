@@ -148,7 +148,7 @@ class Agent:
         if not self.is_enabled():
             return
         try:
-            self._init.requests_init()
+            self._init.init_instrumentation_requests()
             self._init.dump_config()
         except Exception as err:  # pylint: disable=W0703
             logger.error(constants.EXCEPTION_MESSAGE,

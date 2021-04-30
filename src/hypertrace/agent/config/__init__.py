@@ -268,17 +268,15 @@ class AgentConfig:  # pylint: disable=R0902,R0903
         self.agent_config.service_name = self.config['service_name']
         self.agent_config.reporting = reporting
         self.agent_config.data_capture = data_capture
+        tmp_propagation_formats = []
         if 'TRACECONTEXT' in self.config['propagation_formats']:
-            self.agent_config.propagation_formats.add(
-                config_pb2.PropagationFormat.TRACECONTEXT)
+            tmp_propagation_formats.append(config_pb2.PropagationFormat.TRACECONTEXT)
         elif 'B3' in self.config['propagation_formats']:
-            self.agent_config.propagation_formats.add(
-                config_pb2.PropagationFormat.B3)
+            tmp_propagation_formats.append(config_pb2.PropagationFormat.B3)
         else:
             # Default to TRACECONTEXT
-            self.agent_config.propagation_formats.add(
-                config_pb2.PropagationFormat.TRACECONTEXT)
-
+            tmp_propagation_formats.append(config_pb2.PropagationFormat.TRACECONTEXT)
+        self.agent_config.propagation_formats = tmp_propagation_formats
         self.agent_config.enabled = self.config['enabled']
 
         self.agent_config.resource_attributes = self.config['resource_attributes']

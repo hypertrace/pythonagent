@@ -22,7 +22,7 @@ data_capture:
     request: false
     response: false
   body_max_size_bytes: 123457
-propagation_formats: "B3"
+propagation_formats: ["TRACECONTEXT","B3"]
 _use_console_span_exporter: true
 enabled: false
 resource_attributes: {}
