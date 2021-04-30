@@ -112,7 +112,7 @@ def test_env_config() -> None:
     assert config.agent_config.data_capture.body_max_size_bytes == 123456
     assert config.agent_config.propagation_formats == 0
     assert not config.agent_config.enabled
-    assert config.use_console_span_exporter() == True
+    assert config.use_console_span_exporter()
     assert config.agent_config.resource_attributes == {
         'tester01': 'tester01'}
     unset_env_variables()
