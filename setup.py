@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-exec(open('version.py').read())
+exec(open('src/hypertrace/version.py').read())
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()

@@ -10,7 +10,7 @@
 set -e
 
 MAIN_BRANCH="main"
-VERSION_FILE="./version.py"
+VERSION_FILE="./src/hypertrace/version.py"
 
 function write_version_file {
 cat > $2 <<EOL

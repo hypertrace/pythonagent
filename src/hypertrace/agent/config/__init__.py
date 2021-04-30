@@ -319,7 +319,8 @@ class AgentConfig:  # pylint: disable=R0902,R0903
                         logger.debug('Not valid: %s', key)
                         raise AttributeError
                 except AttributeError as err:
-                    logger.error('Unknown attribute encountered: exception=%s, stacktrace=%s',
+                    logger.error('Unknown attribute %s encountered: exception=%s, stacktrace=%s',
+                                 key,
                                  err,
                                  traceback.format_exc())
             else:
