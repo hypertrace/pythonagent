@@ -46,3 +46,9 @@ For further examples, check our [examples section](./examples)
 ### Configuration
 
 Pythonagent can be configured using a config file (e.g. env `HT_CONFIG_FILE=./config.yaml`) or passing env vars directly as described in [this list](https://github.com/hypertrace/agent-config/blob/main/ENV_VARS.md)
+
+## Development
+
+### Releases
+
+In order to create a new release, you can run `make release VERSION=<version-number>` and this will change the version in the code appropriately and push the tags.

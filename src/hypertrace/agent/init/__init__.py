@@ -14,14 +14,17 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from hypertrace.agent import constants
 from hypertrace.agent.config import config_pb2, AgentConfig
 
+from ..constants import TELEMETRY_SDK_NAME
+from ..constants import TELEMETRY_SDK_VERSION
+from ..constants import TELEMETRY_SDK_LANGUAGE
+
 # Initialize logger
 logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
 
 class AgentInit:  # pylint: disable=R0902,R0903
     '''Initialize all the OTel components using configuration from AgentConfig'''
-
-    def __init__(self, agent_config: AgentConfig, init_console_only: bool = False):
+    def __init__(self, agent_config: AgentConfig):
         '''constructor'''
         logger.debug('Initializing AgentInit object.')
         self._config = agent_config
@@ -36,14 +39,25 @@ class AgentInit:  # pylint: disable=R0902,R0903
         }
 
         try:
-            self.init_trace_provider()
-            self.init_propagation()
+            resource_attributes = {
+                    "service.name": self._config.agent_config.service_name,
+                    "service.instance.id": os.getpid(),
+                    "telemetry.sdk.version": TELEMETRY_SDK_VERSION,
+                    "telemetry.sdk.name": TELEMETRY_SDK_NAME,
+                    "telemetry.sdk.language": TELEMETRY_SDK_LANGUAGE
+            }
+            if self._config.agent_config.resource_attributes:
+                logger.debug('Custom attributes found. Adding to resource attributes dict.')
+                resource_attributes.update(self._config.agent_config.resource_attributes)
+            self._tracer_provider = TracerProvider(
+                resource=Resource.create(resource_attributes)
+            )
+            trace.set_tracer_provider(self._tracer_provider)
 
-            if self._config.use_console_span_exporter() \
-                    or init_console_only:
+            if self._config.use_console_span_exporter():
                 self.set_console_span_processor()
 
-            if not init_console_only:
+            if not self._config.use_console_span_exporter():
                 self.set_zipkin_processor()
                 self.set_otlp_processor()
 
@@ -87,8 +101,9 @@ class AgentInit:  # pylint: disable=R0902,R0903
         for mod in self._modules_initialized:
             logger.debug('%s : %s', mod, str(self._modules_initialized[mod]))
 
-    def init_instrumentation_flask(self, app, use_b3=False) -> None:
-        '''Creates a flask instrumentation wrapper based on hypertrace config'''
+    # Creates a flask wrapper using the config defined in hypertraceconfig
+    def flask_init(self, app) -> None:
+        '''Creates a flask instrumentation wrapper using the config defined in hypertraceconfig'''
         logger.debug('Calling AgentInit.flaskInit().')
         try:
             from hypertrace.agent.instrumentation.flask import FlaskInstrumentorWrapper  # pylint: disable=C0415
@@ -97,6 +112,10 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self._flask_instrumentor_wrapper.instrument_app(app)
             self.init_instrumentor_wrapper_base_for_http(
                 self._flask_instrumentor_wrapper)
+            if self._config.agent_config.propagation_formats \
+              == config_pb2.PropagationFormat.B3:
+                logger.debug('Enable B3 context propagation protocol.')
+                self.enable_b3()
         except Exception as err:  # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
                          'flask',
@@ -205,6 +224,9 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self._requests_instrumentor_wrapper = RequestsInstrumentorWrapper()
             self.init_instrumentor_wrapper_base_for_http(
                 self._requests_instrumentor_wrapper)
+            if self._config.agent_config.propagation_formats == config_pb2.PropagationFormat.B3:
+                logger.debug('Enable B3 context propagation protocol.')
+                self.enable_b3()
         except Exception as err:  # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
                          'requests',
@@ -212,7 +234,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
                          traceback.format_exc())
 
     # Creates an aiohttp-client wrapper using the config defined in hypertraceconfig
-    def init_instrumentation_aiohttp_client(self, use_b3=False) -> None:
+    def aiohttp_client_init(self) -> None:
         '''Creates an aiohttp-client wrapper using the config defined in hypertraceconfig'''
         logger.debug('Calling AgentInit.aioHttpClientInit()')
         try:
@@ -223,6 +245,9 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self._aiohttp_client_instrumentor_wrapper = AioHttpClientInstrumentorWrapper()
             self.init_instrumentor_wrapper_base_for_http(
                 self._aiohttp_client_instrumentor_wrapper)
+            if self._config.agent_config.propagation_formats == config_pb2.PropagationFormat.B3:
+                logger.debug('Enable B3 context propagation protocol.')
+                self.enable_b3()
         except Exception as err:  # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
                          'aiohttp_client',

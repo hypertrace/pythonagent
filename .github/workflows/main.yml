@@ -1,6 +1,6 @@
 on:
   push:
-    branches: [ main]
+    branches: [main]
     paths-ignore:
       - "**/*.md"
       - "LICENSE"
@@ -18,7 +18,7 @@ jobs:
 
     strategy:
       matrix:
-        python: ["3.7", "3.8", "3.9"]
+        python-version: ["3.7", "3.8", "3.9"]
 
     steps:
       - name: Run apt-get update
@@ -27,76 +27,25 @@ jobs:
       - name: Install make
         run: sudo apt-get install make
 
-      - name: install software-properties-common
-        run: sudo apt install software-properties-common
-
-      - name: Install Python versions
-        run: |
-          sudo add-apt-repository ppa:deadsnakes/ppa -y &&
-          sudo apt-get install python${{ matrix.python }}
-#          sudo apt-get install python3.7 &&
-#          sudo apt-get install python3.8 &&
-#          sudo apt-get install python3.9
-
-      - uses: actions/checkout@v2
+      - name: Setup python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
 
       - name: Install pip
         run: sudo apt-get install python3-pip
 
+      - uses: actions/checkout@v2
+
       - name: Install tox
         run: pip install --user -r dev-requirements.txt
-        
+
       - name: Run pylint on this branch to generate a report
-        run: tox -e lint
-        
+        run: make lint
+
       - name: Install protobuf compiler
-        run:  |
+        run: |
           sudo apt-get install -y protobuf-compiler
-          protoc --version
-          pip uninstall protobuf python3-protobuf
-          pip install --upgrade pip
-          pip install --upgrade protobuf
 
-      - name: Run unittest
-        run: make unittest
-
-      - name: Run Python 3.X Test Cases
-        run: make test_py${{ matrix.python }}
-
-#      - name: Run Python 3.8 Test Cases
-#        run: make test_py38
-#
-#      - name: Run Python 3.9 Test Cases
-#        run: make test_py39
-#        
-#      - name: Build packge
-#        run: make build
-
-#      - name: Push binary package to private package repo
-#        uses: cpina/github-action-push-to-another-repository@master
-#        env:
-#          API_TOKEN_GITHUB:
-#        with:
-#          source-directory: dist
-#          destination-repository-name: hypertrace-pythonagent
-#          destination-github-username: rcbj
-#          target-branch: main
-
-#      - name: Create src package to copy to repo for installs
-#        run: mkdir -p src_install/src
-#
-#      - name: copy files into src_install 1
-#        run: cp -R src/hypertrace src/hypertrace.egg-info src_install/src
-#
-#      - name: copy files into src_install 2
-#        run: cp LICENSE README.md pyproject.toml setup.py src_install
-#
-#      - name: Push src package to private package repo
-#        uses: cpina/github-action-push-to-another-repository@master
-#        env:
-#          API_TOKEN_GITHUB:
-#        with:
-#          source-directory: src_install
-#          destination-repository-name: hypertrace-pythonagent
-#          destination-github-username: rcbj
-#          target-branch: main
+      - name: Run tests
+        run: PYTHON_VERSION=${{ matrix.python }} make test

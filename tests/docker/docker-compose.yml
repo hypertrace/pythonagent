@@ -1,0 +1,13 @@
+version: '3.1'
+
+services:
+  flask_app:
+    container_name: flask_app
+    build:
+      context: ../..
+      dockerfile: tests/docker/Dockerfile
+    environment:
+      HT_TRACES_EXPORTER: zipkin
+      HT_REPORTING_ENDPOINT: http://collector:9411/api/v2/spans
+      HT_LOG_LEVEL: DEBUG
+      HT_ENABLE_CONSOLE_SPAN_EXPORTER: "True"

@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+  flask_app_b:
+    container_name: flask_app_b
+    build:
+      context: ../..
+      dockerfile: tests/aiohttp/flask_app/Dockerfile
+    environment:
+      ENABLE_INSTRUMENTATION: ${ENABLE_INSTRUMENTATION}
+      HT_TRACES_EXPORTER: zipkin
+      HT_REPORTING_ENDPOINT: http://collector:9411/api/v2/spans
+      HT_LOG_LEVEL: DEBUG
+      HT_ENABLE_CONSOLE_SPAN_EXPORTER: "True"
+    ports:
+      - "8000:8000"
+    command: gunicorn -w 1 -b 0.0.0.0:8000 wsgi1:server
+  flask_app_c:
+    container_name: flask_app_c
+    build:
+      context: ../..
+      dockerfile: tests/aiohttp/flask_app/Dockerfile
+    environment:
+      ENABLE_INSTRUMENTATION: ${ENABLE_INSTRUMENTATION}
+      HT_TRACES_EXPORTER: zipkin
+      HT_REPORTING_ENDPOINT: http://collector:9411/api/v2/spans
+      HT_LOG_LEVEL: DEBUG
+      HT_ENABLE_CONSOLE_SPAN_EXPORTER: "True"
+      HT_PROPAGATION_FORMATS: B3
+    ports:
+      - "8000:8000"
+    command: gunicorn -w 1 -b 0.0.0.0:8000 wsgi2:server

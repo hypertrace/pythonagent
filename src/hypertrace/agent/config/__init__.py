@@ -281,8 +281,7 @@ class AgentConfig:  # pylint: disable=R0902,R0903
 
         self.agent_config.enabled = self.config['enabled']
 
-        self.agent_config.resource_attributes = {
-            'service_name': self.config['service_name']}
+        self.agent_config.resource_attributes = self.config['resource_attributes']
 
         # Validate configuration
         self.validate_config_elements(self.config, self.agent_config)
