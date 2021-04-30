@@ -24,14 +24,15 @@ jobs:
       - name: Run apt-get update
         run: sudo apt-get update
 
-      - name: Install make
+      - name: Install Make
         run: sudo apt-get install make
 
-      - name: Install Python versions
+      - name: Install Python
         run: |
           sudo apt install software-properties-common &&
           sudo add-apt-repository ppa:deadsnakes/ppa -y &&
           sudo apt-get install python${{ matrix.python-version }}
+          python --version
 
       - name: Install pip
         run: sudo apt-get install python3-pip
@@ -41,7 +42,7 @@ jobs:
       - name: Install tox
         run: pip install --user -r dev-requirements.txt
 
-      - name: Run pylint on this branch to generate a report
+      - name: Lint files
         run: make lint
 
       - name: Install protobuf compiler
