@@ -49,3 +49,6 @@ jobs:
 
       - name: Run tests
         run: PYTHON_VERSION=${{ matrix.python }} make test
+
+      - name: Build package
+        run: make build

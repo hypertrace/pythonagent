@@ -51,6 +51,6 @@ install: build
 	pip uninstall hypertrace -y
 	pip install dist/hypertrace-0.1.0.tar.gz
 
-release:
+release: lint test build
 	@if [[ -z "${VERSION}" ]]; then echo "VERSION env var is required"; exit 1 ; fi
 	./release.sh ${VERSION}
