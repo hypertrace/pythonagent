@@ -4,10 +4,6 @@ from hypertrace.agent.config import AgentConfig
 from . import DEFAULT_AGENT_CONFIG
 from . import merge_config
 from . import load_config_from_file
-from ..constants import TELEMETRY_SDK_NAME
-from ..constants import TELEMETRY_SDK_LANGUAGE
-from ..constants import TELEMETRY_SDK_VERSION
-
 
 def test_merge_config() -> None:
     '''Unittest for merging config results.'''
