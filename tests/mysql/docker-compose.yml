@@ -2,15 +2,21 @@ version: '3.1'
 
 services:
 
-  db:
+  mysqldb:
     image: mysql
+    container_name: mysqldb
     command: --default-authentication-plugin=mysql_native_password
     restart: always
     ports:
       - "3306:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: example
+      MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: hypertrace
     volumes:
       - ./sql:/docker-entrypoint-initdb.d
-#  docker exec -it mysql_db_1 mysql -h mysql_db_1 -u root -p
+      - ./docker-healthcheck:/docker-healthcheck
+    healthcheck:
+      test: [ "CMD", "/docker-healthcheck" ]
+      timeout: 40s
+      interval: 3s
+      retries: 20
