@@ -124,10 +124,3 @@ def unset_env_variables():
     for key in os.environ:
         if key[0:3] == "HT_":
             del os.environ[key]
-
-
-def test_telemetry_constants():
-    """Test Telemetry Constants."""
-    assert TELEMETRY_SDK_NAME == "hypertrace"
-    assert TELEMETRY_SDK_LANGUAGE == "python"
-    assert TELEMETRY_SDK_VERSION == "0.20.dev0"
