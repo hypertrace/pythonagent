@@ -29,14 +29,16 @@ jobs:
 
       - name: Install Python
         run: |
-          sudo apt install software-properties-common &&
-          sudo add-apt-repository ppa:deadsnakes/ppa -y &&
+          sudo apt install software-properties-common
+          sudo add-apt-repository ppa:deadsnakes/ppa -y
           sudo apt-get install python${{ matrix.python-version }}
-          python3 -m pip install --upgrade build
           python --version
 
       - name: Install pip
         run: sudo apt-get install python3-pip
+
+      - name: Install pip build
+        run: python3 -m pip install --upgrade build
 
       - uses: actions/checkout@v2
 
