@@ -295,11 +295,16 @@ class AgentConfig:  # pylint: disable=R0902,R0903
         self.agent_config.reporting = reporting
         self.agent_config.data_capture = data_capture
         if self.config[&#39;propagation_formats&#39;]  == &#39;TRACECONTEXT&#39;:
+            logger.debug(&#39;Enabling TRACECONTEXT propagation protocol.&#39;)
             self.agent_config.propagation_formats = config_pb2.PropagationFormat.TRACECONTEXT
         elif self.config[&#39;propagation_formats&#39;] == &#39;B3&#39;:
+            logger.debug(&#39;Enabling B3 propagation protocol&#39;)
             self.agent_config.propagation_formats = config_pb2.PropagationFormat.B3
+            logger.debug(&#39;self.agent_config.propagation_formats: %s&#39;,
+              str(self.agent_config.propagation_formats))
         else:
             # Default to TRACECONTEXT
+            logger.debug(&#39;Defautingto TRACECONTEXT propagation protocol.&#39;)
             self.agent_config.propagation_formats = config_pb2.PropagationFormat.TRACECONTEXT
         self.agent_config.enabled = self.config[&#39;enabled&#39;]
 
@@ -670,11 +675,16 @@ If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></di
         self.agent_config.reporting = reporting
         self.agent_config.data_capture = data_capture
         if self.config[&#39;propagation_formats&#39;]  == &#39;TRACECONTEXT&#39;:
+            logger.debug(&#39;Enabling TRACECONTEXT propagation protocol.&#39;)
             self.agent_config.propagation_formats = config_pb2.PropagationFormat.TRACECONTEXT
         elif self.config[&#39;propagation_formats&#39;] == &#39;B3&#39;:
+            logger.debug(&#39;Enabling B3 propagation protocol&#39;)
             self.agent_config.propagation_formats = config_pb2.PropagationFormat.B3
+            logger.debug(&#39;self.agent_config.propagation_formats: %s&#39;,
+              str(self.agent_config.propagation_formats))
         else:
             # Default to TRACECONTEXT
+            logger.debug(&#39;Defautingto TRACECONTEXT propagation protocol.&#39;)
             self.agent_config.propagation_formats = config_pb2.PropagationFormat.TRACECONTEXT
         self.agent_config.enabled = self.config[&#39;enabled&#39;]
 

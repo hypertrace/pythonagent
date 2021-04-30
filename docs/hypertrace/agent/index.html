@@ -33,6 +33,7 @@ import os.path
 import sys
 import logging
 import traceback
+import flask
 from hypertrace.agent.init import AgentInit
 from hypertrace.agent.config import AgentConfig
 from hypertrace.agent import constants
@@ -84,26 +85,26 @@ logger = setup_custom_logger(__name__) # pylint: disable=C0103
 class Agent:
     &#39;&#39;&#39;Top-level entry point for Hypertrace agent.&#39;&#39;&#39;
 
-    def __init__(self, init_console_only: bool = False):
+    def __init__(self):
         &#39;&#39;&#39;Constructor&#39;&#39;&#39;
         logger.debug(&#39;Initializing Agent.&#39;)
         if not self.is_enabled():
             return
         try:
             self._config = AgentConfig()
-            self._init = AgentInit(self._config, init_console_only)
+            self._init = AgentInit(self._config)
         except Exception as err:  # pylint: disable=W0703
             logger.error(&#39;Failed to initialize Agent: exception=%s, stacktrace=%s&#39;,
                          err,
                          traceback.format_exc())
 
-    def register_flask_app(self, app, use_b3=False) -&gt; None:
+    def register_flask_app(self, app: flask.Flask) -&gt; None:
         &#39;&#39;&#39;Register the flask instrumentation module wrapper&#39;&#39;&#39;
         logger.debug(&#39;Calling Agent.register_flask_app.&#39;)
         if not self.is_enabled():
             return
         try:
-            self._init.flask_init(app, use_b3)
+            self._init.flask_init(app)
             self._init.dump_config()
         except Exception as err: # pylint: disable=W0703
             logger.error(constants.EXCEPTION_MESSAGE,
@@ -150,7 +151,7 @@ class Agent:
             self._init.dump_config()
         except Exception as err: # pylint: disable=W0703
             logger.error(constants.EXCEPTION_MESSAGE,
-                         &#39;flask&#39;,
+                         &#39;mysql&#39;,
                          err,
                          traceback.format_exc())
 
@@ -164,35 +165,35 @@ class Agent:
             self._init.dump_config()
         except Exception as err: # pylint: disable=W0703
             logger.error(constants.EXCEPTION_MESSAGE,
-                         &#39;flask&#39;,
+                         &#39;postgresql&#39;,
                          err,
                          traceback.format_exc())
 
-    def register_requests(self, use_b3=False) -&gt; None:
+    def register_requests(self) -&gt; None:
         &#39;&#39;&#39;Register the requests instrumentation module wrapper&#39;&#39;&#39;
         logger.debug(&#39;Calling Agent.register_requests()&#39;)
         if not self.is_enabled():
             return
         try:
-            self._init.requests_init(use_b3)
+            self._init.requests_init()
             self._init.dump_config()
         except Exception as err: # pylint: disable=W0703
             logger.error(constants.EXCEPTION_MESSAGE,
-                         &#39;flask&#39;,
+                         &#39;requests&#39;,
                          err,
                          traceback.format_exc())
 
-    def register_aiohttp_client(self, use_b3=False) -&gt; None:
+    def register_aiohttp_client(self) -&gt; None:
         &#39;&#39;&#39;Register the aiohttp-client instrumentation module wrapper&#39;&#39;&#39;
         logger.debug(&#39;Calling Agent.register_aiohttp_client().&#39;)
         if not self.is_enabled():
             return
         try:
-            self._init.aiohttp_client_init(use_b3)
+            self._init.aiohttp_client_init()
             self._init.dump_config()
         except Exception as err: # pylint: disable=W0703
             logger.error(constants.EXCEPTION_MESSAGE,
-                         &#39;flask&#39;,
+                         &#39;aiohttp_client&#39;,
                          err,
                          traceback.format_exc())
 
@@ -295,7 +296,6 @@ environment variables, and the agent-config.yaml file.</p></div>
 <dl>
 <dt id="hypertrace.agent.Agent"><code class="flex name class">
 <span>class <span class="ident">Agent</span></span>
-<span>(</span><span>init_console_only: bool = False)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Top-level entry point for Hypertrace agent.</p>
@@ -307,26 +307,26 @@ environment variables, and the agent-config.yaml file.</p></div>
 <pre><code class="python">class Agent:
     &#39;&#39;&#39;Top-level entry point for Hypertrace agent.&#39;&#39;&#39;
 
-    def __init__(self, init_console_only: bool = False):
+    def __init__(self):
         &#39;&#39;&#39;Constructor&#39;&#39;&#39;
         logger.debug(&#39;Initializing Agent.&#39;)
         if not self.is_enabled():
             return
         try:
             self._config = AgentConfig()
-            self._init = AgentInit(self._config, init_console_only)
+            self._init = AgentInit(self._config)
         except Exception as err:  # pylint: disable=W0703
             logger.error(&#39;Failed to initialize Agent: exception=%s, stacktrace=%s&#39;,
                          err,
                          traceback.format_exc())
 
-    def register_flask_app(self, app, use_b3=False) -&gt; None:
+    def register_flask_app(self, app: flask.Flask) -&gt; None:
         &#39;&#39;&#39;Register the flask instrumentation module wrapper&#39;&#39;&#39;
         logger.debug(&#39;Calling Agent.register_flask_app.&#39;)
         if not self.is_enabled():
             return
         try:
-            self._init.flask_init(app, use_b3)
+            self._init.flask_init(app)
             self._init.dump_config()
         except Exception as err: # pylint: disable=W0703
             logger.error(constants.EXCEPTION_MESSAGE,
@@ -373,7 +373,7 @@ environment variables, and the agent-config.yaml file.</p></div>
             self._init.dump_config()
         except Exception as err: # pylint: disable=W0703
             logger.error(constants.EXCEPTION_MESSAGE,
-                         &#39;flask&#39;,
+                         &#39;mysql&#39;,
                          err,
                          traceback.format_exc())
 
@@ -387,35 +387,35 @@ environment variables, and the agent-config.yaml file.</p></div>
             self._init.dump_config()
         except Exception as err: # pylint: disable=W0703
             logger.error(constants.EXCEPTION_MESSAGE,
-                         &#39;flask&#39;,
+                         &#39;postgresql&#39;,
                          err,
                          traceback.format_exc())
 
-    def register_requests(self, use_b3=False) -&gt; None:
+    def register_requests(self) -&gt; None:
         &#39;&#39;&#39;Register the requests instrumentation module wrapper&#39;&#39;&#39;
         logger.debug(&#39;Calling Agent.register_requests()&#39;)
         if not self.is_enabled():
             return
         try:
-            self._init.requests_init(use_b3)
+            self._init.requests_init()
             self._init.dump_config()
         except Exception as err: # pylint: disable=W0703
             logger.error(constants.EXCEPTION_MESSAGE,
-                         &#39;flask&#39;,
+                         &#39;requests&#39;,
                          err,
                          traceback.format_exc())
 
-    def register_aiohttp_client(self, use_b3=False) -&gt; None:
+    def register_aiohttp_client(self) -&gt; None:
         &#39;&#39;&#39;Register the aiohttp-client instrumentation module wrapper&#39;&#39;&#39;
         logger.debug(&#39;Calling Agent.register_aiohttp_client().&#39;)
         if not self.is_enabled():
             return
         try:
-            self._init.aiohttp_client_init(use_b3)
+            self._init.aiohttp_client_init()
             self._init.dump_config()
         except Exception as err: # pylint: disable=W0703
             logger.error(constants.EXCEPTION_MESSAGE,
-                         &#39;flask&#39;,
+                         &#39;aiohttp_client&#39;,
                          err,
                          traceback.format_exc())
 
@@ -457,7 +457,7 @@ environment variables, and the agent-config.yaml file.</p></div>
 </details>
 </dd>
 <dt id="hypertrace.agent.Agent.register_aiohttp_client"><code class="name flex">
-<span>def <span class="ident">register_aiohttp_client</span></span>(<span>self, use_b3=False) ‑> NoneType</span>
+<span>def <span class="ident">register_aiohttp_client</span></span>(<span>self) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Register the aiohttp-client instrumentation module wrapper</p></div>
@@ -465,23 +465,23 @@ environment variables, and the agent-config.yaml file.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def register_aiohttp_client(self, use_b3=False) -&gt; None:
+<pre><code class="python">def register_aiohttp_client(self) -&gt; None:
     &#39;&#39;&#39;Register the aiohttp-client instrumentation module wrapper&#39;&#39;&#39;
     logger.debug(&#39;Calling Agent.register_aiohttp_client().&#39;)
     if not self.is_enabled():
         return
     try:
-        self._init.aiohttp_client_init(use_b3)
+        self._init.aiohttp_client_init()
         self._init.dump_config()
     except Exception as err: # pylint: disable=W0703
         logger.error(constants.EXCEPTION_MESSAGE,
-                     &#39;flask&#39;,
+                     &#39;aiohttp_client&#39;,
                      err,
                      traceback.format_exc())</code></pre>
 </details>
 </dd>
 <dt id="hypertrace.agent.Agent.register_flask_app"><code class="name flex">
-<span>def <span class="ident">register_flask_app</span></span>(<span>self, app, use_b3=False) ‑> NoneType</span>
+<span>def <span class="ident">register_flask_app</span></span>(<span>self, app: flask.app.Flask) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Register the flask instrumentation module wrapper</p></div>
@@ -489,13 +489,13 @@ environment variables, and the agent-config.yaml file.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def register_flask_app(self, app, use_b3=False) -&gt; None:
+<pre><code class="python">def register_flask_app(self, app: flask.Flask) -&gt; None:
     &#39;&#39;&#39;Register the flask instrumentation module wrapper&#39;&#39;&#39;
     logger.debug(&#39;Calling Agent.register_flask_app.&#39;)
     if not self.is_enabled():
         return
     try:
-        self._init.flask_init(app, use_b3)
+        self._init.flask_init(app)
         self._init.dump_config()
     except Exception as err: # pylint: disable=W0703
         logger.error(constants.EXCEPTION_MESSAGE,
@@ -571,7 +571,7 @@ environment variables, and the agent-config.yaml file.</p></div>
         self._init.dump_config()
     except Exception as err: # pylint: disable=W0703
         logger.error(constants.EXCEPTION_MESSAGE,
-                     &#39;flask&#39;,
+                     &#39;mysql&#39;,
                      err,
                      traceback.format_exc())</code></pre>
 </details>
@@ -595,7 +595,7 @@ environment variables, and the agent-config.yaml file.</p></div>
         self._init.dump_config()
     except Exception as err: # pylint: disable=W0703
         logger.error(constants.EXCEPTION_MESSAGE,
-                     &#39;flask&#39;,
+                     &#39;postgresql&#39;,
                      err,
                      traceback.format_exc())</code></pre>
 </details>
@@ -620,7 +620,7 @@ environment variables, and the agent-config.yaml file.</p></div>
 </details>
 </dd>
 <dt id="hypertrace.agent.Agent.register_requests"><code class="name flex">
-<span>def <span class="ident">register_requests</span></span>(<span>self, use_b3=False) ‑> NoneType</span>
+<span>def <span class="ident">register_requests</span></span>(<span>self) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Register the requests instrumentation module wrapper</p></div>
@@ -628,17 +628,17 @@ environment variables, and the agent-config.yaml file.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def register_requests(self, use_b3=False) -&gt; None:
+<pre><code class="python">def register_requests(self) -&gt; None:
     &#39;&#39;&#39;Register the requests instrumentation module wrapper&#39;&#39;&#39;
     logger.debug(&#39;Calling Agent.register_requests()&#39;)
     if not self.is_enabled():
         return
     try:
-        self._init.requests_init(use_b3)
+        self._init.requests_init()
         self._init.dump_config()
     except Exception as err: # pylint: disable=W0703
         logger.error(constants.EXCEPTION_MESSAGE,
-                     &#39;flask&#39;,
+                     &#39;requests&#39;,
                      err,
                      traceback.format_exc())</code></pre>
 </details>

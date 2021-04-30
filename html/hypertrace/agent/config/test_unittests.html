@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.9.2" />
-<title>hypertrace.agent.config.test_config API documentation</title>
+<title>hypertrace.agent.config.test_unittests API documentation</title>
 <meta name="description" content="Unittest for merging config entries." />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
@@ -19,7 +19,7 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>hypertrace.agent.config.test_config</code></h1>
+<h1 class="title">Module <code>hypertrace.agent.config.test_unittests</code></h1>
 </header>
 <section id="section-intro">
 <p>Unittest for merging config entries.</p>
@@ -35,11 +35,13 @@ from . import merge_config
 from . import load_config_from_file
 
 
-def test_merge_config() -&gt; None:
-    &#39;&#39;&#39;Unittest for merging config results.&#39;&#39;&#39;
+
+def test_merge_config():
+    &#39;&#39;&#39;Unittest functionx for merging config entries.&#39;&#39;&#39;
     # set Environment Variable
-    config_file_path = &#34;./src/hypertrace/agent/config/test_agent-config.yaml&#34;
-    config_from_file = load_config_from_file(config_file_path)
+    os.environ[&#34;HT_CONFIG_FILE&#34;] = &#34;./src/hypertrace/agent/config/agent-config.yaml&#34;
+    config_from_file = load_config_from_file(
+        os.environ[&#39;HT_CONFIG_FILE&#39;])
 
     cfg = merge_config(
         DEFAULT_AGENT_CONFIG, config_from_file)
@@ -64,21 +66,16 @@ def test_merge_config() -&gt; None:
     assert cfg[&#34;propagation_formats&#34;] == &#34;B3&#34;
     assert not cfg[&#34;enabled&#34;]
     assert cfg[&#34;_use_console_span_exporter&#34;] is True
-    assert cfg[&#34;resource_attributes&#34;] == {}
-    unset_env_variables()
 
-def test_agent_config() -&gt; None:
+def test_agent_config():
     &#39;&#39;&#39;Unittest functionx for agent config entries.&#39;&#39;&#39;
     # set Environment Variable
-
-    unset_env_variables()
-
     os.environ[&#34;HT_CONFIG_FILE&#34;] = &#34;./src/hypertrace/agent/config/agent-config.yaml&#34;
     print(&#39;Initializing agent.&#39;)
     config = AgentConfig()
     assert config.agent_config.service_name == &#34;pythonagent_001&#34;
     assert config.agent_config.reporting.endpoint == &#34;http://localhost:9411/api/v2/spans1&#34;
-    assert config.agent_config.reporting.trace_reporter_type == 1
+    assert config.agent_config.reporting.trace_reporter_type == 0
     assert config.agent_config.reporting.secure is True
     assert config.agent_config.reporting.token == &#34;TestToken&#34;
     assert config.agent_config.reporting.opa.endpoint == &#34;https://opa.traceableai:8181/&#34;
@@ -95,15 +92,15 @@ def test_agent_config() -&gt; None:
     assert config.agent_config.data_capture.body_max_size_bytes == 123457
     assert config.agent_config.propagation_formats == 0
     assert not config.agent_config.enabled
-    assert config.agent_config.resource_attributes == {
-        &#39;service_name&#39;: &#39;pythonagent_001&#39;}
-    unset_env_variables()
+    assert config.agent_config.resource_attributes == {&#39;service_name&#39;: &#39;pythonagent_001&#39;}
 
-def test_env_config() -&gt; None:
+
+def test_env_config():
     &#39;&#39;&#39;Unittest functionx for env config entries.&#39;&#39;&#39;
+    print(&#39;Initializing agent.&#39;)
     os.environ[&#34;HT_SERVICE_NAME&#34;] = &#34;pythonagent_002&#34;
     os.environ[&#34;HT_REPORTING_ENDPOINT&#34;] = &#34;http://localhost:9411/api/v2/spans2&#34;
-    os.environ[&#34;HT_TRACES_EXPORTER&#34;] = &#34;OTLP&#34;
+    os.environ[&#34;HT_TRACES_EXPORTER&#34;] = &#34;Zikpin&#34;
     os.environ[&#34;HT_REPORTING_SECURE&#34;] = &#34;True&#34;
     os.environ[&#34;HT_REPORTING_TOKEN&#34;] = &#34;&#34;
     os.environ[&#34;HT_REPORTING_OPA_ENDPOINT&#34;] = &#34;https://opa.traceableai:8181/&#34;
@@ -124,7 +121,7 @@ def test_env_config() -&gt; None:
     config = AgentConfig()
     assert config.agent_config.service_name == &#34;pythonagent_002&#34;
     assert config.agent_config.reporting.endpoint == &#34;http://localhost:9411/api/v2/spans2&#34;
-    assert config.agent_config.reporting.trace_reporter_type == 2
+    assert config.agent_config.reporting.trace_reporter_type == 0
     assert config.agent_config.reporting.secure is True
     assert config.agent_config.reporting.token == &#34;&#34;
     assert config.agent_config.reporting.opa.endpoint == &#34;https://opa.traceableai:8181/&#34;
@@ -141,15 +138,8 @@ def test_env_config() -&gt; None:
     assert config.agent_config.data_capture.body_max_size_bytes == 123456
     assert config.agent_config.propagation_formats == 0
     assert not config.agent_config.enabled
-    assert config.agent_config.resource_attributes == {
-        &#39;service_name&#39;: &#39;pythonagent_002&#39;}
-    unset_env_variables()
-
-def unset_env_variables():
-    &#34;&#34;&#34;Reset environment variables.&#34;&#34;&#34;
-    for key in os.environ:
-        if key[0:3] == &#34;HT_&#34;:
-            del os.environ[key]</code></pre>
+    assert config.agent_config.resource_attributes == {&#39;service_name&#39;: &#39;pythonagent_002&#39;}
+    </code></pre>
 </details>
 </section>
 <section>
@@ -159,8 +149,8 @@ def unset_env_variables():
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="hypertrace.agent.config.test_config.test_agent_config"><code class="name flex">
-<span>def <span class="ident">test_agent_config</span></span>(<span>) ‑> NoneType</span>
+<dt id="hypertrace.agent.config.test_unittests.test_agent_config"><code class="name flex">
+<span>def <span class="ident">test_agent_config</span></span>(<span>)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Unittest functionx for agent config entries.</p></div>
@@ -168,18 +158,15 @@ def unset_env_variables():
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def test_agent_config() -&gt; None:
+<pre><code class="python">def test_agent_config():
     &#39;&#39;&#39;Unittest functionx for agent config entries.&#39;&#39;&#39;
     # set Environment Variable
-
-    unset_env_variables()
-
     os.environ[&#34;HT_CONFIG_FILE&#34;] = &#34;./src/hypertrace/agent/config/agent-config.yaml&#34;
     print(&#39;Initializing agent.&#39;)
     config = AgentConfig()
     assert config.agent_config.service_name == &#34;pythonagent_001&#34;
     assert config.agent_config.reporting.endpoint == &#34;http://localhost:9411/api/v2/spans1&#34;
-    assert config.agent_config.reporting.trace_reporter_type == 1
+    assert config.agent_config.reporting.trace_reporter_type == 0
     assert config.agent_config.reporting.secure is True
     assert config.agent_config.reporting.token == &#34;TestToken&#34;
     assert config.agent_config.reporting.opa.endpoint == &#34;https://opa.traceableai:8181/&#34;
@@ -196,13 +183,11 @@ def unset_env_variables():
     assert config.agent_config.data_capture.body_max_size_bytes == 123457
     assert config.agent_config.propagation_formats == 0
     assert not config.agent_config.enabled
-    assert config.agent_config.resource_attributes == {
-        &#39;service_name&#39;: &#39;pythonagent_001&#39;}
-    unset_env_variables()</code></pre>
+    assert config.agent_config.resource_attributes == {&#39;service_name&#39;: &#39;pythonagent_001&#39;}</code></pre>
 </details>
 </dd>
-<dt id="hypertrace.agent.config.test_config.test_env_config"><code class="name flex">
-<span>def <span class="ident">test_env_config</span></span>(<span>) ‑> NoneType</span>
+<dt id="hypertrace.agent.config.test_unittests.test_env_config"><code class="name flex">
+<span>def <span class="ident">test_env_config</span></span>(<span>)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Unittest functionx for env config entries.</p></div>
@@ -210,11 +195,12 @@ def unset_env_variables():
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def test_env_config() -&gt; None:
+<pre><code class="python">def test_env_config():
     &#39;&#39;&#39;Unittest functionx for env config entries.&#39;&#39;&#39;
+    print(&#39;Initializing agent.&#39;)
     os.environ[&#34;HT_SERVICE_NAME&#34;] = &#34;pythonagent_002&#34;
     os.environ[&#34;HT_REPORTING_ENDPOINT&#34;] = &#34;http://localhost:9411/api/v2/spans2&#34;
-    os.environ[&#34;HT_TRACES_EXPORTER&#34;] = &#34;OTLP&#34;
+    os.environ[&#34;HT_TRACES_EXPORTER&#34;] = &#34;Zikpin&#34;
     os.environ[&#34;HT_REPORTING_SECURE&#34;] = &#34;True&#34;
     os.environ[&#34;HT_REPORTING_TOKEN&#34;] = &#34;&#34;
     os.environ[&#34;HT_REPORTING_OPA_ENDPOINT&#34;] = &#34;https://opa.traceableai:8181/&#34;
@@ -235,7 +221,7 @@ def unset_env_variables():
     config = AgentConfig()
     assert config.agent_config.service_name == &#34;pythonagent_002&#34;
     assert config.agent_config.reporting.endpoint == &#34;http://localhost:9411/api/v2/spans2&#34;
-    assert config.agent_config.reporting.trace_reporter_type == 2
+    assert config.agent_config.reporting.trace_reporter_type == 0
     assert config.agent_config.reporting.secure is True
     assert config.agent_config.reporting.token == &#34;&#34;
     assert config.agent_config.reporting.opa.endpoint == &#34;https://opa.traceableai:8181/&#34;
@@ -252,25 +238,24 @@ def unset_env_variables():
     assert config.agent_config.data_capture.body_max_size_bytes == 123456
     assert config.agent_config.propagation_formats == 0
     assert not config.agent_config.enabled
-    assert config.agent_config.resource_attributes == {
-        &#39;service_name&#39;: &#39;pythonagent_002&#39;}
-    unset_env_variables()</code></pre>
+    assert config.agent_config.resource_attributes == {&#39;service_name&#39;: &#39;pythonagent_002&#39;}</code></pre>
 </details>
 </dd>
-<dt id="hypertrace.agent.config.test_config.test_merge_config"><code class="name flex">
-<span>def <span class="ident">test_merge_config</span></span>(<span>) ‑> NoneType</span>
+<dt id="hypertrace.agent.config.test_unittests.test_merge_config"><code class="name flex">
+<span>def <span class="ident">test_merge_config</span></span>(<span>)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Unittest for merging config results.</p></div>
+<div class="desc"><p>Unittest functionx for merging config entries.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def test_merge_config() -&gt; None:
-    &#39;&#39;&#39;Unittest for merging config results.&#39;&#39;&#39;
+<pre><code class="python">def test_merge_config():
+    &#39;&#39;&#39;Unittest functionx for merging config entries.&#39;&#39;&#39;
     # set Environment Variable
-    config_file_path = &#34;./src/hypertrace/agent/config/test_agent-config.yaml&#34;
-    config_from_file = load_config_from_file(config_file_path)
+    os.environ[&#34;HT_CONFIG_FILE&#34;] = &#34;./src/hypertrace/agent/config/agent-config.yaml&#34;
+    config_from_file = load_config_from_file(
+        os.environ[&#39;HT_CONFIG_FILE&#39;])
 
     cfg = merge_config(
         DEFAULT_AGENT_CONFIG, config_from_file)
@@ -294,25 +279,7 @@ def unset_env_variables():
     assert cfg[&#34;data_capture&#34;][&#34;body_max_size_bytes&#34;] == 123457
     assert cfg[&#34;propagation_formats&#34;] == &#34;B3&#34;
     assert not cfg[&#34;enabled&#34;]
-    assert cfg[&#34;_use_console_span_exporter&#34;] is True
-    assert cfg[&#34;resource_attributes&#34;] == {}
-    unset_env_variables()</code></pre>
-</details>
-</dd>
-<dt id="hypertrace.agent.config.test_config.unset_env_variables"><code class="name flex">
-<span>def <span class="ident">unset_env_variables</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Reset environment variables.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def unset_env_variables():
-    &#34;&#34;&#34;Reset environment variables.&#34;&#34;&#34;
-    for key in os.environ:
-        if key[0:3] == &#34;HT_&#34;:
-            del os.environ[key]</code></pre>
+    assert cfg[&#34;_use_console_span_exporter&#34;] is True</code></pre>
 </details>
 </dd>
 </dl>
@@ -333,10 +300,9 @@ def unset_env_variables():
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="hypertrace.agent.config.test_config.test_agent_config" href="#hypertrace.agent.config.test_config.test_agent_config">test_agent_config</a></code></li>
-<li><code><a title="hypertrace.agent.config.test_config.test_env_config" href="#hypertrace.agent.config.test_config.test_env_config">test_env_config</a></code></li>
-<li><code><a title="hypertrace.agent.config.test_config.test_merge_config" href="#hypertrace.agent.config.test_config.test_merge_config">test_merge_config</a></code></li>
-<li><code><a title="hypertrace.agent.config.test_config.unset_env_variables" href="#hypertrace.agent.config.test_config.unset_env_variables">unset_env_variables</a></code></li>
+<li><code><a title="hypertrace.agent.config.test_unittests.test_agent_config" href="#hypertrace.agent.config.test_unittests.test_agent_config">test_agent_config</a></code></li>
+<li><code><a title="hypertrace.agent.config.test_unittests.test_env_config" href="#hypertrace.agent.config.test_unittests.test_env_config">test_env_config</a></code></li>
+<li><code><a title="hypertrace.agent.config.test_unittests.test_merge_config" href="#hypertrace.agent.config.test_unittests.test_merge_config">test_merge_config</a></code></li>
 </ul>
 </li>
 </ul>

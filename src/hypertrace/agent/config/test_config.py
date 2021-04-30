@@ -39,12 +39,14 @@ def test_merge_config() -> None:
     }
     unset_env_variables()
 
-
 def test_agent_config() -> None:
     '''Unittest functionx for agent config entries.'''
     # set Environment Variable
 
-    os.environ["HT_CONFIG_FILE"] = "./src/hypertrace/agent/config/test_agent-config.yaml"
+    unset_env_variables()
+
+    os.environ["HT_CONFIG_FILE"] = "./src/hypertrace/agent/config/agent-config.yaml"
+    print('Initializing agent.')
     config = AgentConfig()
     assert config.agent_config.service_name == "pythonagent_001"
     assert config.agent_config.reporting.endpoint == "http://localhost:9411/api/v2/spans1"
@@ -68,7 +70,6 @@ def test_agent_config() -> None:
     assert config.agent_config.resource_attributes == {
         'tester01': 'tester01'}
     unset_env_variables()
-
 
 def test_env_config() -> None:
     '''Unittest functionx for env config entries.'''
@@ -116,7 +117,6 @@ def test_env_config() -> None:
     assert config.agent_config.resource_attributes == {
         'tester01': 'tester01'}
     unset_env_variables()
-
 
 def unset_env_variables():
     """Reset environment variables."""

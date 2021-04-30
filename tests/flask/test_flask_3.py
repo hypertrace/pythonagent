@@ -90,7 +90,7 @@ server = FlaskServer(app)
 # Code snippet here represents the current initialization logic
 #
 logger.info('Initializing agent.')
-agent = Agent(True)
+agent = Agent()
 agent.register_flask_app(app)
 #
 # End initialization logic for Python Agent

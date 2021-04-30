@@ -4,6 +4,7 @@ import os.path
 import sys
 import logging
 import traceback
+import flask
 from hypertrace.agent.init import AgentInit
 from hypertrace.agent.config import AgentConfig
 from hypertrace.agent import constants
@@ -55,26 +56,26 @@ logger = setup_custom_logger(__name__) # pylint: disable=C0103
 class Agent:
     '''Top-level entry point for Hypertrace agent.'''
 
-    def __init__(self, init_console_only: bool = False):
+    def __init__(self):
         '''Constructor'''
         logger.debug('Initializing Agent.')
         if not self.is_enabled():
             return
         try:
             self._config = AgentConfig()
-            self._init = AgentInit(self._config, init_console_only)
+            self._init = AgentInit(self._config)
         except Exception as err:  # pylint: disable=W0703
             logger.error('Failed to initialize Agent: exception=%s, stacktrace=%s',
                          err,
                          traceback.format_exc())
 
-    def register_flask_app(self, app, use_b3=False) -> None:
+    def register_flask_app(self, app: flask.Flask) -> None:
         '''Register the flask instrumentation module wrapper'''
         logger.debug('Calling Agent.register_flask_app.')
         if not self.is_enabled():
             return
         try:
-            self._init.flask_init(app, use_b3)
+            self._init.flask_init(app)
             self._init.dump_config()
         except Exception as err: # pylint: disable=W0703
             logger.error(constants.EXCEPTION_MESSAGE,
@@ -121,7 +122,7 @@ class Agent:
             self._init.dump_config()
         except Exception as err: # pylint: disable=W0703
             logger.error(constants.EXCEPTION_MESSAGE,
-                         'flask',
+                         'mysql',
                          err,
                          traceback.format_exc())
 
@@ -135,35 +136,35 @@ class Agent:
             self._init.dump_config()
         except Exception as err: # pylint: disable=W0703
             logger.error(constants.EXCEPTION_MESSAGE,
-                         'flask',
+                         'postgresql',
                          err,
                          traceback.format_exc())
 
-    def register_requests(self, use_b3=False) -> None:
+    def register_requests(self) -> None:
         '''Register the requests instrumentation module wrapper'''
         logger.debug('Calling Agent.register_requests()')
         if not self.is_enabled():
             return
         try:
-            self._init.requests_init(use_b3)
+            self._init.requests_init()
             self._init.dump_config()
         except Exception as err: # pylint: disable=W0703
             logger.error(constants.EXCEPTION_MESSAGE,
-                         'flask',
+                         'requests',
                          err,
                          traceback.format_exc())
 
-    def register_aiohttp_client(self, use_b3=False) -> None:
+    def register_aiohttp_client(self) -> None:
         '''Register the aiohttp-client instrumentation module wrapper'''
         logger.debug('Calling Agent.register_aiohttp_client().')
         if not self.is_enabled():
             return
         try:
-            self._init.aiohttp_client_init(use_b3)
+            self._init.aiohttp_client_init()
             self._init.dump_config()
         except Exception as err: # pylint: disable=W0703
             logger.error(constants.EXCEPTION_MESSAGE,
-                         'flask',
+                         'aiohttp_client',
                          err,
                          traceback.format_exc())
 
