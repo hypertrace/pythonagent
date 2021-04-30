@@ -15,4 +15,3 @@ pyyaml
 flask
 pytest
 pytest-xdist
-pytest-dotenv

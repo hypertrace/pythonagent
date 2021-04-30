@@ -13,6 +13,8 @@ from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanE
 from opentelemetry.sdk.trace.export import BatchSpanProcessor, SimpleSpanProcessor
 from hypertrace.agent import Agent
 
+os.environ['HT_PROPAGATION_FORMATS'] = 'B3'
+
 def setup_custom_logger(name):
   try:
     formatter = logging.Formatter(fmt='%(asctime)s %(levelname)-8s %(message)s',
