@@ -16,7 +16,7 @@ jobs:
         run: |
           sudo apt install software-properties-common &&
           sudo add-apt-repository ppa:deadsnakes/ppa -y &&
-          sudo apt-get install python3.7
+          sudo apt-get install python3.9
           python --version
 
       - name: Install pip
