@@ -67,7 +67,7 @@ git pull origin $MAIN_BRANCH
 
 # Makes sure docs are up to date
 make docs
-git diff-index --quiet HEAD -- || git commit -m "docs: update docs";
+git diff-index --quiet HEAD -- || { git add ./docs && git commit -m "docs: update docs"; }
 
 write_version_file $VERSION $VERSION_FILE
 git add $VERSION_FILE
