@@ -5,7 +5,6 @@ from . import DEFAULT_AGENT_CONFIG
 from . import merge_config
 from . import load_config_from_file
 
-
 def test_merge_config() -> None:
     '''Unittest for merging config results.'''
     # set Environment Variable
@@ -35,7 +34,9 @@ def test_merge_config() -> None:
     assert cfg["propagation_formats"] == "B3"
     assert not cfg["enabled"]
     assert cfg["_use_console_span_exporter"] is True
-    assert cfg["resource_attributes"] == {}
+    assert cfg["resource_attributes"] == {
+        'tester01': 'tester01'
+    }
     unset_env_variables()
 
 
@@ -65,7 +66,7 @@ def test_agent_config() -> None:
     assert config.agent_config.propagation_formats == 0
     assert not config.agent_config.enabled
     assert config.agent_config.resource_attributes == {
-        'service_name': 'pythonagent_001'}
+        'tester01': 'tester01'}
     unset_env_variables()
 
 
@@ -90,7 +91,7 @@ def test_env_config() -> None:
     os.environ["HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES"] = "123456"
     os.environ["HT_PROPAGATION_FORMATS"] = "B3"
     os.environ["HT_ENABLED"] = "False"
-    os.environ["HT_ENABLE_CONSOLE_SPAN_EXPORTER"] = "{'service_name': 'pythonagent_002'}"
+    os.environ["HT_ENABLE_CONSOLE_SPAN_EXPORTER"] = "True"
     config = AgentConfig()
     assert config.agent_config.service_name == "pythonagent_002"
     assert config.agent_config.reporting.endpoint == "http://localhost:9411/api/v2/spans2"
@@ -111,8 +112,9 @@ def test_env_config() -> None:
     assert config.agent_config.data_capture.body_max_size_bytes == 123456
     assert config.agent_config.propagation_formats == 0
     assert not config.agent_config.enabled
+    assert config.use_console_span_exporter()
     assert config.agent_config.resource_attributes == {
-        'service_name': 'pythonagent_002'}
+        'tester01': 'tester01'}
     unset_env_variables()
 
 
