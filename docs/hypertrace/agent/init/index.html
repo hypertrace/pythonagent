@@ -43,6 +43,10 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from hypertrace.agent import constants
 from hypertrace.agent.config import config_pb2, AgentConfig
 
+from ..constants import TELEMETRY_SDK_NAME
+from ..constants import TELEMETRY_SDK_VERSION
+from ..constants import TELEMETRY_SDK_LANGUAGE
+
 # Initialize logger
 logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -63,11 +67,18 @@ class AgentInit:  # pylint: disable=R0902,R0903
             &#34;aiohttp_client&#34;: False
         }
         try:
-            self._tracer_provider = TracerProvider(
-                resource=Resource.create({
+            resource_attributes = {
                     &#34;service.name&#34;: self._config.agent_config.service_name,
                     &#34;service.instance.id&#34;: os.getpid(),
-                })
+                    &#34;telemetry.sdk.version&#34;: TELEMETRY_SDK_VERSION,
+                    &#34;telemetry.sdk.name&#34;: TELEMETRY_SDK_NAME,
+                    &#34;telemetry.sdk.language&#34;: TELEMETRY_SDK_LANGUAGE
+            }
+            if self._config.agent_config.resource_attributes:
+                logger.debug(&#39;Custom attributes found. Adding to resource attributes dict.&#39;)
+                resource_attributes.update(self._config.agent_config.resource_attributes)
+            self._tracer_provider = TracerProvider(
+                resource=Resource.create(resource_attributes)
             )
             trace.set_tracer_provider(self._tracer_provider)
 
@@ -377,11 +388,18 @@ class AgentInit:  # pylint: disable=R0902,R0903
             &#34;aiohttp_client&#34;: False
         }
         try:
-            self._tracer_provider = TracerProvider(
-                resource=Resource.create({
+            resource_attributes = {
                     &#34;service.name&#34;: self._config.agent_config.service_name,
                     &#34;service.instance.id&#34;: os.getpid(),
-                })
+                    &#34;telemetry.sdk.version&#34;: TELEMETRY_SDK_VERSION,
+                    &#34;telemetry.sdk.name&#34;: TELEMETRY_SDK_NAME,
+                    &#34;telemetry.sdk.language&#34;: TELEMETRY_SDK_LANGUAGE
+            }
+            if self._config.agent_config.resource_attributes:
+                logger.debug(&#39;Custom attributes found. Adding to resource attributes dict.&#39;)
+                resource_attributes.update(self._config.agent_config.resource_attributes)
+            self._tracer_provider = TracerProvider(
+                resource=Resource.create(resource_attributes)
             )
             trace.set_tracer_provider(self._tracer_provider)
 
