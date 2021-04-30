@@ -38,14 +38,18 @@ class AgentInit:  # pylint: disable=R0902,R0903
             "aiohttp_client": False
         }
         try:
-            self._tracer_provider = TracerProvider(
-                resource=Resource.create({
+            resource_attributes = {
                     "service.name": self._config.agent_config.service_name,
                     "service.instance.id": os.getpid(),
                     "telemetry.sdk.version": TELEMETRY_SDK_VERSION,
                     "telemetry.sdk.name": TELEMETRY_SDK_NAME,
                     "telemetry.sdk.language": TELEMETRY_SDK_LANGUAGE
-                })
+            }
+            if self._config.agent_config.resource_attributes:
+                logger.debug('Custom attributes found. Adding to resource attributes dict.')
+                resource_attributes.update(self._config.agent_config.resource_attributes)
+            self._tracer_provider = TracerProvider(
+                resource=Resource.create(resource_attributes)
             )
             trace.set_tracer_provider(self._tracer_provider)
 
