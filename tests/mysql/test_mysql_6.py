@@ -7,6 +7,7 @@ from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanE
 from opentelemetry.sdk.trace.export import BatchSpanProcessor, SimpleSpanProcessor
 from hypertrace.agent import Agent
 
+
 def setup_custom_logger(name):
     try:
         formatter = logging.Formatter(fmt='%(asctime)s %(levelname)-8s %(message)s',
@@ -49,7 +50,7 @@ def test_run():
         logger.info('Making connection to mysql.')
         cnx = mysql.connector.connect(database='hypertrace',
                                       username='root',
-                                      password='example',
+                                      password='root',
                                       host='localhost',
                                       port=3306)
         logger.info('Connect successfully.')
