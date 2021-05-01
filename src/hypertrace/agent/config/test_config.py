@@ -4,6 +4,7 @@ from hypertrace.agent.config import AgentConfig
 from . import DEFAULT_AGENT_CONFIG
 from . import merge_config
 from . import load_config_from_file
+from . import config_pb2
 
 def test_merge_config() -> None:
     '''Unittest for merging config results.'''
@@ -31,7 +32,7 @@ def test_merge_config() -> None:
     assert not cfg["data_capture"]["rpc_body"]["response"]
     assert not cfg["data_capture"]["rpc_body"]["response"]
     assert cfg["data_capture"]["body_max_size_bytes"] == 123457
-    assert cfg["propagation_formats"] == "B3"
+    assert 'B3' in cfg["propagation_formats"]
     assert not cfg["enabled"]
     assert cfg["_use_console_span_exporter"] is True
     assert cfg["resource_attributes"] == {
@@ -65,7 +66,7 @@ def test_agent_config() -> None:
     assert not config.agent_config.data_capture.rpc_body.request.value
     assert not config.agent_config.data_capture.rpc_body.response.value
     assert config.agent_config.data_capture.body_max_size_bytes == 123457
-    assert config.agent_config.propagation_formats == 0
+    assert config_pb2.PropagationFormat.B3 in config.agent_config.propagation_formats
     assert not config.agent_config.enabled
     assert config.agent_config.resource_attributes == {
         'tester01': 'tester01'}
@@ -111,7 +112,7 @@ def test_env_config() -> None:
     assert not config.agent_config.data_capture.rpc_body.request.value
     assert not config.agent_config.data_capture.rpc_body.response.value
     assert config.agent_config.data_capture.body_max_size_bytes == 123456
-    assert config.agent_config.propagation_formats == 0
+    assert config_pb2.PropagationFormat.B3 in config.agent_config.propagation_formats
     assert not config.agent_config.enabled
     assert config.use_console_span_exporter()
     assert config.agent_config.resource_attributes == {

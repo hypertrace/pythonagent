@@ -2,7 +2,7 @@
 DEFAULT_AGENT_CONFIG = {
     '_use_console_span_exporter': False,
     'enabled': True,
-    'propagation_formats':'TRACECONTEXT',
+    'propagation_formats': ['TRACECONTEXT'],
     'service_name': 'pythonagent',
     'reporting': {
         'endpoint': 'http://localhost:9411/api/v2/spans',
@@ -12,8 +12,8 @@ DEFAULT_AGENT_CONFIG = {
         'opa': {
             'endpoint': 'http://opa.traceableai:8181/',
             'poll_period_seconds': 60,
-            'enabled' : False,
-      }
+            'enabled': False,
+        }
     },
     'data_capture': {
         'http_headers': {

@@ -43,16 +43,19 @@ def setup_custom_logger(name: str) -> logging.Logger:
         logger_.addHandler(handler)
         logger_.addHandler(screen_handler)
         return logger_
-    except Exception as err: # pylint: disable=W0703
+    except Exception as err:  # pylint: disable=W0703
         print('Failed to customize logger: exception=%s, stacktrace=%s',
               err,
               traceback.format_exc())
         return None
 
+
 # create logger object
-logger = setup_custom_logger(__name__) # pylint: disable=C0103
+logger = setup_custom_logger(__name__)  # pylint: disable=C0103
 
 # The Hypertrace Python Agent class
+
+
 class Agent:
     '''Top-level entry point for Hypertrace agent.'''
 
@@ -77,7 +80,7 @@ class Agent:
         try:
             self._init.flask_init(app)
             self._init.dump_config()
-        except Exception as err: # pylint: disable=W0703
+        except Exception as err:  # pylint: disable=W0703
             logger.error(constants.EXCEPTION_MESSAGE,
                          'flask',
                          err,
@@ -89,14 +92,13 @@ class Agent:
         if not self.is_enabled():
             return
         try:
-            self._init.grpc_server_init()
+            self._init.init_instrumentation_grpc_server()
             self._init.dump_config()
-        except Exception as err: # pylint: disable=W0703
+        except Exception as err:  # pylint: disable=W0703
             logger.error(constants.EXCEPTION_MESSAGE,
                          'grpc:server',
                          err,
                          traceback.format_exc())
-
 
     def register_grpc_client(self) -> None:
         '''Register the grpc:client instrumentation module wrapper'''
@@ -104,9 +106,9 @@ class Agent:
         if not self.is_enabled():
             return
         try:
-            self._init.grpc_client_init()
+            self._init.init_instrumentation_grpc_client()
             self._init.dump_config()
-        except Exception as err: # pylint: disable=W0703
+        except Exception as err:  # pylint: disable=W0703
             logger.error(constants.EXCEPTION_MESSAGE,
                          'grpc:client',
                          err,
@@ -118,9 +120,9 @@ class Agent:
         if not self.is_enabled():
             return
         try:
-            self._init.mysql_init()
+            self._init.init_instrumentation_mysql()
             self._init.dump_config()
-        except Exception as err: # pylint: disable=W0703
+        except Exception as err:  # pylint: disable=W0703
             logger.error(constants.EXCEPTION_MESSAGE,
                          'mysql',
                          err,
@@ -132,9 +134,9 @@ class Agent:
         if not self.is_enabled():
             return
         try:
-            self._init.postgresql_init()
+            self._init.init_instrumentation_postgresql()
             self._init.dump_config()
-        except Exception as err: # pylint: disable=W0703
+        except Exception as err:  # pylint: disable=W0703
             logger.error(constants.EXCEPTION_MESSAGE,
                          'postgresql',
                          err,
@@ -146,9 +148,9 @@ class Agent:
         if not self.is_enabled():
             return
         try:
-            self._init.requests_init()
+            self._init.init_instrumentation_requests()
             self._init.dump_config()
-        except Exception as err: # pylint: disable=W0703
+        except Exception as err:  # pylint: disable=W0703
             logger.error(constants.EXCEPTION_MESSAGE,
                          'requests',
                          err,
@@ -162,14 +164,13 @@ class Agent:
         try:
             self._init.aiohttp_client_init()
             self._init.dump_config()
-        except Exception as err: # pylint: disable=W0703
+        except Exception as err:  # pylint: disable=W0703
             logger.error(constants.EXCEPTION_MESSAGE,
                          'aiohttp_client',
                          err,
                          traceback.format_exc())
 
     def register_processor(self, processor) -> None:  # pylint: disable=R1710
-
         '''Add additional span exporters + processors'''
         logger.debug('Entering Agent.register_processor().')
         if not self.is_enabled():
@@ -177,7 +178,7 @@ class Agent:
         if self.is_enabled():
             return self._init.register_processor(processor)
 
-    def is_enabled(self) -> bool: # pylint: disable=R0201
+    def is_enabled(self) -> bool:  # pylint: disable=R0201
         '''Is agent enabled?'''
         if 'HT_ENABLED' in os.environ:
             if os.environ['HT_ENABLED'] == 'false':
