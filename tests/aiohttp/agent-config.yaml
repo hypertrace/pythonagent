@@ -15,5 +15,3 @@ data_capture:
   rpc_body:
     request: true
     response: true
-propagation_formats:
-  - "B3"

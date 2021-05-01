@@ -31,7 +31,15 @@ def merge_config(base_config, overriding_config):
                 base_config[key] = merge_config(
                     base_config[key], overriding_config[key])
         else:
-            base_config[key] = overriding_config[key]
+            if key == 'propagation_formats':
+                logger.debug('Merging propagation_formats values.')
+                logger.debug('base_config[key]=%s', str(base_config[key]))
+                if hasattr(base_config, key):
+                    base_config[key] = set(base_config[key].extend(overriding_config[key]))
+                else:
+                    base_config[key] = overriding_config[key]
+            else:
+                base_config[key] = overriding_config[key]
     return base_config
 
 
@@ -271,9 +279,11 @@ class AgentConfig:  # pylint: disable=R0902,R0903
         tmp_propagation_formats = []
         if 'TRACECONTEXT' in self.config['propagation_formats']:
             tmp_propagation_formats.append(config_pb2.PropagationFormat.TRACECONTEXT)
-        elif 'B3' in self.config['propagation_formats']:
+            tmp_propagation_formats = list(set(tmp_propagation_formats))
+        if 'B3' in self.config['propagation_formats']:
             tmp_propagation_formats.append(config_pb2.PropagationFormat.B3)
-        else:
+            tmp_propagation_formats = list(set(tmp_propagation_formats))
+        if not tmp_propagation_formats:
             # Default to TRACECONTEXT
             tmp_propagation_formats.append(config_pb2.PropagationFormat.TRACECONTEXT)
         self.agent_config.propagation_formats = tmp_propagation_formats
@@ -302,6 +312,8 @@ class AgentConfig:  # pylint: disable=R0902,R0903
                     logger.debug('config_element=%s, agent_config_base=%s',
                                  str(config_element),
                                  str(agent_config_base))
+                    if key == 'resource_attributes':
+                        continue
                     self.validate_config_elements(config_element[key],
                                                   eval('agent_config_base.' + key))  # pylint: disable=W0123
                     continue
@@ -310,7 +322,7 @@ class AgentConfig:  # pylint: disable=R0902,R0903
                                  err,
                                  traceback.format_exc())
                     continue
-            if isinstance(config_element[key], (str, bool, int, list)):
+            elif isinstance(config_element[key], (str, bool, int, list)):
                 logger.debug('is string')
                 if key in PYTHON_SPECIFIC_ATTRIBUTES:
                     logger.debug(
@@ -318,6 +330,7 @@ class AgentConfig:  # pylint: disable=R0902,R0903
                     continue
                 try:
                     if hasattr(agent_config_base, key):
+#                      and key != 'propagation_formats':
                         logger.debug('Is valid: %s', key)
                     else:
                         logger.debug('Not valid: %s', key)
