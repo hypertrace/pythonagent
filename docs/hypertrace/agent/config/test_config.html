@@ -33,6 +33,7 @@ from hypertrace.agent.config import AgentConfig
 from . import DEFAULT_AGENT_CONFIG
 from . import merge_config
 from . import load_config_from_file
+from . import config_pb2
 
 def test_merge_config() -&gt; None:
     &#39;&#39;&#39;Unittest for merging config results.&#39;&#39;&#39;
@@ -60,7 +61,7 @@ def test_merge_config() -&gt; None:
     assert not cfg[&#34;data_capture&#34;][&#34;rpc_body&#34;][&#34;response&#34;]
     assert not cfg[&#34;data_capture&#34;][&#34;rpc_body&#34;][&#34;response&#34;]
     assert cfg[&#34;data_capture&#34;][&#34;body_max_size_bytes&#34;] == 123457
-    assert cfg[&#34;propagation_formats&#34;] == &#34;B3&#34;
+    assert &#39;B3&#39; in cfg[&#34;propagation_formats&#34;]
     assert not cfg[&#34;enabled&#34;]
     assert cfg[&#34;_use_console_span_exporter&#34;] is True
     assert cfg[&#34;resource_attributes&#34;] == {
@@ -94,7 +95,7 @@ def test_agent_config() -&gt; None:
     assert not config.agent_config.data_capture.rpc_body.request.value
     assert not config.agent_config.data_capture.rpc_body.response.value
     assert config.agent_config.data_capture.body_max_size_bytes == 123457
-    assert config.agent_config.propagation_formats == 0
+    assert config_pb2.PropagationFormat.B3 in config.agent_config.propagation_formats
     assert not config.agent_config.enabled
     assert config.agent_config.resource_attributes == {
         &#39;tester01&#39;: &#39;tester01&#39;}
@@ -140,7 +141,7 @@ def test_env_config() -&gt; None:
     assert not config.agent_config.data_capture.rpc_body.request.value
     assert not config.agent_config.data_capture.rpc_body.response.value
     assert config.agent_config.data_capture.body_max_size_bytes == 123456
-    assert config.agent_config.propagation_formats == 0
+    assert config_pb2.PropagationFormat.B3 in config.agent_config.propagation_formats
     assert not config.agent_config.enabled
     assert config.use_console_span_exporter()
     assert config.agent_config.resource_attributes == {
@@ -196,7 +197,7 @@ def unset_env_variables():
     assert not config.agent_config.data_capture.rpc_body.request.value
     assert not config.agent_config.data_capture.rpc_body.response.value
     assert config.agent_config.data_capture.body_max_size_bytes == 123457
-    assert config.agent_config.propagation_formats == 0
+    assert config_pb2.PropagationFormat.B3 in config.agent_config.propagation_formats
     assert not config.agent_config.enabled
     assert config.agent_config.resource_attributes == {
         &#39;tester01&#39;: &#39;tester01&#39;}
@@ -252,7 +253,7 @@ def unset_env_variables():
     assert not config.agent_config.data_capture.rpc_body.request.value
     assert not config.agent_config.data_capture.rpc_body.response.value
     assert config.agent_config.data_capture.body_max_size_bytes == 123456
-    assert config.agent_config.propagation_formats == 0
+    assert config_pb2.PropagationFormat.B3 in config.agent_config.propagation_formats
     assert not config.agent_config.enabled
     assert config.use_console_span_exporter()
     assert config.agent_config.resource_attributes == {
@@ -295,7 +296,7 @@ def unset_env_variables():
     assert not cfg[&#34;data_capture&#34;][&#34;rpc_body&#34;][&#34;response&#34;]
     assert not cfg[&#34;data_capture&#34;][&#34;rpc_body&#34;][&#34;response&#34;]
     assert cfg[&#34;data_capture&#34;][&#34;body_max_size_bytes&#34;] == 123457
-    assert cfg[&#34;propagation_formats&#34;] == &#34;B3&#34;
+    assert &#39;B3&#39; in cfg[&#34;propagation_formats&#34;]
     assert not cfg[&#34;enabled&#34;]
     assert cfg[&#34;_use_console_span_exporter&#34;] is True
     assert cfg[&#34;resource_attributes&#34;] == {
