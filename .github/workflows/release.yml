@@ -36,9 +36,13 @@ jobs:
       - name: Build package
         run: make build
 
+      - name: List ./dist files
+        run: ls -lRa ./dist
+
       - name: Publish a Python distribution to PyPI
         # This action relies on the package files being present in ./dist folder
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
           password: ${{ secrets.PYPI_TOKEN }}
+          verbose: true
