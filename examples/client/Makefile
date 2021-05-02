@@ -6,4 +6,4 @@ run:
 	STREAM=${STREAM} HT_CONFIG_FILE=./config.yaml python client.py
 
 run-hypertrace:
-	docker-compose up
+	docker-compose -f docker-compose-hypertrace.yml up --renew-anon-volumes -d
