@@ -1,3 +1,0 @@
-[submodule "tools/env-vars-generator/protobuf"]
-	path = tools/env-vars-generator/protobuf
-	url = https://github.com/protocolbuffers/protobuf.git

@@ -1,3 +1,0 @@
-# we only need the protos in protobuf/src so we ignore everything else to reduce the context size
-protobuf/*
-!protobuf/src
