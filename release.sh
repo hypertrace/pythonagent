@@ -68,7 +68,7 @@ echo "Fetching latest $MAIN_BRANCH..."
 git pull origin $MAIN_BRANCH
 
 # Makes sure docs are up to date
-make docs
+tox -e pdoc
 git diff-index --quiet HEAD -- || { git add ./docs && git commit -m "docs: update docs"; }
 
 write_version_file $VERSION $VERSION_FILE

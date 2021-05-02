@@ -6,11 +6,11 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    name="hypertrace",
-    version= __version__,
-    author="Robert C. Broeckelmann Jr.",
-    author_email="robert@iyasec.io",
-    description="The Hypertrace Python Agent",
+    name="hypertrace-agent",
+    version=__version__,
+    author="Hypertrace",
+    author_email="community@hypertrace.org",
+    description="Hypertrace Python Agent",
     long_description="file: README.md",
     long_description_content_type="text/markdown",
     url="https://github.com/hypertrace/pythonagent",
@@ -19,7 +19,7 @@ setup(
     },
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: Apache",
+        "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent"
     ],
     package_dir={"": "src"},
