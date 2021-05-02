@@ -26,9 +26,11 @@ test: test-unit test-integration
 
 .PHONY: build-proto
 build-proto:
+	git submodule update  --init  --recursive
 	protoc --python_out=src/hypertrace/agent/config \
-          -Isrc/protobuf-config/agent-config \
-          src/protobuf-config/agent-config/config.proto
+          -Isrc/agent-config \
+          -Isrc/agent-config/tools/env-vars-generator/protobuf/src \
+          src/agent-config/config.proto
 
 .PHONY: build
 build: build-proto
@@ -49,7 +51,7 @@ lint:
 .PHONY: install
 install: build
 	pip uninstall hypertrace -y
-	pip install dist/hypertrace-0.1.0.tar.gz
+	pip install dist/hypertrace-*.tar.gz
 
 release: lint test build
 	@if [[ -z "${VERSION}" ]]; then echo "VERSION env var is required"; exit 1 ; fi
