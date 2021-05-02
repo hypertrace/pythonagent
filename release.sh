@@ -55,7 +55,7 @@ if [ ! -z "$(git status --porcelain)" ]; then
 fi
 
 echo "Fetching remote tags..."
-git fetch --tags
+git fetch --all
 
 if [ ! -z "$(git tag -l "$VERSION")" ]; then 
     echo "Version \"$VERSION\" already exists."
