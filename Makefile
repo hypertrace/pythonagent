@@ -27,8 +27,8 @@ test: test-unit test-integration
 .PHONY: build-proto
 build-proto:
 	protoc --python_out=src/hypertrace/agent/config \
-          -Isrc/protobuf-config/agent-config \
-          src/protobuf-config/agent-config/config.proto
+          -Isrc/protobuf/agent-config \
+          src/protobuf/agent-config/config.proto
 
 .PHONY: build
 build: build-proto
