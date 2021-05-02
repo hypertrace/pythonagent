@@ -10,12 +10,12 @@ logging.basicConfig()
 logging.getLogger().setLevel(logging.DEBUG)
 
 
-def stream_body(resBody: str):
-    newLineChars = ['{', '}', ',', '[', ']']
-    for c in resBody:
+def stream_body(res_body: str):
+    new_line_chars = ['{', '}', ',', '[', ']']
+    for c in res_body:
         time.sleep(0.3)
         logging.debug("Sending response chunk")
-        if c in newLineChars:
+        if c in new_line_chars:
             yield c + "\n"
         else:
             yield c
