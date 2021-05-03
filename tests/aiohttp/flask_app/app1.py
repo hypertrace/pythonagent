@@ -50,13 +50,30 @@ async def fetch(url, body, headers):
     async with session.post(url, data=body, headers=headers) as response:
       return await response.text()
 
+
 @server.route("/route2", methods=['POST'])
-def testAPI1():
+def testAPI2():
     try:
       logger.info('Serving request for /route2')
       loop = asyncio.get_event_loop()
       response = loop.run_until_complete(asyncio.gather(
         fetch('https://petstore.swagger.io/v2/pet', '{"id":0,"category":{"id":0,"name":"doggie"},"name":"doggie","photoUrls":["http://example.co"],"tags":[{"id":0,"name":"doggie"}],"status":"available"}', { "Accept":"application/json", "Content-Type": "application/json", 'tester1': 'tester1', 'tester2':'tester2' })))
+      response1 = flask.Response(mimetype='application/json')
+      response1.data = str('{ "a": "a", "xyz": "xyz" }')
+      return response1
+    except:
+      logger.error('Failed to initialize postgresql instrumentation wrapper: exception=%s, stacktrace=%s',
+        sys.exc_info()[0],
+        traceback.format_exc())
+      response = flask.Response(mimetype='application/json', status=500)
+      response.data = str('{}')
+      return response
+
+@server.route("/route1", methods=['POST'])
+def testAPI1():
+    try:
+      logger.info('Serving request for /route1')
+      loop = asyncio.get_event_loop()
       response1 = flask.Response(mimetype='application/json')
       response1.data = str('{ "a": "a", "xyz": "xyz" }')
       return response1
@@ -74,6 +91,9 @@ def after_request(response):
     logger.debug("after_request() called")
     if not ENABLE_INSTRUMENTATION:
       return response
+    if request.base_url != '/route1':
+      return response
+
     # Get all of the in memory spans that were recorded for this iteration
     span_list = memoryExporter.get_finished_spans()
     # Confirm something was returned.
