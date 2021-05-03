@@ -6,6 +6,7 @@ import inspect
 import traceback
 import json
 import flask
+from urllib.parse import urlsplit, urlunsplit
 from opentelemetry.instrumentation.flask import (
     FlaskInstrumentor,
     get_default_span_name,
@@ -53,7 +54,11 @@ def _hypertrace_before_request(flask_wrapper):
             request_body = flask.request.data       # same
             logger.debug('span: %s', str(span))
             logger.debug('Request headers: %s', str(request_headers))
-            logger.debug('Request body: %s', str(request_body))
+            # logger.debug('Request body: %s', str(request_body))
+            # logger.debug('flask request %s', flask.request.url)
+            logger.debug('flask request base_url %s', flask.request.base_url)
+            clean_url = urlsplit(flask.request.base_url)
+            logger.debug('flask  base_url_path %s', clean_url.path)
             # Call base request handler
             flask_wrapper.generic_request_handler(
                 request_headers, request_body, span)
