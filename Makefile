@@ -53,6 +53,8 @@ install: build
 	pip uninstall hypertrace -y
 	pip install dist/hypertrace-*.tar.gz
 
-release: lint test build
-	@if [[ -z "${VERSION}" ]]; then echo "VERSION env var is required"; exit 1 ; fi
+release:
+	@if [[ ! -z "$(git tag -l ${VERSION})" ]]; then echo "Version \"${VERSION}\" already exists."; exit 1 ; fi
+	@if [[ -z "${VERSION}" ]]; then echo "VERSION env var is required."; exit 1 ; fi
+	$(MAKE) lint test build
 	./release.sh ${VERSION}
