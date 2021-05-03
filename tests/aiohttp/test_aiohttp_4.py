@@ -75,4 +75,7 @@ async def test_run():
       assert aiohttpSpanAsObject['attributes']['http.response.header.content-type'] == 'application/json'
       assert aiohttpSpanAsObject['attributes']['http.request.header.x-b3-traceid']
       assert aiohttpSpanAsObject['attributes']['http.status_code'] == 200
+      assert aiohttpSpanAsObject['attributes']['http.response.body'] == '{ "a": "a", "xyz": "xyz" }'
+
+
       memoryExporter.clear()
