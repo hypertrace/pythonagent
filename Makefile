@@ -26,7 +26,7 @@ test: test-unit test-integration
 
 .PHONY: build-proto
 build-proto:
-	git submodule update  --init  --recursive
+	git submodule update --init --recursive
 	protoc --python_out=src/hypertrace/agent/config \
           -Isrc/agent-config \
           -Isrc/agent-config/tools/env-vars-generator/protobuf/src \
