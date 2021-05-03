@@ -4,6 +4,7 @@ TEST_DIR=tests
 
 PYTHON_VERSION ?= $(shell python --version | cut -c8- | cut -d'.' -f 1-2) # e.g. 3.9
 PY_TARGET=py$(subst .,,$(PYTHON_VERSION)) # e.g. py39
+LOG_LEVEL ?= INFO
 
 .PHONY: test-unit
 test-unit:
@@ -11,15 +12,15 @@ test-unit:
 
 .PHONY: test-integration
 test-integration:
-	@echo "Running tests over $(PY_TARGET)" 
-	cd ${TEST_DIR}/flask; tox -e ${PY_TARGET}
-	cd ${TEST_DIR}/grpc; tox -e ${PY_TARGET}
-	cd ${TEST_DIR}/mysql; tox -e ${PY_TARGET}
-	cd ${TEST_DIR}/postgresql; tox -e ${PY_TARGET}
-	cd ${TEST_DIR}/gunicorn; tox -e ${PY_TARGET}
-	cd ${TEST_DIR}/requests; tox -e ${PY_TARGET}
-	cd ${TEST_DIR}/aiohttp; tox -e ${PY_TARGET}
-	cd ${TEST_DIR}/docker; tox -e ${PY_TARGET}
+	@echo "Running integration tests over $(PY_TARGET) with LOG_LEVEL=$(LOG_LEVEL)" 
+	cd ${TEST_DIR}/flask; HT_LOG_LEVEL=${LOG_LEVEL} tox -e ${PY_TARGET}
+	cd ${TEST_DIR}/grpc; HT_LOG_LEVEL=${LOG_LEVEL} tox -e ${PY_TARGET}
+	cd ${TEST_DIR}/mysql; HT_LOG_LEVEL=${LOG_LEVEL} tox -e ${PY_TARGET}
+	cd ${TEST_DIR}/postgresql; HT_LOG_LEVEL=${LOG_LEVEL} tox -e ${PY_TARGET}
+	cd ${TEST_DIR}/gunicorn; HT_LOG_LEVEL=${LOG_LEVEL} tox -e ${PY_TARGET}
+	cd ${TEST_DIR}/requests; HT_LOG_LEVEL=${LOG_LEVEL} tox -e ${PY_TARGET}
+	cd ${TEST_DIR}/aiohttp; HT_LOG_LEVEL=${LOG_LEVEL} tox -e ${PY_TARGET}
+	cd ${TEST_DIR}/docker; HT_LOG_LEVEL=${LOG_LEVEL} tox -e ${PY_TARGET}
 
 .PHONY: test
 test: test-unit test-integration
@@ -53,6 +54,8 @@ install: build
 	pip uninstall hypertrace -y
 	pip install dist/hypertrace-*.tar.gz
 
-release: lint test build
-	@if [[ -z "${VERSION}" ]]; then echo "VERSION env var is required"; exit 1 ; fi
+release: 
+	@if [[ ! -z "$(git tag -l ${VERSION})" ]]; then echo "Version \"${VERSION}\" already exists."; exit 1 ; fi
+	$(MAKE) lint test build
+	@if [[ -z "${VERSION}" ]]; then echo "VERSION env var is required."; exit 1 ; fi
 	./release.sh ${VERSION}
