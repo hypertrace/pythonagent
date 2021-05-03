@@ -30,8 +30,8 @@ jobs:
           sudo apt-get install -y protobuf-compiler
           protoc --version
           pip uninstall protobuf python3-protobuf
-          pip install --upgrade pip
-          pip install --upgrade protobuf
+          pip install --no-input --upgrade pip
+          pip install --no-input --upgrade protobuf
 
       - name: Build package
         run: make build
