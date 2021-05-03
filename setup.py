@@ -27,18 +27,21 @@ setup(
     python_requires=">=3.7",
     install_requires=[
         "opentelemetry-api==1.1.0",
-        "opentelemetry-exporter-zipkin",
-        "opentelemetry-propagator-b3",
         "opentelemetry-exporter-otlp==1.1.0",
-        "opentelemetry-instrumentation-flask",
-        "opentelemetry-instrumentation-grpc",
-        "opentelemetry-instrumentation-mysql",
-        "opentelemetry-instrumentation-psycopg2",
-        "opentelemetry-instrumentation-requests",
-        "opentelemetry-instrumentation-aiohttp_client",
-        "opentelemetry-util-http",
-        "google",
-        "protobuf",
-        "pyyaml"
+        "opentelemetry-exporter-zipkin==1.1.0",
+        "opentelemetry-instrumentation==0.20b0",
+        "opentelemetry-instrumentation-aiohttp-client==0.20b0",
+        "opentelemetry-instrumentation-wsgi==0.20b0",
+        "opentelemetry-instrumentation-flask==0.20b0",
+        "opentelemetry-instrumentation-mysql==0.20b0",
+        "opentelemetry-instrumentation-psycopg2==0.20b0",
+        "opentelemetry-instrumentation-requests==0.20b0",
+        "opentelemetry-instrumentation-grpc==0.20b0",
+        "opentelemetry-propagator-b3==1.1.0",
+        "opentelemetry-sdk==1.1.0",
+        "opentelemetry-util-http==0.20b0",
+        "google==3.0.0",
+        "pyyaml",
+        "protobuf==3.15.8"
     ]
 )
