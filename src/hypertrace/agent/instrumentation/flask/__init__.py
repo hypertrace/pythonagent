@@ -155,4 +155,3 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
     def get_app(self) -> flask.Flask:
         '''Return the flask app object.'''
         return self._app
-    
