@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
 class AgentInit:  # pylint: disable=R0902,R0903
     '''Initialize all the OTel components using configuration from AgentConfig'''
+
     def __init__(self, agent_config: AgentConfig):
         '''constructor'''
         logger.debug('Initializing AgentInit object.')
@@ -40,10 +41,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
 
             if self._config.use_console_span_exporter():
                 self.set_console_span_processor()
-
-            if not self._config.use_console_span_exporter():
-                self.set_zipkin_processor()
-                self.set_otlp_processor()
+            else:
+                self.init_exporter()
 
             self._flask_instrumentor_wrapper = None
             self._grpc_instrumentor_client_wrapper = None
@@ -63,18 +62,28 @@ class AgentInit:  # pylint: disable=R0902,R0903
         '''Initialize trace provider and set resource attributes.'''
         resource_attributes = {
             "service.name": self._config.agent_config.service_name,
-                "service.instance.id": os.getpid(),
-                "telemetry.sdk.version": constants.TELEMETRY_SDK_VERSION,
-                "telemetry.sdk.name": constants.TELEMETRY_SDK_NAME,
-                "telemetry.sdk.language": constants.TELEMETRY_SDK_LANGUAGE
+            "service.instance.id": os.getpid(),
+            "telemetry.sdk.version": constants.TELEMETRY_SDK_VERSION,
+            "telemetry.sdk.name": constants.TELEMETRY_SDK_NAME,
+            "telemetry.sdk.language": constants.TELEMETRY_SDK_LANGUAGE
         }
         if self._config.agent_config.resource_attributes:
-            logger.debug('Custom attributes found. Adding to resource attributes dict.')
-            resource_attributes.update(self._config.agent_config.resource_attributes)
+            logger.debug(
+                'Custom attributes found. Adding to resource attributes dict.')
+            resource_attributes.update(
+                self._config.agent_config.resource_attributes)
         self._tracer_provider = TracerProvider(
             resource=Resource.create(resource_attributes)
         )
         trace.set_tracer_provider(self._tracer_provider)
+
+    def init_exporter(self) -> None:
+        reporter_type = self._config.agent_config.reporting.trace_reporter_type
+        logger.debug("Intializing the reporter type: `%s`", reporter_type)
+        if reporter_type == 'ZIPKIN':
+            self.init_zipkin_exporter()
+        else:
+            self.init_otlp_exporter()
 
     def init_propagation(self) -> None:
         '''Initialize requested context propagation protocols.'''
@@ -266,20 +275,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
             console_span_exporter)
         self._tracer_provider.add_span_processor(simple_export_span_processor)
 
-    def set_zipkin_processor(self) -> None:
+    def init_zipkin_exporter(self) -> None:
         '''configure zipkin span exporter + processor'''
-        if 'HT_TRACES_EXPORTER' in os.environ:
-            if os.environ['HT_TRACES_EXPORTER'] == 'zipkin':
-                logger.debug(
-                    "HT_TRACES_EXPORTER is zipkin, adding exporter.")
-            else:
-                return
-        else:
-            if self._config.agent_config.reporting.trace_reporter_type == 'ZIPKIN':
-                logger.debug("Trace reporter type is zipkin, adding exporter.")
-            else:
-                return
-
         try:
             zipkin_exporter = ZipkinExporter(
                 endpoint=self._config.agent_config.reporting.endpoint
@@ -290,23 +287,12 @@ class AgentInit:  # pylint: disable=R0902,R0903
 
             logger.info('Added ZipkinExporter span exporter')
         except Exception as err:  # pylint: disable=W0703
-            logger.error('Failed to register_processor: exception=%s, stacktrace=%s',
+            logger.error('Failed to register exporter: exception=%s, stacktrace=%s',
                          err,
                          traceback.format_exc())
 
-    def set_otlp_processor(self) -> None:
+    def init_otlp_exporter(self) -> None:
         '''configure otlp span exporter + processor'''
-        if 'HT_TRACES_EXPORTER' in os.environ:
-            if os.environ['HT_TRACES_EXPORTER'] == 'otlp':
-                logger.debug("HT_TRACES_EXPORTER is otlp, adding exporter.")
-            else:
-                return
-        else:
-            if self._config.agent_config.reporting.trace_reporter_type == 'OTLP':
-                logger.debug("Trace reporter type is otlp, adding exporter.")
-            else:
-                return
-
         try:
             otlp_exporter = OTLPSpanExporter(endpoint=self._config.agent_config.reporting.endpoint,
                                              insecure=self._config.agent_config.reporting.secure)
