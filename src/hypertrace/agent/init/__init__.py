@@ -11,6 +11,7 @@ from opentelemetry.exporter.zipkin.proto.http import ZipkinExporter
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.propagators.composite import CompositeHTTPPropagator
 from hypertrace.agent import constants
 from hypertrace.agent.config import config_pb2, AgentConfig
 
