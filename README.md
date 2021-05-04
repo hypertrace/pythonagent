@@ -26,7 +26,7 @@ Currently, this agent does not support auto-instrumentation. That will be availa
 
 - Install the hypertrace python agent:
 ```bash
-pip install git+https://github.com/hypertrace/pythonagent.git@main#egg=hypertrace
+pip install hypertrace-agent
 ```
 - Add the following to your app's entrypoint python file:
 
