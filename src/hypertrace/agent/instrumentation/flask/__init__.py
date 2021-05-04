@@ -66,8 +66,6 @@ def _hypertrace_before_request(flask_wrapper):
     return hypertrace_before_request
 
 # Per request post-handler
-
-
 def _hypertrace_after_request(flask_wrapper) -> flask.wrappers.Response:
     '''This function is invoked by flask to set the handler'''
     def hypertrace_after_request(response):

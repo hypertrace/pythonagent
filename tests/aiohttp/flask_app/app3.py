@@ -45,18 +45,10 @@ logger = setup_custom_logger(__name__)
 
 ENABLE_INSTRUMENTATION = bool(os.getenv('ENABLE_INSTRUMENTATION'))
 
-async def fetch(url, body, headers):
-  async with aiohttp.ClientSession() as session, async_timeout.timeout(10):
-    async with session.post(url, data=body, headers=headers) as response:
-      return await response.text()
-
-@server.route("/route2", methods=['POST'])
+@server.route("/route1", methods=['POST'])
 def testAPI1():
     try:
       logger.info('Serving request for /route2')
-      loop = asyncio.get_event_loop()
-      response = loop.run_until_complete(asyncio.gather(
-        fetch('http://flask_app_d:9000/route1', '{ "a":"a", "b":"b" }', { "Accept":"application/json", "Content-Type": "application/json", 'tester1': 'tester1', 'tester2':'tester2' })))
       response1 = flask.Response(mimetype='application/json')
       response1.data = str('{ "a": "a", "xyz": "xyz" }')
       return response1
@@ -80,29 +72,20 @@ def after_request(response):
     assert span_list
     # Confirm there are three spans
     logger.debug('len(span_list): ' + str(len(span_list)))
-    assert len(span_list) == 2
+    assert len(span_list) == 1
     logger.debug('span_list: ' + str(span_list[0].attributes))
-    logger.debug('span_list: ' + str(span_list[1].attributes))
     # Convert each span to a JSON object
-    flaskSpanAsObject = json.loads(span_list[1].to_json())
-    aiohttpSpanAsObject = json.loads(span_list[0].to_json())
+    flaskSpanAsObject = json.loads(span_list[0].to_json())
     # Dump all attributes for debugging
     for key in flaskSpanAsObject:
       logger.debug(key + ' : ' + str(flaskSpanAsObject[key]))
     # Check that the expected results are in the flask extended span attributes
     assert flaskSpanAsObject['attributes']['http.method'] == 'POST'
-    assert flaskSpanAsObject['attributes']['http.target'] == '/route2';
+    assert flaskSpanAsObject['attributes']['http.target'] == '/route1';
     assert flaskSpanAsObject['attributes']['http.response.header.content-type'] == 'application/json'
     assert flaskSpanAsObject['attributes']['http.response.body'] == '{ "a": "a", "xyz": "xyz" }'
     assert flaskSpanAsObject['attributes']['http.request.header.x-b3-traceid']
     assert flaskSpanAsObject['attributes']['http.status_code'] == 200
-    for key in aiohttpSpanAsObject:
-      logger.debug(key + ' : ' + str(aiohttpSpanAsObject[key]))
-    assert aiohttpSpanAsObject['attributes']['http.method'] == 'POST'
-    assert aiohttpSpanAsObject['attributes']['http.url'] == 'http://flask_app_d:9000/route1';
-    assert aiohttpSpanAsObject['attributes']['http.response.header.content-type'] == 'application/json'
-    assert aiohttpSpanAsObject['attributes']['http.request.header.x-b3-traceid']
-    assert aiohttpSpanAsObject['attributes']['http.status_code'] == 200
     memoryExporter.clear()
     return response
   except:

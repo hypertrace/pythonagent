@@ -57,7 +57,7 @@ def testAPI2():
       logger.info('Serving request for /route2')
       loop = asyncio.get_event_loop()
       response = loop.run_until_complete(asyncio.gather(
-        fetch('https://petstore.swagger.io/v2/pet', '{"id":0,"category":{"id":0,"name":"doggie"},"name":"doggie","photoUrls":["http://example.co"],"tags":[{"id":0,"name":"doggie"}],"status":"available"}', { "Accept":"application/json", "Content-Type": "application/json", 'tester1': 'tester1', 'tester2':'tester2' })))
+        fetch('http://flask_app_d:9000/route2', '{ "a":"a", "b","b" }', { "Accept":"application/json", "Content-Type": "application/json", 'tester1': 'tester1', 'tester2':'tester2' })))
       response1 = flask.Response(mimetype='application/json')
       response1.data = str('{ "a": "a", "xyz": "xyz" }')
       return response1
@@ -118,7 +118,7 @@ def after_request(response):
     for key in aiohttpSpanAsObject:
       logger.debug(key + ' : ' + str(aiohttpSpanAsObject[key]))
     assert aiohttpSpanAsObject['attributes']['http.method'] == 'POST'
-    assert aiohttpSpanAsObject['attributes']['http.url'] == 'https://petstore.swagger.io/v2/pet';
+    assert aiohttpSpanAsObject['attributes']['http.url'] == 'http://flask_app_d:9000/route2';
     assert aiohttpSpanAsObject['attributes']['http.response.header.content-type'] == 'application/json'
     assert aiohttpSpanAsObject['attributes']['http.request.header.traceparent']
     assert aiohttpSpanAsObject['attributes']['http.status_code'] == 200

@@ -57,7 +57,7 @@ async def test_run():
 
   #Make test call
   async with aiohttp.ClientSession() as session:
-    async with session.post('http://localhost:8000/route2', data='{"id":0,"category":{"id":0,"name":"doggie"},"name":"doggie","photoUrls":["http://example.co"],"tags":[{"id":0,"name":"doggie"}],"status":"available"}', headers={ "Accept":"application/json", "Content-Type": "application/json", 'tester1': 'tester1', 'tester2':'tester2' }) as response:
+    async with session.post('http://localhost:8000/route2', data='{ "a":"a", "b":"b" }', headers={ "Accept":"application/json", "Content-Type": "application/json", 'tester1': 'tester1', 'tester2':'tester2' }) as response:
       await response.text()
       span_list = memoryExporter.get_finished_spans()
       # Confirm something was returned.
