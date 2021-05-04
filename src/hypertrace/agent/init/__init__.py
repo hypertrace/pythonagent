@@ -268,17 +268,10 @@ class AgentInit:  # pylint: disable=R0902,R0903
 
     def set_zipkin_processor(self) -> None:
         '''configure zipkin span exporter + processor'''
-        if 'HT_TRACES_EXPORTER' in os.environ:
-            if os.environ['HT_TRACES_EXPORTER'] == 'zipkin':
-                logger.debug(
-                    "HT_TRACES_EXPORTER is zipkin, adding exporter.")
-            else:
-                return
+        if self._config.agent_config.reporting.trace_reporter_type == 'ZIPKIN':
+            logger.debug("Trace reporter type is zipkin, adding exporter.")
         else:
-            if self._config.agent_config.reporting.trace_reporter_type == 'ZIPKIN':
-                logger.debug("Trace reporter type is zipkin, adding exporter.")
-            else:
-                return
+            return
 
         try:
             zipkin_exporter = ZipkinExporter(
@@ -296,16 +289,10 @@ class AgentInit:  # pylint: disable=R0902,R0903
 
     def set_otlp_processor(self) -> None:
         '''configure otlp span exporter + processor'''
-        if 'HT_TRACES_EXPORTER' in os.environ:
-            if os.environ['HT_TRACES_EXPORTER'] == 'otlp':
-                logger.debug("HT_TRACES_EXPORTER is otlp, adding exporter.")
-            else:
-                return
+        if self._config.agent_config.reporting.trace_reporter_type == 'OTLP':
+            logger.debug("Trace reporter type is otlp, adding exporter.")
         else:
-            if self._config.agent_config.reporting.trace_reporter_type == 'OTLP':
-                logger.debug("Trace reporter type is otlp, adding exporter.")
-            else:
-                return
+            return
 
         try:
             otlp_exporter = OTLPSpanExporter(endpoint=self._config.agent_config.reporting.endpoint,
