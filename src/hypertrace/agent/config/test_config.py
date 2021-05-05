@@ -46,10 +46,8 @@ def test_agent_config() -> None:
     '''Unittest functionx for agent config entries.'''
     # set Environment Variable
 
-    unset_env_variables()
+    os.environ["HT_CONFIG_FILE"] = "./src/hypertrace/agent/config/test_agent-config.yaml"
 
-    os.environ["HT_CONFIG_FILE"] = "./src/hypertrace/agent/config/agent-config.yaml"
-    print('Initializing agent.')
     config = AgentConfig()
     assert config.agent_config.service_name == "pythonagent_001"
     assert config.agent_config.reporting.endpoint == "http://localhost:9411/api/v2/spans1"
@@ -120,6 +118,17 @@ def test_env_config() -> None:
     assert config.use_console_span_exporter()
     assert config.agent_config.resource_attributes == {
         'tester01': 'tester01'}
+
+    unset_env_variables()
+
+
+def test_file_values_are_overriden_by_env() -> None:
+    '''Test config is loaded from env.'''
+
+    os.environ["HT_CONFIG_FILE"] = "./src/hypertrace/agent/config/test_agent-config.yaml"
+    os.environ["HT_REPORTING_TRACE_REPORTER_TYPE"] = "OTLP"
+    config = AgentConfig()
+    assert config.agent_config.reporting.trace_reporter_type == 2
 
     unset_env_variables()
 
