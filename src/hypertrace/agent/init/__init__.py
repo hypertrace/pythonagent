@@ -268,7 +268,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
 
     def set_zipkin_processor(self) -> None:
         '''configure zipkin span exporter + processor'''
-        if self._config.agent_config.reporting.trace_reporter_type == config_pb2.TraceReporterType.ZIPKIN:
+        if self._config.agent_config.reporting.trace_reporter_type i\
+          == config_pb2.TraceReporterType.ZIPKIN:
             logger.debug("Trace reporter type is zipkin, adding exporter.")
         else:
             return
@@ -289,7 +290,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
 
     def set_otlp_processor(self) -> None:
         '''configure otlp span exporter + processor'''
-        if self._config.agent_config.reporting.trace_reporter_type == config_pb2.TraceReporterType.ZIPKIN:
+        if self._config.agent_config.reporting.trace_reporter_type \
+          == config_pb2.TraceReporterType.ZIPKIN:
             logger.debug("Trace reporter type is otlp, adding exporter.")
         else:
             return
