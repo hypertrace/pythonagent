@@ -7,7 +7,7 @@ services:
       context: ../..
       dockerfile: tests/docker/Dockerfile
     environment:
-      HT_REPORTING_TRACE_REPORTER_TYPE: zipkin
+      HT_REPORTING_TRACE_REPORTER_TYPE: ZIPKIN
       HT_REPORTING_ENDPOINT: http://collector:9411/api/v2/spans
       HT_LOG_LEVEL: DEBUG
       HT_ENABLE_CONSOLE_SPAN_EXPORTER: "True"
