@@ -83,14 +83,15 @@ class AgentInit:  # pylint: disable=R0902,R0903
         for prop_format in self._config.agent_config.propagation_formats:
             if prop_format == config_pb2.PropagationFormat.TRACECONTEXT:
                 # TRACECONTEXT is the default context propagation
-                propagator_list += get_global_textmap()._propagators
+                from opentelemetry.propagate import get_global_textmap # pylint: disable=C0415
+                propagator_list += get_global_textmap()._propagators # pylint: disable=W0212
                 logger.debug('Adding TRACECONTEXT trace propagator to list.')
             if prop_format == config_pb2.PropagationFormat.B3:
                 from opentelemetry.propagate import set_global_textmap, get_global_textmap # pylint: disable=C0415
                 from opentelemetry.propagators.b3 import B3Format  # pylint: disable=C0415
                 propagator_list += [ B3Format() ]
                 logger.debug('Adding B3 trace propagator to list.')
-        logger.debug('propagator_list: ' + str(propagator_list))
+        logger.debug('propagator_list: %s', str(propagator_list))
         composite_propagators = CompositeHTTPPropagator(propagator_list)
         set_global_textmap(composite_propagators)
 
