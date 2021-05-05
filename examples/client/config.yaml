@@ -1,3 +1,6 @@
 service_name: "client"
 propagation_formats:
   - "B3"
+reporting:
+  endpoint: http://localhost:9411/api/v2/spans
+  trace_reporter_type: ZIPKIN

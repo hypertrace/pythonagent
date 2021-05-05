@@ -78,12 +78,14 @@ class AgentInit:  # pylint: disable=R0902,R0903
         trace.set_tracer_provider(self._tracer_provider)
 
     def init_exporter(self) -> None:
+        """Initialize exporter"""
         reporter_type = self._config.agent_config.reporting.trace_reporter_type
-        logger.debug("Intializing the reporter type: `%s`", reporter_type)
-        if reporter_type == 'ZIPKIN':
-            self.init_zipkin_exporter()
+        if reporter_type == config_pb2.TraceReporterType.ZIPKIN:
+            self._init_zipkin_exporter()
+        elif reporter_type == config_pb2.TraceReporterType.OTLP:
+            self._init_otlp_exporter()
         else:
-            self.init_otlp_exporter()
+            logger.error("Unknown exporter type `%s`", reporter_type)
 
     def init_propagation(self) -> None:
         '''Initialize requested context propagation protocols.'''
@@ -275,8 +277,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
             console_span_exporter)
         self._tracer_provider.add_span_processor(simple_export_span_processor)
 
-    def init_zipkin_exporter(self) -> None:
-        '''configure zipkin span exporter + processor'''
+    def _init_zipkin_exporter(self) -> None:
+        '''Initialize Zipkin exporter'''
         try:
             zipkin_exporter = ZipkinExporter(
                 endpoint=self._config.agent_config.reporting.endpoint
@@ -285,21 +287,21 @@ class AgentInit:  # pylint: disable=R0902,R0903
             span_processor = BatchSpanProcessor(zipkin_exporter)
             self._tracer_provider.add_span_processor(span_processor)
 
-            logger.info('Added ZipkinExporter span exporter')
+            logger.info('Initialized Zipkin exporter')
         except Exception as err:  # pylint: disable=W0703
             logger.error('Failed to register exporter: exception=%s, stacktrace=%s',
                          err,
                          traceback.format_exc())
 
-    def init_otlp_exporter(self) -> None:
-        '''configure otlp span exporter + processor'''
+    def _init_otlp_exporter(self) -> None:
+        '''Initialize OTLP exporter'''
         try:
             otlp_exporter = OTLPSpanExporter(endpoint=self._config.agent_config.reporting.endpoint,
                                              insecure=self._config.agent_config.reporting.secure)
             span_processor = BatchSpanProcessor(otlp_exporter)
             self._tracer_provider.add_span_processor(span_processor)
 
-            logger.info('Added OtlpExporter span exporter')
+            logger.info('Initialized Zipkin exporter')
         except Exception as err:  # pylint: disable=W0703
             logger.error('Failed to register_processor: exception=%s, stacktrace=%s',
                          err,

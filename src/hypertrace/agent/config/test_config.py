@@ -6,6 +6,7 @@ from . import merge_config
 from . import load_config_from_file
 from . import config_pb2
 
+
 def test_merge_config() -> None:
     '''Unittest for merging config results.'''
     # set Environment Variable
@@ -40,6 +41,7 @@ def test_merge_config() -> None:
     }
     unset_env_variables()
 
+
 def test_agent_config() -> None:
     '''Unittest functionx for agent config entries.'''
     # set Environment Variable
@@ -72,11 +74,12 @@ def test_agent_config() -> None:
         'tester01': 'tester01'}
     unset_env_variables()
 
+
 def test_env_config() -> None:
-    '''Unittest functionx for env config entries.'''
+    '''Test config is loaded from env.'''
     os.environ["HT_SERVICE_NAME"] = "pythonagent_002"
     os.environ["HT_REPORTING_ENDPOINT"] = "http://localhost:9411/api/v2/spans2"
-    os.environ["HT_TRACES_EXPORTER"] = "OTLP"
+    os.environ["HT_REPORTING_TRACE_REPORTER_TYPE"] = "OTLP"
     os.environ["HT_REPORTING_SECURE"] = "True"
     os.environ["HT_REPORTING_TOKEN"] = ""
     os.environ["HT_REPORTING_OPA_ENDPOINT"] = "https://opa.traceableai:8181/"
@@ -117,7 +120,9 @@ def test_env_config() -> None:
     assert config.use_console_span_exporter()
     assert config.agent_config.resource_attributes == {
         'tester01': 'tester01'}
+
     unset_env_variables()
+
 
 def unset_env_variables():
     """Reset environment variables."""
