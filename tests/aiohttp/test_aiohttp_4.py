@@ -13,7 +13,7 @@ from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanE
 from opentelemetry.sdk.trace.export import BatchSpanProcessor, SimpleSpanProcessor
 from hypertrace.agent import Agent
 
-os.environ['HT_PROPAGATION_FORMATS'] = 'B3'
+os.environ['HT_PROPAGATION_FORMATS'] = 'B3,TRACECONTEXT'
 
 def setup_custom_logger(name):
   try:
@@ -74,6 +74,7 @@ async def test_run():
       assert aiohttpSpanAsObject['attributes']['http.request.header.tester2'] == 'tester2'
       assert aiohttpSpanAsObject['attributes']['http.response.header.content-type'] == 'application/json'
       assert aiohttpSpanAsObject['attributes']['http.request.header.x-b3-traceid']
+      assert aiohttpSpanAsObject['attributes']['http.request.header.traceparent']
       assert aiohttpSpanAsObject['attributes']['http.status_code'] == 200
       assert aiohttpSpanAsObject['attributes']['http.response.body'] == '{ "a": "a", "xyz": "xyz" }'
 
