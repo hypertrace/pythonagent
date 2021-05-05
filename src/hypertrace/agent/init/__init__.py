@@ -287,9 +287,11 @@ class AgentInit:  # pylint: disable=R0902,R0903
             span_processor = BatchSpanProcessor(zipkin_exporter)
             self._tracer_provider.add_span_processor(span_processor)
 
-            logger.info('Initialized Zipkin exporter')
+            logger.info(
+                'Initialized Zipkin exporter reporting to `%s`',
+                self._config.agent_config.reporting.endpoint)
         except Exception as err:  # pylint: disable=W0703
-            logger.error('Failed to register exporter: exception=%s, stacktrace=%s',
+            logger.error('Failed to initialize Zipkin exporter: exception=%s, stacktrace=%s',
                          err,
                          traceback.format_exc())
 
@@ -301,8 +303,9 @@ class AgentInit:  # pylint: disable=R0902,R0903
             span_processor = BatchSpanProcessor(otlp_exporter)
             self._tracer_provider.add_span_processor(span_processor)
 
-            logger.info('Initialized Zipkin exporter')
+            logger.info('Initialized OTLP exporter reporting to `%s`',
+                        self._config.agent_config.reporting.endpoint)
         except Exception as err:  # pylint: disable=W0703
-            logger.error('Failed to register_processor: exception=%s, stacktrace=%s',
+            logger.error('Failed to initialize OTLP exporter: exception=%s, stacktrace=%s',
                          err,
                          traceback.format_exc())
