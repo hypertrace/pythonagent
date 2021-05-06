@@ -1,8 +1,8 @@
 version: '3'
 
 services:
-  flask_app_a:
-    container_name: flask_app_a
+  requests_flask_app_a:
+    container_name: requests_flask_app_a
     build:
       context: ../..
       dockerfile: tests/requests/flask_app/Dockerfile
@@ -12,9 +12,20 @@ services:
     ports:
       - "8000:8000"
     command: gunicorn -w 1 -b 0.0.0.0:8000 wsgi1:server
+  requests_flask_app_b:
+    container_name: requests_flask_app_b
+    build:
+      context: ../..
+      dockerfile: tests/requests/flask_app/Dockerfile
+    environment:
+      ENABLE_INSTRUMENTATION: ${ENABLE_INSTRUMENTATION}
+      HT_ENABLE_CONSOLE_SPAN_EXPORTER: "True"
+    ports:
+      - "8000:8000"
+    command: gunicorn -w 1 -b 0.0.0.0:8000 wsgi2:server
 
-  flask_app_z:
-    container_name: flask_app_z
+  requests_flask_app_z:
+    container_name: requests_flask_app_z
     build:
       context: ../..
       dockerfile: tests/requests/flask_app/Dockerfile
@@ -25,4 +36,3 @@ services:
     ports:
       - "8000:8000"
     command: gunicorn -w 1 -b 0.0.0.0:8000 wsgi1:server
-

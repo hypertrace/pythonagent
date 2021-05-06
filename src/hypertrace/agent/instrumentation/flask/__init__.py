@@ -18,6 +18,8 @@ from hypertrace.agent.instrumentation import BaseInstrumentorWrapper
 # Initialize logger
 logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
+
+
 # Dump metadata about an object; useful for initial discovery of interestin ginfo
 
 
@@ -53,7 +55,8 @@ def _hypertrace_before_request(flask_wrapper):
             request_body = flask.request.data       # same
             logger.debug('span: %s', str(span))
             logger.debug('Request headers: %s', str(request_headers))
-            logger.debug('Request body: %s', str(request_body))
+            span.update_name(str(flask.request.method) + ' ' + str(flask.request.url_rule))
+
             # Call base request handler
             flask_wrapper.generic_request_handler(
                 request_headers, request_body, span)
@@ -97,6 +100,9 @@ def _hypertrace_after_request(flask_wrapper) -> flask.wrappers.Response:
 
     return hypertrace_after_request
 
+
+
+
 # Main Flask Instrumentor Wrapper class.
 class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
     '''Hypertrace wrapper around OTel Flask instrumentor class'''
@@ -106,13 +112,18 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
         super().__init__()
         self._app = None
 
+
+
+
     # Initialize instrumentation wrapper
     def instrument_app(self, app, name_callback=get_default_span_name) -> None:
         '''Initialize instrumentation'''
         logger.debug('Entering FlaskInstrumentorWrapper.instument_app().')
         try:
+
             # Call parent class's initialization
             super().instrument_app(app, name_callback)
+
             self._app = app
             # Set pre-request handler
             app.before_request(_hypertrace_before_request(self))
