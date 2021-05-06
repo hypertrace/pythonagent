@@ -102,6 +102,10 @@ class AgentInit:  # pylint: disable=R0902,R0903
                 from opentelemetry.propagators.b3 import B3Format  # pylint: disable=C0415
                 propagator_list += [ B3Format() ]
                 logger.debug('Adding B3 trace propagator to list.')
+
+        if len(propagator_list) == 0:
+            logger.debug('No propagators have been initialized.')
+
         logger.debug('propagator_list: %s', str(propagator_list))
         from opentelemetry.propagate import set_global_textmap # pylint: disable=C0415
         from opentelemetry.propagators.composite import CompositeHTTPPropagator # pylint: disable=C0415

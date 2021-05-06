@@ -8,6 +8,7 @@ opentelemetry-instrumentation-grpc
 opentelemetry-instrumentation-requests
 opentelemetry-instrumentation-wsgi
 opentelemetry-util-http
+opentelemetry-propagator-b3==1.1.0
 google
 protobuf
 pyyaml

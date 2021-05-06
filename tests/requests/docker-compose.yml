@@ -12,6 +12,7 @@ services:
     ports:
       - "8000:8000"
     command: gunicorn -w 1 -b 0.0.0.0:8000 wsgi1:server
+
   requests_flask_app_b:
     container_name: requests_flask_app_b
     build:
@@ -21,7 +22,7 @@ services:
       ENABLE_INSTRUMENTATION: ${ENABLE_INSTRUMENTATION}
       HT_ENABLE_CONSOLE_SPAN_EXPORTER: "True"
     ports:
-      - "8000:8000"
+      - "8001:8000"
     command: gunicorn -w 1 -b 0.0.0.0:8000 wsgi2:server
 
   requests_flask_app_z:
@@ -34,5 +35,5 @@ services:
       HT_ENABLE_CONSOLE_SPAN_EXPORTER: "True"
       HT_PROPAGATION_FORMATS: B3
     ports:
-      - "8000:8000"
+      - "8002:8000"
     command: gunicorn -w 1 -b 0.0.0.0:8000 wsgi1:server
