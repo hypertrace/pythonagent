@@ -52,5 +52,5 @@ def test_run():
   logger.info('Added in-memoy span exporter')
 
   #Make test call
-  response = requests.get(url="https://www.google.org/")
+  response = requests.get(url='http://localhost:8000/route2')
   logger.info('response: ' + str(response))

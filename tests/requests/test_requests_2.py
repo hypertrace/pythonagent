@@ -124,6 +124,10 @@ def test_run():
       assert flaskSpanAsObject['attributes']['http.status_code'] == 200
       assert flaskSpanAsObject['attributes']['http.response.header.tester3'] == 'tester3'
       logger.info('requestsSpanAsObject: ' + json.dumps(requestsSpanAsObject))
+      assert requestsSpanAsObject['attributes']['http.request.header.traceparent']
+      assert requestsSpanAsObject['attributes']['http.method'] == 'GET'
+      assert requestsSpanAsObject['attributes']['http.url'] == 'http://localhost:8000/route2'
+      assert requestsSpanAsObject['attributes']['http.status_code'] == 200
       memoryExporter.clear()
       logger.info('Reading /route1 response.')
       a1 = r1.get_json()['a']
