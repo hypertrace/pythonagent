@@ -25,6 +25,4 @@ data_capture:
 propagation_formats: ["B3"]
 _use_console_span_exporter: true
 enabled: false
-resource_attributes: {
-  'tester01': 'tester01'
-}
+resource_attributes: { "tester01": "tester01" }

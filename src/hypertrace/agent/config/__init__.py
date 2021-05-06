@@ -33,9 +33,9 @@ def merge_config(base_config, overriding_config):
         else:
             if key == 'propagation_formats':
                 logger.debug('Merging propagation_formats values.')
-                logger.debug('base_config[key]=%s', str(base_config[key]))
                 if hasattr(base_config, key):
-                    base_config[key] = set(base_config[key].extend(overriding_config[key]))
+                    base_config[key] = set(
+                        base_config[key].extend(overriding_config[key]))
                 else:
                     base_config[key] = overriding_config[key]
             else:
@@ -111,9 +111,11 @@ class AgentConfig:  # pylint: disable=R0902,R0903
             logger.debug("[env] Loaded HT_REPORTING_ENDPOINT from env")
             self.config['reporting']['endpoint'] = os.environ['HT_REPORTING_ENDPOINT']
 
-        if 'HT_TRACES_EXPORTER' in os.environ:
-            logger.debug("[env] Loaded HT_TRACES_EXPORTER from env")
-            self.config['reporting']['trace_reporter_type'] = os.environ['HT_TRACES_EXPORTER']
+        if 'HT_REPORTING_TRACE_REPORTER_TYPE' in os.environ:
+            logger.info(
+                "[env] Loaded HT_REPORTING_TRACE_REPORTER_TYPE from env")
+            self.config['reporting']['trace_reporter_type'] = \
+                os.environ['HT_REPORTING_TRACE_REPORTER_TYPE']
 
         if 'HT_REPORTING_SECURE' in os.environ:
             logger.debug("[env] Loaded HT_REPORTING_SECURE from env")
@@ -241,7 +243,7 @@ class AgentConfig:  # pylint: disable=R0902,R0903
             reporting.trace_reporter_type = config_pb2.TraceReporterType.ZIPKIN
         else:
             # Default to ZIPKIN
-            reporting.trace_reporter_type = config_pb2.TraceReporterType.ZIPKIN
+            reporting.trace_reporter_type = config_pb2.TraceReporterType.OTLP
 
         # Create DataCapture Message components
         rpc_body = config_pb2.Message(request=BoolValue(
@@ -278,14 +280,16 @@ class AgentConfig:  # pylint: disable=R0902,R0903
         self.agent_config.data_capture = data_capture
         tmp_propagation_formats = []
         if 'TRACECONTEXT' in self.config['propagation_formats']:
-            tmp_propagation_formats.append(config_pb2.PropagationFormat.TRACECONTEXT)
+            tmp_propagation_formats.append(
+                config_pb2.PropagationFormat.TRACECONTEXT)
             tmp_propagation_formats = list(set(tmp_propagation_formats))
         if 'B3' in self.config['propagation_formats']:
             tmp_propagation_formats.append(config_pb2.PropagationFormat.B3)
             tmp_propagation_formats = list(set(tmp_propagation_formats))
         if not tmp_propagation_formats:
             # Default to TRACECONTEXT
-            tmp_propagation_formats.append(config_pb2.PropagationFormat.TRACECONTEXT)
+            tmp_propagation_formats.append(
+                config_pb2.PropagationFormat.TRACECONTEXT)
         self.agent_config.propagation_formats = tmp_propagation_formats
         self.agent_config.enabled = self.config['enabled']
 
@@ -298,17 +302,14 @@ class AgentConfig:  # pylint: disable=R0902,R0903
         """Validate that all present elements in the parse configuration are
         defined in the config_pb2.AgentConfig"""
         # Check for configuration entries that do not belong
-        logger.debug('Entering AgentConfig.validate_config_elements().')
         for key in config_element:
-            logger.debug('Checking: %s', key)
-            logger.debug('type: %s', str(type(config_element[key])))
+            logger.debug('Checking key=%s, type=%s', key,
+                         str(type(config_element[key])))
             if isinstance(config_element[key], dict):
-                logger.debug('Found dictioanry. Recursing into it.')
                 try:
                     if not hasattr(agent_config_base, key):
                         logger.error(
                             'Unknown attribute encountered. key=%s', key)
-                        raise AttributeError
                     logger.debug('config_element=%s, agent_config_base=%s',
                                  str(config_element),
                                  str(agent_config_base))
@@ -323,14 +324,13 @@ class AgentConfig:  # pylint: disable=R0902,R0903
                                  traceback.format_exc())
                     continue
             elif isinstance(config_element[key], (str, bool, int, list)):
-                logger.debug('is string')
                 if key in PYTHON_SPECIFIC_ATTRIBUTES:
                     logger.debug(
                         'Found pythonagent-specific attribute, attr=%s', key)
                     continue
                 try:
                     if hasattr(agent_config_base, key):
-#                      and key != 'propagation_formats':
+                        #                      and key != 'propagation_formats':
                         logger.debug('Is valid: %s', key)
                     else:
                         logger.debug('Not valid: %s', key)

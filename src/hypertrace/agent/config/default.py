@@ -5,9 +5,9 @@ DEFAULT_AGENT_CONFIG = {
     'propagation_formats': ['TRACECONTEXT'],
     'service_name': 'pythonagent',
     'reporting': {
-        'endpoint': 'http://localhost:9411/api/v2/spans',
+        'endpoint': 'localhost:4317',
         'secure': False,
-        'trace_reporter_type': 'ZIPKIN',
+        'trace_reporter_type': 'OTLP',
         'token': '',
         'opa': {
             'endpoint': 'http://opa.traceableai:8181/',
