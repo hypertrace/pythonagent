@@ -35,9 +35,11 @@ class AgentInit:  # pylint: disable=R0902,R0903
             "aiohttp_client": False
         }
 
+        self.init_trace_provider()
+
         try:
-            self._tracer_provider = None
             self.init_trace_provider()
+            self.init_propagation()
 
             if self._config.use_console_span_exporter():
                 self.set_console_span_processor()
@@ -113,7 +115,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             logger.debug('%s : %s', mod, str(self._modules_initialized[mod]))
 
     # Creates a flask wrapper using the config defined in hypertraceconfig
-    def flask_init(self, app) -> None:
+    def init_instrumentation_flask(self, app) -> None:
         '''Creates a flask instrumentation wrapper using the config defined in hypertraceconfig'''
         logger.debug('Calling AgentInit.flaskInit().')
         try:
@@ -123,7 +125,6 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self._flask_instrumentor_wrapper.instrument_app(app)
             self.init_instrumentor_wrapper_base_for_http(
                 self._flask_instrumentor_wrapper)
-            self.init_propagation()
         except Exception as err:  # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
                          'flask',
@@ -232,7 +233,6 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self._requests_instrumentor_wrapper = RequestsInstrumentorWrapper()
             self.init_instrumentor_wrapper_base_for_http(
                 self._requests_instrumentor_wrapper)
-            self.init_propagation()
         except Exception as err:  # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
                          'requests',
@@ -251,7 +251,6 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self._aiohttp_client_instrumentor_wrapper = AioHttpClientInstrumentorWrapper()
             self.init_instrumentor_wrapper_base_for_http(
                 self._aiohttp_client_instrumentor_wrapper)
-            self.init_propagation()
         except Exception as err:  # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
                          'aiohttp_client',

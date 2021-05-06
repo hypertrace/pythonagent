@@ -10,6 +10,8 @@ from google.protobuf import json_format as jf
 from google.protobuf.wrappers_pb2 import BoolValue
 from hypertrace.agent.config import config_pb2
 from hypertrace.agent.config.default import *
+from .file import load_config_from_file
+from .environment import load_config_from_env
 
 # Configuration attributes specific to pythonagent
 PYTHON_SPECIFIC_ATTRIBUTES: list = [
@@ -41,30 +43,6 @@ def merge_config(base_config, overriding_config):
             else:
                 base_config[key] = overriding_config[key]
     return base_config
-
-
-def load_config_from_file(filepath):
-    """
-    Returns the config loaded from a provided config file
-    """
-    logger.debug(
-        'HT_CONFIG_FILE is set %s. Attempting to load the config file', filepath)
-    try:
-        path = os.path.abspath(filepath)
-
-        file = open(path, 'r')
-        from_file_config = yaml.load(file, Loader=yaml.FullLoader)
-        file.close()
-
-        logger.debug('Successfully load config from %s', path)
-
-        return from_file_config
-    except Exception as err:  # pylint: disable=W0703
-        logger.error('Failed to load HT_CONFIG_FILE: exception=%s, stacktrace=%s',
-                     err,
-                     traceback.format_exc())
-        logger.info('Loading default configuration.')
-        return DEFAULT_AGENT_CONFIG
 
 # Read agent-config file and override with environment variables as necessaary
 
@@ -98,127 +76,7 @@ class AgentConfig:  # pylint: disable=R0902,R0903
             logger.info('Loading default configuration.')
             self.config = DEFAULT_AGENT_CONFIG
 
-        if "reporting" not in self.config:
-            self.config['reporting'] = {}
-            self.config['reporting']['opa'] = {}
-        # Use variables from environment:
-        if 'HT_SERVICE_NAME' in os.environ:
-            logger.debug("[env] Loaded HT_SERVICE_NAME from env")
-            # set local variable
-            self.config['service_name'] = os.environ['HT_SERVICE_NAME']
-
-        if 'HT_REPORTING_ENDPOINT' in os.environ:
-            logger.debug("[env] Loaded HT_REPORTING_ENDPOINT from env")
-            self.config['reporting']['endpoint'] = os.environ['HT_REPORTING_ENDPOINT']
-
-        if 'HT_REPORTING_TRACE_REPORTER_TYPE' in os.environ:
-            logger.info(
-                "[env] Loaded HT_REPORTING_TRACE_REPORTER_TYPE from env")
-            self.config['reporting']['trace_reporter_type'] = \
-                os.environ['HT_REPORTING_TRACE_REPORTER_TYPE']
-
-        if 'HT_REPORTING_SECURE' in os.environ:
-            logger.debug("[env] Loaded HT_REPORTING_SECURE from env")
-            self.config['reporting']['secure'] = os.environ['HT_REPORTING_SECURE'].lower(
-            ) == 'true'
-
-        if 'HT_REPORTING_TOKEN' in os.environ:
-            logger.debug("[env] Loaded HT_REPORTING_TOKEN from env")
-            self.config['reporting']['token'] = os.environ['HT_REPORTING_TOKEN']
-
-        if 'HT_REPORTING_OPA_ENDPOINT' in os.environ:
-            logger.debug("[env] Loaded HT_REPORTING_OPA_ENDPOINT from env")
-            self.config['reporting']['opa']['endpoint'] = os.environ['HT_REPORTING_OPA_ENDPOINT']
-
-        if 'HT_REPORTING_OPA_POLL_PERIOD_SECONDS' in os.environ:
-            logger.debug(
-                "[env] Loaded HT_REPORTING_OPA_POLL_PERIOD_SECONDS from env")
-            self.config['reporting']['opa']['poll_period_seconds'] \
-                = int(os.environ['HT_REPORTING_OPA_POLL_PERIOD_SECONDS'])
-
-        if 'HT_REPORTING_OPA_ENABLED' in os.environ:
-            logger.debug("[env] Loaded HT_REPORTING_OPA_ENABLED from env")
-            self.config['reporting']['opa']['enabled'] \
-                = os.environ['HT_REPORTING_OPA_ENABLED'].lower() \
-                == 'true'
-
-        if 'HT_DATA_CAPTURE_HTTP_HEADERS_REQUEST' in os.environ:
-            logger.debug(
-                "[env] Loaded HT_DATA_CAPTURE_HTTP_HEADERS_REQUEST from env")
-            self.config['data_capture']['http_headers']['request'] \
-                = os.environ['HT_DATA_CAPTURE_HTTP_HEADERS_REQUEST'].lower() \
-                == 'true'
-
-        if 'HT_DATA_CAPTURE_HTTP_HEADERS_RESPONSE' in os.environ:
-            logger.debug(
-                "[env] Loaded HT_DATA_CAPTURE_HTTP_HEADERS_RESPONSE from env")
-            self.config['data_capture']['http_headers']['response'] \
-                = os.environ['HT_DATA_CAPTURE_HTTP_HEADERS_RESPONSE'].lower() \
-                == 'true'
-
-        if 'HT_DATA_CAPTURE_HTTP_BODY_REQUEST' in os.environ:
-            logger.debug(
-                "[env] Loaded HT_DATA_CAPTURE_HTTP_BODY_REQUEST from env")
-            self.config['data_capture']['http_body']['request'] \
-                = os.environ['HT_DATA_CAPTURE_HTTP_BODY_REQUEST'].lower() \
-                == 'true'
-
-        if 'HT_DATA_CAPTURE_HTTP_BODY_RESPONSE' in os.environ:
-            logger.debug(
-                "[env] Loaded HT_DATA_CAPTURE_HTTP_BODY_RESPONSE from env")
-            self.config['data_capture']['http_body']['response'] \
-                = os.environ['HT_DATA_CAPTURE_HTTP_BODY_RESPONSE'].lower() \
-                == 'true'
-
-        if 'HT_DATA_CAPTURE_RPC_METADATA_REQUEST' in os.environ:
-            logger.debug(
-                "[env] Loaded HT_DATA_CAPTURE_RPC_METADATA_REQUEST from env")
-            self.config['data_capture']['rpc_metadata']['request'] \
-                = os.environ['HT_DATA_CAPTURE_RPC_METADATA_REQUEST'].lower() \
-                == 'true'
-
-        if 'HT_DATA_CAPTURE_RPC_METADATA_RESPONSE' in os.environ:
-            logger.debug(
-                "[env] Loaded HT_DATA_CAPTURE_RPC_METADATA_RESPONSE from env")
-            self.config['data_capture']['rpc_metadata']['response'] \
-                = os.environ['HT_DATA_CAPTURE_RPC_METADATA_RESPONSE'].lower() \
-                == 'true'
-
-        if 'HT_DATA_CAPTURE_RPC_BODY_REQUEST' in os.environ:
-            logger.debug(
-                "[env] Loaded HT_DATA_CAPTURE_RPC_BODY_REQUEST from env")
-            self.config['data_capture']['rpc_body']['request'] \
-                = os.environ['HT_DATA_CAPTURE_RPC_BODY_REQUEST'].lower() \
-                == 'true'
-
-        if 'HT_DATA_CAPTURE_RPC_BODY_RESPONSE' in os.environ:
-            logger.debug(
-                "[env] Loaded HT_DATA_CAPTURE_RPC_BODY_RESPONSE from env")
-            self.config['data_capture']['rpc_body']['response'] \
-                = os.environ['HT_DATA_CAPTURE_RPC_BODY_RESPONSE'].lower() \
-                == 'true'
-
-        if 'HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES' in os.environ:
-            logger.debug(
-                "[env] Loaded HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES from env")
-            self.config['data_capture']['body_max_size_bytes'] \
-                = int(os.environ['HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES'])
-
-        # Valid values are 'TRACECONTEXT' and/or 'B3'
-        if 'HT_PROPAGATION_FORMATS' in os.environ and len(os.environ['HT_PROPAGATION_FORMATS']) > 0:
-            logger.debug("[env] Loaded HT_PROPAGATION_FORMATS from env")
-            self.config['propagation_formats'] = os.environ['HT_PROPAGATION_FORMATS'].split(
-                ',')
-
-        if 'HT_ENABLED' in os.environ:
-            logger.debug("[env] Loaded HT_ENABLED from env")
-            self.config['enabled'] = os.environ['HT_ENABLED'].lower() == 'true'
-
-        if 'HT_ENABLE_CONSOLE_SPAN_EXPORTER' in os.environ:
-            logger.debug("[env] Loaded HT_ENABLE_CONSOLE_SPAN_EXPORTER from env, %s",
-                         str(os.environ['HT_ENABLE_CONSOLE_SPAN_EXPORTER'].lower()))
-            self.config['_use_console_span_exporter'] = \
-                os.environ['HT_ENABLE_CONSOLE_SPAN_EXPORTER'].lower() == 'true'
+        self.config = merge_config(self.config, load_config_from_env())
 
         # Create Protobuf AgentConfig object
         #
