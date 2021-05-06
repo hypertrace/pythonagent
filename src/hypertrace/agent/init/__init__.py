@@ -81,7 +81,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
         propagator_list = []
         for prop_format in self._config.agent_config.propagation_formats:
             if prop_format == config_pb2.PropagationFormat.TRACECONTEXT:
-                from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator # pylint: disable=C0415
+                from opentelemetry.trace.propagation.tracecontext \
+                  import TraceContextTextMapPropagator # pylint: disable=C0415
                 propagator_list += [ TraceContextTextMapPropagator() ]
                 logger.debug('Adding TRACECONTEXT trace propagator to list.')
             if prop_format == config_pb2.PropagationFormat.B3:
