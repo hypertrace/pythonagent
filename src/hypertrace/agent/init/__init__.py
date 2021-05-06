@@ -35,7 +35,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             "aiohttp_client": False
         }
 
-        self.init_trace_provider()
+        self._tracer_provider = None
 
         try:
             self.init_trace_provider()
