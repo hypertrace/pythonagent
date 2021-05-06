@@ -1,11 +1,10 @@
 service_name: pythonagent_001
 reporting:
-  endpoint: http://localhost:9411/api/v2/spans1
+  endpoint: http://localhost:9411/api/v2/spans
   secure: true
   trace_reporter_type: ZIPKIN
   token: "TestToken"
   opa:
-    endpoint: "https://opa.traceableai:8181/"
     poll_period_seconds: 50
     enabled: true
 data_capture:
