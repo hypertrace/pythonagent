@@ -33,7 +33,8 @@ class BaseInstrumentorWrapper:
         self._process_request_body = False
         self._process_response_body = False
         self._service_name = 'hypertrace-python-agent'
-        self._max_body_size = 128 * 1024
+        if 'HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES' in os.environ and os.environ["HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES"]:
+            self._max_body_size = int(os.environ["HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES"])
 
     # Dump object for troubleshooting purposes
     def introspect(self, obj) -> None:
@@ -367,6 +368,28 @@ class BaseInstrumentorWrapper:
         if body in (None, ''):
             return ''
         if self.check_body_size(body): # pylint: disable=R1705
-            return body[0, self.get_max_body_size()]
+            return self.valid_body(body, self.get_max_body_size())
         else:
             return body
+
+    # Return valid json body
+    def valid_body(self, body: str, index: int) -> str:
+        body = body[0:index]
+        index = index - 1
+        if not self.is_json(body):
+            body = body + ',"hypertrace": "truncated"}'
+            if self.is_json(body):
+                return body
+            if index == 0:
+                return '{"hypertrace": "truncated"}'
+            return self.valid_body(body, index)
+        else:
+            return body
+
+    # Check if string is valid Json
+    def is_json(self, body: str) -> bool:
+        try:
+            json.loads(body)
+        except ValueError as e:
+            return False
+        return True
