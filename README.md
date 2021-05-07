@@ -36,7 +36,7 @@ from hypertrace.agent import Agent
 ...
 
 agent = Agent() # initialize the agent
-agent.registerFlaskApp(app) # instrument a flask application
+agent.register_flask_app(app) # instrument a flask application
 agent.registerMySQL() # instrument the MySQL client
 ...
 ```
