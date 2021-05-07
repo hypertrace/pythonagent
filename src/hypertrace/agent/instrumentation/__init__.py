@@ -10,7 +10,18 @@ from opentelemetry.trace.span import Span
 # Setup logger name
 logger = logging.getLogger(__name__) # pylint: disable=C0103
 
+
+def is_json(body: str) -> bool:
+    """Checks if body is valid json"""
+    try:
+        json.loads(body)
+    except ValueError:
+        return False
+    return True
+
+
 # This is a base class for all Hypertrace Instrumentation wrapper classes
+# pylint: disable=R0904
 class BaseInstrumentorWrapper:
     '''This is a base class for all Hypertrace Instrumentation wrapper classes'''
     # Standard extended span attribute names / prefixes
@@ -33,8 +44,11 @@ class BaseInstrumentorWrapper:
         self._process_request_body = False
         self._process_response_body = False
         self._service_name = 'hypertrace-python-agent'
-        if 'HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES' in os.environ and os.environ["HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES"]:
+        if 'HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES' in os.environ \
+                and os.environ["HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES"]:
             self._max_body_size = int(os.environ["HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES"])
+        else:
+            self._max_body_size = 128 * 1024
 
     # Dump object for troubleshooting purposes
     def introspect(self, obj) -> None:
@@ -374,22 +388,14 @@ class BaseInstrumentorWrapper:
 
     # Return valid json body
     def valid_body(self, body: str, index: int) -> str:
+        """Returns the valid Json body"""
         body = body[0:index]
         index = index - 1
-        if not self.is_json(body):
+        if not is_json(body):
             body = body + ',"hypertrace": "truncated"}'
-            if self.is_json(body):
+            if is_json(body):
                 return body
             if index == 0:
                 return '{"hypertrace": "truncated"}'
             return self.valid_body(body, index)
-        else:
-            return body
-
-    # Check if string is valid Json
-    def is_json(self, body: str) -> bool:
-        try:
-            json.loads(body)
-        except ValueError as e:
-            return False
-        return True
+        return body
