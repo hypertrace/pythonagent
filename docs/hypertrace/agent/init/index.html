@@ -49,6 +49,7 @@ logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
 class AgentInit:  # pylint: disable=R0902,R0903
     &#39;&#39;&#39;Initialize all the OTel components using configuration from AgentConfig&#39;&#39;&#39;
+
     def __init__(self, agent_config: AgentConfig):
         &#39;&#39;&#39;constructor&#39;&#39;&#39;
         logger.debug(&#39;Initializing AgentInit object.&#39;)
@@ -63,16 +64,16 @@ class AgentInit:  # pylint: disable=R0902,R0903
             &#34;aiohttp_client&#34;: False
         }
 
+        self._tracer_provider = None
+
         try:
-            self._tracer_provider = None
             self.init_trace_provider()
+            self.init_propagation()
 
             if self._config.use_console_span_exporter():
                 self.set_console_span_processor()
-
-            if not self._config.use_console_span_exporter():
-                self.set_zipkin_processor()
-                self.set_otlp_processor()
+            else:
+                self.init_exporter()
 
             self._flask_instrumentor_wrapper = None
             self._grpc_instrumentor_client_wrapper = None
@@ -92,26 +93,53 @@ class AgentInit:  # pylint: disable=R0902,R0903
         &#39;&#39;&#39;Initialize trace provider and set resource attributes.&#39;&#39;&#39;
         resource_attributes = {
             &#34;service.name&#34;: self._config.agent_config.service_name,
-                &#34;service.instance.id&#34;: os.getpid(),
-                &#34;telemetry.sdk.version&#34;: constants.TELEMETRY_SDK_VERSION,
-                &#34;telemetry.sdk.name&#34;: constants.TELEMETRY_SDK_NAME,
-                &#34;telemetry.sdk.language&#34;: constants.TELEMETRY_SDK_LANGUAGE
+            &#34;service.instance.id&#34;: os.getpid(),
+            &#34;telemetry.sdk.version&#34;: constants.TELEMETRY_SDK_VERSION,
+            &#34;telemetry.sdk.name&#34;: constants.TELEMETRY_SDK_NAME,
+            &#34;telemetry.sdk.language&#34;: constants.TELEMETRY_SDK_LANGUAGE
         }
         if self._config.agent_config.resource_attributes:
-            logger.debug(&#39;Custom attributes found. Adding to resource attributes dict.&#39;)
-            resource_attributes.update(self._config.agent_config.resource_attributes)
+            logger.debug(
+                &#39;Custom attributes found. Adding to resource attributes dict.&#39;)
+            resource_attributes.update(
+                self._config.agent_config.resource_attributes)
         self._tracer_provider = TracerProvider(
             resource=Resource.create(resource_attributes)
         )
         trace.set_tracer_provider(self._tracer_provider)
 
+    def init_exporter(self) -&gt; None:
+        &#34;&#34;&#34;Initialize exporter&#34;&#34;&#34;
+        reporter_type = self._config.agent_config.reporting.trace_reporter_type
+        if reporter_type == config_pb2.TraceReporterType.ZIPKIN:
+            self._init_zipkin_exporter()
+        elif reporter_type == config_pb2.TraceReporterType.OTLP:
+            self._init_otlp_exporter()
+        else:
+            logger.error(&#34;Unknown exporter type `%s`&#34;, reporter_type)
+
     def init_propagation(self) -&gt; None:
         &#39;&#39;&#39;Initialize requested context propagation protocols.&#39;&#39;&#39;
+        propagator_list = []
         for prop_format in self._config.agent_config.propagation_formats:
+            if prop_format == config_pb2.PropagationFormat.TRACECONTEXT:
+                from opentelemetry.trace.propagation.tracecontext \
+                  import TraceContextTextMapPropagator # pylint: disable=C0415
+                propagator_list += [ TraceContextTextMapPropagator() ]
+                logger.debug(&#39;Adding TRACECONTEXT trace propagator to list.&#39;)
             if prop_format == config_pb2.PropagationFormat.B3:
-                from opentelemetry.propagate import set_global_textmap  # pylint: disable=C0415
                 from opentelemetry.propagators.b3 import B3Format  # pylint: disable=C0415
-                set_global_textmap(B3Format())
+                propagator_list += [ B3Format() ]
+                logger.debug(&#39;Adding B3 trace propagator to list.&#39;)
+
+        if len(propagator_list) == 0:
+            logger.debug(&#39;No propagators have been initialized.&#39;)
+
+        logger.debug(&#39;propagator_list: %s&#39;, str(propagator_list))
+        from opentelemetry.propagate import set_global_textmap # pylint: disable=C0415
+        from opentelemetry.propagators.composite import CompositeHTTPPropagator # pylint: disable=C0415
+        composite_propagators = CompositeHTTPPropagator(propagator_list)
+        set_global_textmap(composite_propagators)
 
     def dump_config(self) -&gt; None:
         &#39;&#39;&#39;dump the current state of AgentInit.&#39;&#39;&#39;
@@ -120,7 +148,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             logger.debug(&#39;%s : %s&#39;, mod, str(self._modules_initialized[mod]))
 
     # Creates a flask wrapper using the config defined in hypertraceconfig
-    def flask_init(self, app) -&gt; None:
+    def init_instrumentation_flask(self, app) -&gt; None:
         &#39;&#39;&#39;Creates a flask instrumentation wrapper using the config defined in hypertraceconfig&#39;&#39;&#39;
         logger.debug(&#39;Calling AgentInit.flaskInit().&#39;)
         try:
@@ -130,7 +158,6 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self._flask_instrumentor_wrapper.instrument_app(app)
             self.init_instrumentor_wrapper_base_for_http(
                 self._flask_instrumentor_wrapper)
-            self.init_propagation()
         except Exception as err:  # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
                          &#39;flask&#39;,
@@ -239,7 +266,6 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self._requests_instrumentor_wrapper = RequestsInstrumentorWrapper()
             self.init_instrumentor_wrapper_base_for_http(
                 self._requests_instrumentor_wrapper)
-            self.init_propagation()
         except Exception as err:  # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
                          &#39;requests&#39;,
@@ -258,7 +284,6 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self._aiohttp_client_instrumentor_wrapper = AioHttpClientInstrumentorWrapper()
             self.init_instrumentor_wrapper_base_for_http(
                 self._aiohttp_client_instrumentor_wrapper)
-            self.init_propagation()
         except Exception as err:  # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
                          &#39;aiohttp_client&#39;,
@@ -295,20 +320,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
             console_span_exporter)
         self._tracer_provider.add_span_processor(simple_export_span_processor)
 
-    def set_zipkin_processor(self) -&gt; None:
-        &#39;&#39;&#39;configure zipkin span exporter + processor&#39;&#39;&#39;
-        if &#39;HT_TRACES_EXPORTER&#39; in os.environ:
-            if os.environ[&#39;HT_TRACES_EXPORTER&#39;] == &#39;zipkin&#39;:
-                logger.debug(
-                    &#34;HT_TRACES_EXPORTER is zipkin, adding exporter.&#34;)
-            else:
-                return
-        else:
-            if self._config.agent_config.reporting.trace_reporter_type == &#39;ZIPKIN&#39;:
-                logger.debug(&#34;Trace reporter type is zipkin, adding exporter.&#34;)
-            else:
-                return
-
+    def _init_zipkin_exporter(self) -&gt; None:
+        &#39;&#39;&#39;Initialize Zipkin exporter&#39;&#39;&#39;
         try:
             zipkin_exporter = ZipkinExporter(
                 endpoint=self._config.agent_config.reporting.endpoint
@@ -317,34 +330,27 @@ class AgentInit:  # pylint: disable=R0902,R0903
             span_processor = BatchSpanProcessor(zipkin_exporter)
             self._tracer_provider.add_span_processor(span_processor)
 
-            logger.info(&#39;Added ZipkinExporter span exporter&#39;)
+            logger.info(
+                &#39;Initialized Zipkin exporter reporting to `%s`&#39;,
+                self._config.agent_config.reporting.endpoint)
         except Exception as err:  # pylint: disable=W0703
-            logger.error(&#39;Failed to register_processor: exception=%s, stacktrace=%s&#39;,
+            logger.error(&#39;Failed to initialize Zipkin exporter: exception=%s, stacktrace=%s&#39;,
                          err,
                          traceback.format_exc())
 
-    def set_otlp_processor(self) -&gt; None:
-        &#39;&#39;&#39;configure otlp span exporter + processor&#39;&#39;&#39;
-        if &#39;HT_TRACES_EXPORTER&#39; in os.environ:
-            if os.environ[&#39;HT_TRACES_EXPORTER&#39;] == &#39;otlp&#39;:
-                logger.debug(&#34;HT_TRACES_EXPORTER is otlp, adding exporter.&#34;)
-            else:
-                return
-        else:
-            if self._config.agent_config.reporting.trace_reporter_type == &#39;OTLP&#39;:
-                logger.debug(&#34;Trace reporter type is otlp, adding exporter.&#34;)
-            else:
-                return
-
+    def _init_otlp_exporter(self) -&gt; None:
+        &#39;&#39;&#39;Initialize OTLP exporter&#39;&#39;&#39;
         try:
             otlp_exporter = OTLPSpanExporter(endpoint=self._config.agent_config.reporting.endpoint,
-                                             insecure=self._config.agent_config.reporting.secure)
+                                             insecure= \
+                                               not self._config.agent_config.reporting.secure)
             span_processor = BatchSpanProcessor(otlp_exporter)
             self._tracer_provider.add_span_processor(span_processor)
 
-            logger.info(&#39;Added OtlpExporter span exporter&#39;)
+            logger.info(&#39;Initialized OTLP exporter reporting to `%s`&#39;,
+                        self._config.agent_config.reporting.endpoint)
         except Exception as err:  # pylint: disable=W0703
-            logger.error(&#39;Failed to register_processor: exception=%s, stacktrace=%s&#39;,
+            logger.error(&#39;Failed to initialize OTLP exporter: exception=%s, stacktrace=%s&#39;,
                          err,
                          traceback.format_exc())</code></pre>
 </details>
@@ -371,6 +377,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
 </summary>
 <pre><code class="python">class AgentInit:  # pylint: disable=R0902,R0903
     &#39;&#39;&#39;Initialize all the OTel components using configuration from AgentConfig&#39;&#39;&#39;
+
     def __init__(self, agent_config: AgentConfig):
         &#39;&#39;&#39;constructor&#39;&#39;&#39;
         logger.debug(&#39;Initializing AgentInit object.&#39;)
@@ -385,16 +392,16 @@ class AgentInit:  # pylint: disable=R0902,R0903
             &#34;aiohttp_client&#34;: False
         }
 
+        self._tracer_provider = None
+
         try:
-            self._tracer_provider = None
             self.init_trace_provider()
+            self.init_propagation()
 
             if self._config.use_console_span_exporter():
                 self.set_console_span_processor()
-
-            if not self._config.use_console_span_exporter():
-                self.set_zipkin_processor()
-                self.set_otlp_processor()
+            else:
+                self.init_exporter()
 
             self._flask_instrumentor_wrapper = None
             self._grpc_instrumentor_client_wrapper = None
@@ -414,26 +421,53 @@ class AgentInit:  # pylint: disable=R0902,R0903
         &#39;&#39;&#39;Initialize trace provider and set resource attributes.&#39;&#39;&#39;
         resource_attributes = {
             &#34;service.name&#34;: self._config.agent_config.service_name,
-                &#34;service.instance.id&#34;: os.getpid(),
-                &#34;telemetry.sdk.version&#34;: constants.TELEMETRY_SDK_VERSION,
-                &#34;telemetry.sdk.name&#34;: constants.TELEMETRY_SDK_NAME,
-                &#34;telemetry.sdk.language&#34;: constants.TELEMETRY_SDK_LANGUAGE
+            &#34;service.instance.id&#34;: os.getpid(),
+            &#34;telemetry.sdk.version&#34;: constants.TELEMETRY_SDK_VERSION,
+            &#34;telemetry.sdk.name&#34;: constants.TELEMETRY_SDK_NAME,
+            &#34;telemetry.sdk.language&#34;: constants.TELEMETRY_SDK_LANGUAGE
         }
         if self._config.agent_config.resource_attributes:
-            logger.debug(&#39;Custom attributes found. Adding to resource attributes dict.&#39;)
-            resource_attributes.update(self._config.agent_config.resource_attributes)
+            logger.debug(
+                &#39;Custom attributes found. Adding to resource attributes dict.&#39;)
+            resource_attributes.update(
+                self._config.agent_config.resource_attributes)
         self._tracer_provider = TracerProvider(
             resource=Resource.create(resource_attributes)
         )
         trace.set_tracer_provider(self._tracer_provider)
 
+    def init_exporter(self) -&gt; None:
+        &#34;&#34;&#34;Initialize exporter&#34;&#34;&#34;
+        reporter_type = self._config.agent_config.reporting.trace_reporter_type
+        if reporter_type == config_pb2.TraceReporterType.ZIPKIN:
+            self._init_zipkin_exporter()
+        elif reporter_type == config_pb2.TraceReporterType.OTLP:
+            self._init_otlp_exporter()
+        else:
+            logger.error(&#34;Unknown exporter type `%s`&#34;, reporter_type)
+
     def init_propagation(self) -&gt; None:
         &#39;&#39;&#39;Initialize requested context propagation protocols.&#39;&#39;&#39;
+        propagator_list = []
         for prop_format in self._config.agent_config.propagation_formats:
+            if prop_format == config_pb2.PropagationFormat.TRACECONTEXT:
+                from opentelemetry.trace.propagation.tracecontext \
+                  import TraceContextTextMapPropagator # pylint: disable=C0415
+                propagator_list += [ TraceContextTextMapPropagator() ]
+                logger.debug(&#39;Adding TRACECONTEXT trace propagator to list.&#39;)
             if prop_format == config_pb2.PropagationFormat.B3:
-                from opentelemetry.propagate import set_global_textmap  # pylint: disable=C0415
                 from opentelemetry.propagators.b3 import B3Format  # pylint: disable=C0415
-                set_global_textmap(B3Format())
+                propagator_list += [ B3Format() ]
+                logger.debug(&#39;Adding B3 trace propagator to list.&#39;)
+
+        if len(propagator_list) == 0:
+            logger.debug(&#39;No propagators have been initialized.&#39;)
+
+        logger.debug(&#39;propagator_list: %s&#39;, str(propagator_list))
+        from opentelemetry.propagate import set_global_textmap # pylint: disable=C0415
+        from opentelemetry.propagators.composite import CompositeHTTPPropagator # pylint: disable=C0415
+        composite_propagators = CompositeHTTPPropagator(propagator_list)
+        set_global_textmap(composite_propagators)
 
     def dump_config(self) -&gt; None:
         &#39;&#39;&#39;dump the current state of AgentInit.&#39;&#39;&#39;
@@ -442,7 +476,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             logger.debug(&#39;%s : %s&#39;, mod, str(self._modules_initialized[mod]))
 
     # Creates a flask wrapper using the config defined in hypertraceconfig
-    def flask_init(self, app) -&gt; None:
+    def init_instrumentation_flask(self, app) -&gt; None:
         &#39;&#39;&#39;Creates a flask instrumentation wrapper using the config defined in hypertraceconfig&#39;&#39;&#39;
         logger.debug(&#39;Calling AgentInit.flaskInit().&#39;)
         try:
@@ -452,7 +486,6 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self._flask_instrumentor_wrapper.instrument_app(app)
             self.init_instrumentor_wrapper_base_for_http(
                 self._flask_instrumentor_wrapper)
-            self.init_propagation()
         except Exception as err:  # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
                          &#39;flask&#39;,
@@ -561,7 +594,6 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self._requests_instrumentor_wrapper = RequestsInstrumentorWrapper()
             self.init_instrumentor_wrapper_base_for_http(
                 self._requests_instrumentor_wrapper)
-            self.init_propagation()
         except Exception as err:  # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
                          &#39;requests&#39;,
@@ -580,7 +612,6 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self._aiohttp_client_instrumentor_wrapper = AioHttpClientInstrumentorWrapper()
             self.init_instrumentor_wrapper_base_for_http(
                 self._aiohttp_client_instrumentor_wrapper)
-            self.init_propagation()
         except Exception as err:  # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
                          &#39;aiohttp_client&#39;,
@@ -617,20 +648,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
             console_span_exporter)
         self._tracer_provider.add_span_processor(simple_export_span_processor)
 
-    def set_zipkin_processor(self) -&gt; None:
-        &#39;&#39;&#39;configure zipkin span exporter + processor&#39;&#39;&#39;
-        if &#39;HT_TRACES_EXPORTER&#39; in os.environ:
-            if os.environ[&#39;HT_TRACES_EXPORTER&#39;] == &#39;zipkin&#39;:
-                logger.debug(
-                    &#34;HT_TRACES_EXPORTER is zipkin, adding exporter.&#34;)
-            else:
-                return
-        else:
-            if self._config.agent_config.reporting.trace_reporter_type == &#39;ZIPKIN&#39;:
-                logger.debug(&#34;Trace reporter type is zipkin, adding exporter.&#34;)
-            else:
-                return
-
+    def _init_zipkin_exporter(self) -&gt; None:
+        &#39;&#39;&#39;Initialize Zipkin exporter&#39;&#39;&#39;
         try:
             zipkin_exporter = ZipkinExporter(
                 endpoint=self._config.agent_config.reporting.endpoint
@@ -639,34 +658,27 @@ class AgentInit:  # pylint: disable=R0902,R0903
             span_processor = BatchSpanProcessor(zipkin_exporter)
             self._tracer_provider.add_span_processor(span_processor)
 
-            logger.info(&#39;Added ZipkinExporter span exporter&#39;)
+            logger.info(
+                &#39;Initialized Zipkin exporter reporting to `%s`&#39;,
+                self._config.agent_config.reporting.endpoint)
         except Exception as err:  # pylint: disable=W0703
-            logger.error(&#39;Failed to register_processor: exception=%s, stacktrace=%s&#39;,
+            logger.error(&#39;Failed to initialize Zipkin exporter: exception=%s, stacktrace=%s&#39;,
                          err,
                          traceback.format_exc())
 
-    def set_otlp_processor(self) -&gt; None:
-        &#39;&#39;&#39;configure otlp span exporter + processor&#39;&#39;&#39;
-        if &#39;HT_TRACES_EXPORTER&#39; in os.environ:
-            if os.environ[&#39;HT_TRACES_EXPORTER&#39;] == &#39;otlp&#39;:
-                logger.debug(&#34;HT_TRACES_EXPORTER is otlp, adding exporter.&#34;)
-            else:
-                return
-        else:
-            if self._config.agent_config.reporting.trace_reporter_type == &#39;OTLP&#39;:
-                logger.debug(&#34;Trace reporter type is otlp, adding exporter.&#34;)
-            else:
-                return
-
+    def _init_otlp_exporter(self) -&gt; None:
+        &#39;&#39;&#39;Initialize OTLP exporter&#39;&#39;&#39;
         try:
             otlp_exporter = OTLPSpanExporter(endpoint=self._config.agent_config.reporting.endpoint,
-                                             insecure=self._config.agent_config.reporting.secure)
+                                             insecure= \
+                                               not self._config.agent_config.reporting.secure)
             span_processor = BatchSpanProcessor(otlp_exporter)
             self._tracer_provider.add_span_processor(span_processor)
 
-            logger.info(&#39;Added OtlpExporter span exporter&#39;)
+            logger.info(&#39;Initialized OTLP exporter reporting to `%s`&#39;,
+                        self._config.agent_config.reporting.endpoint)
         except Exception as err:  # pylint: disable=W0703
-            logger.error(&#39;Failed to register_processor: exception=%s, stacktrace=%s&#39;,
+            logger.error(&#39;Failed to initialize OTLP exporter: exception=%s, stacktrace=%s&#39;,
                          err,
                          traceback.format_exc())</code></pre>
 </details>
@@ -692,7 +704,6 @@ class AgentInit:  # pylint: disable=R0902,R0903
         self._aiohttp_client_instrumentor_wrapper = AioHttpClientInstrumentorWrapper()
         self.init_instrumentor_wrapper_base_for_http(
             self._aiohttp_client_instrumentor_wrapper)
-        self.init_propagation()
     except Exception as err:  # pylint: disable=W0703
         logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
                      &#39;aiohttp_client&#39;,
@@ -716,8 +727,28 @@ class AgentInit:  # pylint: disable=R0902,R0903
         logger.debug(&#39;%s : %s&#39;, mod, str(self._modules_initialized[mod]))</code></pre>
 </details>
 </dd>
-<dt id="hypertrace.agent.init.AgentInit.flask_init"><code class="name flex">
-<span>def <span class="ident">flask_init</span></span>(<span>self, app) ‑> NoneType</span>
+<dt id="hypertrace.agent.init.AgentInit.init_exporter"><code class="name flex">
+<span>def <span class="ident">init_exporter</span></span>(<span>self) ‑> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Initialize exporter</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def init_exporter(self) -&gt; None:
+    &#34;&#34;&#34;Initialize exporter&#34;&#34;&#34;
+    reporter_type = self._config.agent_config.reporting.trace_reporter_type
+    if reporter_type == config_pb2.TraceReporterType.ZIPKIN:
+        self._init_zipkin_exporter()
+    elif reporter_type == config_pb2.TraceReporterType.OTLP:
+        self._init_otlp_exporter()
+    else:
+        logger.error(&#34;Unknown exporter type `%s`&#34;, reporter_type)</code></pre>
+</details>
+</dd>
+<dt id="hypertrace.agent.init.AgentInit.init_instrumentation_flask"><code class="name flex">
+<span>def <span class="ident">init_instrumentation_flask</span></span>(<span>self, app) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Creates a flask instrumentation wrapper using the config defined in hypertraceconfig</p></div>
@@ -725,7 +756,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def flask_init(self, app) -&gt; None:
+<pre><code class="python">def init_instrumentation_flask(self, app) -&gt; None:
     &#39;&#39;&#39;Creates a flask instrumentation wrapper using the config defined in hypertraceconfig&#39;&#39;&#39;
     logger.debug(&#39;Calling AgentInit.flaskInit().&#39;)
     try:
@@ -735,7 +766,6 @@ class AgentInit:  # pylint: disable=R0902,R0903
         self._flask_instrumentor_wrapper.instrument_app(app)
         self.init_instrumentor_wrapper_base_for_http(
             self._flask_instrumentor_wrapper)
-        self.init_propagation()
     except Exception as err:  # pylint: disable=W0703
         logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
                      &#39;flask&#39;,
@@ -890,7 +920,6 @@ class AgentInit:  # pylint: disable=R0902,R0903
         self._requests_instrumentor_wrapper = RequestsInstrumentorWrapper()
         self.init_instrumentor_wrapper_base_for_http(
             self._requests_instrumentor_wrapper)
-        self.init_propagation()
     except Exception as err:  # pylint: disable=W0703
         logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
                      &#39;requests&#39;,
@@ -934,11 +963,26 @@ class AgentInit:  # pylint: disable=R0902,R0903
 </summary>
 <pre><code class="python">def init_propagation(self) -&gt; None:
     &#39;&#39;&#39;Initialize requested context propagation protocols.&#39;&#39;&#39;
+    propagator_list = []
     for prop_format in self._config.agent_config.propagation_formats:
+        if prop_format == config_pb2.PropagationFormat.TRACECONTEXT:
+            from opentelemetry.trace.propagation.tracecontext \
+              import TraceContextTextMapPropagator # pylint: disable=C0415
+            propagator_list += [ TraceContextTextMapPropagator() ]
+            logger.debug(&#39;Adding TRACECONTEXT trace propagator to list.&#39;)
         if prop_format == config_pb2.PropagationFormat.B3:
-            from opentelemetry.propagate import set_global_textmap  # pylint: disable=C0415
             from opentelemetry.propagators.b3 import B3Format  # pylint: disable=C0415
-            set_global_textmap(B3Format())</code></pre>
+            propagator_list += [ B3Format() ]
+            logger.debug(&#39;Adding B3 trace propagator to list.&#39;)
+
+    if len(propagator_list) == 0:
+        logger.debug(&#39;No propagators have been initialized.&#39;)
+
+    logger.debug(&#39;propagator_list: %s&#39;, str(propagator_list))
+    from opentelemetry.propagate import set_global_textmap # pylint: disable=C0415
+    from opentelemetry.propagators.composite import CompositeHTTPPropagator # pylint: disable=C0415
+    composite_propagators = CompositeHTTPPropagator(propagator_list)
+    set_global_textmap(composite_propagators)</code></pre>
 </details>
 </dd>
 <dt id="hypertrace.agent.init.AgentInit.init_trace_provider"><code class="name flex">
@@ -954,14 +998,16 @@ class AgentInit:  # pylint: disable=R0902,R0903
     &#39;&#39;&#39;Initialize trace provider and set resource attributes.&#39;&#39;&#39;
     resource_attributes = {
         &#34;service.name&#34;: self._config.agent_config.service_name,
-            &#34;service.instance.id&#34;: os.getpid(),
-            &#34;telemetry.sdk.version&#34;: constants.TELEMETRY_SDK_VERSION,
-            &#34;telemetry.sdk.name&#34;: constants.TELEMETRY_SDK_NAME,
-            &#34;telemetry.sdk.language&#34;: constants.TELEMETRY_SDK_LANGUAGE
+        &#34;service.instance.id&#34;: os.getpid(),
+        &#34;telemetry.sdk.version&#34;: constants.TELEMETRY_SDK_VERSION,
+        &#34;telemetry.sdk.name&#34;: constants.TELEMETRY_SDK_NAME,
+        &#34;telemetry.sdk.language&#34;: constants.TELEMETRY_SDK_LANGUAGE
     }
     if self._config.agent_config.resource_attributes:
-        logger.debug(&#39;Custom attributes found. Adding to resource attributes dict.&#39;)
-        resource_attributes.update(self._config.agent_config.resource_attributes)
+        logger.debug(
+            &#39;Custom attributes found. Adding to resource attributes dict.&#39;)
+        resource_attributes.update(
+            self._config.agent_config.resource_attributes)
     self._tracer_provider = TracerProvider(
         resource=Resource.create(resource_attributes)
     )
@@ -1002,79 +1048,6 @@ class AgentInit:  # pylint: disable=R0902,R0903
     self._tracer_provider.add_span_processor(simple_export_span_processor)</code></pre>
 </details>
 </dd>
-<dt id="hypertrace.agent.init.AgentInit.set_otlp_processor"><code class="name flex">
-<span>def <span class="ident">set_otlp_processor</span></span>(<span>self) ‑> NoneType</span>
-</code></dt>
-<dd>
-<div class="desc"><p>configure otlp span exporter + processor</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def set_otlp_processor(self) -&gt; None:
-    &#39;&#39;&#39;configure otlp span exporter + processor&#39;&#39;&#39;
-    if &#39;HT_TRACES_EXPORTER&#39; in os.environ:
-        if os.environ[&#39;HT_TRACES_EXPORTER&#39;] == &#39;otlp&#39;:
-            logger.debug(&#34;HT_TRACES_EXPORTER is otlp, adding exporter.&#34;)
-        else:
-            return
-    else:
-        if self._config.agent_config.reporting.trace_reporter_type == &#39;OTLP&#39;:
-            logger.debug(&#34;Trace reporter type is otlp, adding exporter.&#34;)
-        else:
-            return
-
-    try:
-        otlp_exporter = OTLPSpanExporter(endpoint=self._config.agent_config.reporting.endpoint,
-                                         insecure=self._config.agent_config.reporting.secure)
-        span_processor = BatchSpanProcessor(otlp_exporter)
-        self._tracer_provider.add_span_processor(span_processor)
-
-        logger.info(&#39;Added OtlpExporter span exporter&#39;)
-    except Exception as err:  # pylint: disable=W0703
-        logger.error(&#39;Failed to register_processor: exception=%s, stacktrace=%s&#39;,
-                     err,
-                     traceback.format_exc())</code></pre>
-</details>
-</dd>
-<dt id="hypertrace.agent.init.AgentInit.set_zipkin_processor"><code class="name flex">
-<span>def <span class="ident">set_zipkin_processor</span></span>(<span>self) ‑> NoneType</span>
-</code></dt>
-<dd>
-<div class="desc"><p>configure zipkin span exporter + processor</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def set_zipkin_processor(self) -&gt; None:
-    &#39;&#39;&#39;configure zipkin span exporter + processor&#39;&#39;&#39;
-    if &#39;HT_TRACES_EXPORTER&#39; in os.environ:
-        if os.environ[&#39;HT_TRACES_EXPORTER&#39;] == &#39;zipkin&#39;:
-            logger.debug(
-                &#34;HT_TRACES_EXPORTER is zipkin, adding exporter.&#34;)
-        else:
-            return
-    else:
-        if self._config.agent_config.reporting.trace_reporter_type == &#39;ZIPKIN&#39;:
-            logger.debug(&#34;Trace reporter type is zipkin, adding exporter.&#34;)
-        else:
-            return
-
-    try:
-        zipkin_exporter = ZipkinExporter(
-            endpoint=self._config.agent_config.reporting.endpoint
-        )
-
-        span_processor = BatchSpanProcessor(zipkin_exporter)
-        self._tracer_provider.add_span_processor(span_processor)
-
-        logger.info(&#39;Added ZipkinExporter span exporter&#39;)
-    except Exception as err:  # pylint: disable=W0703
-        logger.error(&#39;Failed to register_processor: exception=%s, stacktrace=%s&#39;,
-                     err,
-                     traceback.format_exc())</code></pre>
-</details>
-</dd>
 </dl>
 </dd>
 </dl>
@@ -1098,7 +1071,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
 <ul class="">
 <li><code><a title="hypertrace.agent.init.AgentInit.aiohttp_client_init" href="#hypertrace.agent.init.AgentInit.aiohttp_client_init">aiohttp_client_init</a></code></li>
 <li><code><a title="hypertrace.agent.init.AgentInit.dump_config" href="#hypertrace.agent.init.AgentInit.dump_config">dump_config</a></code></li>
-<li><code><a title="hypertrace.agent.init.AgentInit.flask_init" href="#hypertrace.agent.init.AgentInit.flask_init">flask_init</a></code></li>
+<li><code><a title="hypertrace.agent.init.AgentInit.init_exporter" href="#hypertrace.agent.init.AgentInit.init_exporter">init_exporter</a></code></li>
+<li><code><a title="hypertrace.agent.init.AgentInit.init_instrumentation_flask" href="#hypertrace.agent.init.AgentInit.init_instrumentation_flask">init_instrumentation_flask</a></code></li>
 <li><code><a title="hypertrace.agent.init.AgentInit.init_instrumentation_grpc_client" href="#hypertrace.agent.init.AgentInit.init_instrumentation_grpc_client">init_instrumentation_grpc_client</a></code></li>
 <li><code><a title="hypertrace.agent.init.AgentInit.init_instrumentation_grpc_server" href="#hypertrace.agent.init.AgentInit.init_instrumentation_grpc_server">init_instrumentation_grpc_server</a></code></li>
 <li><code><a title="hypertrace.agent.init.AgentInit.init_instrumentation_mysql" href="#hypertrace.agent.init.AgentInit.init_instrumentation_mysql">init_instrumentation_mysql</a></code></li>
@@ -1109,8 +1083,6 @@ class AgentInit:  # pylint: disable=R0902,R0903
 <li><code><a title="hypertrace.agent.init.AgentInit.init_trace_provider" href="#hypertrace.agent.init.AgentInit.init_trace_provider">init_trace_provider</a></code></li>
 <li><code><a title="hypertrace.agent.init.AgentInit.register_processor" href="#hypertrace.agent.init.AgentInit.register_processor">register_processor</a></code></li>
 <li><code><a title="hypertrace.agent.init.AgentInit.set_console_span_processor" href="#hypertrace.agent.init.AgentInit.set_console_span_processor">set_console_span_processor</a></code></li>
-<li><code><a title="hypertrace.agent.init.AgentInit.set_otlp_processor" href="#hypertrace.agent.init.AgentInit.set_otlp_processor">set_otlp_processor</a></code></li>
-<li><code><a title="hypertrace.agent.init.AgentInit.set_zipkin_processor" href="#hypertrace.agent.init.AgentInit.set_zipkin_processor">set_zipkin_processor</a></code></li>
 </ul>
 </li>
 </ul>
