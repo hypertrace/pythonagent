@@ -109,7 +109,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
             from hypertrace.agent.instrumentation.flask import FlaskInstrumentorWrapper  # pylint: disable=C0415
             self._modules_initialized['flask'] = True
             self._flask_instrumentor_wrapper = FlaskInstrumentorWrapper()
-            self._flask_instrumentor_wrapper.instrument_app(app)
+            if app:
+                self._flask_instrumentor_wrapper.instrument_app(app)
             self.init_instrumentor_wrapper_base_for_http(
                 self._flask_instrumentor_wrapper)
             self.init_propagation()

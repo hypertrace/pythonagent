@@ -43,5 +43,10 @@ setup(
         "google==3.0.0",
         "pyyaml",
         "protobuf==3.15.8"
-    ]
+    ],
+    entry_points = {
+        'console_scripts': [
+            'hypertrace-instrument = hypertrace.agent.autoinstrumentation.hypertrace_instrument:run',
+        ],
+    }
 )

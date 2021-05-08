@@ -1,5 +1,4 @@
 from flask import Flask, request, jsonify, make_response, Response
-from hypertrace.agent import Agent
 import time
 import json
 import logging
@@ -37,9 +36,9 @@ def insert_user(name: str) -> int:
 
 def create_app():
     app = Flask(__name__)
-    agent = Agent()
-    agent.register_flask_app(app)
-    agent.register_mysql()
+#    agent = Agent()
+#    agent.register_flask_app(app)
+#    agent.register_mysql()
 
     @app.route('/', methods=['POST'])
     def hello():
