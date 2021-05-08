@@ -4,9 +4,6 @@ import logging
 import traceback
 import json
 import pytest
-import aiohttp
-import asyncio
-import async_timeout
 import flask
 from werkzeug.serving import make_server
 from flask import request
@@ -45,38 +42,13 @@ logger = setup_custom_logger(__name__)
 
 ENABLE_INSTRUMENTATION = bool(os.getenv('ENABLE_INSTRUMENTATION'))
 
-async def fetch(url, body, headers):
-  async with aiohttp.ClientSession() as session, async_timeout.timeout(10):
-    async with session.post(url, data=body, headers=headers) as response:
-      return await response.text()
-
-
-@server.route("/route2", methods=['POST'])
-def testAPI2():
-    try:
-      logger.info('Serving request for /route2')
-      loop = asyncio.get_event_loop()
-      response = loop.run_until_complete(asyncio.gather(
-        fetch('https://petstore.swagger.io/v2/pet', '{"id":0,"category":{"id":0,"name":"doggie"},"name":"doggie","photoUrls":["http://example.co"],"tags":[{"id":0,"name":"doggie"}],"status":"available"}', { "Accept":"application/json", "Content-Type": "application/json", 'tester1': 'tester1', 'tester2':'tester2' })))
-      response1 = flask.Response(mimetype='application/json')
-      response1.data = str('{ "a": "a", "xyz": "xyz" }')
-      return response1
-    except:
-      logger.error('Failed to initialize postgresql instrumentation wrapper: exception=%s, stacktrace=%s',
-        sys.exc_info()[0],
-        traceback.format_exc())
-      response = flask.Response(mimetype='application/json', status=500)
-      response.data = str('{}')
-      return response
-
-@server.route("/route1", methods=['POST'])
+@server.route("/route2")
 def testAPI1():
     try:
-      logger.info('Serving request for /route1')
-      loop = asyncio.get_event_loop()
-      response1 = flask.Response(mimetype='application/json')
-      response1.data = str('{ "a": "a", "xyz": "xyz" }')
-      return response1
+      logger.info('Serving request for /route2')
+      response = flask.Response(mimetype='application/json')
+      response.data = str('{ "a": "a", "xyz": "xyz" }')
+      return response
     except:
       logger.error('Failed to initialize postgresql instrumentation wrapper: exception=%s, stacktrace=%s',
         sys.exc_info()[0],
@@ -85,43 +57,54 @@ def testAPI1():
       response.data = str('{}')
       return response
 
-@server.teardown_request
+#@server.teardown_request
 def after_request(response):
   try:
     logger.debug("after_request() called")
     if not ENABLE_INSTRUMENTATION:
       return response
-    if request.base_url != '/route1':
-      return response
-
     # Get all of the in memory spans that were recorded for this iteration
     span_list = memoryExporter.get_finished_spans()
     # Confirm something was returned.
     assert span_list
     # Confirm there are three spans
     logger.debug('len(span_list): ' + str(len(span_list)))
-    assert len(span_list) == 2
+    assert len(span_list) == 1
     logger.debug('span_list: ' + str(span_list[0].attributes))
-    logger.debug('span_list: ' + str(span_list[1].attributes))
     # Convert each span to a JSON object
-    flaskSpanAsObject = json.loads(span_list[1].to_json())
-    aiohttpSpanAsObject = json.loads(span_list[0].to_json())
+    flaskSpanAsObject = json.loads(span_list[0].to_json())
+    # Flask extended span object attributes should look like:
+    #
+    # {
+    #   "http.method": "GET",
+    #   "http.server_name": "localhost",
+    #   "http.scheme": "http",
+    #   "net.host.port": 5000,
+    #   "http.host": "localhost:5000",
+    #   "http.target": "/dbtest",
+    #   "net.peer.ip": "127.0.0.1",
+    #   "http.user_agent": "werkzeug/1.0.1",
+    #   "http.flavor": "1.1",
+    #   "http.route": "/dbtest",
+    #   "http.request.header.user-agent": "werkzeug/1.0.1",
+    #   "http.request.header.host": "localhost:5000",
+    #   "http.response.header.content-type": "application/json",
+    #   "http.response.header.content-length": "26",
+    #   "http.response.body": "{ \"a\": \"a\", \"xyz\": \"xyz\" }",
+    #   "http.status_text": "OK",
+    #   "http.status_code": 200
+    # }
+    #
+    # Dump all attributes for debugging
     for key in flaskSpanAsObject:
       logger.debug(key + ' : ' + str(flaskSpanAsObject[key]))
     # Check that the expected results are in the flask extended span attributes
-    assert flaskSpanAsObject['attributes']['http.method'] == 'POST'
+    assert flaskSpanAsObject['attributes']['http.method'] == 'GET'
     assert flaskSpanAsObject['attributes']['http.target'] == '/route2';
+    assert flaskSpanAsObject['attributes']['http.request.header.traceparent']
     assert flaskSpanAsObject['attributes']['http.response.header.content-type'] == 'application/json'
     assert flaskSpanAsObject['attributes']['http.response.body'] == '{ "a": "a", "xyz": "xyz" }'
-    assert flaskSpanAsObject['attributes']['http.request.header.traceparent']
     assert flaskSpanAsObject['attributes']['http.status_code'] == 200
-    for key in aiohttpSpanAsObject:
-      logger.debug(key + ' : ' + str(aiohttpSpanAsObject[key]))
-    assert aiohttpSpanAsObject['attributes']['http.method'] == 'POST'
-    assert aiohttpSpanAsObject['attributes']['http.url'] == 'https://petstore.swagger.io/v2/pet';
-    assert aiohttpSpanAsObject['attributes']['http.response.header.content-type'] == 'application/json'
-    assert aiohttpSpanAsObject['attributes']['http.request.header.traceparent']
-    assert aiohttpSpanAsObject['attributes']['http.status_code'] == 200
     memoryExporter.clear()
     return response
   except:
@@ -138,7 +121,6 @@ if ENABLE_INSTRUMENTATION == True:
   logger.info('Initializing agent.')
   agent = Agent()
   agent.register_flask_app(server)
-  agent.register_aiohttp_client()
   #
   # End initialization logic for Python Agent
   #

@@ -5,7 +5,7 @@ DEFAULT_AGENT_CONFIG = {
     'propagation_formats': ['TRACECONTEXT'],
     'service_name': 'pythonagent',
     'reporting': {
-        'endpoint': 'localhost:4317',
+        'endpoint': 'http://localhost:4317',
         'secure': False,
         'trace_reporter_type': 'OTLP',
         'token': '',

@@ -21,6 +21,8 @@ from hypertrace.agent.config import AgentConfig
 # Initialize logger
 logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
+
+
 # Dump metadata about an object; useful for initial discovery of interestin ginfo
 
 
@@ -56,7 +58,8 @@ def _hypertrace_before_request(flask_wrapper):
             request_body = flask.request.data       # same
             logger.debug('span: %s', str(span))
             logger.debug('Request headers: %s', str(request_headers))
-            logger.debug('Request body: %s', str(request_body))
+            span.update_name(str(flask.request.method) + ' ' + str(flask.request.url_rule))
+
             # Call base request handler
             flask_wrapper.generic_request_handler(
                 request_headers, request_body, span)
@@ -99,6 +102,8 @@ def _hypertrace_after_request(flask_wrapper) -> flask.wrappers.Response:
     return hypertrace_after_request
 
 class _HypertraceInstrumentedFlask(_InstrumentedFlask, BaseInstrumentorWrapper):
+    """Hypertrace Wrapper class around OTel _InstrumentedFlask. This replaces
+    the flask.Flask class definition."""
 
     def __init__(self, *args, **kwargs):
         _InstrumentedFlask.__init__(self,*args, **kwargs)
@@ -117,7 +122,6 @@ class _HypertraceInstrumentedFlask(_InstrumentedFlask, BaseInstrumentorWrapper):
         self.set_body_max_size(
             config.agent_config.data_capture.body_max_size_bytes)
 
-
 # Main Flask Instrumentor Wrapper class.
 class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
     '''Hypertrace wrapper around OTel Flask instrumentor class'''
@@ -128,6 +132,7 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
         self._app = None
 
     def _instrument(self, **kwargs):
+        '''Override OTel method that sets up global flask instrumentation'''
         self._original_flask = flask.Flask
         name_callback = kwargs.get("name_callback")
         tracer_provider = kwargs.get("tracer_provider")
@@ -141,8 +146,10 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
         '''Initialize instrumentation'''
         logger.debug('Entering FlaskInstrumentorWrapper.instument_app().')
         try:
+
             # Call parent class's initialization
             super().instrument_app(app, name_callback)
+
             self._app = app
             # Set pre-request handler
             app.before_request(_hypertrace_before_request(self))

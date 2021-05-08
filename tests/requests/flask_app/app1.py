@@ -100,7 +100,8 @@ def after_request(response):
       logger.debug(key + ' : ' + str(flaskSpanAsObject[key]))
     # Check that the expected results are in the flask extended span attributes
     assert flaskSpanAsObject['attributes']['http.method'] == 'GET'
-    assert flaskSpanAsObject['attributes']['http.target'] == '/route2';
+    assert flaskSpanAsObject['attributes']['http.target'] == '/route2'
+    assert flaskSpanAsObject['attributes']['http.request.header.traceparent']
     assert flaskSpanAsObject['attributes']['http.response.header.content-type'] == 'application/json'
     assert flaskSpanAsObject['attributes']['http.response.body'] == '{ "a": "a", "xyz": "xyz" }'
     assert flaskSpanAsObject['attributes']['http.status_code'] == 200

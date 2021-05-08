@@ -35,9 +35,11 @@ class AgentInit:  # pylint: disable=R0902,R0903
             "aiohttp_client": False
         }
 
+        self._tracer_provider = None
+
         try:
-            self._tracer_provider = None
             self.init_trace_provider()
+            self.init_propagation()
 
             if self._config.use_console_span_exporter():
                 self.set_console_span_processor()
@@ -89,11 +91,26 @@ class AgentInit:  # pylint: disable=R0902,R0903
 
     def init_propagation(self) -> None:
         '''Initialize requested context propagation protocols.'''
+        propagator_list = []
         for prop_format in self._config.agent_config.propagation_formats:
+            if prop_format == config_pb2.PropagationFormat.TRACECONTEXT:
+                from opentelemetry.trace.propagation.tracecontext \
+                  import TraceContextTextMapPropagator # pylint: disable=C0415
+                propagator_list += [ TraceContextTextMapPropagator() ]
+                logger.debug('Adding TRACECONTEXT trace propagator to list.')
             if prop_format == config_pb2.PropagationFormat.B3:
-                from opentelemetry.propagate import set_global_textmap  # pylint: disable=C0415
                 from opentelemetry.propagators.b3 import B3Format  # pylint: disable=C0415
-                set_global_textmap(B3Format())
+                propagator_list += [ B3Format() ]
+                logger.debug('Adding B3 trace propagator to list.')
+
+        if len(propagator_list) == 0:
+            logger.debug('No propagators have been initialized.')
+
+        logger.debug('propagator_list: %s', str(propagator_list))
+        from opentelemetry.propagate import set_global_textmap # pylint: disable=C0415
+        from opentelemetry.propagators.composite import CompositeHTTPPropagator # pylint: disable=C0415
+        composite_propagators = CompositeHTTPPropagator(propagator_list)
+        set_global_textmap(composite_propagators)
 
     def dump_config(self) -> None:
         '''dump the current state of AgentInit.'''
@@ -102,7 +119,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             logger.debug('%s : %s', mod, str(self._modules_initialized[mod]))
 
     # Creates a flask wrapper using the config defined in hypertraceconfig
-    def flask_init(self, app) -> None:
+    def init_instrumentation_flask(self, app) -> None:
         '''Creates a flask instrumentation wrapper using the config defined in hypertraceconfig'''
         logger.debug('Calling AgentInit.flaskInit().')
         try:
@@ -113,7 +130,6 @@ class AgentInit:  # pylint: disable=R0902,R0903
                 self._flask_instrumentor_wrapper.instrument_app(app)
             self.init_instrumentor_wrapper_base_for_http(
                 self._flask_instrumentor_wrapper)
-            self.init_propagation()
         except Exception as err:  # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
                          'flask',
@@ -222,7 +238,6 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self._requests_instrumentor_wrapper = RequestsInstrumentorWrapper()
             self.init_instrumentor_wrapper_base_for_http(
                 self._requests_instrumentor_wrapper)
-            self.init_propagation()
         except Exception as err:  # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
                          'requests',
@@ -241,7 +256,6 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self._aiohttp_client_instrumentor_wrapper = AioHttpClientInstrumentorWrapper()
             self.init_instrumentor_wrapper_base_for_http(
                 self._aiohttp_client_instrumentor_wrapper)
-            self.init_propagation()
         except Exception as err:  # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
                          'aiohttp_client',
@@ -288,9 +302,11 @@ class AgentInit:  # pylint: disable=R0902,R0903
             span_processor = BatchSpanProcessor(zipkin_exporter)
             self._tracer_provider.add_span_processor(span_processor)
 
-            logger.info('Initialized Zipkin exporter')
+            logger.info(
+                'Initialized Zipkin exporter reporting to `%s`',
+                self._config.agent_config.reporting.endpoint)
         except Exception as err:  # pylint: disable=W0703
-            logger.error('Failed to register exporter: exception=%s, stacktrace=%s',
+            logger.error('Failed to initialize Zipkin exporter: exception=%s, stacktrace=%s',
                          err,
                          traceback.format_exc())
 
@@ -298,12 +314,14 @@ class AgentInit:  # pylint: disable=R0902,R0903
         '''Initialize OTLP exporter'''
         try:
             otlp_exporter = OTLPSpanExporter(endpoint=self._config.agent_config.reporting.endpoint,
-                                             insecure=self._config.agent_config.reporting.secure)
+                                             insecure= \
+                                               not self._config.agent_config.reporting.secure)
             span_processor = BatchSpanProcessor(otlp_exporter)
             self._tracer_provider.add_span_processor(span_processor)
 
-            logger.info('Initialized Zipkin exporter')
+            logger.info('Initialized OTLP exporter reporting to `%s`',
+                        self._config.agent_config.reporting.endpoint)
         except Exception as err:  # pylint: disable=W0703
-            logger.error('Failed to register_processor: exception=%s, stacktrace=%s',
+            logger.error('Failed to initialize OTLP exporter: exception=%s, stacktrace=%s',
                          err,
                          traceback.format_exc())
