@@ -1,10 +1,33 @@
-'''Enable instrumentationon all supported modules.'''
-from hypertrace.agent import Agent
+'''Enable instrumentationon all supported modules.''' # pylint: disable=R0401
+import os # pylint: disable=R0401
+import logging
+from hypertrace.agent import Agent # pylint: disable=R0401
+
+# Initialize logger
+logger = logging.getLogger(__name__)  # pylint: disable=C0103
+
+if 'HT_INSTRUMENTED_MODULES' in os.environ:
+    logger.debug("[env] Loaded HT_INSTRUMENTED_MODULES from env")
+    modules_ = os.environ['HT_INSTRUMENTED_MODULES']
+
+modules_array = modules_.split(',')
+
 agent = Agent()
-agent.register_flask_app()
-agent.register_grpc_server()
-agent.register_grpc_client()
-agent.register_mysql()
-agent.register_postgresql()
-agent.register_requests()
-agent.register_aiohttp_client()
+for mod in modules_array:
+    if mod is None or len(mod) == 0:
+        continue
+
+    if mod == 'flask':
+        agent.register_flask_app()
+    if mod == 'grpc:server':
+        agent.register_grpc_server()
+    if mod == 'grpc:client':
+        agent.register_grpc_client()
+    if mod == 'mysql':
+        agent.register_mysql()
+    if mod == 'postgresql':
+        agent.register_postgresql()
+    if mod == 'requests':
+        agent.register_requests()
+    if mod == 'aiohttp-client':
+        agent.register_aiohttp_client()

@@ -11,6 +11,7 @@ from shutil import which
 logger = getLogger(__file__)
 
 def parse_args():
+    '''Parse CLI arguments.'''
     parser = argparse.ArgumentParser(
         description="""
         hypertrace-instrument automatically instruments a Python
@@ -19,14 +20,17 @@ def parse_args():
     )
 
     parser.add_argument("command", help="Your Python application.")
+
     parser.add_argument(
         "command_args",
         help="Arguments for your application.",
         nargs=argparse.REMAINDER,
     )
+
     return parser.parse_args()
 
 def run() -> None:
+    '''hypertrace-instrument Entry point'''
     args = parse_args()
 
     python_path = environ.get("PYTHONPATH")
@@ -48,7 +52,6 @@ def run() -> None:
 
     python_path.insert(0, filedir_path)
     environ["PYTHONPATH"] = pathsep.join(python_path)
-    from flask import Flask
 
     executable = which(args.command)
     execl(executable, executable, *args.command_args)

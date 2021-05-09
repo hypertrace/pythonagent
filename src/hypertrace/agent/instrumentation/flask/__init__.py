@@ -133,12 +133,12 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
 
     def _instrument(self, **kwargs):
         '''Override OTel method that sets up global flask instrumentation'''
-        self._original_flask = flask.Flask
+        self._original_flask = flask.Flask # pylint: disable = W0201
         name_callback = kwargs.get("name_callback")
         tracer_provider = kwargs.get("tracer_provider")
         if callable(name_callback):
             _HypertraceInstrumentedFlask.name_callback = name_callback
-        _HypertraceInstrumentedFlask._tracer_provider = tracer_provider
+        _HypertraceInstrumentedFlask._tracer_provider = tracer_provider # pylint: disable=W0212
         flask.Flask = _HypertraceInstrumentedFlask
 
     # Initialize instrumentation wrapper
