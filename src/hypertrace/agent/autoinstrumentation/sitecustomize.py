@@ -3,16 +3,31 @@ import os # pylint: disable=R0401
 import logging
 from hypertrace.agent import Agent # pylint: disable=R0401
 
+DEFAULTS = [
+    'flask',
+    'mysql',
+    'postgresql',
+    'grpc:server',
+    'grpc:client',
+    'requests',
+    'aiohttp'
+]
+
 # Initialize logger
 logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
+modules_ = ''
 if 'HT_INSTRUMENTED_MODULES' in os.environ:
     logger.debug("[env] Loaded HT_INSTRUMENTED_MODULES from env")
     modules_ = os.environ['HT_INSTRUMENTED_MODULES']
 
 modules_array = modules_.split(',')
 
+if len(modules_array) == 1 and modules_array[0] == '':
+    modules_array = DEFAULTS
+
 agent = Agent()
+
 for mod in modules_array:
     if mod is None or len(mod) == 0:
         continue
