@@ -1,7 +1,7 @@
 '''Enable instrumentationon all supported modules.''' # pylint: disable=R0401
-import os # pylint: disable=R0401
+import os
 import logging
-from hypertrace.agent import Agent # pylint: disable=R0401
+from hypertrace.agent import Agent
 
 DEFAULTS = [
     'flask',
@@ -16,12 +16,12 @@ DEFAULTS = [
 # Initialize logger
 logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
-modules_ = ''
+MODULES = ''
 if 'HT_INSTRUMENTED_MODULES' in os.environ:
     logger.debug("[env] Loaded HT_INSTRUMENTED_MODULES from env")
-    modules_ = os.environ['HT_INSTRUMENTED_MODULES']
+    MODULES = os.environ['HT_INSTRUMENTED_MODULES']
 
-modules_array = modules_.split(',')
+modules_array = MODULES.split(',')
 
 if len(modules_array) == 1 and modules_array[0] == '':
     modules_array = DEFAULTS

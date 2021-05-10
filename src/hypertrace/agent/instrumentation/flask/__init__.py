@@ -1,4 +1,4 @@
-'''Hypertrace flask instrumentor module wrapper.'''
+'''Hypertrace flask instrumentor module wrapper.''' # pylint: disable=R0401
 import sys
 import os.path
 import logging

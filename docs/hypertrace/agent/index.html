@@ -101,7 +101,7 @@ class Agent:
                          err,
                          traceback.format_exc())
 
-    def register_flask_app(self, app: flask.Flask) -&gt; None:
+    def register_flask_app(self, app: flask.Flask = None) -&gt; None:
         &#39;&#39;&#39;Register the flask instrumentation module wrapper&#39;&#39;&#39;
         logger.debug(&#39;Calling Agent.register_flask_app.&#39;)
         if not self.is_enabled():
@@ -219,6 +219,10 @@ class Agent:
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
+<dt><code class="name"><a title="hypertrace.agent.autoinstrumentation" href="autoinstrumentation/index.html">hypertrace.agent.autoinstrumentation</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt><code class="name"><a title="hypertrace.agent.config" href="config/index.html">hypertrace.agent.config</a></code></dt>
 <dd>
 <div class="desc"><p>Agent configuration logic that pull in values from a defaults list,
@@ -321,7 +325,7 @@ environment variables, and the agent-config.yaml file.</p></div>
                          err,
                          traceback.format_exc())
 
-    def register_flask_app(self, app: flask.Flask) -&gt; None:
+    def register_flask_app(self, app: flask.Flask = None) -&gt; None:
         &#39;&#39;&#39;Register the flask instrumentation module wrapper&#39;&#39;&#39;
         logger.debug(&#39;Calling Agent.register_flask_app.&#39;)
         if not self.is_enabled():
@@ -480,7 +484,7 @@ environment variables, and the agent-config.yaml file.</p></div>
 </details>
 </dd>
 <dt id="hypertrace.agent.Agent.register_flask_app"><code class="name flex">
-<span>def <span class="ident">register_flask_app</span></span>(<span>self, app: flask.app.Flask) ‑> NoneType</span>
+<span>def <span class="ident">register_flask_app</span></span>(<span>self, app: flask.app.Flask = None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Register the flask instrumentation module wrapper</p></div>
@@ -488,7 +492,7 @@ environment variables, and the agent-config.yaml file.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def register_flask_app(self, app: flask.Flask) -&gt; None:
+<pre><code class="python">def register_flask_app(self, app: flask.Flask = None) -&gt; None:
     &#39;&#39;&#39;Register the flask instrumentation module wrapper&#39;&#39;&#39;
     logger.debug(&#39;Calling Agent.register_flask_app.&#39;)
     if not self.is_enabled():
@@ -659,6 +663,7 @@ environment variables, and the agent-config.yaml file.</p></div>
 </li>
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
+<li><code><a title="hypertrace.agent.autoinstrumentation" href="autoinstrumentation/index.html">hypertrace.agent.autoinstrumentation</a></code></li>
 <li><code><a title="hypertrace.agent.config" href="config/index.html">hypertrace.agent.config</a></code></li>
 <li><code><a title="hypertrace.agent.constants" href="constants.html">hypertrace.agent.constants</a></code></li>
 <li><code><a title="hypertrace.agent.init" href="init/index.html">hypertrace.agent.init</a></code></li>
