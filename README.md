@@ -41,6 +41,15 @@ agent.registerMySQL() # instrument the MySQL client
 ...
 ```
 
+or
+
+- Use the autoinstrumentation CLI
+```
+HT_INSTRUMENTED_MODULES=flask,mysql
+hypertrace-instrument python app.py
+```
+By default, all supported modules are instrumented.
+
 For further examples, check our [examples section](./examples)
 
 ### Configuration
