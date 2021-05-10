@@ -56,4 +56,5 @@ def run() -> None:
     executable = which(args.command)
     execl(executable, executable, *args.command_args)
 
-run()
+if __name__ == '__main__':
+    run()
