@@ -5,6 +5,7 @@ import inspect
 import traceback
 import json
 import logging
+from hypertrace.agent.config import AgentConfig
 from opentelemetry.trace.span import Span
 
 # Setup logger name
@@ -44,11 +45,13 @@ class BaseInstrumentorWrapper:
         self._process_request_body = False
         self._process_response_body = False
         self._service_name = 'hypertrace-python-agent'
+        self._config = AgentConfig()
+
         if 'HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES' in os.environ \
                 and os.environ["HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES"]:
             self._max_body_size = int(os.environ["HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES"])
         else:
-            self._max_body_size = 128 * 1024
+            self._max_body_size = self._config.agent_config.data_capture.body_max_size_bytes
 
     # Dump object for troubleshooting purposes
     def introspect(self, obj) -> None:
@@ -387,6 +390,8 @@ class BaseInstrumentorWrapper:
             return body
 
     # Return valid json body
+
+
     def valid_body(self, body: str, index: int) -> str:
         """Returns the valid Json body"""
         body = body[0:index]
