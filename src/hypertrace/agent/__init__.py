@@ -58,19 +58,32 @@ logger = setup_custom_logger(__name__)  # pylint: disable=C0103
 
 class Agent:
     '''Top-level entry point for Hypertrace agent.'''
+    _instance = None
+
+    def __new__(cls):
+        '''constructor'''
+        if cls._instance is None:
+            logger.debug('Creating Agent')
+            cls._instance = super(Agent, cls).__new__(cls)
+            cls._instance._initialized = False
+        else:
+            logger.debug('Using existing Agent.')
+        return cls._instance
 
     def __init__(self):
-        '''Constructor'''
-        logger.debug('Initializing Agent.')
-        if not self.is_enabled():
-            return
-        try:
-            self._config = AgentConfig()
-            self._init = AgentInit(self._config)
-        except Exception as err:  # pylint: disable=W0703
-            logger.error('Failed to initialize Agent: exception=%s, stacktrace=%s',
-                         err,
-                         traceback.format_exc())
+        '''Initializer'''
+        if not self._initialized: # pylint: disable=E0203:
+            logger.debug('Initializing Agent.')
+            if not self.is_enabled():
+                return
+            try:
+                self._config = AgentConfig()
+                self._init = AgentInit(self._config)
+                self._initialized = True
+            except Exception as err:  # pylint: disable=W0703
+                logger.error('Failed to initialize Agent: exception=%s, stacktrace=%s',
+                             err,
+                             traceback.format_exc())
 
     def register_flask_app(self, app: flask.Flask = None) -> None:
         '''Register the flask instrumentation module wrapper'''
