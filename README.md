@@ -36,19 +36,21 @@ from hypertrace.agent import Agent
 ...
 
 agent = Agent() # initialize the agent
-agent.registerFlaskApp(app) # instrument a flask application
-agent.registerMySQL() # instrument the MySQL client
+agent.register_flask_app(app) # instrument a flask application
+agent.register_mysql() # instrument the MySQL client
 ...
 ```
 
 or
 
-- Use the autoinstrumentation CLI
+- Use the autoinstrumentation CLI (without any modifiation to application code)
 ```
 HT_INSTRUMENTED_MODULES=flask,mysql
 hypertrace-instrument python app.py
 ```
 By default, all supported modules are instrumented.
+
+Note, do not attempt to instantiate a hypertrace.agent.Agent object while using hypertrace-instrument.
 
 For further examples, check our [examples section](./examples)
 
