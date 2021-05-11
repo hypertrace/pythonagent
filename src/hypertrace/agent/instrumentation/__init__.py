@@ -5,8 +5,9 @@ import inspect
 import traceback
 import json
 import logging
-from hypertrace.agent.config import AgentConfig
 from opentelemetry.trace.span import Span
+from hypertrace.agent.config import AgentConfig
+
 
 # Setup logger name
 logger = logging.getLogger(__name__) # pylint: disable=C0103
