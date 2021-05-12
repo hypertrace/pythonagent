@@ -2,6 +2,7 @@
 import os
 import os.path
 import sys
+import threading
 import logging
 import traceback
 import flask
@@ -59,13 +60,15 @@ logger = setup_custom_logger(__name__)  # pylint: disable=C0103
 class Agent:
     '''Top-level entry point for Hypertrace agent.'''
     _instance = None
+    _singleton_lock = threading.Lock()
 
     def __new__(cls):
         '''constructor'''
         if cls._instance is None:
-            logger.debug('Creating Agent')
-            cls._instance = super(Agent, cls).__new__(cls)
-            cls._instance._initialized = False
+            with cls._singleton_lock:
+                logger.debug('Creating Agent')
+                cls._instance = super(Agent, cls).__new__(cls)
+                cls._instance._initialized = False
         else:
             logger.debug('Using existing Agent.')
         return cls._instance
