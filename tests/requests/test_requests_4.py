@@ -68,10 +68,11 @@ def test_run():
     assert len(span_list) == 1
     logger.debug('span_list: ' + str(span_list[0].attributes))
     requestsSpanAsObject = json.loads(span_list[0].to_json())
+    logger.debug('Received response: ' + requestsSpanAsObject['attributes']['http.response.body'])
     # Check that the expected results are in the flask extended span attributes
     assert requestsSpanAsObject['attributes']['http.method'] == 'GET'
     assert requestsSpanAsObject['attributes']['http.url'] == 'http://localhost:8002/route2'
     assert requestsSpanAsObject['attributes']['http.response.header.content-type'] == 'application/json'
-    assert requestsSpanAsObject['attributes']['http.response.body'] == '{ \"a\": \"a\",\"hypertrace\": \"truncated\"}'
+    assert requestsSpanAsObject['attributes']['http.response.body'] == '{"hypertrace": "truncated",  "a": "a", }'
     assert requestsSpanAsObject['attributes']['http.request.header.x-b3-traceid']
     assert requestsSpanAsObject['attributes']['http.status_code'] == 200

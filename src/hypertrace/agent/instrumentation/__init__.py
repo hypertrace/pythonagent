@@ -392,7 +392,7 @@ class BaseInstrumentorWrapper:
 
     # Return valid json body
 
-    def valid_body(self, body, index) -> str:
+    def valid_body(self, body, index) -> str:  # pylint: disable=C0116,R0912
 
         if len(body) <= index:
             return body
@@ -402,34 +402,34 @@ class BaseInstrumentorWrapper:
 
         body = body[0:index]
 
-        open_bracket = '''[{'''
-        close_bracket = ''']}'''
-        nQuotes = 0
-        nSemicolon = 0
+        # open_bracket = '''[{'''
+        # close_bracket = ''']}'''
+        nquotes = 0
+        nsemicolon = 0
         list_symbols = []
 
         for letter in body:
-            if letter == '{' or letter == '[':
+            if letter == '{' or letter == '[': # pylint: disable=R1714
                 list_symbols.append(letter)
             elif letter == ':':
-                nSemicolon += 1
+                nsemicolon += 1
             elif letter == '"':
-                nQuotes += 1
-            elif letter == '}' or letter == ']':
+                nquotes += 1
+            elif letter == '}' or letter == ']': # pylint: disable=R1714
                 list_symbols = list_symbols[:-1]
 
         closingsymbols = ""
-        nQuotes = nQuotes % 4
+        nquotes = nquotes % 4
 
         if list_symbols[-1] == '{':
-            if nQuotes == 1:
+            if nquotes == 1:
                 closingsymbols = '\": \"'
-            elif nQuotes == 2:
+            elif nquotes == 2:
                 closingsymbols = '\"\"'
-            elif nQuotes == 3:
+            elif nquotes == 3:
                 closingsymbols = '\"'
         elif list_symbols[-1] == '[':
-            if nQuotes == 1 or nQuotes == 3:
+            if nquotes == 1 or nquotes == 3: # pylint: disable=R1714
                 closingsymbols = '\"'
 
         for symbol in reversed(list_symbols):
@@ -445,7 +445,7 @@ class BaseInstrumentorWrapper:
 
         return body
 
-    def is_truncatable(self, payload) -> bool:
+    def is_truncatable(self, payload) -> bool:  # pylint: disable=C0116,R0201
         if payload[0] == '{' or payload[0] == '[':
             return True
 
