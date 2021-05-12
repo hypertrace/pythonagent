@@ -392,16 +392,61 @@ class BaseInstrumentorWrapper:
 
     # Return valid json body
 
+    def valid_body(self, body, index) -> str:
 
-    def valid_body(self, body: str, index: int) -> str:
-        """Returns the valid Json body"""
+        if len(body) <= index:
+            return body
+
+        if not self.is_truncatable(body):
+            return body
+
         body = body[0:index]
-        index = index - 1
-        if not is_json(body):
-            body = body + ',"hypertrace": "truncated"}'
-            if is_json(body):
-                return body
-            if index == 0:
-                return '{"hypertrace": "truncated"}'
-            return self.valid_body(body, index)
+
+        open_bracket = '''[{'''
+        close_bracket = ''']}'''
+        nQuotes = 0
+        nSemicolon = 0
+        list_symbols = []
+
+        for letter in body:
+            if letter == '{' or letter == '[':
+                list_symbols.append(letter)
+            elif letter == ':':
+                nSemicolon += 1
+            elif letter == '"':
+                nQuotes += 1
+            elif letter == '}' or letter == ']':
+                list_symbols = list_symbols[:-1]
+
+        closingsymbols = ""
+        nQuotes = nQuotes % 4
+
+        if list_symbols[-1] == '{':
+            if nQuotes == 1:
+                closingsymbols = '\": \"'
+            elif nQuotes == 2:
+                closingsymbols = '\"\"'
+            elif nQuotes == 3:
+                closingsymbols = '\"'
+        elif list_symbols[-1] == '[':
+            if nQuotes == 1 or nQuotes == 3:
+                closingsymbols = '\"'
+
+        for symbol in reversed(list_symbols):
+            if symbol == '{':
+                closingsymbols += '}'
+            elif symbol == '[':
+                closingsymbols += ']'
+
+        if body[0] == '{':
+            body = '{\"hypertrace\": \"truncated\", ' + body[1:] + closingsymbols
+        elif body[0] == '[':
+            body = '[{\"hypertrace\": \"truncated\"}, ' + body[1:] + closingsymbols
+
         return body
+
+    def is_truncatable(self, payload) -> bool:
+        if payload[0] == '{' or payload[0] == '[':
+            return True
+
+        return False

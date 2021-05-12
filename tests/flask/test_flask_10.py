@@ -126,15 +126,6 @@ def test_run():
     agent.register_processor(simpleExportSpanProcessor)
     logger.info('Added in-memoy span exporter')
 
-    #  # Setup Jaeger Exporter
-    #  logger.info('Adding jaeger span exporter.')
-    #  jaegerExporter = JaegerExporter(
-    #      agent_host_name='localhost',
-    #      agent_port=6831,
-    #  )
-    #  batchExportSpanProcessor = BatchSpanProcessor(jaegerExporter)
-    #  agent.register_processor(batchExportSpanProcessor)
-    #  logger.info('Added jaeger span exporter.')
 
     logger.info('Running test calls.')
     with app.test_client() as c:
@@ -150,14 +141,17 @@ def test_run():
             logger.debug('len(span_list): ' + str(len(span_list)))
             assert len(span_list) == 1
             logger.debug('span_list: ' + str(span_list[0].attributes))
+
             flask_span_as_object = json.loads(span_list[0].to_json())
+            logger.debug('Received response: ' + flask_span_as_object['attributes']['http.response.body'])
             # Check that the expected results are in the flask extended span attributes
             assert flask_span_as_object['attributes']['http.method'] == 'GET'
             assert flask_span_as_object['attributes']['http.target'] == '/route1'
             assert flask_span_as_object['attributes']['http.request.header.tester1'] == 'tester1'
             assert flask_span_as_object['attributes']['http.request.header.tester2'] == 'tester2'
             assert flask_span_as_object['attributes']['http.response.header.content-type'] == 'application/json'
-            assert flask_span_as_object['attributes']['http.response.body'] == '{ "a": "a","hypertrace": "truncated"}'
+
+            assert flask_span_as_object['attributes']['http.response.body'] == '{"hypertrace": "truncated",  "a": "a", }'
             assert flask_span_as_object['attributes']['http.status_code'] == 200
             assert flask_span_as_object['attributes']['http.response.header.tester3'] == 'tester3'
             memoryExporter.clear()
