@@ -151,7 +151,7 @@ def test_run():
             assert flask_span_as_object['attributes']['http.request.header.tester2'] == 'tester2'
             assert flask_span_as_object['attributes']['http.response.header.content-type'] == 'application/json'
 
-            assert flask_span_as_object['attributes']['http.response.body'] == '{"hypertrace": "truncated",  "a": "a", }'
+            assert flask_span_as_object['attributes']['http.response.body'] == '{"hypertrace": "truncated",  "a": "a"}'
             assert flask_span_as_object['attributes']['http.status_code'] == 200
             assert flask_span_as_object['attributes']['http.response.header.tester3'] == 'tester3'
             memoryExporter.clear()

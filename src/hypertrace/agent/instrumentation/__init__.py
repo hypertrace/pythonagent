@@ -409,13 +409,16 @@ class BaseInstrumentorWrapper:
         list_symbols = []
 
         for letter in body:
-            if letter == '{' or letter == '[': # pylint: disable=R1714
+            if letter == '[':
+                list_symbols.append(letter)
+            elif letter == '{':
+                nquotes = 0
                 list_symbols.append(letter)
             elif letter == ':':
                 nsemicolon += 1
             elif letter == '"':
                 nquotes += 1
-            elif letter == '}' or letter == ']': # pylint: disable=R1714
+            elif letter == '}' or letter == ']':# pylint: disable=R1714
                 list_symbols = list_symbols[:-1]
 
         closingsymbols = ""
@@ -437,6 +440,16 @@ class BaseInstrumentorWrapper:
                 closingsymbols += '}'
             elif symbol == '[':
                 closingsymbols += ']'
+
+        nindex = 1
+        for letter in reversed(body):
+            if letter != ',' and letter != ' ':# pylint: disable=R1714
+                break
+        nindex += 1
+
+        body = body[:-nindex]
+
+
 
         if body[0] == '{':
             body = '{\"hypertrace\": \"truncated\", ' + body[1:] + closingsymbols

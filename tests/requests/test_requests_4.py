@@ -73,6 +73,6 @@ def test_run():
     assert requestsSpanAsObject['attributes']['http.method'] == 'GET'
     assert requestsSpanAsObject['attributes']['http.url'] == 'http://localhost:8002/route2'
     assert requestsSpanAsObject['attributes']['http.response.header.content-type'] == 'application/json'
-    assert requestsSpanAsObject['attributes']['http.response.body'] == '{"hypertrace": "truncated",  "a": "a", }'
+    assert requestsSpanAsObject['attributes']['http.response.body'] == '{"hypertrace": "truncated",  "a": "a"}'
     assert requestsSpanAsObject['attributes']['http.request.header.x-b3-traceid']
     assert requestsSpanAsObject['attributes']['http.status_code'] == 200
