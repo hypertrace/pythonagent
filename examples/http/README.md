@@ -1,4 +1,4 @@
-# Pythonagent examples
+# Pythonagent HTTP examples
 
 This folder contains examples for client and server using pythonagent and its instrumentations.
 
