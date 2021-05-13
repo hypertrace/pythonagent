@@ -45,9 +45,8 @@ def update_python_path() -> None:
     # If this directory is already in python_path, remove it.
     python_path = [path for path in python_path if path != cwd_path]
 
-    # If cwd is not in the PYTHONPATH, add it to the front.
-    if cwd_path not in python_path:
-        python_path.insert(0, cwd_path)
+    # Add CWD to the front.
+    python_path.insert(0, cwd_path)
 
     # What is the directory containing this python file?
     filedir_path = dirname(abspath(__file__))
@@ -55,7 +54,7 @@ def update_python_path() -> None:
     # If this directory is already in python_path, remove it.
     python_path = [path for path in python_path if path != filedir_path]
 
-    # If this diretory is not in python_path, add it to the front
+    # Add this directory to the front
     python_path.insert(0, filedir_path)
 
     # Reset PYTHONPATH environment variable
