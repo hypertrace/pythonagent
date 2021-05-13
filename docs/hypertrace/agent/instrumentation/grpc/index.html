@@ -234,8 +234,11 @@ class OpenTelemetryServerInterceptorWrapper(_server.OpenTelemetryServerIntercept
                     logger.debug(&#39;Response Body: %s&#39;, str(response))
                     logger.debug(&#39;Response Headers: %s&#39;,
                                  str(context.get_trailing_metadata()))
-                    self._gisw.generic_rpc_response_handler(
-                        context.get_trailing_metadata()[0], response, span)
+                    trailing_metadata = context.get_trailing_metadata()
+                    if len(trailing_metadata) &gt; 0:
+                        self._gisw.generic_rpc_response_handler(
+                            trailing_metadata[0], response, span)
+
                     return response
                 except Exception as error: # pylint: disable=W0703
                     # Bare exceptions are likely to be gRPC aborts, which
@@ -639,7 +642,8 @@ class OpenTelemetryClientInterceptorWrapper(_client.OpenTelemetryClientIntercept
     ) -&gt; None:
         &#39;&#39;&#39;process streaming request for hypertrace&#39;&#39;&#39;
         logger.debug(
-            &#39;Entering OpenTelemetryClientInterceptorWrapper.intercept_stream().&#39;)</code></pre>
+            &#39;Entering OpenTelemetryClientInterceptorWrapper.intercept_stream().&#39;)
+        # COME_BACK -- need to implement this</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -668,7 +672,8 @@ class OpenTelemetryClientInterceptorWrapper(_client.OpenTelemetryClientIntercept
 ) -&gt; None:
     &#39;&#39;&#39;process streaming request for hypertrace&#39;&#39;&#39;
     logger.debug(
-        &#39;Entering OpenTelemetryClientInterceptorWrapper.intercept_stream().&#39;)</code></pre>
+        &#39;Entering OpenTelemetryClientInterceptorWrapper.intercept_stream().&#39;)
+    # COME_BACK -- need to implement this</code></pre>
 </details>
 </dd>
 <dt id="hypertrace.agent.instrumentation.grpc.OpenTelemetryClientInterceptorWrapper.intercept_unary"><code class="name flex">
@@ -758,8 +763,11 @@ class OpenTelemetryClientInterceptorWrapper(_client.OpenTelemetryClientIntercept
                     logger.debug(&#39;Response Body: %s&#39;, str(response))
                     logger.debug(&#39;Response Headers: %s&#39;,
                                  str(context.get_trailing_metadata()))
-                    self._gisw.generic_rpc_response_handler(
-                        context.get_trailing_metadata()[0], response, span)
+                    trailing_metadata = context.get_trailing_metadata()
+                    if len(trailing_metadata) &gt; 0:
+                        self._gisw.generic_rpc_response_handler(
+                            trailing_metadata[0], response, span)
+
                     return response
                 except Exception as error: # pylint: disable=W0703
                     # Bare exceptions are likely to be gRPC aborts, which
@@ -781,7 +789,8 @@ class OpenTelemetryClientInterceptorWrapper(_client.OpenTelemetryClientIntercept
             context) -&gt; None:
         &#39;&#39;&#39;Setup interceptor helper for streaming requests.&#39;&#39;&#39;
         logger.debug(
-            &#39;Entering OpenTelemetryServerInterceptorWrapper.intercept_server_stream().&#39;)</code></pre>
+            &#39;Entering OpenTelemetryServerInterceptorWrapper.intercept_server_stream().&#39;)
+        # COME_BACK -- need to implement this</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -836,8 +845,11 @@ class OpenTelemetryClientInterceptorWrapper(_client.OpenTelemetryClientIntercept
                 logger.debug(&#39;Response Body: %s&#39;, str(response))
                 logger.debug(&#39;Response Headers: %s&#39;,
                              str(context.get_trailing_metadata()))
-                self._gisw.generic_rpc_response_handler(
-                    context.get_trailing_metadata()[0], response, span)
+                trailing_metadata = context.get_trailing_metadata()
+                if len(trailing_metadata) &gt; 0:
+                    self._gisw.generic_rpc_response_handler(
+                        trailing_metadata[0], response, span)
+
                 return response
             except Exception as error: # pylint: disable=W0703
                 # Bare exceptions are likely to be gRPC aborts, which
