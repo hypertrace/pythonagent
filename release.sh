@@ -27,6 +27,12 @@ function rollback_changes {
     git tag -d $1 # removes local tag
 }
 
+function commit_docs {
+  git status -s
+  git add ./docs
+  git commit -m "docs: update docs";
+}
+
 if [[ -z $1 || "$1" == "--help" ]]; then
     echo "Usage: $0 <version_number>"
     exit 0
@@ -49,7 +55,7 @@ fi
 
 # TODO: add a check for making sure incremental version.
 
-if [ ! -z "$(git status --porcelain)" ]; then 
+if [ ! -z "$(git status --porcelain)" ]; then
     echo "You have uncommitted files. Commit or stash them first."
     exit 1
 fi
@@ -69,7 +75,7 @@ git pull origin $MAIN_BRANCH
 
 # Makes sure docs are up to date
 tox -e pdoc
-git diff-index --quiet HEAD -- || { git add ./docs && git commit -m "docs: update docs"; }
+git diff-index --quiet HEAD ./docs || commit_docs
 
 write_version_file $VERSION $VERSION_FILE
 git add $VERSION_FILE
