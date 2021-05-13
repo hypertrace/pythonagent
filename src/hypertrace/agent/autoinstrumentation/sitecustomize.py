@@ -10,7 +10,7 @@ DEFAULTS = [
   'grpc:server',
   'grpc:client',
   'requests',
-  'aiohttp'
+  'aiohttp-client'
 ]
 
 # Initialize logger
@@ -23,10 +23,9 @@ if 'HT_INSTRUMENTED_MODULES' in os.environ:
     if len(MODULES) > 0:
         MODULES = MODULES.replace(' ', '')
 
-modules_array = MODULES.split(',')
-
-if len(modules_array) == 1 \
-  and modules_array[0] == '':
+if len(MODULES) > 0:
+    modules_array = MODULES.split(',')
+else:
     modules_array = DEFAULTS
 
 # Create Hypertrace agent
