@@ -171,13 +171,16 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
         flask.Flask = _HypertraceInstrumentedFlask
 
     # Initialize instrumentation wrapper
-    def instrument_app(self, app, name_callback=get_default_span_name) -&gt; None:
+    def instrument_app(self,
+                       app,
+                       name_callback=get_default_span_name,
+                       tracer_provider=None) -&gt; None:
         &#39;&#39;&#39;Initialize instrumentation&#39;&#39;&#39;
         logger.debug(&#39;Entering FlaskInstrumentorWrapper.instument_app().&#39;)
         try:
 
             # Call parent class&#39;s initialization
-            super().instrument_app(app, name_callback)
+            super().instrument_app(app, name_callback, tracer_provider)
 
             self._app = app
             # Set pre-request handler
@@ -275,13 +278,16 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
         flask.Flask = _HypertraceInstrumentedFlask
 
     # Initialize instrumentation wrapper
-    def instrument_app(self, app, name_callback=get_default_span_name) -&gt; None:
+    def instrument_app(self,
+                       app,
+                       name_callback=get_default_span_name,
+                       tracer_provider=None) -&gt; None:
         &#39;&#39;&#39;Initialize instrumentation&#39;&#39;&#39;
         logger.debug(&#39;Entering FlaskInstrumentorWrapper.instument_app().&#39;)
         try:
 
             # Call parent class&#39;s initialization
-            super().instrument_app(app, name_callback)
+            super().instrument_app(app, name_callback, tracer_provider)
 
             self._app = app
             # Set pre-request handler
@@ -339,7 +345,7 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
 </details>
 </dd>
 <dt id="hypertrace.agent.instrumentation.flask.FlaskInstrumentorWrapper.instrument_app"><code class="name flex">
-<span>def <span class="ident">instrument_app</span></span>(<span>self, app, name_callback=&lt;function get_default_span_name&gt;) ‑> NoneType</span>
+<span>def <span class="ident">instrument_app</span></span>(<span>self, app, name_callback=&lt;function get_default_span_name&gt;, tracer_provider=None) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Initialize instrumentation</p></div>
@@ -347,13 +353,16 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def instrument_app(self, app, name_callback=get_default_span_name) -&gt; None:
+<pre><code class="python">def instrument_app(self,
+                   app,
+                   name_callback=get_default_span_name,
+                   tracer_provider=None) -&gt; None:
     &#39;&#39;&#39;Initialize instrumentation&#39;&#39;&#39;
     logger.debug(&#39;Entering FlaskInstrumentorWrapper.instument_app().&#39;)
     try:
 
         # Call parent class&#39;s initialization
-        super().instrument_app(app, name_callback)
+        super().instrument_app(app, name_callback, tracer_provider)
 
         self._app = app
         # Set pre-request handler

@@ -33,13 +33,13 @@ import logging
 from hypertrace.agent import Agent
 
 DEFAULTS = [
-    &#39;flask&#39;,
-    &#39;mysql&#39;,
-    &#39;postgresql&#39;,
-    &#39;grpc:server&#39;,
-    &#39;grpc:client&#39;,
-    &#39;requests&#39;,
-    &#39;aiohttp&#39;
+  &#39;flask&#39;,
+  &#39;mysql&#39;,
+  &#39;postgresql&#39;,
+  &#39;grpc:server&#39;,
+  &#39;grpc:client&#39;,
+  &#39;requests&#39;,
+  &#39;aiohttp-client&#39;
 ]
 
 # Initialize logger
@@ -49,32 +49,38 @@ MODULES = &#39;&#39;
 if &#39;HT_INSTRUMENTED_MODULES&#39; in os.environ:
     logger.debug(&#34;[env] Loaded HT_INSTRUMENTED_MODULES from env&#34;)
     MODULES = os.environ[&#39;HT_INSTRUMENTED_MODULES&#39;]
+    if len(MODULES) &gt; 0:
+        MODULES = MODULES.replace(&#39; &#39;, &#39;&#39;)
 
-modules_array = MODULES.split(&#39;,&#39;)
-
-if len(modules_array) == 1 and modules_array[0] == &#39;&#39;:
+if len(MODULES) &gt; 0:
+    modules_array = MODULES.split(&#39;,&#39;)
+else:
     modules_array = DEFAULTS
 
+# Create Hypertrace agent
 agent = Agent()
 
+# Initialize desired instrumentation wrappers
 for mod in modules_array:
     if mod is None or len(mod) == 0:
         continue
 
     if mod == &#39;flask&#39;:
         agent.register_flask_app()
-    if mod == &#39;grpc:server&#39;:
+    elif mod == &#39;grpc:server&#39;:
         agent.register_grpc_server()
-    if mod == &#39;grpc:client&#39;:
+    elif mod == &#39;grpc:client&#39;:
         agent.register_grpc_client()
-    if mod == &#39;mysql&#39;:
+    elif mod == &#39;mysql&#39;:
         agent.register_mysql()
-    if mod == &#39;postgresql&#39;:
+    elif mod == &#39;postgresql&#39;:
         agent.register_postgresql()
-    if mod == &#39;requests&#39;:
+    elif mod == &#39;requests&#39;:
         agent.register_requests()
-    if mod == &#39;aiohttp-client&#39;:
-        agent.register_aiohttp_client()</code></pre>
+    elif mod == &#39;aiohttp-client&#39;:
+        agent.register_aiohttp_client()
+    else:
+        logger.error(&#39;Unknown module name: %s&#39;, mod)</code></pre>
 </details>
 </section>
 <section>

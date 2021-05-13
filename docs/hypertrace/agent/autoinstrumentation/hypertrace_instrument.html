@@ -62,31 +62,50 @@ def parse_args():
 
     return parser.parse_args()
 
+def update_python_path() -&gt; None:
+    &#39;&#39;&#39;Retrieve existing PYTHONPATH&#39;&#39;&#39;
+    python_path = environ.get(&#34;PYTHONPATH&#34;)
+
+    # Split the paths
+    if not python_path:
+        python_path = []
+    else:
+        python_path = python_path.split(pathsep)
+
+    # Get the current working directory
+    cwd_path = getcwd()
+
+    # If this directory is already in python_path, remove it.
+    python_path = [path for path in python_path if path != cwd_path]
+
+    # If cwd is not in the PYTHONPATH, add it to the front.
+    if cwd_path not in python_path:
+        python_path.insert(0, cwd_path)
+
+    # What is the directory containing this python file?
+    filedir_path = dirname(abspath(__file__))
+
+    # If this directory is already in python_path, remove it.
+    python_path = [path for path in python_path if path != filedir_path]
+
+    # If this diretory is not in python_path, add it to the front
+    python_path.insert(0, filedir_path)
+
+    # Reset PYTHONPATH environment variable
+    environ[&#34;PYTHONPATH&#34;] = pathsep.join(python_path)
+
 def run() -&gt; None:
     &#39;&#39;&#39;hypertrace-instrument Entry point&#39;&#39;&#39;
     args = parse_args()
 
-    python_path = environ.get(&#34;PYTHONPATH&#34;)
+    # update PYTHONPATH env var
+    update_python_path()
 
-    if not python_path:
-        python_path = []
-
-    else:
-        python_path = python_path.split(pathsep)
-
-    cwd_path = getcwd()
-
-    if cwd_path not in python_path:
-        python_path.insert(0, cwd_path)
-
-    filedir_path = dirname(abspath(__file__))
-
-    python_path = [path for path in python_path if path != filedir_path]
-
-    python_path.insert(0, filedir_path)
-    environ[&#34;PYTHONPATH&#34;] = pathsep.join(python_path)
-
+    # Get full path to the command that was passed in as an
+    # argument
     executable = which(args.command)
+
+    # Execute the app
     execl(executable, executable, *args.command_args)
 
 if __name__ == &#39;__main__&#39;:
@@ -142,28 +161,57 @@ if __name__ == &#39;__main__&#39;:
     &#39;&#39;&#39;hypertrace-instrument Entry point&#39;&#39;&#39;
     args = parse_args()
 
+    # update PYTHONPATH env var
+    update_python_path()
+
+    # Get full path to the command that was passed in as an
+    # argument
+    executable = which(args.command)
+
+    # Execute the app
+    execl(executable, executable, *args.command_args)</code></pre>
+</details>
+</dd>
+<dt id="hypertrace.agent.autoinstrumentation.hypertrace_instrument.update_python_path"><code class="name flex">
+<span>def <span class="ident">update_python_path</span></span>(<span>) ‑> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Retrieve existing PYTHONPATH</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def update_python_path() -&gt; None:
+    &#39;&#39;&#39;Retrieve existing PYTHONPATH&#39;&#39;&#39;
     python_path = environ.get(&#34;PYTHONPATH&#34;)
 
+    # Split the paths
     if not python_path:
         python_path = []
-
     else:
         python_path = python_path.split(pathsep)
 
+    # Get the current working directory
     cwd_path = getcwd()
 
+    # If this directory is already in python_path, remove it.
+    python_path = [path for path in python_path if path != cwd_path]
+
+    # If cwd is not in the PYTHONPATH, add it to the front.
     if cwd_path not in python_path:
         python_path.insert(0, cwd_path)
 
+    # What is the directory containing this python file?
     filedir_path = dirname(abspath(__file__))
 
+    # If this directory is already in python_path, remove it.
     python_path = [path for path in python_path if path != filedir_path]
 
+    # If this diretory is not in python_path, add it to the front
     python_path.insert(0, filedir_path)
-    environ[&#34;PYTHONPATH&#34;] = pathsep.join(python_path)
 
-    executable = which(args.command)
-    execl(executable, executable, *args.command_args)</code></pre>
+    # Reset PYTHONPATH environment variable
+    environ[&#34;PYTHONPATH&#34;] = pathsep.join(python_path)</code></pre>
 </details>
 </dd>
 </dl>
@@ -186,6 +234,7 @@ if __name__ == &#39;__main__&#39;:
 <ul class="">
 <li><code><a title="hypertrace.agent.autoinstrumentation.hypertrace_instrument.parse_args" href="#hypertrace.agent.autoinstrumentation.hypertrace_instrument.parse_args">parse_args</a></code></li>
 <li><code><a title="hypertrace.agent.autoinstrumentation.hypertrace_instrument.run" href="#hypertrace.agent.autoinstrumentation.hypertrace_instrument.run">run</a></code></li>
+<li><code><a title="hypertrace.agent.autoinstrumentation.hypertrace_instrument.update_python_path" href="#hypertrace.agent.autoinstrumentation.hypertrace_instrument.update_python_path">update_python_path</a></code></li>
 </ul>
 </li>
 </ul>
