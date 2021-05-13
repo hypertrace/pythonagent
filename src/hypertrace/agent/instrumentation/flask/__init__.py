@@ -1,4 +1,4 @@
-'''Hypertrace flask instrumentor module wrapper.'''
+'''Hypertrace flask instrumentor module wrapper.''' # pylint: disable=R0401
 import sys
 import os.path
 import logging
@@ -7,6 +7,7 @@ import traceback
 import json
 import flask
 from opentelemetry.instrumentation.flask import (
+    _InstrumentedFlask,
     FlaskInstrumentor,
     get_default_span_name,
     _teardown_request,
@@ -14,6 +15,8 @@ from opentelemetry.instrumentation.flask import (
 )
 from hypertrace.agent import constants  # pylint: disable=R0801
 from hypertrace.agent.instrumentation import BaseInstrumentorWrapper
+from hypertrace.agent.init import AgentInit
+from hypertrace.agent.config import AgentConfig
 
 # Initialize logger
 logger = logging.getLogger(__name__)  # pylint: disable=C0103
@@ -69,8 +72,6 @@ def _hypertrace_before_request(flask_wrapper):
     return hypertrace_before_request
 
 # Per request post-handler
-
-
 def _hypertrace_after_request(flask_wrapper) -> flask.wrappers.Response:
     '''This function is invoked by flask to set the handler'''
     def hypertrace_after_request(response):
@@ -100,8 +101,26 @@ def _hypertrace_after_request(flask_wrapper) -> flask.wrappers.Response:
 
     return hypertrace_after_request
 
+class _HypertraceInstrumentedFlask(_InstrumentedFlask, BaseInstrumentorWrapper):
+    """Hypertrace Wrapper class around OTel _InstrumentedFlask. This replaces
+    the flask.Flask class definition."""
 
-
+    def __init__(self, *args, **kwargs):
+        _InstrumentedFlask.__init__(self,*args, **kwargs)
+        BaseInstrumentorWrapper.__init__(self)
+        self.before_request(_hypertrace_before_request(self))
+        self.after_request(_hypertrace_after_request(self))
+        config: AgentConfig = AgentConfig()
+        self.set_process_request_headers(
+            config.agent_config.data_capture.http_headers.request)
+        self.set_process_request_body(
+            config.agent_config.data_capture.http_body.request)
+        self.set_process_response_headers(
+            config.agent_config.data_capture.http_headers.response)
+        self.set_process_response_body(
+            config.agent_config.data_capture.http_body.response)
+        self.set_body_max_size(
+            config.agent_config.data_capture.body_max_size_bytes)
 
 # Main Flask Instrumentor Wrapper class.
 class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
@@ -112,11 +131,21 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
         super().__init__()
         self._app = None
 
-
-
+    def _instrument(self, **kwargs):
+        '''Override OTel method that sets up global flask instrumentation'''
+        self._original_flask = flask.Flask # pylint: disable = W0201
+        name_callback = kwargs.get("name_callback")
+        tracer_provider = kwargs.get("tracer_provider")
+        if callable(name_callback):
+            _HypertraceInstrumentedFlask.name_callback = name_callback
+        _HypertraceInstrumentedFlask._tracer_provider = tracer_provider # pylint: disable=W0212
+        flask.Flask = _HypertraceInstrumentedFlask
 
     # Initialize instrumentation wrapper
-    def instrument_app(self, app, name_callback=get_default_span_name) -> None:
+    def instrument_app(self,
+                       app,
+                       name_callback=get_default_span_name,
+                       tracer_provider=None) -> None:
         '''Initialize instrumentation'''
         logger.debug('Entering FlaskInstrumentorWrapper.instument_app().')
         try:

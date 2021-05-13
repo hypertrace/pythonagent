@@ -63,7 +63,6 @@ class AgentInit:  # pylint: disable=R0902,R0903
             &#34;requests&#34;: False,
             &#34;aiohttp_client&#34;: False
         }
-
         self._tracer_provider = None
 
         try:
@@ -152,12 +151,30 @@ class AgentInit:  # pylint: disable=R0902,R0903
         &#39;&#39;&#39;Creates a flask instrumentation wrapper using the config defined in hypertraceconfig&#39;&#39;&#39;
         logger.debug(&#39;Calling AgentInit.flaskInit().&#39;)
         try:
+            if self.is_registered(&#39;flask&#39;):
+                return
             from hypertrace.agent.instrumentation.flask import FlaskInstrumentorWrapper  # pylint: disable=C0415
             self._modules_initialized[&#39;flask&#39;] = True
             self._flask_instrumentor_wrapper = FlaskInstrumentorWrapper()
-            self._flask_instrumentor_wrapper.instrument_app(app)
+            call_default_instrumentor = True
+            # There are two ways to initialize the flask instrumenation
+            # wrapper. The first (and original way) instruments the specific
+            # Flask object that is passed in). The second way is to globally
+            # replace the Flask class definition with the hypertrace instrumentation
+            # wrapper class.
+            #
+            # If an app object is provided, then the flask wrapper is initialized
+            # by calling the instrument_app method. Then, there is no need to call
+            # instrument() (so, we pass False as the second argument to
+            # self.init_instrumentor_wrapper_base_for_http().
+            #
+            # If no app object was provided, then instrument() is called.
+            if app:
+                self._flask_instrumentor_wrapper.instrument_app(app)
+                call_default_instrumentor = False
             self.init_instrumentor_wrapper_base_for_http(
-                self._flask_instrumentor_wrapper)
+                self._flask_instrumentor_wrapper,
+                call_default_instrumentor)
         except Exception as err:  # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
                          &#39;flask&#39;,
@@ -168,6 +185,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
         &#39;&#39;&#39;Creates a grpc server wrapper based on hypertrace config&#39;&#39;&#39;
         logger.debug(&#39;Calling AgentInit.grpcServerInit&#39;)
         try:
+            if self.is_registered(&#39;grpc:server&#39;):
+                return
             from hypertrace.agent.instrumentation.grpc import (  # pylint: disable=C0415
                 GrpcInstrumentorServerWrapper
             )
@@ -195,6 +214,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
         &#39;&#39;&#39;Creates a grpc client wrapper using the config defined in hypertraceconfig&#39;&#39;&#39;
         logger.debug(&#39;Calling AgentInit.grpcClientInit&#39;)
         try:
+            if self.is_registered(&#39;grpc:client&#39;):
+                return
             from hypertrace.agent.instrumentation.grpc import (  # pylint: disable=C0415
                 GrpcInstrumentorClientWrapper
             )
@@ -223,6 +244,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
         &#39;&#39;&#39;Creates a mysql server wrapper using the config defined in hypertraceconfig&#39;&#39;&#39;
         logger.debug(&#39;Calling AgentInit.mysqlInit()&#39;)
         try:
+            if self.is_registered(&#39;mysql&#39;):
+                return
             from hypertrace.agent.instrumentation.mysql import (  # pylint: disable=C0415
                 MySQLInstrumentorWrapper
             )
@@ -241,6 +264,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
         &#39;&#39;&#39;Creates a postgresql client wrapper using the config defined in hypertraceconfig&#39;&#39;&#39;
         logger.debug(&#39;Calling AgentInit.postgreSQLInit()&#39;)
         try:
+            if self.is_registered(&#39;postgresql&#39;):
+                return
             from hypertrace.agent.instrumentation.postgresql import (  # pylint: disable=C0415
                 PostgreSQLInstrumentorWrapper
             )
@@ -259,6 +284,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
         &#39;&#39;&#39;Creates a requests client wrapper using the config defined in hypertraceconfig&#39;&#39;&#39;
         logger.debug(&#39;Calling AgentInit.requestsInit()&#39;)
         try:
+            if self.is_registered(&#39;requests&#39;):
+                return
             from hypertrace.agent.instrumentation.requests import (  # pylint: disable=C0415
                 RequestsInstrumentorWrapper
             )
@@ -277,6 +304,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
         &#39;&#39;&#39;Creates an aiohttp-client wrapper using the config defined in hypertraceconfig&#39;&#39;&#39;
         logger.debug(&#39;Calling AgentInit.aioHttpClientInit()&#39;)
         try:
+            if self.is_registered(&#39;aiohttp_client&#39;):
+                return
             from hypertrace.agent.instrumentation.aiohttp import (  # pylint: disable=C0415
                 AioHttpClientInstrumentorWrapper
             )
@@ -291,10 +320,13 @@ class AgentInit:  # pylint: disable=R0902,R0903
                          traceback.format_exc())
 
     # Common wrapper initialization logic
-    def init_instrumentor_wrapper_base_for_http(self, instrumentor) -&gt; None:
+    def init_instrumentor_wrapper_base_for_http(self,
+                                                instrumentor,
+                                                call_instrument: bool = True) -&gt; None:
         &#39;&#39;&#39;Common wrapper initialization logic&#39;&#39;&#39;
         logger.debug(&#39;Calling AgentInit.initInstrumentorWrapperBaseForHTTP().&#39;)
-        instrumentor.instrument()
+        if call_instrument:
+            instrumentor.instrument()
         instrumentor.set_process_request_headers(
             self._config.agent_config.data_capture.http_headers.request)
         instrumentor.set_process_request_body(
@@ -352,7 +384,14 @@ class AgentInit:  # pylint: disable=R0902,R0903
         except Exception as err:  # pylint: disable=W0703
             logger.error(&#39;Failed to initialize OTLP exporter: exception=%s, stacktrace=%s&#39;,
                          err,
-                         traceback.format_exc())</code></pre>
+                         traceback.format_exc())
+
+    def is_registered(self, module: str) -&gt; bool:
+        &#39;&#39;&#39;Is an instrumentation module already registered?&#39;&#39;&#39;
+        try:
+            return self._modules_initialized[module]
+        except Exception as err: # pylint: disable=W0703,W0612
+            return False</code></pre>
 </details>
 </section>
 <section>
@@ -391,7 +430,6 @@ class AgentInit:  # pylint: disable=R0902,R0903
             &#34;requests&#34;: False,
             &#34;aiohttp_client&#34;: False
         }
-
         self._tracer_provider = None
 
         try:
@@ -480,12 +518,30 @@ class AgentInit:  # pylint: disable=R0902,R0903
         &#39;&#39;&#39;Creates a flask instrumentation wrapper using the config defined in hypertraceconfig&#39;&#39;&#39;
         logger.debug(&#39;Calling AgentInit.flaskInit().&#39;)
         try:
+            if self.is_registered(&#39;flask&#39;):
+                return
             from hypertrace.agent.instrumentation.flask import FlaskInstrumentorWrapper  # pylint: disable=C0415
             self._modules_initialized[&#39;flask&#39;] = True
             self._flask_instrumentor_wrapper = FlaskInstrumentorWrapper()
-            self._flask_instrumentor_wrapper.instrument_app(app)
+            call_default_instrumentor = True
+            # There are two ways to initialize the flask instrumenation
+            # wrapper. The first (and original way) instruments the specific
+            # Flask object that is passed in). The second way is to globally
+            # replace the Flask class definition with the hypertrace instrumentation
+            # wrapper class.
+            #
+            # If an app object is provided, then the flask wrapper is initialized
+            # by calling the instrument_app method. Then, there is no need to call
+            # instrument() (so, we pass False as the second argument to
+            # self.init_instrumentor_wrapper_base_for_http().
+            #
+            # If no app object was provided, then instrument() is called.
+            if app:
+                self._flask_instrumentor_wrapper.instrument_app(app)
+                call_default_instrumentor = False
             self.init_instrumentor_wrapper_base_for_http(
-                self._flask_instrumentor_wrapper)
+                self._flask_instrumentor_wrapper,
+                call_default_instrumentor)
         except Exception as err:  # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
                          &#39;flask&#39;,
@@ -496,6 +552,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
         &#39;&#39;&#39;Creates a grpc server wrapper based on hypertrace config&#39;&#39;&#39;
         logger.debug(&#39;Calling AgentInit.grpcServerInit&#39;)
         try:
+            if self.is_registered(&#39;grpc:server&#39;):
+                return
             from hypertrace.agent.instrumentation.grpc import (  # pylint: disable=C0415
                 GrpcInstrumentorServerWrapper
             )
@@ -523,6 +581,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
         &#39;&#39;&#39;Creates a grpc client wrapper using the config defined in hypertraceconfig&#39;&#39;&#39;
         logger.debug(&#39;Calling AgentInit.grpcClientInit&#39;)
         try:
+            if self.is_registered(&#39;grpc:client&#39;):
+                return
             from hypertrace.agent.instrumentation.grpc import (  # pylint: disable=C0415
                 GrpcInstrumentorClientWrapper
             )
@@ -551,6 +611,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
         &#39;&#39;&#39;Creates a mysql server wrapper using the config defined in hypertraceconfig&#39;&#39;&#39;
         logger.debug(&#39;Calling AgentInit.mysqlInit()&#39;)
         try:
+            if self.is_registered(&#39;mysql&#39;):
+                return
             from hypertrace.agent.instrumentation.mysql import (  # pylint: disable=C0415
                 MySQLInstrumentorWrapper
             )
@@ -569,6 +631,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
         &#39;&#39;&#39;Creates a postgresql client wrapper using the config defined in hypertraceconfig&#39;&#39;&#39;
         logger.debug(&#39;Calling AgentInit.postgreSQLInit()&#39;)
         try:
+            if self.is_registered(&#39;postgresql&#39;):
+                return
             from hypertrace.agent.instrumentation.postgresql import (  # pylint: disable=C0415
                 PostgreSQLInstrumentorWrapper
             )
@@ -587,6 +651,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
         &#39;&#39;&#39;Creates a requests client wrapper using the config defined in hypertraceconfig&#39;&#39;&#39;
         logger.debug(&#39;Calling AgentInit.requestsInit()&#39;)
         try:
+            if self.is_registered(&#39;requests&#39;):
+                return
             from hypertrace.agent.instrumentation.requests import (  # pylint: disable=C0415
                 RequestsInstrumentorWrapper
             )
@@ -605,6 +671,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
         &#39;&#39;&#39;Creates an aiohttp-client wrapper using the config defined in hypertraceconfig&#39;&#39;&#39;
         logger.debug(&#39;Calling AgentInit.aioHttpClientInit()&#39;)
         try:
+            if self.is_registered(&#39;aiohttp_client&#39;):
+                return
             from hypertrace.agent.instrumentation.aiohttp import (  # pylint: disable=C0415
                 AioHttpClientInstrumentorWrapper
             )
@@ -619,10 +687,13 @@ class AgentInit:  # pylint: disable=R0902,R0903
                          traceback.format_exc())
 
     # Common wrapper initialization logic
-    def init_instrumentor_wrapper_base_for_http(self, instrumentor) -&gt; None:
+    def init_instrumentor_wrapper_base_for_http(self,
+                                                instrumentor,
+                                                call_instrument: bool = True) -&gt; None:
         &#39;&#39;&#39;Common wrapper initialization logic&#39;&#39;&#39;
         logger.debug(&#39;Calling AgentInit.initInstrumentorWrapperBaseForHTTP().&#39;)
-        instrumentor.instrument()
+        if call_instrument:
+            instrumentor.instrument()
         instrumentor.set_process_request_headers(
             self._config.agent_config.data_capture.http_headers.request)
         instrumentor.set_process_request_body(
@@ -680,7 +751,14 @@ class AgentInit:  # pylint: disable=R0902,R0903
         except Exception as err:  # pylint: disable=W0703
             logger.error(&#39;Failed to initialize OTLP exporter: exception=%s, stacktrace=%s&#39;,
                          err,
-                         traceback.format_exc())</code></pre>
+                         traceback.format_exc())
+
+    def is_registered(self, module: str) -&gt; bool:
+        &#39;&#39;&#39;Is an instrumentation module already registered?&#39;&#39;&#39;
+        try:
+            return self._modules_initialized[module]
+        except Exception as err: # pylint: disable=W0703,W0612
+            return False</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
@@ -697,6 +775,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
     &#39;&#39;&#39;Creates an aiohttp-client wrapper using the config defined in hypertraceconfig&#39;&#39;&#39;
     logger.debug(&#39;Calling AgentInit.aioHttpClientInit()&#39;)
     try:
+        if self.is_registered(&#39;aiohttp_client&#39;):
+            return
         from hypertrace.agent.instrumentation.aiohttp import (  # pylint: disable=C0415
             AioHttpClientInstrumentorWrapper
         )
@@ -760,12 +840,30 @@ class AgentInit:  # pylint: disable=R0902,R0903
     &#39;&#39;&#39;Creates a flask instrumentation wrapper using the config defined in hypertraceconfig&#39;&#39;&#39;
     logger.debug(&#39;Calling AgentInit.flaskInit().&#39;)
     try:
+        if self.is_registered(&#39;flask&#39;):
+            return
         from hypertrace.agent.instrumentation.flask import FlaskInstrumentorWrapper  # pylint: disable=C0415
         self._modules_initialized[&#39;flask&#39;] = True
         self._flask_instrumentor_wrapper = FlaskInstrumentorWrapper()
-        self._flask_instrumentor_wrapper.instrument_app(app)
+        call_default_instrumentor = True
+        # There are two ways to initialize the flask instrumenation
+        # wrapper. The first (and original way) instruments the specific
+        # Flask object that is passed in). The second way is to globally
+        # replace the Flask class definition with the hypertrace instrumentation
+        # wrapper class.
+        #
+        # If an app object is provided, then the flask wrapper is initialized
+        # by calling the instrument_app method. Then, there is no need to call
+        # instrument() (so, we pass False as the second argument to
+        # self.init_instrumentor_wrapper_base_for_http().
+        #
+        # If no app object was provided, then instrument() is called.
+        if app:
+            self._flask_instrumentor_wrapper.instrument_app(app)
+            call_default_instrumentor = False
         self.init_instrumentor_wrapper_base_for_http(
-            self._flask_instrumentor_wrapper)
+            self._flask_instrumentor_wrapper,
+            call_default_instrumentor)
     except Exception as err:  # pylint: disable=W0703
         logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
                      &#39;flask&#39;,
@@ -786,6 +884,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
     &#39;&#39;&#39;Creates a grpc client wrapper using the config defined in hypertraceconfig&#39;&#39;&#39;
     logger.debug(&#39;Calling AgentInit.grpcClientInit&#39;)
     try:
+        if self.is_registered(&#39;grpc:client&#39;):
+            return
         from hypertrace.agent.instrumentation.grpc import (  # pylint: disable=C0415
             GrpcInstrumentorClientWrapper
         )
@@ -823,6 +923,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
     &#39;&#39;&#39;Creates a grpc server wrapper based on hypertrace config&#39;&#39;&#39;
     logger.debug(&#39;Calling AgentInit.grpcServerInit&#39;)
     try:
+        if self.is_registered(&#39;grpc:server&#39;):
+            return
         from hypertrace.agent.instrumentation.grpc import (  # pylint: disable=C0415
             GrpcInstrumentorServerWrapper
         )
@@ -859,6 +961,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
     &#39;&#39;&#39;Creates a mysql server wrapper using the config defined in hypertraceconfig&#39;&#39;&#39;
     logger.debug(&#39;Calling AgentInit.mysqlInit()&#39;)
     try:
+        if self.is_registered(&#39;mysql&#39;):
+            return
         from hypertrace.agent.instrumentation.mysql import (  # pylint: disable=C0415
             MySQLInstrumentorWrapper
         )
@@ -886,6 +990,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
     &#39;&#39;&#39;Creates a postgresql client wrapper using the config defined in hypertraceconfig&#39;&#39;&#39;
     logger.debug(&#39;Calling AgentInit.postgreSQLInit()&#39;)
     try:
+        if self.is_registered(&#39;postgresql&#39;):
+            return
         from hypertrace.agent.instrumentation.postgresql import (  # pylint: disable=C0415
             PostgreSQLInstrumentorWrapper
         )
@@ -913,6 +1019,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
     &#39;&#39;&#39;Creates a requests client wrapper using the config defined in hypertraceconfig&#39;&#39;&#39;
     logger.debug(&#39;Calling AgentInit.requestsInit()&#39;)
     try:
+        if self.is_registered(&#39;requests&#39;):
+            return
         from hypertrace.agent.instrumentation.requests import (  # pylint: disable=C0415
             RequestsInstrumentorWrapper
         )
@@ -928,7 +1036,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
 </details>
 </dd>
 <dt id="hypertrace.agent.init.AgentInit.init_instrumentor_wrapper_base_for_http"><code class="name flex">
-<span>def <span class="ident">init_instrumentor_wrapper_base_for_http</span></span>(<span>self, instrumentor) ‑> NoneType</span>
+<span>def <span class="ident">init_instrumentor_wrapper_base_for_http</span></span>(<span>self, instrumentor, call_instrument: bool = True) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Common wrapper initialization logic</p></div>
@@ -936,10 +1044,13 @@ class AgentInit:  # pylint: disable=R0902,R0903
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def init_instrumentor_wrapper_base_for_http(self, instrumentor) -&gt; None:
+<pre><code class="python">def init_instrumentor_wrapper_base_for_http(self,
+                                            instrumentor,
+                                            call_instrument: bool = True) -&gt; None:
     &#39;&#39;&#39;Common wrapper initialization logic&#39;&#39;&#39;
     logger.debug(&#39;Calling AgentInit.initInstrumentorWrapperBaseForHTTP().&#39;)
-    instrumentor.instrument()
+    if call_instrument:
+        instrumentor.instrument()
     instrumentor.set_process_request_headers(
         self._config.agent_config.data_capture.http_headers.request)
     instrumentor.set_process_request_body(
@@ -1014,6 +1125,23 @@ class AgentInit:  # pylint: disable=R0902,R0903
     trace.set_tracer_provider(self._tracer_provider)</code></pre>
 </details>
 </dd>
+<dt id="hypertrace.agent.init.AgentInit.is_registered"><code class="name flex">
+<span>def <span class="ident">is_registered</span></span>(<span>self, module: str) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Is an instrumentation module already registered?</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_registered(self, module: str) -&gt; bool:
+    &#39;&#39;&#39;Is an instrumentation module already registered?&#39;&#39;&#39;
+    try:
+        return self._modules_initialized[module]
+    except Exception as err: # pylint: disable=W0703,W0612
+        return False</code></pre>
+</details>
+</dd>
 <dt id="hypertrace.agent.init.AgentInit.register_processor"><code class="name flex">
 <span>def <span class="ident">register_processor</span></span>(<span>self, processor) ‑> NoneType</span>
 </code></dt>
@@ -1081,6 +1209,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
 <li><code><a title="hypertrace.agent.init.AgentInit.init_instrumentor_wrapper_base_for_http" href="#hypertrace.agent.init.AgentInit.init_instrumentor_wrapper_base_for_http">init_instrumentor_wrapper_base_for_http</a></code></li>
 <li><code><a title="hypertrace.agent.init.AgentInit.init_propagation" href="#hypertrace.agent.init.AgentInit.init_propagation">init_propagation</a></code></li>
 <li><code><a title="hypertrace.agent.init.AgentInit.init_trace_provider" href="#hypertrace.agent.init.AgentInit.init_trace_provider">init_trace_provider</a></code></li>
+<li><code><a title="hypertrace.agent.init.AgentInit.is_registered" href="#hypertrace.agent.init.AgentInit.is_registered">is_registered</a></code></li>
 <li><code><a title="hypertrace.agent.init.AgentInit.register_processor" href="#hypertrace.agent.init.AgentInit.register_processor">register_processor</a></code></li>
 <li><code><a title="hypertrace.agent.init.AgentInit.set_console_span_processor" href="#hypertrace.agent.init.AgentInit.set_console_span_processor">set_console_span_processor</a></code></li>
 </ul>

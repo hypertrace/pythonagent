@@ -2,6 +2,7 @@
 import os
 import os.path
 import sys
+import threading
 import logging
 import traceback
 import flask
@@ -17,8 +18,6 @@ def setup_custom_logger(name: str) -> logging.Logger:
     try:
         formatter = logging.Formatter(fmt='%(asctime)s %(levelname)-8s %(message)s',
                                       datefmt='%Y-%m-%d %H:%M:%S')
-        handler = logging.FileHandler('agent.log', mode='a')
-        handler.setFormatter(formatter)
         screen_handler = logging.StreamHandler(stream=sys.stdout)
         screen_handler.setFormatter(formatter)
         log_level = logging.INFO
@@ -40,7 +39,6 @@ def setup_custom_logger(name: str) -> logging.Logger:
             if ht_log_level == 'NOTSET':
                 log_level = logging.NOTSET
         logger_.setLevel(log_level)
-        logger_.addHandler(handler)
         logger_.addHandler(screen_handler)
         return logger_
     except Exception as err:  # pylint: disable=W0703
@@ -58,21 +56,36 @@ logger = setup_custom_logger(__name__)  # pylint: disable=C0103
 
 class Agent:
     '''Top-level entry point for Hypertrace agent.'''
+    _instance = None
+    _singleton_lock = threading.Lock()
+
+    def __new__(cls):
+        '''constructor'''
+        if cls._instance is None:
+            with cls._singleton_lock:
+                logger.debug('Creating Agent')
+                cls._instance = super(Agent, cls).__new__(cls)
+                cls._instance._initialized = False
+        else:
+            logger.debug('Using existing Agent.')
+        return cls._instance
 
     def __init__(self):
-        '''Constructor'''
-        logger.debug('Initializing Agent.')
-        if not self.is_enabled():
-            return
-        try:
-            self._config = AgentConfig()
-            self._init = AgentInit(self._config)
-        except Exception as err:  # pylint: disable=W0703
-            logger.error('Failed to initialize Agent: exception=%s, stacktrace=%s',
-                         err,
-                         traceback.format_exc())
+        '''Initializer'''
+        if not self._initialized: # pylint: disable=E0203:
+            logger.debug('Initializing Agent.')
+            if not self.is_enabled():
+                return
+            try:
+                self._config = AgentConfig()
+                self._init = AgentInit(self._config)
+                self._initialized = True
+            except Exception as err:  # pylint: disable=W0703
+                logger.error('Failed to initialize Agent: exception=%s, stacktrace=%s',
+                             err,
+                             traceback.format_exc())
 
-    def register_flask_app(self, app: flask.Flask) -> None:
+    def register_flask_app(self, app: flask.Flask = None) -> None:
         '''Register the flask instrumentation module wrapper'''
         logger.debug('Calling Agent.register_flask_app.')
         if not self.is_enabled():

@@ -18,7 +18,7 @@ def load_config_from_file(filepath):
     try:
         path = os.path.abspath(filepath)
 
-        file = open(path, 'r')
+        file = open(path, 'r') # pylint: disable=R1732
         from_file_config = yaml.load(file, Loader=yaml.FullLoader)
         file.close()
 
