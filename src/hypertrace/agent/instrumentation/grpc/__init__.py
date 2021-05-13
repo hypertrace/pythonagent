@@ -207,7 +207,8 @@ class OpenTelemetryServerInterceptorWrapper(_server.OpenTelemetryServerIntercept
                                  str(context.get_trailing_metadata()))
                     trailing_metadata = context.get_trailing_metadata()
                     if len(trailing_metadata) > 0:
-                        self._gisw.generic_rpc_response_handler(trailing_metadata[0], response, span)
+                        self._gisw.generic_rpc_response_handler(
+                            trailing_metadata[0], response, span)
 
                     return response
                 except Exception as error: # pylint: disable=W0703
