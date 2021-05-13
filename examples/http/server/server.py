@@ -31,7 +31,7 @@ def insert_user(name: str) -> int:
     query = "INSERT INTO users (`name`) VALUES (%s)"
     cursor.execute(query, (name,))
     id = cursor.lastrowid
-    cursos.close()
+    cursor.close()
     cnx.close()
     return id
 
