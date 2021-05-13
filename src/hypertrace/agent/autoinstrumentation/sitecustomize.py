@@ -4,13 +4,13 @@ import logging
 from hypertrace.agent import Agent
 
 DEFAULTS = [
-    'flask',
-    'mysql',
-    'postgresql',
-    'grpc:server',
-    'grpc:client',
-    'requests',
-    'aiohttp'
+  'flask',
+  'mysql',
+  'postgresql',
+  'grpc:server',
+  'grpc:client',
+  'requests',
+  'aiohttp'
 ]
 
 # Initialize logger
@@ -20,29 +20,36 @@ MODULES = ''
 if 'HT_INSTRUMENTED_MODULES' in os.environ:
     logger.debug("[env] Loaded HT_INSTRUMENTED_MODULES from env")
     MODULES = os.environ['HT_INSTRUMENTED_MODULES']
+    if len(MODULES) > 0:
+        MODULES = MODULES.replace(' ', '')
 
 modules_array = MODULES.split(',')
 
-if len(modules_array) == 1 and modules_array[0] == '':
+if len(modules_array) == 1 \
+  and modules_array[0] == '':
     modules_array = DEFAULTS
 
+# Create Hypertrace agent
 agent = Agent()
 
+# Initialize desired instrumentation wrappers
 for mod in modules_array:
     if mod is None or len(mod) == 0:
         continue
 
     if mod == 'flask':
         agent.register_flask_app()
-    if mod == 'grpc:server':
+    elif mod == 'grpc:server':
         agent.register_grpc_server()
-    if mod == 'grpc:client':
+    elif mod == 'grpc:client':
         agent.register_grpc_client()
-    if mod == 'mysql':
+    elif mod == 'mysql':
         agent.register_mysql()
-    if mod == 'postgresql':
+    elif mod == 'postgresql':
         agent.register_postgresql()
-    if mod == 'requests':
+    elif mod == 'requests':
         agent.register_requests()
-    if mod == 'aiohttp-client':
+    elif mod == 'aiohttp-client':
         agent.register_aiohttp_client()
+    else:
+        logger.error('Unknown module name: %s', mod)
