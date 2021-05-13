@@ -151,7 +151,7 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
         try:
 
             # Call parent class's initialization
-            super().instrument_app(app, name_callback, tracer_provider)
+            super().instrument_app(app, name_callback)
 
             self._app = app
             # Set pre-request handler
