@@ -127,10 +127,25 @@ class AgentInit:  # pylint: disable=R0902,R0903
             from hypertrace.agent.instrumentation.flask import FlaskInstrumentorWrapper  # pylint: disable=C0415
             self._modules_initialized['flask'] = True
             self._flask_instrumentor_wrapper = FlaskInstrumentorWrapper()
+            call_default_instrumentor = True
+            # There are two ways to initialize the flask instrumenation
+            # wrapper. The first (and original way) instruments the specific
+            # Flask object that is passed in). The second way is to globally
+            # replace the Flask class definition with the hypertrace instrumentation
+            # wrapper class.
+            #
+            # If an app object is provided, then the flask wrapper is initialized
+            # by calling the instrument_app method. Then, there is no need to call
+            # instrument() (so, we pass False as the second argument to
+            # self.init_instrumentor_wrapper_base_for_http().
+            #
+            # If no app object was provided, then instrument() is called.
             if app:
                 self._flask_instrumentor_wrapper.instrument_app(app)
+                call_default_instrumentor = False
             self.init_instrumentor_wrapper_base_for_http(
-                self._flask_instrumentor_wrapper)
+                self._flask_instrumentor_wrapper,
+                call_default_instrumentor)
         except Exception as err:  # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
                          'flask',
