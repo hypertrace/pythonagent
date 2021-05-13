@@ -30,7 +30,7 @@ function rollback_changes {
 function commit_docs {
   git status -s
   git add ./docs
-  git commit -m "docs: update docs";
+  git commit -m "docs: update docs" || true
 }
 
 if [[ -z $1 || "$1" == "--help" ]]; then
