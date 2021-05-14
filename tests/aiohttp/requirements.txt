@@ -64,7 +64,6 @@ Markdown==3.3.4
 MarkupSafe==1.1.1
 marshmallow==3.11.1
 mccabe==0.6.1
-meld==3.20.2
 mock==4.0.3
 multidict==5.1.0
 mysql-connector-python==8.0.23
