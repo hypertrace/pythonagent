@@ -148,7 +148,6 @@ rsa==3.4.2
 s3transfer==0.3.3
 SecretStorage==3.3.1
 six==1.16.0
-sos==3.8
 soupsieve==1.9.2
 systemd-python==234
 Tempita==0.5.1
