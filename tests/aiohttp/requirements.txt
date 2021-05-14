@@ -60,7 +60,6 @@ langtable==0.0.52
 lazy-object-proxy==1.4.3
 Logentries==0.17
 lxml==4.4.0
-Mako==1.1.0.dev0
 Markdown==3.3.4
 MarkupSafe==1.1.1
 marshmallow==3.11.1
