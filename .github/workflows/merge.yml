@@ -62,6 +62,9 @@ jobs:
           pip install --upgrade --no-input pip
           pip install --upgrade --no-input protobuf
 
+      - name: Install pytest-asyncio
+        run: sudo pip install pytest-asyncio
+
       - name: Run tests
         run: PYTHON_VERSION=${{ matrix.python }} make test
 
