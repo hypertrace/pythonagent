@@ -147,7 +147,6 @@ rfc3986==1.4.0
 rsa==3.4.2
 s3transfer==0.3.3
 SecretStorage==3.3.1
-selinux==2.9
 sepolicy==1.1
 setools==4.2.2
 simpleline==1.6
