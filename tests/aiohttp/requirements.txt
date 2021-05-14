@@ -104,7 +104,6 @@ ply==3.11
 productmd==1.28
 protolint==1.1.4
 psycopg2-binary==2.8.6
-py==1.10.0
 pyasn1==0.4.4
 pycairo==1.18.1
 pycodestyle==2.7.0
