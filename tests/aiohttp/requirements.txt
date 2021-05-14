@@ -144,7 +144,6 @@ requests-file==1.4.3
 requests-ftp==0.3.1
 requests-toolbelt==0.9.1
 rfc3986==1.4.0
-rpm==4.15.1
 rsa==3.4.2
 s3transfer==0.3.3
 SecretStorage==3.3.1
