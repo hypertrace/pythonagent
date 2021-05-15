@@ -58,6 +58,11 @@ jobs:
           pip uninstall --yes protobuf python3-protobuf
           pip install --upgrade --no-input pip
           pip install --upgrade --no-input protobuf
+          
+      # while pytest-asyncio is listed in the integration tests deps, we see this missing when
+      # running the test, hence we force the install.
+      - name: Force install pytest-asyncio
+        run: sudo pip install pytest-asyncio
 
       - name: Run tests
         run: PYTHON_VERSION=${{ matrix.python }} make test
