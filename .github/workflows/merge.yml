@@ -40,7 +40,7 @@ jobs:
       - name: Install pip
         run: |
           sudo apt-get install python3-pip
-          sudo pip install --upgrade pip
+#          sudo pip install --upgrade pip
 
       - name: Install pip build
         run: python3 -m pip install --upgrade build
