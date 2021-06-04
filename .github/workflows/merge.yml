@@ -66,7 +66,7 @@ jobs:
         run: sudo pip install pytest-asyncio
 
       - name: Run tests
-        run: PYTHON_VERSION=${{ matrix.python }} make test
+        run: PYTHON_VERSION=${{ matrix.python-version }} make test
 
       - name: Build package
         run: make build
