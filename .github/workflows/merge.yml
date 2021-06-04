@@ -34,7 +34,7 @@ jobs:
           sudo apt install software-properties-common
           sudo add-apt-repository ppa:deadsnakes/ppa -y
           sudo apt-get install python${{ matrix.python-version }}
-          python`echo ${{ matrix.python-version }} | sed 's/\.//g'` --version
+          python${{ matrix.python-version }} --version
 
       - name: Install pip
         run: |
