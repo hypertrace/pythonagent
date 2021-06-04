@@ -12,7 +12,7 @@ test-unit:
 
 .PHONY: test-integration
 test-integration:
-	@echo "Running integration tests over $(PY_TARGET) with LOG_LEVEL=$(LOG_LEVEL)" 
+	@echo "Running integration tests over $(PY_TARGET) with LOG_LEVEL=$(LOG_LEVEL), PY_TARGET=${PY_TARGET}" 
 	cd ${TEST_DIR}/flask; HT_LOG_LEVEL=${LOG_LEVEL} tox -e ${PY_TARGET}
 	cd ${TEST_DIR}/grpc; HT_LOG_LEVEL=${LOG_LEVEL} tox -e ${PY_TARGET}
 	cd ${TEST_DIR}/mysql; HT_LOG_LEVEL=${LOG_LEVEL} tox -e ${PY_TARGET}
