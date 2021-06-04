@@ -48,7 +48,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Install tox
-        run: pip install --user -r dev-requirements.txt
+        run: pip install --user -r dev-requirements.txt -r requirements.txt
 
       - name: Lint files
         run: make lint
