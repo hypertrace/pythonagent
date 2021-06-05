@@ -133,7 +133,7 @@ def client_interceptor_wrapper(tracer_provider) -> None:
     return OpenTelemetryClientInterceptorWrapper(tracer)
 
 # Wrapper around Server-side telemetry context
-class _OpenTelemetryWrapperServicerContext(_server._OpenTelemetryServicerContext): # pylint: disable=W0212
+class _OpenTelemetryWrapperServicerContext(_server._OpenTelemetryServicerContext): # pylint: disable=W0212,W0223
     '''grpc:server telemetry context'''
     def __init__(self, servicer_context, active_span):
         '''constructor'''

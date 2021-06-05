@@ -1,14 +1,4 @@
-opentelemetry-api==1.1.0
-opentelemetry-instrumentation
-opentelemetry-exporter-zipkin
-opentelemetry-propagator-b3
-opentelemetry-exporter-otlp==1.1.0
-opentelemetry-instrumentation-flask
-opentelemetry-instrumentation-grpc
-opentelemetry-instrumentation-mysql
-opentelemetry-instrumentation-requests
-opentelemetry-instrumentation-wsgi
-opentelemetry-util-http
+../..
 google
 protobuf
 pyyaml
