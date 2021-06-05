@@ -64,7 +64,7 @@ jobs:
       # while pytest-asyncio is listed in the integration tests deps, we see this missing when
       # running the test, hence we force the install.
       - name: Force install pytest-asyncio
-        run: sudo pip install pytest-asyncio flask mysql-connector-python==8.0.23
+        run: sudo pip install pytest-asyncio flask mysql-connector-python==8.0.23 psycopg2-binary==2.8.6 pytest-postgresql==3.1.1
 
       - name: Run tests
         run: PYTHON_VERSION=${{ matrix.python-version }} make test
