@@ -9,6 +9,7 @@ import flask
 from opentelemetry.instrumentation.flask import (
     _InstrumentedFlask,
     FlaskInstrumentor,
+    get_default_span_name,
     _teardown_request,
     _ENVIRON_SPAN_KEY,
 )
@@ -143,7 +144,7 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
     # Initialize instrumentation wrapper
     def instrument_app(self,
                        app,
-                       name_callback) -> None:
+                       name_callback=get_default_span_name) -> None:
         '''Initialize instrumentation'''
         logger.debug('Entering FlaskInstrumentorWrapper.instument_app().')
         try:
