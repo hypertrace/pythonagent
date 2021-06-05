@@ -35,7 +35,6 @@ jobs:
           which python
           sudo apt install software-properties-common
           sudo add-apt-repository ppa:deadsnakes/ppa -y
-          sudo apt-get remove -y python${{ matrix.python-version }}
           sudo apt-get install python${{ matrix.python-version }}
           sudo apt-get install python3-all
           python --version
