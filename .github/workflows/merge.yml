@@ -32,9 +32,11 @@ jobs:
 
       - name: Install Python
         run: |
+          which python
           sudo apt install software-properties-common
           sudo add-apt-repository ppa:deadsnakes/ppa -y
           sudo apt-get install python${{ matrix.python-version }}
+          sudo apt-get install python3-all
           python --version
 
       - name: Install pip
@@ -58,14 +60,14 @@ jobs:
           pip uninstall --yes protobuf python3-protobuf
           pip install --upgrade --no-input pip
           pip install --upgrade --no-input protobuf
-          
+
       # while pytest-asyncio is listed in the integration tests deps, we see this missing when
       # running the test, hence we force the install.
       - name: Force install pytest-asyncio
-        run: sudo pip install pytest-asyncio
+        run: sudo pip install pytest-asyncio flask mysql-connector-python==8.0.23 psycopg2-binary==2.8.6 pytest-postgresql==3.1.1 aiohttp==3.7.4
 
       - name: Run tests
-        run: PYTHON_VERSION=${{ matrix.python }} make test
+        run: PYTHON_VERSION=${{ matrix.python-version }} make test
 
       - name: Build package
         run: make build

@@ -173,8 +173,7 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
     # Initialize instrumentation wrapper
     def instrument_app(self,
                        app,
-                       name_callback=get_default_span_name,
-                       tracer_provider=None) -&gt; None:
+                       name_callback=get_default_span_name) -&gt; None:
         &#39;&#39;&#39;Initialize instrumentation&#39;&#39;&#39;
         logger.debug(&#39;Entering FlaskInstrumentorWrapper.instument_app().&#39;)
         try:
@@ -280,8 +279,7 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
     # Initialize instrumentation wrapper
     def instrument_app(self,
                        app,
-                       name_callback=get_default_span_name,
-                       tracer_provider=None) -&gt; None:
+                       name_callback=get_default_span_name) -&gt; None:
         &#39;&#39;&#39;Initialize instrumentation&#39;&#39;&#39;
         logger.debug(&#39;Entering FlaskInstrumentorWrapper.instument_app().&#39;)
         try:
@@ -345,7 +343,7 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
 </details>
 </dd>
 <dt id="hypertrace.agent.instrumentation.flask.FlaskInstrumentorWrapper.instrument_app"><code class="name flex">
-<span>def <span class="ident">instrument_app</span></span>(<span>self, app, name_callback=&lt;function get_default_span_name&gt;, tracer_provider=None) ‑> NoneType</span>
+<span>def <span class="ident">instrument_app</span></span>(<span>self, app, name_callback=&lt;function get_default_span_name&gt;) ‑> NoneType</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Initialize instrumentation</p></div>
@@ -355,8 +353,7 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
 </summary>
 <pre><code class="python">def instrument_app(self,
                    app,
-                   name_callback=get_default_span_name,
-                   tracer_provider=None) -&gt; None:
+                   name_callback=get_default_span_name) -&gt; None:
     &#39;&#39;&#39;Initialize instrumentation&#39;&#39;&#39;
     logger.debug(&#39;Entering FlaskInstrumentorWrapper.instument_app().&#39;)
     try:

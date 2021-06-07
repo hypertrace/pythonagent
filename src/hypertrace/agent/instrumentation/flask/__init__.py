@@ -144,14 +144,13 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
     # Initialize instrumentation wrapper
     def instrument_app(self,
                        app,
-                       name_callback=get_default_span_name,
-                       tracer_provider=None) -> None:
+                       name_callback=get_default_span_name) -> None:
         '''Initialize instrumentation'''
         logger.debug('Entering FlaskInstrumentorWrapper.instument_app().')
         try:
 
             # Call parent class's initialization
-            super().instrument_app(app, name_callback)
+            super().instrument_app(app)
 
             self._app = app
             # Set pre-request handler

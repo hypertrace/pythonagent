@@ -131,7 +131,7 @@ def exit_callback():
             assert flaskSpanAsObject['attributes']['rpc.system'] == 'grpc'
             assert flaskSpanAsObject['attributes']['rpc.method'] == 'SayHello'
             user_agent_re = re.compile(
-                'grpc-python/.* grpc-c/15.0.0 (.*; chttp2)')
+                'grpc-python/.* grpc-c/.* (.*; chttp2)')
             assert re.match(
                 user_agent_re, flaskSpanAsObject['attributes']['rpc.request.metadata.user-agent'])
             assert flaskSpanAsObject['attributes']['rpc.request.body'] == 'name: \"you\"\n'

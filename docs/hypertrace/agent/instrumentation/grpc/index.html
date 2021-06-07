@@ -162,7 +162,7 @@ def client_interceptor_wrapper(tracer_provider) -&gt; None:
     return OpenTelemetryClientInterceptorWrapper(tracer)
 
 # Wrapper around Server-side telemetry context
-class _OpenTelemetryWrapperServicerContext(_server._OpenTelemetryServicerContext): # pylint: disable=W0212
+class _OpenTelemetryWrapperServicerContext(_server._OpenTelemetryServicerContext): # pylint: disable=W0212,W0223
     &#39;&#39;&#39;grpc:server telemetry context&#39;&#39;&#39;
     def __init__(self, servicer_context, active_span):
         &#39;&#39;&#39;constructor&#39;&#39;&#39;
@@ -642,8 +642,7 @@ class OpenTelemetryClientInterceptorWrapper(_client.OpenTelemetryClientIntercept
     ) -&gt; None:
         &#39;&#39;&#39;process streaming request for hypertrace&#39;&#39;&#39;
         logger.debug(
-            &#39;Entering OpenTelemetryClientInterceptorWrapper.intercept_stream().&#39;)
-        # COME_BACK -- need to implement this</code></pre>
+            &#39;Entering OpenTelemetryClientInterceptorWrapper.intercept_stream().&#39;)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -672,8 +671,7 @@ class OpenTelemetryClientInterceptorWrapper(_client.OpenTelemetryClientIntercept
 ) -&gt; None:
     &#39;&#39;&#39;process streaming request for hypertrace&#39;&#39;&#39;
     logger.debug(
-        &#39;Entering OpenTelemetryClientInterceptorWrapper.intercept_stream().&#39;)
-    # COME_BACK -- need to implement this</code></pre>
+        &#39;Entering OpenTelemetryClientInterceptorWrapper.intercept_stream().&#39;)</code></pre>
 </details>
 </dd>
 <dt id="hypertrace.agent.instrumentation.grpc.OpenTelemetryClientInterceptorWrapper.intercept_unary"><code class="name flex">
@@ -789,8 +787,7 @@ class OpenTelemetryClientInterceptorWrapper(_client.OpenTelemetryClientIntercept
             context) -&gt; None:
         &#39;&#39;&#39;Setup interceptor helper for streaming requests.&#39;&#39;&#39;
         logger.debug(
-            &#39;Entering OpenTelemetryServerInterceptorWrapper.intercept_server_stream().&#39;)
-        # COME_BACK -- need to implement this</code></pre>
+            &#39;Entering OpenTelemetryServerInterceptorWrapper.intercept_server_stream().&#39;)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
