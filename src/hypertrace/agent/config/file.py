@@ -19,7 +19,7 @@ def load_config_from_file(filepath):
         path = os.path.abspath(filepath)
 
         file = open(path, 'r') # pylint: disable=R1732
-        from_file_config = yaml.load(file, Loader=yaml.FullLoader)
+        from_file_config = yaml.safe_load(file)
         file.close()
 
         logger.debug('Successfully load config from %s', path)
