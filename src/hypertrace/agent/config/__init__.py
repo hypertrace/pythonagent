@@ -174,7 +174,7 @@ class AgentConfig:  # pylint: disable=R0902,R0903
                     if key == 'resource_attributes':
                         continue
                     self.validate_config_elements(config_element[key],
-                                                  eval('agent_config_base.' + key))  # pylint: disable=W0123
+                                                  getattr(agent_config_base, key))  # pylint: disable=W0123
                     continue
                 except AttributeError as err:
                     logger.error('Unknown attribute encountered: exception=%s, stacktrace=%s',
