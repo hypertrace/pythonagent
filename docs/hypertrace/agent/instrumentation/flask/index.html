@@ -179,7 +179,7 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
         try:
 
             # Call parent class&#39;s initialization
-            super().instrument_app(app, name_callback)
+            super().instrument_app(app)
 
             self._app = app
             # Set pre-request handler
@@ -285,7 +285,7 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
         try:
 
             # Call parent class&#39;s initialization
-            super().instrument_app(app, name_callback)
+            super().instrument_app(app)
 
             self._app = app
             # Set pre-request handler
@@ -359,7 +359,7 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
     try:
 
         # Call parent class&#39;s initialization
-        super().instrument_app(app, name_callback)
+        super().instrument_app(app)
 
         self._app = app
         # Set pre-request handler

@@ -205,7 +205,7 @@ class AgentConfig:  # pylint: disable=R0902,R0903
                     if key == &#39;resource_attributes&#39;:
                         continue
                     self.validate_config_elements(config_element[key],
-                                                  eval(&#39;agent_config_base.&#39; + key))  # pylint: disable=W0123
+                                                  getattr(agent_config_base, key))  # pylint: disable=W0123
                     continue
                 except AttributeError as err:
                     logger.error(&#39;Unknown attribute encountered: exception=%s, stacktrace=%s&#39;,
@@ -457,7 +457,7 @@ If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></di
                     if key == &#39;resource_attributes&#39;:
                         continue
                     self.validate_config_elements(config_element[key],
-                                                  eval(&#39;agent_config_base.&#39; + key))  # pylint: disable=W0123
+                                                  getattr(agent_config_base, key))  # pylint: disable=W0123
                     continue
                 except AttributeError as err:
                     logger.error(&#39;Unknown attribute encountered: exception=%s, stacktrace=%s&#39;,
@@ -570,7 +570,7 @@ defined in the config_pb2.AgentConfig</p></div>
                 if key == &#39;resource_attributes&#39;:
                     continue
                 self.validate_config_elements(config_element[key],
-                                              eval(&#39;agent_config_base.&#39; + key))  # pylint: disable=W0123
+                                              getattr(agent_config_base, key))  # pylint: disable=W0123
                 continue
             except AttributeError as err:
                 logger.error(&#39;Unknown attribute encountered: exception=%s, stacktrace=%s&#39;,
