@@ -11,12 +11,12 @@ This agent supports these frameworks and adds following capabilities:
 
 | Module/Framework | Description | Python Versions Tested/Supported|
 |------|-------------| ---------------|
-| [flask](https://flask.palletsprojects.com/en/1.1.x/api)|A micro web framework written in Python.| Python 3.7, 3.8, 3.9|
-| [grpc](https://grpc.github.io/grpc/python/)|Python GRPC library.| Python 3.7, 3.8, 3.9|
-| [mysql-connector](https://dev.mysql.com/doc/connector-python/en/)| Python MySQL database client library.| Python 3.7, 3.8, 3.9|
+| [flask](https://flask.palletsprojects.com/en/1.1.x/api)|A micro web framework written in Python.| Python 3.6, 3.7, 3.8, 3.9|
+| [grpc](https://grpc.github.io/grpc/python/)|Python GRPC library.| Python 3.6, 3.7, 3.8, 3.9|
+| [mysql-connector](https://dev.mysql.com/doc/connector-python/en/)| Python MySQL database client library.| Python 3.6, 3.7, 3.8, 3.9|
 | [psycopg2/postgresql](https://www.psycopg.org/docs/)|Python Postgresql database client library. | Python 3.8, 3.9|
-| [requests](https://docs.python-requests.org/en/master/)|Python HTTP client library.| Python 3.7, 3.8, 3.9|
-| [aiohttp](https://docs.aiohttp.org/en/stable/)|Python async HTTP client library.| Python 3.7, 3.8, 3.9|
+| [requests](https://docs.python-requests.org/en/master/)|Python HTTP client library.| Python 3.6, 3.7, 3.8, 3.9|
+| [aiohttp](https://docs.aiohttp.org/en/stable/)|Python async HTTP client library.| Python 3.6, 3.7, 3.8, 3.9|
 
 ## Getting started
 
