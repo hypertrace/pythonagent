@@ -13,7 +13,10 @@ from opentelemetry.instrumentation.flask import (
     _teardown_request,
     _ENVIRON_SPAN_KEY,
 )
+from werkzeug.exceptions import Forbidden
+
 from hypertrace.agent import constants  # pylint: disable=R0801
+from hypertrace.agent.filter.registry import Registry
 from hypertrace.agent.instrumentation import BaseInstrumentorWrapper
 from hypertrace.agent.init import AgentInit
 from hypertrace.agent.config import AgentConfig
@@ -58,11 +61,21 @@ def _hypertrace_before_request(flask_wrapper):
             request_body = flask.request.data       # same
             logger.debug('span: %s', str(span))
             logger.debug('Request headers: %s', str(request_headers))
+
             span.update_name(str(flask.request.method) + ' ' + str(flask.request.url_rule))
 
             # Call base request handler
             flask_wrapper.generic_request_handler(
                 request_headers, request_body, span)
+
+            block_result = Registry().apply_filters(span, flask.request.url, flask.request.headers, flask.request.data)
+            if block_result:
+                logger.debug('should block evaluated to true, aborting with 403')
+                flask.abort(403)
+
+        except Forbidden as forbidden_error:
+            raise forbidden_error
+
         except Exception as err:  # pylint: disable=W0703
             logger.error(constants.INST_RUNTIME_EXCEPTION_MSSG,
                          'flask before_request handler',
