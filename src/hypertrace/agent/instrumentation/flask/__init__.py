@@ -68,7 +68,10 @@ def _hypertrace_before_request(flask_wrapper):
             flask_wrapper.generic_request_handler(
                 request_headers, request_body, span)
 
-            block_result = Registry().apply_filters(span, flask.request.url, flask.request.headers, flask.request.data)
+            block_result = Registry().apply_filters(span,
+                                                    flask.request.url,
+                                                    flask.request.headers,
+                                                    flask.request.data)
             if block_result:
                 logger.debug('should block evaluated to true, aborting with 403')
                 flask.abort(403)

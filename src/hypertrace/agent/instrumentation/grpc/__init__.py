@@ -197,16 +197,20 @@ class OpenTelemetryServerInterceptorWrapper(_server.OpenTelemetryServerIntercept
                              str(handler_call_details.invocation_metadata))
                 logger.debug('Request Body: %s', str(request_or_iterator))
 
+                invocation_metadata = handler_call_details.invocation_metadata
+
                 self._gisw.generic_rpc_request_handler(
-                    handler_call_details.invocation_metadata, request_or_iterator, span)
+                    invocation_metadata, request_or_iterator, span)
                 try:
-                    # Capture response
-                    block_result = Registry().apply_filters(span, '', handler_call_details.invocation_metadata,
+                    block_result = Registry().apply_filters(span,
+                                                            '',
+                                                            invocation_metadata,
                                                             request_or_iterator)
                     if block_result:
                         logger.debug('should block evaluated to true, aborting with 403')
                         return context.abort(grpc.StatusCode.PERMISSION_DENIED, 'Permission Denied')
 
+                    # Capture response
                     context = _OpenTelemetryWrapperServicerContext(
                         context, span)
                     response = behavior(request_or_iterator, context)
