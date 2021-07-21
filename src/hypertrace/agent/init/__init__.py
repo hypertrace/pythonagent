@@ -39,7 +39,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
         self._tracer_provider = None
 
         try:
-            self.apply_config_changes(None)
+            self.apply_config(None)
 
             self._flask_instrumentor_wrapper = None
             self._grpc_instrumentor_client_wrapper = None
@@ -55,7 +55,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
                          traceback.format_exc())
             raise sys.exc_info()[0]
 
-    def apply_config_changes(self, agent_config: (Union[None, AgentConfig])):
+    def apply_config(self, agent_config: (Union[None, AgentConfig])):
+        """Initialize various aspects of the agent based on the most recent config"""
         if agent_config:
             self._config = agent_config
 

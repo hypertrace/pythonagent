@@ -5,13 +5,18 @@ import sys
 import threading
 import logging
 import traceback
+from contextlib import contextmanager
+
 import flask
+
+import opentelemetry.trace as ot
+
 from hypertrace.agent.init import AgentInit
 from hypertrace.agent.config import AgentConfig
 from hypertrace.agent import constants
-from contextlib import contextmanager
 
-# main logging modle configuration
+
+# main logging module configuration
 
 
 def setup_custom_logger(name: str) -> logging.Logger:
@@ -88,15 +93,16 @@ class Agent:
 
     @contextmanager
     def edit_config(self):
+        '''Initializer'''
         try:
-            # need to explicitly set this as None when modifying the config via code to regenerate Trace Provider with new options
-            import opentelemetry.trace as ot
-            ot._TRACER_PROVIDER = None
+            # need to explicitly set this as None when modifying the config via code
+            # to regenerate Trace Provider with new options
+            ot._TRACER_PROVIDER = None  # pylint:disable=W0212
             agent_config = self._config.agent_config
             yield agent_config
             self._config.agent_config = agent_config
         finally:
-            self._init.apply_config_changes(self._config)
+            self._init.apply_config(self._config)
 
     def register_flask_app(self, app: flask.Flask = None) -> None:
         '''Register the flask instrumentation module wrapper'''
