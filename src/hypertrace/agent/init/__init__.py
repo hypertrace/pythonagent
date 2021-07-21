@@ -4,6 +4,8 @@ import os
 import traceback
 import logging
 import json
+from typing import Union
+
 from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider, export
 from opentelemetry.sdk.trace.export import ConsoleSpanExporter, SimpleSpanProcessor
@@ -37,13 +39,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
         self._tracer_provider = None
 
         try:
-            self.init_trace_provider()
-            self.init_propagation()
-
-            if self._config.use_console_span_exporter():
-                self.set_console_span_processor()
-            else:
-                self.init_exporter()
+            self.apply_config_changes(None)
 
             self._flask_instrumentor_wrapper = None
             self._grpc_instrumentor_client_wrapper = None
@@ -58,6 +54,19 @@ class AgentInit:  # pylint: disable=R0902,R0903
                          err,
                          traceback.format_exc())
             raise sys.exc_info()[0]
+
+    def apply_config_changes(self, agent_config: (Union[None, AgentConfig])):
+        if agent_config:
+            self._config = agent_config
+
+        self.init_trace_provider()
+        self.init_propagation()
+
+        if self._config.use_console_span_exporter():
+            self.set_console_span_processor()
+        else:
+            self.init_exporter()
+
 
     def init_trace_provider(self) -> None:
         '''Initialize trace provider and set resource attributes.'''
