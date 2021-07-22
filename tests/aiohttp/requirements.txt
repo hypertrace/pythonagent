@@ -6,3 +6,4 @@ flask
 pytest
 pytest-xdist
 pytest-asyncio
+aiohttp
