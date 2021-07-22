@@ -30,10 +30,6 @@ jobs:
       - name: Install Make
         run: sudo apt-get install make
 
-      - name: Install Python
-      - uses: actions/checkout@v2
-
-
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
