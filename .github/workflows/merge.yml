@@ -21,7 +21,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: ["3.6", "3.7", "3.8.5", "3.9"]
+        python-version: ["3.6", "3.7", "3.8.9", "3.9"]
 
     steps:
       - name: Run apt-get update
@@ -32,11 +32,10 @@ jobs:
 
       - name: Install Python
         run: |
-          which python
-          sudo apt install software-properties-common
-          sudo add-apt-repository ppa:deadsnakes/ppa -y
-          sudo apt-get install python${{ matrix.python-version }}
-          sudo apt-get install python3-all
+          curl https://pyenv.run | bash
+          exec $SHELL
+          pyenv install ${{ matrix.python-version }}
+          pyenv global ${{ matrix.python-version }}
           python --version
 
       - name: Install pip
