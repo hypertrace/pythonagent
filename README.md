@@ -70,12 +70,15 @@ Pythonagent can be configured using a config file (e.g. env `HT_CONFIG_FILE=./co
 In some scenarios you may want to configure your agent options programmatically, the following example shows how to achieve this. 
 ```python
 from hypertrace.agent import Agent
+from hypertrace.agent.config import config_pb2 as hypertrace_config
 
 agent = Agent()
-a = Agent()
-with a.edit_config() as config:
+with agent.edit_config() as config:
     config.service_name = "code modified service name"
-    config.reporting.endpoint = "http://localhost:9411/api/v2/spans"
+    
+    config.reporting.endpoint = "http://localhost:4317"
+    config.reporting.trace_reporter_type = hypertrace_config.TraceReporterType.OTLP
+    config.propagation_formats = [hypertrace_config.PropagationFormat.B3]
 ```
 
 ## Development
