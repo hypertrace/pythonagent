@@ -19,3 +19,9 @@ protobuf>=3.15.8
 tox>=3.23.0
 pylint==2.8.2
 pdoc3>=0.9.2
+pytest-asyncio
+flask
+mysql-connector-python==8.0.23
+psycopg2-binary==2.8.6
+pytest-postgresql==3.1.1
+aiohttp==3.7.4
