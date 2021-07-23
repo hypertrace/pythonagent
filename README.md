@@ -23,7 +23,7 @@ This agent supports these frameworks and adds following capabilities:
 ## Instrumentation
 The hypertrace agent offers two methods of instrumenting your python application.
 - Manual instrumentation requires editing your code to initialize an agent, and registering any applicable modules to be instrumented.
-- Auto instrumentation involves prepending your applications startup command with`hypertrace-instrument`.
+- Auto instrumentation involves prepending your applications startup command with `hypertrace-instrument`.
 
 Both approaches are explained in more detail below.
 
