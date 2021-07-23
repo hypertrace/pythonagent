@@ -27,7 +27,7 @@ jobs:
         run: |
           sudo apt-get install -y protobuf-compiler
           protoc --version
-          pip uninstall protobuf python3-protobuf
+          pip uninstall --yes protobuf python3-protobuf
           pip install --no-input --upgrade pip
           pip install --no-input --upgrade protobuf
 
