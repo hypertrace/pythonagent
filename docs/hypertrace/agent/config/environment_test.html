@@ -76,7 +76,6 @@ def test_env_config() -&gt; None:
     assert &#39;TRACECONTEXT&#39; in config[&#39;propagation_formats&#39;]
     assert config[&#39;enabled&#39;] is False
     assert config[&#39;_use_console_span_exporter&#39;]
-
     unset_env_variables()
 
 
@@ -146,7 +145,6 @@ def unset_env_variables():
     assert &#39;TRACECONTEXT&#39; in config[&#39;propagation_formats&#39;]
     assert config[&#39;enabled&#39;] is False
     assert config[&#39;_use_console_span_exporter&#39;]
-
     unset_env_variables()</code></pre>
 </details>
 </dd>

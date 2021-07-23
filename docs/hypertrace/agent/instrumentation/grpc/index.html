@@ -49,6 +49,7 @@ from opentelemetry.instrumentation.grpc.version import __version__
 from opentelemetry.instrumentation.grpc.grpcext import intercept_channel
 from wrapt import wrap_function_wrapper as _wrap # pylint: disable=R0801
 from hypertrace.agent import constants
+from hypertrace.agent.filter.registry import Registry
 from hypertrace.agent.instrumentation import BaseInstrumentorWrapper
 
 # Initialize logger with local module name
@@ -224,9 +225,20 @@ class OpenTelemetryServerInterceptorWrapper(_server.OpenTelemetryServerIntercept
                 logger.debug(&#39;Request Metadata: %s&#39;,
                              str(handler_call_details.invocation_metadata))
                 logger.debug(&#39;Request Body: %s&#39;, str(request_or_iterator))
+
+                invocation_metadata = handler_call_details.invocation_metadata
+
                 self._gisw.generic_rpc_request_handler(
-                    handler_call_details.invocation_metadata, request_or_iterator, span)
+                    invocation_metadata, request_or_iterator, span)
                 try:
+                    block_result = Registry().apply_filters(span,
+                                                            &#39;&#39;,
+                                                            invocation_metadata,
+                                                            request_or_iterator)
+                    if block_result:
+                        logger.debug(&#39;should block evaluated to true, aborting with 403&#39;)
+                        return context.abort(grpc.StatusCode.PERMISSION_DENIED, &#39;Permission Denied&#39;)
+
                     # Capture response
                     context = _OpenTelemetryWrapperServicerContext(
                         context, span)
@@ -753,9 +765,20 @@ class OpenTelemetryClientInterceptorWrapper(_client.OpenTelemetryClientIntercept
                 logger.debug(&#39;Request Metadata: %s&#39;,
                              str(handler_call_details.invocation_metadata))
                 logger.debug(&#39;Request Body: %s&#39;, str(request_or_iterator))
+
+                invocation_metadata = handler_call_details.invocation_metadata
+
                 self._gisw.generic_rpc_request_handler(
-                    handler_call_details.invocation_metadata, request_or_iterator, span)
+                    invocation_metadata, request_or_iterator, span)
                 try:
+                    block_result = Registry().apply_filters(span,
+                                                            &#39;&#39;,
+                                                            invocation_metadata,
+                                                            request_or_iterator)
+                    if block_result:
+                        logger.debug(&#39;should block evaluated to true, aborting with 403&#39;)
+                        return context.abort(grpc.StatusCode.PERMISSION_DENIED, &#39;Permission Denied&#39;)
+
                     # Capture response
                     context = _OpenTelemetryWrapperServicerContext(
                         context, span)
@@ -835,9 +858,20 @@ class OpenTelemetryClientInterceptorWrapper(_client.OpenTelemetryClientIntercept
             logger.debug(&#39;Request Metadata: %s&#39;,
                          str(handler_call_details.invocation_metadata))
             logger.debug(&#39;Request Body: %s&#39;, str(request_or_iterator))
+
+            invocation_metadata = handler_call_details.invocation_metadata
+
             self._gisw.generic_rpc_request_handler(
-                handler_call_details.invocation_metadata, request_or_iterator, span)
+                invocation_metadata, request_or_iterator, span)
             try:
+                block_result = Registry().apply_filters(span,
+                                                        &#39;&#39;,
+                                                        invocation_metadata,
+                                                        request_or_iterator)
+                if block_result:
+                    logger.debug(&#39;should block evaluated to true, aborting with 403&#39;)
+                    return context.abort(grpc.StatusCode.PERMISSION_DENIED, &#39;Permission Denied&#39;)
+
                 # Capture response
                 context = _OpenTelemetryWrapperServicerContext(
                     context, span)
