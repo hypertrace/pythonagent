@@ -20,9 +20,14 @@ This agent supports these frameworks and adds following capabilities:
 
 ## Getting started
 
-### Instrument Code
+## Instrumentation
+The hypertrace agent offers two methods of instrumenting your python application.
+- Manual instrumentation requires editing your code to initialize an agent, and registering any applicable modules to be instrumented.
+- Auto instrumentation involves prepending your applications startup command with `hypertrace-instrument`.
 
-Currently, this agent does not support auto-instrumentation. That will be available in a future release. In the meantime, the following code snippet must be added to the entry point of your python application.
+Both approaches are explained in more detail below.
+
+### Manual Instrumentation
 
 - Install the hypertrace python agent:
 ```bash
@@ -48,10 +53,9 @@ agent.register_aiohttp_client() # instrument an aiohttp client
 ...
 ```
 
-or
+_Note: The `HT_INSTRUMENTED_MODULES` environment variable does not have any effect for manual instrumentation_
 
-### Use autoinstrumentation 
-
+### Autoinstrumentation
 Hypertrace provides a CLI that will instrument the code without code modification
 
 ```
@@ -60,6 +64,9 @@ hypertrace-instrument python app.py
 ```
 
 By default, all supported modules are instrumented.
+
+When using auto instrumentation you can use the `HT_INSTRUMENTED_MODULES` environment variable to limit which modules are instrumented.
+In the above example, only flask and mysql would be instrumented.
 
 For further examples, check our [examples section](./examples)
 

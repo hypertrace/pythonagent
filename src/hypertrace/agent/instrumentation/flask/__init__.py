@@ -122,21 +122,16 @@ class _HypertraceInstrumentedFlask(_InstrumentedFlask, BaseInstrumentorWrapper):
     the flask.Flask class definition."""
 
     def __init__(self, *args, **kwargs):
-        _InstrumentedFlask.__init__(self,*args, **kwargs)
+        _InstrumentedFlask.__init__(self, *args, **kwargs)
         BaseInstrumentorWrapper.__init__(self)
         self.before_request(_hypertrace_before_request(self))
         self.after_request(_hypertrace_after_request(self))
         config: AgentConfig = AgentConfig()
-        self.set_process_request_headers(
-            config.agent_config.data_capture.http_headers.request)
-        self.set_process_request_body(
-            config.agent_config.data_capture.http_body.request)
-        self.set_process_response_headers(
-            config.agent_config.data_capture.http_headers.response)
-        self.set_process_response_body(
-            config.agent_config.data_capture.http_body.response)
-        self.set_body_max_size(
-            config.agent_config.data_capture.body_max_size_bytes)
+        self.set_process_request_headers(config.agent_config.data_capture.http_headers.request)
+        self.set_process_request_body(config.agent_config.data_capture.http_body.request)
+        self.set_process_response_headers(config.agent_config.data_capture.http_headers.response)
+        self.set_process_response_body(config.agent_config.data_capture.http_body.response)
+        self.set_body_max_size(config.agent_config.data_capture.body_max_size_bytes)
 
 # Main Flask Instrumentor Wrapper class.
 class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
@@ -158,21 +153,15 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
         flask.Flask = _HypertraceInstrumentedFlask
 
     # Initialize instrumentation wrapper
-    def instrument_app(self,
-                       app,
-                       name_callback=get_default_span_name) -> None:
+    @staticmethod
+    def instrument_app(app, request_hook=None, response_hook=None, tracer_provider=None):
         '''Initialize instrumentation'''
         logger.debug('Entering FlaskInstrumentorWrapper.instument_app().')
         try:
 
             # Call parent class's initialization
-            super().instrument_app(app)
+            FlaskInstrumentor.instrument_app(app, request_hook, response_hook, None)
 
-            self._app = app
-            # Set pre-request handler
-            app.before_request(_hypertrace_before_request(self))
-            # Set post-response handler
-            app.after_request(_hypertrace_after_request(self))
         except Exception as err:  # pylint: disable=W0703
             logger.error("""An error occurred initializing flask otel
                             instrumentor: exception=%s, stacktrace=%s""",
@@ -181,13 +170,14 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
             raise err
 
     # Teardown instrumentation wrapper
-    def uninstrument_app(self, app) -> None:
+    @staticmethod
+    def uninstrument_app(app) -> None:
         '''Disable instrumentation'''
         logger.debug('Entering FlaskInstrumentorWrapper.uninstrument_app()')
         try:
             # Call parent's teardown logic
-            super()._uninstrument_app(self, app)  # pylint: disable=E1101
-            self._app = None
+            super().uninstrument_app(app)  # pylint: disable=E1101
+
         except Exception as err:  # pylint: disable=W0703
             logger.error("""An error occurred while shutting down flask otel
                          instrumentor: exception=%s, stacktrace=%s""",
