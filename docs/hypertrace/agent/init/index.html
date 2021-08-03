@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.9.2" />
+<meta name="generator" content="pdoc 0.10.0" />
 <title>hypertrace.agent.init API documentation</title>
 <meta name="description" content="Initialize all the components using configuration from AgentConfig" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
@@ -781,7 +781,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
 <h3>Methods</h3>
 <dl>
 <dt id="hypertrace.agent.init.AgentInit.aiohttp_client_init"><code class="name flex">
-<span>def <span class="ident">aiohttp_client_init</span></span>(<span>self) ‑> NoneType</span>
+<span>def <span class="ident">aiohttp_client_init</span></span>(<span>self) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Creates an aiohttp-client wrapper using the config defined in hypertraceconfig</p></div>
@@ -810,7 +810,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
 </details>
 </dd>
 <dt id="hypertrace.agent.init.AgentInit.apply_config"><code class="name flex">
-<span>def <span class="ident">apply_config</span></span>(<span>self, agent_config: Union[NoneType, <a title="hypertrace.agent.config.AgentConfig" href="../config/index.html#hypertrace.agent.config.AgentConfig">AgentConfig</a>])</span>
+<span>def <span class="ident">apply_config</span></span>(<span>self, agent_config: Optional[None])</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Initialize various aspects of the agent based on the most recent config</p></div>
@@ -833,7 +833,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
 </details>
 </dd>
 <dt id="hypertrace.agent.init.AgentInit.dump_config"><code class="name flex">
-<span>def <span class="ident">dump_config</span></span>(<span>self) ‑> NoneType</span>
+<span>def <span class="ident">dump_config</span></span>(<span>self) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"><p>dump the current state of AgentInit.</p></div>
@@ -849,7 +849,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
 </details>
 </dd>
 <dt id="hypertrace.agent.init.AgentInit.init_exporter"><code class="name flex">
-<span>def <span class="ident">init_exporter</span></span>(<span>self) ‑> NoneType</span>
+<span>def <span class="ident">init_exporter</span></span>(<span>self) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Initialize exporter</p></div>
@@ -869,7 +869,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
 </details>
 </dd>
 <dt id="hypertrace.agent.init.AgentInit.init_instrumentation_flask"><code class="name flex">
-<span>def <span class="ident">init_instrumentation_flask</span></span>(<span>self, app) ‑> NoneType</span>
+<span>def <span class="ident">init_instrumentation_flask</span></span>(<span>self, app) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Creates a flask instrumentation wrapper using the config defined in hypertraceconfig</p></div>
@@ -913,7 +913,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
 </details>
 </dd>
 <dt id="hypertrace.agent.init.AgentInit.init_instrumentation_grpc_client"><code class="name flex">
-<span>def <span class="ident">init_instrumentation_grpc_client</span></span>(<span>self) ‑> NoneType</span>
+<span>def <span class="ident">init_instrumentation_grpc_client</span></span>(<span>self) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Creates a grpc client wrapper using the config defined in hypertraceconfig</p></div>
@@ -952,7 +952,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
 </details>
 </dd>
 <dt id="hypertrace.agent.init.AgentInit.init_instrumentation_grpc_server"><code class="name flex">
-<span>def <span class="ident">init_instrumentation_grpc_server</span></span>(<span>self) ‑> NoneType</span>
+<span>def <span class="ident">init_instrumentation_grpc_server</span></span>(<span>self) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Creates a grpc server wrapper based on hypertrace config</p></div>
@@ -990,7 +990,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
 </details>
 </dd>
 <dt id="hypertrace.agent.init.AgentInit.init_instrumentation_mysql"><code class="name flex">
-<span>def <span class="ident">init_instrumentation_mysql</span></span>(<span>self) ‑> NoneType</span>
+<span>def <span class="ident">init_instrumentation_mysql</span></span>(<span>self) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Creates a mysql server wrapper using the config defined in hypertraceconfig</p></div>
@@ -1019,7 +1019,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
 </details>
 </dd>
 <dt id="hypertrace.agent.init.AgentInit.init_instrumentation_postgresql"><code class="name flex">
-<span>def <span class="ident">init_instrumentation_postgresql</span></span>(<span>self) ‑> NoneType</span>
+<span>def <span class="ident">init_instrumentation_postgresql</span></span>(<span>self) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Creates a postgresql client wrapper using the config defined in hypertraceconfig</p></div>
@@ -1048,7 +1048,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
 </details>
 </dd>
 <dt id="hypertrace.agent.init.AgentInit.init_instrumentation_requests"><code class="name flex">
-<span>def <span class="ident">init_instrumentation_requests</span></span>(<span>self) ‑> NoneType</span>
+<span>def <span class="ident">init_instrumentation_requests</span></span>(<span>self) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Creates a requests client wrapper using the config defined in hypertraceconfig</p></div>
@@ -1077,7 +1077,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
 </details>
 </dd>
 <dt id="hypertrace.agent.init.AgentInit.init_instrumentor_wrapper_base_for_http"><code class="name flex">
-<span>def <span class="ident">init_instrumentor_wrapper_base_for_http</span></span>(<span>self, instrumentor, call_instrument: bool = True) ‑> NoneType</span>
+<span>def <span class="ident">init_instrumentor_wrapper_base_for_http</span></span>(<span>self, instrumentor, call_instrument: bool = True) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Common wrapper initialization logic</p></div>
@@ -1105,7 +1105,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
 </details>
 </dd>
 <dt id="hypertrace.agent.init.AgentInit.init_propagation"><code class="name flex">
-<span>def <span class="ident">init_propagation</span></span>(<span>self) ‑> NoneType</span>
+<span>def <span class="ident">init_propagation</span></span>(<span>self) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Initialize requested context propagation protocols.</p></div>
@@ -1138,7 +1138,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
 </details>
 </dd>
 <dt id="hypertrace.agent.init.AgentInit.init_trace_provider"><code class="name flex">
-<span>def <span class="ident">init_trace_provider</span></span>(<span>self) ‑> NoneType</span>
+<span>def <span class="ident">init_trace_provider</span></span>(<span>self) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Initialize trace provider and set resource attributes.</p></div>
@@ -1184,7 +1184,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
 </details>
 </dd>
 <dt id="hypertrace.agent.init.AgentInit.register_processor"><code class="name flex">
-<span>def <span class="ident">register_processor</span></span>(<span>self, processor) ‑> NoneType</span>
+<span>def <span class="ident">register_processor</span></span>(<span>self, processor) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Register additional span exporter + processor</p></div>
@@ -1199,7 +1199,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
 </details>
 </dd>
 <dt id="hypertrace.agent.init.AgentInit.set_console_span_processor"><code class="name flex">
-<span>def <span class="ident">set_console_span_processor</span></span>(<span>self) ‑> NoneType</span>
+<span>def <span class="ident">set_console_span_processor</span></span>(<span>self) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Register the console span processor for debugging purposes.</p></div>
@@ -1262,7 +1262,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
 </footer>
 </body>
 </html>

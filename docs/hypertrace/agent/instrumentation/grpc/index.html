@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.9.2" />
+<meta name="generator" content="pdoc 0.10.0" />
 <title>hypertrace.agent.instrumentation.grpc API documentation</title>
 <meta name="description" content="Hypertrace wrapper around OTel Flask instrumentor" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
@@ -325,7 +325,7 @@ class OpenTelemetryClientInterceptorWrapper(_client.OpenTelemetryClientIntercept
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="hypertrace.agent.instrumentation.grpc.client_interceptor_wrapper"><code class="name flex">
-<span>def <span class="ident">client_interceptor_wrapper</span></span>(<span>tracer_provider) ‑> NoneType</span>
+<span>def <span class="ident">client_interceptor_wrapper</span></span>(<span>tracer_provider) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Helper function to set interceptor.</p></div>
@@ -341,7 +341,7 @@ class OpenTelemetryClientInterceptorWrapper(_client.OpenTelemetryClientIntercept
 </details>
 </dd>
 <dt id="hypertrace.agent.instrumentation.grpc.introspect"><code class="name flex">
-<span>def <span class="ident">introspect</span></span>(<span>obj) ‑> NoneType</span>
+<span>def <span class="ident">introspect</span></span>(<span>obj) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Object introspection, used for debugging purposes</p></div>
@@ -364,7 +364,7 @@ class OpenTelemetryClientInterceptorWrapper(_client.OpenTelemetryClientIntercept
 </details>
 </dd>
 <dt id="hypertrace.agent.instrumentation.grpc.server_interceptor_wrapper"><code class="name flex">
-<span>def <span class="ident">server_interceptor_wrapper</span></span>(<span>gisw, tracer_provider=None) ‑> NoneType</span>
+<span>def <span class="ident">server_interceptor_wrapper</span></span>(<span>gisw, tracer_provider=None) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Helper function to set interceptor.</p></div>
@@ -439,7 +439,7 @@ class OpenTelemetryClientInterceptorWrapper(_client.OpenTelemetryClientIntercept
 <h3>Methods</h3>
 <dl>
 <dt id="hypertrace.agent.instrumentation.grpc.GrpcInstrumentorClientWrapper.wrapper_fn_wrapper"><code class="name flex">
-<span>def <span class="ident">wrapper_fn_wrapper</span></span>(<span>self, original_func, instance, args, kwargs) ‑> NoneType</span>
+<span>def <span class="ident">wrapper_fn_wrapper</span></span>(<span>self, original_func, instance, args, kwargs) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Wrap function for initializing the the request handler</p></div>
@@ -548,7 +548,7 @@ class OpenTelemetryClientInterceptorWrapper(_client.OpenTelemetryClientIntercept
 <h3>Methods</h3>
 <dl>
 <dt id="hypertrace.agent.instrumentation.grpc.GrpcInstrumentorServerWrapper.instrument"><code class="name flex">
-<span>def <span class="ident">instrument</span></span>(<span>self, **kwargs) ‑> NoneType</span>
+<span>def <span class="ident">instrument</span></span>(<span>self, **kwargs) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"><p>instrument grpc:server</p></div>
@@ -563,7 +563,7 @@ class OpenTelemetryClientInterceptorWrapper(_client.OpenTelemetryClientIntercept
 </details>
 </dd>
 <dt id="hypertrace.agent.instrumentation.grpc.GrpcInstrumentorServerWrapper.uninstrument"><code class="name flex">
-<span>def <span class="ident">uninstrument</span></span>(<span>self, **kwargs) ‑> NoneType</span>
+<span>def <span class="ident">uninstrument</span></span>(<span>self, **kwargs) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"><p>disable grpc:server instrumentation.</p></div>
@@ -667,7 +667,7 @@ class OpenTelemetryClientInterceptorWrapper(_client.OpenTelemetryClientIntercept
 <h3>Methods</h3>
 <dl>
 <dt id="hypertrace.agent.instrumentation.grpc.OpenTelemetryClientInterceptorWrapper.intercept_stream"><code class="name flex">
-<span>def <span class="ident">intercept_stream</span></span>(<span>self, request_or_iterator, metadata, client_info, invoker) ‑> NoneType</span>
+<span>def <span class="ident">intercept_stream</span></span>(<span>self, request_or_iterator, metadata, client_info, invoker) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"><p>process streaming request for hypertrace</p></div>
@@ -689,7 +689,7 @@ class OpenTelemetryClientInterceptorWrapper(_client.OpenTelemetryClientIntercept
 </details>
 </dd>
 <dt id="hypertrace.agent.instrumentation.grpc.OpenTelemetryClientInterceptorWrapper.intercept_unary"><code class="name flex">
-<span>def <span class="ident">intercept_unary</span></span>(<span>self, request, metadata, client_info, invoker) ‑> NoneType</span>
+<span>def <span class="ident">intercept_unary</span></span>(<span>self, request, metadata, client_info, invoker) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Process unary request for hypertrace.</p></div>
@@ -955,7 +955,7 @@ class OpenTelemetryClientInterceptorWrapper(_client.OpenTelemetryClientIntercept
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
 </footer>
 </body>
 </html>
