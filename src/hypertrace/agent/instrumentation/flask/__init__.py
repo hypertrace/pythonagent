@@ -98,8 +98,12 @@ def _hypertrace_after_request(flask_wrapper) -> flask.wrappers.Response:
             span = flask.request.environ.get(_ENVIRON_SPAN_KEY)
             # Pull response headers
             response_headers = response.headers
-            # Pull message body
-            response_body = response.data
+
+            response_body = ""
+            # dont extract response content if body is a file
+            if not response.direct_passthrough:
+                response_body = response.data
+
             logger.debug('Span: %s', str(span))
             logger.debug('Response Headers: %s', str(response_headers))
             logger.debug('Response Body: %s', str(response_body))
