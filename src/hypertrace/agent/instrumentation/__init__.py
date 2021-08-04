@@ -370,5 +370,3 @@ class BaseInstrumentorWrapper:
             return body[0, self.get_max_body_size()]
         else:
             return body
-
-
