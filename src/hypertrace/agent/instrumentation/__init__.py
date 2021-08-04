@@ -165,7 +165,7 @@ class BaseInstrumentorWrapper:
                                 'This is an interesting content-type.')
                             request_body_str = None
                             if isinstance(request_body, bytes):
-                                request_body_str = request_body.decode('UTF8')
+                                request_body_str = request_body.decode('UTF8', 'backslashreplace')
                             else:
                                 request_body_str = request_body
                             request_body_str = self.grab_first_n_bytes(request_body_str)
@@ -177,7 +177,7 @@ class BaseInstrumentorWrapper:
                                 span.set_attribute(
                                     self.HTTP_REQUEST_BODY_PREFIX, request_body_str)
         except: # pylint: disable=W0702
-            logger.error('An error occurred in genericRequestHandler: exception=%s, stacktrace=%s',
+            logger.debug('An error occurred in genericRequestHandler: exception=%s, stacktrace=%s',
                          sys.exc_info()[0],
                          traceback.format_exc())
             # Not rethrowing to avoid causing runtime errors
@@ -231,7 +231,7 @@ class BaseInstrumentorWrapper:
                                 'This is an interesting content-type.')
                             response_body_str = None
                             if isinstance(response_body, bytes):
-                                response_body_str = response_body.decode('UTF8')
+                                response_body_str = response_body.decode('UTF8', 'backslashreplace')
                             else:
                                 response_body_str = response_body
                             response_body_str = self.grab_first_n_bytes(response_body_str)
@@ -244,7 +244,7 @@ class BaseInstrumentorWrapper:
                                 span.set_attribute(
                                     self.HTTP_RESPONSE_BODY_PREFIX, response_body_str)
         except: # pylint: disable=W0702
-            logger.error('An error occurred in genericResponseHandler: exception=%s, stacktrace=%s',
+            logger.debug('An error occurred in genericResponseHandler: exception=%s, stacktrace=%s',
                          sys.exc_info()[0],
                          traceback.format_exc())
             # Not rethrowing to avoid causing runtime errors
@@ -265,7 +265,7 @@ class BaseInstrumentorWrapper:
                 return True
             return False
         except: # pylint: disable=W0702
-            logger.error("""An error occurred while inspecting content-type:
+            logger.debug("""An error occurred while inspecting content-type:
                          exception=%s, stacktrace=%s""",
                          sys.exc_info()[0],
                          traceback.format_exc())
@@ -303,7 +303,7 @@ class BaseInstrumentorWrapper:
                 span.set_attribute(self.RPC_REQUEST_BODY_PREFIX,
                                    request_body_str)
         except: # pylint: disable=W0702
-            logger.error('An error occurred in genericRequestHandler: exception=%s, stacktrace=%s',
+            logger.debug('An error occurred in genericRequestHandler: exception=%s, stacktrace=%s',
                          sys.exc_info()[0],
                          traceback.format_exc())
             # Not rethrowing to avoid causing runtime errors
@@ -342,7 +342,7 @@ class BaseInstrumentorWrapper:
                 span.set_attribute(
                     self.RPC_RESPONSE_BODY_PREFIX, response_body_str)
         except: # pylint: disable=W0702
-            logger.error('An error occurred in genericResponseHandler: exception=%s, stacktrace=%s',
+            logger.debug('An error occurred in genericResponseHandler: exception=%s, stacktrace=%s',
                          sys.exc_info()[0],
                          traceback.format_exc())
             # Not rethrowing to avoid causing runtime errors

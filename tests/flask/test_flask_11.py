@@ -1,26 +1,14 @@
 import sys
-import os
 import logging
 import flask
-import pytest
 import traceback
 import json
-
-from opentelemetry.trace import Span
 from werkzeug.serving import make_server
-from flask import request
-import time
-import atexit
 import threading
 from flask import Flask, send_file
-# from opentelemetry.exporter.jaeger.thrift import JaegerExporter
-from opentelemetry import trace as trace_api
-from opentelemetry.sdk.trace import TracerProvider, export
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
-from opentelemetry.sdk.trace.export import BatchSpanProcessor, SimpleSpanProcessor
+from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 from hypertrace.agent import Agent
-from hypertrace.agent.filter import Filter
-from hypertrace.agent.filter.registry import Registry
 
 def setup_custom_logger(name):
     try:
@@ -86,6 +74,12 @@ def test_run():
         logger.info('Serving request for /route1.')
         return send_file("./tox.ini")
 
+    @app.route("/unicode")
+    def testAPI2():
+        response = flask.Response(mimetype='application/x-www-form-urlencoded')
+        response.data = b'\x80abc'
+        return response
+
     @app.route("/terminate")
     def terminate():
         logger.info('Serving request for /terminatae.')
@@ -123,7 +117,7 @@ def test_run():
         try:
             logger.info('Making test call to /route1')
             r1 = app.test_client().get('http://localhost:5000/route1',
-                                       headers={'tester1': 'tester1', 'tester2': 'tester2'})
+                                        headers={'tester1': 'tester1', 'tester2': 'tester2'})
 
             assert r1.status_code == 200
             span_list = memoryExporter.get_finished_spans()
@@ -146,6 +140,17 @@ def test_run():
 
             memoryExporter.clear()
 
+            r2 = app.test_client().get('http://localhost:5000/unicode')
+            assert r2.status_code == 200
+            span_list = memoryExporter.get_finished_spans()
+            assert span_list
+            assert len(span_list) == 1
+            flaskSpanAsObject = json.loads(span_list[0].to_json())
+
+            # Check that the expected results are in the flask extended span attributes
+            assert flaskSpanAsObject['attributes']['http.method'] == 'GET'
+            assert flaskSpanAsObject['attributes']['http.target'] == '/unicode'
+            assert flaskSpanAsObject['attributes']['http.response.body'] == "\\x80abc"
             return 0
         except:
             logger.error('Failed to initialize flask instrumentation wrapper: exception=%s, stacktrace=%s',
