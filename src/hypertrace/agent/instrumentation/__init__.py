@@ -165,7 +165,7 @@ class BaseInstrumentorWrapper:
                                 'This is an interesting content-type.')
                             request_body_str = None
                             if isinstance(request_body, bytes):
-                                request_body_str = request_body.decode('UTF8')
+                                request_body_str = request_body.decode('UTF8', 'backslashreplace')
                             else:
                                 request_body_str = request_body
                             request_body_str = self.grab_first_n_bytes(request_body_str)
@@ -231,7 +231,7 @@ class BaseInstrumentorWrapper:
                                 'This is an interesting content-type.')
                             response_body_str = None
                             if isinstance(response_body, bytes):
-                                response_body_str = response_body.decode('UTF8')
+                                response_body_str = response_body.decode('UTF8', 'backslashreplace')
                             else:
                                 response_body_str = response_body
                             response_body_str = self.grab_first_n_bytes(response_body_str)
@@ -370,3 +370,5 @@ class BaseInstrumentorWrapper:
             return body[0, self.get_max_body_size()]
         else:
             return body
+
+
