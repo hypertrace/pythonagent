@@ -117,8 +117,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
 
         logger.debug('propagator_list: %s', str(propagator_list))
         from opentelemetry.propagate import set_global_textmap # pylint: disable=C0415
-        from opentelemetry.propagators.composite import CompositeHTTPPropagator # pylint: disable=C0415
-        composite_propagators = CompositeHTTPPropagator(propagator_list)
+        from opentelemetry.propagators.composite import CompositePropagator # pylint: disable=C0415
+        composite_propagators = CompositePropagator(propagator_list)
         set_global_textmap(composite_propagators)
 
     def dump_config(self) -> None:
@@ -150,12 +150,20 @@ class AgentInit:  # pylint: disable=R0902,R0903
             # self.init_instrumentor_wrapper_base_for_http().
             #
             # If no app object was provided, then instrument() is called.
+
+            from hypertrace.agent.instrumentation.flask import _hypertrace_before_request # pylint: disable=C0415
+            from hypertrace.agent.instrumentation.flask import _hypertrace_after_request # pylint: disable=C0415
+            before_hook = _hypertrace_before_request(self._flask_instrumentor_wrapper)
+            after_hook = _hypertrace_after_request(self._flask_instrumentor_wrapper)
             if app:
-                self._flask_instrumentor_wrapper.instrument_app(app)
+                FlaskInstrumentorWrapper.instrument_app(app)
                 call_default_instrumentor = False
-            self.init_instrumentor_wrapper_base_for_http(
-                self._flask_instrumentor_wrapper,
-                call_default_instrumentor)
+
+                app.before_request(before_hook)
+                # Set post-response handler
+                app.after_request(after_hook)
+            self.init_instrumentor_wrapper_base_for_http(self._flask_instrumentor_wrapper,
+                                                         call_default_instrumentor)
         except Exception as err:  # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
                          'flask',

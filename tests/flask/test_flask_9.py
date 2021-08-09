@@ -11,7 +11,6 @@ import time
 import atexit
 import threading
 from flask import Flask
-# from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 from opentelemetry import trace as trace_api
 from opentelemetry.sdk.trace import TracerProvider, export
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
