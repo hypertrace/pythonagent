@@ -8,11 +8,13 @@ from google.protobuf import json_format as jf
 from google.protobuf.wrappers_pb2 import BoolValue
 from hypertrace.agent.config import config_pb2
 from hypertrace.agent.config.default import *
+from hypertrace.agent import custom_logger
+
 from .file import load_config_from_file
 from .environment import load_config_from_env
 
 # Configuration attributes specific to pythonagent
-from hypertrace.agent import custom_logger
+
 
 PYTHON_SPECIFIC_ATTRIBUTES: list = [
     '_use_console_span_exporter'

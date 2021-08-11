@@ -1,3 +1,6 @@
+"""
+Logging configuration
+"""
 import logging
 import os
 import sys
@@ -36,8 +39,3 @@ def setup_logger(name: str) -> logging.Logger:
               err,
               traceback.format_exc())
         return None
-
-
-# create logger object
-logger = setup_custom_logger(__name__)  # pylint: disable=C0103
-

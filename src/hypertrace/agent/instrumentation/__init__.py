@@ -141,9 +141,8 @@ class BaseInstrumentorWrapper:
                     logger.debug(str(header))
                     span.set_attribute(
                         self.HTTP_REQUEST_HEADER_PREFIX + header[0].lower(), header[1])
-            # Log request body if requested
+            # Process request body if enabled
             if self.get_process_request_body():
-                logger.debug('Request Body: %s', str(request_body))
                 # Get content-type value
                 content_type_header_tuple = [
                     item for item in request_headers if item[0].lower() == 'content-type']
@@ -167,6 +166,15 @@ class BaseInstrumentorWrapper:
                                 request_body_str = request_body.decode('UTF8', 'backslashreplace')
                             else:
                                 request_body_str = request_body
+
+                            try:
+                                logger.debug('Request Body: %s', str(request_body))
+                            except:  # pylint:disable=W0702
+                                logger.debug('error logging request body: exception=%s, \
+                                             stacktrace=%s',
+                                             sys.exc_info()[0],
+                                             traceback.format_exc())
+
                             request_body_str = self.grab_first_n_bytes(request_body_str)
                             if content_type_header_tuple[0][1] == 'application/json' \
                               or content_type_header_tuple[0][1] == 'application/graphql':
@@ -233,6 +241,15 @@ class BaseInstrumentorWrapper:
                                 response_body_str = response_body.decode('UTF8', 'backslashreplace')
                             else:
                                 response_body_str = response_body
+
+                            try:
+                                logger.debug('Request Body: %s', str(response_body_str))
+                            except:  # pylint:disable=W0702
+                                logger.debug('error logging response body: exception=%s, \
+                                             stacktrace=%s',
+                                             sys.exc_info()[0],
+                                             traceback.format_exc())
+
                             response_body_str = self.grab_first_n_bytes(response_body_str)
                             # Format message body correctly
                             if content_type_header_tuple[0][1] == 'application/json'\
