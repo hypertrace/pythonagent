@@ -30,7 +30,7 @@ class Agent:
         if cls._instance is None:
             with cls._singleton_lock:
                 logger.debug('Creating Agent')
-                logger.debug(f'Python version: {sys.version}')
+                logger.debug('Python version: %s', sys.version)
                 cls._instance = super(Agent, cls).__new__(cls)
                 cls._instance._initialized = False
         else:
