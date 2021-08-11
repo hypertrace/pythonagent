@@ -18,7 +18,8 @@ LOG_LEVEL = {
     'CRTITICAL': logging.CRITICAL,
     'NOTSET': logging.NOTSET
 }
-def setup_logger(name: str) -> logging.Logger:
+
+def get_custom_logger(name: str) -> logging.Logger:
     '''Agent logger configuration'''
     try:
         formatter = logging.Formatter(fmt=u'%(asctime)s %(levelname)-8s %(message)s',

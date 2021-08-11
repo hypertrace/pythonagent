@@ -1,23 +1,30 @@
 '''Hypertrace wrapper around OTel Flask instrumentor'''
+import sys
+import os.path
 import logging
 import inspect
+import json
 import traceback
+from contextlib import contextmanager
+import flask
 import grpc
-from opentelemetry import trace
+from opentelemetry import propagators, trace
 from opentelemetry.instrumentation.grpc import (
     GrpcInstrumentorServer,
     GrpcInstrumentorClient,
     _server,
-    _client
+    _client,
+    server_interceptor
 )
 from opentelemetry.instrumentation.grpc.version import __version__
 from opentelemetry.instrumentation.grpc.grpcext import intercept_channel
-from hypertrace.agent import constants, custom_logger
+from wrapt import wrap_function_wrapper as _wrap # pylint: disable=R0801
+from hypertrace.agent import constants
 from hypertrace.agent.filter.registry import Registry
 from hypertrace.agent.instrumentation import BaseInstrumentorWrapper
 
 # Initialize logger with local module name
-logger = custom_logger.setup_logger(__name__)# pylint: disable=C0103
+logger = logging.getLogger(__name__) # pylint: disable=C0103
 
 # Object introspection, used for debugging purposes
 def introspect(obj) -> None:

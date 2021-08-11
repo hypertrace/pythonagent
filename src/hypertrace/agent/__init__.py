@@ -5,6 +5,7 @@ import sys
 import threading
 import traceback
 from contextlib import contextmanager
+import logging
 
 import flask
 
@@ -17,7 +18,7 @@ from hypertrace.agent import custom_logger
 
 # The Hypertrace Python Agent class
 
-logger = custom_logger.setup_logger(__name__)
+logger = custom_logger.get_custom_logger(__name__)
 
 class Agent:
     '''Top-level entry point for Hypertrace agent.'''

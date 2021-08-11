@@ -1,13 +1,14 @@
 '''Base class of all Hypertrace Instrumentation Wrapper classes'''
 import sys
+import os.path
 import inspect
 import traceback
+import json
+import logging
 from opentelemetry.trace.span import Span
 
-from hypertrace.agent import custom_logger
-
 # Setup logger name
-logger = custom_logger.setup_logger(__name__)
+logger = logging.getLogger(__name__) # pylint: disable=C0103
 
 # This is a base class for all Hypertrace Instrumentation wrapper classes
 class BaseInstrumentorWrapper:
@@ -143,6 +144,7 @@ class BaseInstrumentorWrapper:
                         self.HTTP_REQUEST_HEADER_PREFIX + header[0].lower(), header[1])
             # Process request body if enabled
             if self.get_process_request_body():
+                logger.debug('Request Body: %s', str(request_body))
                 # Get content-type value
                 content_type_header_tuple = [
                     item for item in request_headers if item[0].lower() == 'content-type']
@@ -171,7 +173,7 @@ class BaseInstrumentorWrapper:
                                 logger.debug('Request Body: %s', str(request_body))
                             except:  # pylint:disable=W0702
                                 logger.debug('error logging request body: exception=%s, \
-                                             stacktrace=%s',
+                                                                         stacktrace=%s',
                                              sys.exc_info()[0],
                                              traceback.format_exc())
 
@@ -215,7 +217,7 @@ class BaseInstrumentorWrapper:
                     logger.debug(str(header))
                     span.set_attribute(
                         self.HTTP_RESPONSE_HEADER_PREFIX + header[0].lower(), header[1])
-            # Log response body if requested
+            # Process response body if enabled
             if self.get_process_response_body():
                 logger.debug('Response Body: %s', str(response_body))
                 # Get content-type value
@@ -246,7 +248,7 @@ class BaseInstrumentorWrapper:
                                 logger.debug('Response Body: %s', str(response_body_str))
                             except:  # pylint:disable=W0702
                                 logger.debug('error logging response body: exception=%s, \
-                                             stacktrace=%s',
+                                                                        stacktrace=%s',
                                              sys.exc_info()[0],
                                              traceback.format_exc())
 

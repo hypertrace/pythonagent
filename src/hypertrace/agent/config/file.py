@@ -1,12 +1,12 @@
 '''File config loader'''
 
 import os
+import logging
 import traceback
 import yaml
 
-from hypertrace.agent import custom_logger
 
-logger = custom_logger.setup_logger(__name__)  # pylint: disable=C0103
+logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
 
 def load_config_from_file(filepath):
