@@ -1,30 +1,23 @@
 '''Hypertrace flask instrumentor module wrapper.''' # pylint: disable=R0401
 import sys
-import os.path
-import logging
 import inspect
 import traceback
-import json
 import flask
 from opentelemetry.instrumentation.flask import (
     _InstrumentedFlask,
     FlaskInstrumentor,
     get_default_span_name,
-    _teardown_request,
     _ENVIRON_SPAN_KEY,
 )
 from werkzeug.exceptions import Forbidden
 
-from hypertrace.agent import constants  # pylint: disable=R0801
+from hypertrace.agent import constants, custom_logger  # pylint: disable=R0801
 from hypertrace.agent.filter.registry import Registry
 from hypertrace.agent.instrumentation import BaseInstrumentorWrapper
-from hypertrace.agent.init import AgentInit
 from hypertrace.agent.config import AgentConfig
 
 # Initialize logger
-logger = logging.getLogger(__name__)  # pylint: disable=C0103
-
-
+logger = custom_logger.setup_logger(__name__)  # pylint: disable=C0103
 
 # Dump metadata about an object; useful for initial discovery of interestin ginfo
 

@@ -1,14 +1,13 @@
 '''Base class of all Hypertrace Instrumentation Wrapper classes'''
 import sys
-import os.path
 import inspect
 import traceback
-import json
-import logging
 from opentelemetry.trace.span import Span
 
+from hypertrace.agent import custom_logger
+
 # Setup logger name
-logger = logging.getLogger(__name__) # pylint: disable=C0103
+logger = custom_logger.setup_logger(__name__)
 
 # This is a base class for all Hypertrace Instrumentation wrapper classes
 class BaseInstrumentorWrapper:

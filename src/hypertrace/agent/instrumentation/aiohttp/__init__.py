@@ -1,12 +1,8 @@
 '''Hypertrace instrumentation logic for aiohttp-client'''
-import sys
-import os.path
-import logging
 import traceback
 import inspect
 import types
 import typing
-import codecs
 from collections import deque
 import asyncio
 import aiohttp
@@ -14,14 +10,14 @@ import wrapt
 from opentelemetry import context as context_api
 from opentelemetry import trace
 from opentelemetry.instrumentation.aiohttp_client.version import __version__
-from opentelemetry.instrumentation.instrumentor import BaseInstrumentor
-from opentelemetry.trace import SpanKind, TracerProvider, get_tracer
-from opentelemetry.trace.status import Status, StatusCode
+from opentelemetry.trace import TracerProvider, get_tracer
 from opentelemetry.instrumentation.aiohttp_client import AioHttpClientInstrumentor
+
+from hypertrace.agent import custom_logger
 from hypertrace.agent.instrumentation import BaseInstrumentorWrapper
 
 # Initialize logger with local module name
-logger = logging.getLogger(__name__)  # pylint: disable=C0103
+logger = custom_logger.setup_logger(__name__)  # pylint: disable=C0103
 
 # Max time to wait for response data to be read.
 MAX_WAIT_TIME = 0.1 # seconds

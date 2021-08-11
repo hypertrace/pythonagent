@@ -3,12 +3,13 @@
 autoinstrument existing pythong programs that use supported
 modules.'''
 import argparse
-from logging import getLogger
 from os import environ, execl, getcwd
 from os.path import abspath, dirname, pathsep
 from shutil import which
 
-logger = getLogger(__file__)
+from hypertrace.agent import custom_logger
+
+logger = custom_logger.setup_logger(__name__)
 
 def parse_args():
     '''Parse CLI arguments.'''

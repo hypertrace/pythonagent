@@ -1,16 +1,10 @@
 '''Hypertrace wrapper around OTel instrumentation class'''
-import sys
-import os.path
-import logging
-import traceback
-import functools
-import types
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
-from requests.models import Response
+
+from hypertrace.agent import custom_logger
 from hypertrace.agent.instrumentation import BaseInstrumentorWrapper
 
-# Initialize logger with local module name
-logger = logging.getLogger(__name__) # pylint: disable=C0103
+logger = custom_logger.setup_logger(__name__) # pylint: disable=C0103
 
 def get_active_span_for_call_wrapper(requests_wrapper):
     '''Helper function to setup call wrapper function'''

@@ -1,9 +1,9 @@
 '''Environment config loader'''
 
 import os
-import logging
+from hypertrace.agent import custom_logger
 
-logger = logging.getLogger(__name__)  # pylint: disable=C0103
+logger = custom_logger.setup_logger(__name__)  # pylint: disable=C0103
 
 
 def load_config_from_env() -> dict:  # pylint: disable=R0912,R0915
