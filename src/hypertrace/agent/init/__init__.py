@@ -13,11 +13,11 @@ from opentelemetry.exporter.zipkin.proto.http import ZipkinExporter
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from hypertrace.agent import constants, custom_logger
+from hypertrace.agent import constants
 from hypertrace.agent.config import config_pb2, AgentConfig
 
 # Initialize logger
-logger = custom_logger.setup_logger(__name__)  # pylint: disable=C0103
+logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
 
 class AgentInit:  # pylint: disable=R0902,R0903
