@@ -12,7 +12,7 @@ from .file import load_config_from_file
 from .environment import load_config_from_env
 
 # Configuration attributes specific to pythonagent
-from .. import custom_logger
+from hypertrace.agent import custom_logger
 
 PYTHON_SPECIFIC_ATTRIBUTES: list = [
     '_use_console_span_exporter'
