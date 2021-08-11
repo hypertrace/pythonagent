@@ -243,7 +243,7 @@ class BaseInstrumentorWrapper:
                                 response_body_str = response_body
 
                             try:
-                                logger.debug('Request Body: %s', str(response_body_str))
+                                logger.debug('Response Body: %s', str(response_body_str))
                             except:  # pylint:disable=W0702
                                 logger.debug('error logging response body: exception=%s, \
                                              stacktrace=%s',
