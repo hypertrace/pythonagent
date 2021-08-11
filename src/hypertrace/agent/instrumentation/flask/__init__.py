@@ -60,7 +60,6 @@ def _hypertrace_before_request(flask_wrapper):
             # Pull message body
             request_body = flask.request.data       # same
             logger.debug('span: %s', str(span))
-            logger.debug('Request headers: %s', str(request_headers))
 
             span.update_name(str(flask.request.method) + ' ' + str(flask.request.url_rule))
 
@@ -105,7 +104,6 @@ def _hypertrace_after_request(flask_wrapper) -> flask.wrappers.Response:
                 response_body = response.data
 
             logger.debug('Span: %s', str(span))
-            logger.debug('Response Headers: %s', str(response_headers))
 
             # Call base response handler
             flask_wrapper.generic_response_handler(

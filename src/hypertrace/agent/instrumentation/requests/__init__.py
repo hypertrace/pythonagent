@@ -20,7 +20,6 @@ def get_active_span_for_call_wrapper(requests_wrapper):
         '''Hypertrace call wrapper function'''
         logger.debug('Entering get_active_span_for_request().')
         logger.debug('span: %s', str(span))
-        logger.debug('response headers: %s', str(response.headers))
         response_content = None
         if hasattr(response, 'content'):
             logger.debug('Converting response message body to string.')
@@ -28,9 +27,6 @@ def get_active_span_for_call_wrapper(requests_wrapper):
         else:
             logger.debug('No response message body. Setting to blank string.')
             response_content = ''
-
-        logger.debug('request: %s', str(response.request))
-        logger.debug('request headers: %s', str(response.request.headers))
         request_content = None
         if hasattr(response.request, 'content'):
             logger.debug('Converting request message body to string.')
