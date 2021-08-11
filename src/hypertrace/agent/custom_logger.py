@@ -20,7 +20,7 @@ _LOG_LEVEL = {
 def get_custom_logger(name: str) -> logging.Logger:
     '''Agent logger configuration'''
     try:
-        formatter = logging.Formatter(fmt=u'%(asctime)s %(levelname)-8s %(message)s',
+        formatter = logging.Formatter(fmt='%(asctime)s %(levelname)-8s %(message)s',
                                       datefmt='%Y-%m-%d %H:%M:%S')
         screen_handler = logging.StreamHandler(stream=sys.stdout)
         screen_handler.setFormatter(formatter)
