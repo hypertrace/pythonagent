@@ -6,9 +6,7 @@ import os
 import sys
 import traceback
 
-HT_LOGGER_NAME = 'hypertrace'
-
-LOG_LEVEL = {
+_LOG_LEVEL = {
     None: logging.INFO,
     '': logging.INFO,
     'INFO': logging.INFO,
@@ -30,7 +28,7 @@ def get_custom_logger(name: str) -> logging.Logger:
         logger_ = logging.getLogger(name)
         if 'HT_LOG_LEVEL' in os.environ:
             ht_log_level = os.environ['HT_LOG_LEVEL']
-            log_level = LOG_LEVEL.get(ht_log_level, log_level)
+            log_level = _LOG_LEVEL.get(ht_log_level, log_level)
 
         logger_.setLevel(log_level)
         logger_.addHandler(screen_handler)
