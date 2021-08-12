@@ -3,9 +3,9 @@ import os
 import os.path
 import sys
 import threading
-import logging
 import traceback
 from contextlib import contextmanager
+import logging
 
 import flask
 
@@ -14,51 +14,11 @@ import opentelemetry.trace as ot
 from hypertrace.agent.init import AgentInit
 from hypertrace.agent.config import AgentConfig
 from hypertrace.agent import constants
-
-
-# main logging module configuration
-
-
-def setup_custom_logger(name: str) -> logging.Logger:
-    '''Agent logger configuration'''
-    try:
-        formatter = logging.Formatter(fmt='%(asctime)s %(levelname)-8s %(message)s',
-                                      datefmt='%Y-%m-%d %H:%M:%S')
-        screen_handler = logging.StreamHandler(stream=sys.stdout)
-        screen_handler.setFormatter(formatter)
-        log_level = logging.INFO
-        logger_ = logging.getLogger(name)
-        if 'HT_LOG_LEVEL' in os.environ:
-            ht_log_level = os.environ['HT_LOG_LEVEL']
-            if ht_log_level is None or ht_log_level == '':
-                log_level = logging.INFO
-            if ht_log_level == 'INFO':
-                log_level = logging.INFO
-            if ht_log_level == 'DEBUG':
-                log_level = logging.DEBUG
-            if ht_log_level == 'ERROR':
-                log_level = logging.ERROR
-            if ht_log_level == 'WARNING':
-                log_level = logging.WARNING
-            if ht_log_level == 'CRITICAL':
-                log_level = logging.CRITICAL
-            if ht_log_level == 'NOTSET':
-                log_level = logging.NOTSET
-        logger_.setLevel(log_level)
-        logger_.addHandler(screen_handler)
-        return logger_
-    except Exception as err:  # pylint: disable=W0703
-        print('Failed to customize logger: exception=%s, stacktrace=%s',
-              err,
-              traceback.format_exc())
-        return None
-
-
-# create logger object
-logger = setup_custom_logger(__name__)  # pylint: disable=C0103
+from hypertrace.agent import custom_logger
 
 # The Hypertrace Python Agent class
 
+logger = custom_logger.get_custom_logger(__name__)
 
 class Agent:
     '''Top-level entry point for Hypertrace agent.'''
@@ -70,6 +30,7 @@ class Agent:
         if cls._instance is None:
             with cls._singleton_lock:
                 logger.debug('Creating Agent')
+                logger.debug('Python version: %s', sys.version)
                 cls._instance = super(Agent, cls).__new__(cls)
                 cls._instance._initialized = False
         else:
