@@ -32,9 +32,9 @@ import os
 import os.path
 import sys
 import threading
-import logging
 import traceback
 from contextlib import contextmanager
+import logging
 
 import flask
 
@@ -43,51 +43,11 @@ import opentelemetry.trace as ot
 from hypertrace.agent.init import AgentInit
 from hypertrace.agent.config import AgentConfig
 from hypertrace.agent import constants
-
-
-# main logging module configuration
-
-
-def setup_custom_logger(name: str) -&gt; logging.Logger:
-    &#39;&#39;&#39;Agent logger configuration&#39;&#39;&#39;
-    try:
-        formatter = logging.Formatter(fmt=&#39;%(asctime)s %(levelname)-8s %(message)s&#39;,
-                                      datefmt=&#39;%Y-%m-%d %H:%M:%S&#39;)
-        screen_handler = logging.StreamHandler(stream=sys.stdout)
-        screen_handler.setFormatter(formatter)
-        log_level = logging.INFO
-        logger_ = logging.getLogger(name)
-        if &#39;HT_LOG_LEVEL&#39; in os.environ:
-            ht_log_level = os.environ[&#39;HT_LOG_LEVEL&#39;]
-            if ht_log_level is None or ht_log_level == &#39;&#39;:
-                log_level = logging.INFO
-            if ht_log_level == &#39;INFO&#39;:
-                log_level = logging.INFO
-            if ht_log_level == &#39;DEBUG&#39;:
-                log_level = logging.DEBUG
-            if ht_log_level == &#39;ERROR&#39;:
-                log_level = logging.ERROR
-            if ht_log_level == &#39;WARNING&#39;:
-                log_level = logging.WARNING
-            if ht_log_level == &#39;CRITICAL&#39;:
-                log_level = logging.CRITICAL
-            if ht_log_level == &#39;NOTSET&#39;:
-                log_level = logging.NOTSET
-        logger_.setLevel(log_level)
-        logger_.addHandler(screen_handler)
-        return logger_
-    except Exception as err:  # pylint: disable=W0703
-        print(&#39;Failed to customize logger: exception=%s, stacktrace=%s&#39;,
-              err,
-              traceback.format_exc())
-        return None
-
-
-# create logger object
-logger = setup_custom_logger(__name__)  # pylint: disable=C0103
+from hypertrace.agent import custom_logger
 
 # The Hypertrace Python Agent class
 
+logger = custom_logger.get_custom_logger(__name__)
 
 class Agent:
     &#39;&#39;&#39;Top-level entry point for Hypertrace agent.&#39;&#39;&#39;
@@ -99,6 +59,7 @@ class Agent:
         if cls._instance is None:
             with cls._singleton_lock:
                 logger.debug(&#39;Creating Agent&#39;)
+                logger.debug(&#39;Python version: %s&#39;, sys.version)
                 cls._instance = super(Agent, cls).__new__(cls)
                 cls._instance._initialized = False
         else:
@@ -264,6 +225,10 @@ environment variables, and the agent-config.yaml file.</p></div>
 <dd>
 <div class="desc"><p>constants</p></div>
 </dd>
+<dt><code class="name"><a title="hypertrace.agent.custom_logger" href="custom_logger.html">hypertrace.agent.custom_logger</a></code></dt>
+<dd>
+<div class="desc"><p>Logging configuration</p></div>
+</dd>
 <dt><code class="name"><a title="hypertrace.agent.filter" href="filter/index.html">hypertrace.agent.filter</a></code></dt>
 <dd>
 <div class="desc"><p>Filter abstract base class for blocking</p></div>
@@ -281,53 +246,6 @@ environment variables, and the agent-config.yaml file.</p></div>
 <section>
 </section>
 <section>
-<h2 class="section-title" id="header-functions">Functions</h2>
-<dl>
-<dt id="hypertrace.agent.setup_custom_logger"><code class="name flex">
-<span>def <span class="ident">setup_custom_logger</span></span>(<span>name: str) ‑> logging.Logger</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Agent logger configuration</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def setup_custom_logger(name: str) -&gt; logging.Logger:
-    &#39;&#39;&#39;Agent logger configuration&#39;&#39;&#39;
-    try:
-        formatter = logging.Formatter(fmt=&#39;%(asctime)s %(levelname)-8s %(message)s&#39;,
-                                      datefmt=&#39;%Y-%m-%d %H:%M:%S&#39;)
-        screen_handler = logging.StreamHandler(stream=sys.stdout)
-        screen_handler.setFormatter(formatter)
-        log_level = logging.INFO
-        logger_ = logging.getLogger(name)
-        if &#39;HT_LOG_LEVEL&#39; in os.environ:
-            ht_log_level = os.environ[&#39;HT_LOG_LEVEL&#39;]
-            if ht_log_level is None or ht_log_level == &#39;&#39;:
-                log_level = logging.INFO
-            if ht_log_level == &#39;INFO&#39;:
-                log_level = logging.INFO
-            if ht_log_level == &#39;DEBUG&#39;:
-                log_level = logging.DEBUG
-            if ht_log_level == &#39;ERROR&#39;:
-                log_level = logging.ERROR
-            if ht_log_level == &#39;WARNING&#39;:
-                log_level = logging.WARNING
-            if ht_log_level == &#39;CRITICAL&#39;:
-                log_level = logging.CRITICAL
-            if ht_log_level == &#39;NOTSET&#39;:
-                log_level = logging.NOTSET
-        logger_.setLevel(log_level)
-        logger_.addHandler(screen_handler)
-        return logger_
-    except Exception as err:  # pylint: disable=W0703
-        print(&#39;Failed to customize logger: exception=%s, stacktrace=%s&#39;,
-              err,
-              traceback.format_exc())
-        return None</code></pre>
-</details>
-</dd>
-</dl>
 </section>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
@@ -352,6 +270,7 @@ environment variables, and the agent-config.yaml file.</p></div>
         if cls._instance is None:
             with cls._singleton_lock:
                 logger.debug(&#39;Creating Agent&#39;)
+                logger.debug(&#39;Python version: %s&#39;, sys.version)
                 cls._instance = super(Agent, cls).__new__(cls)
                 cls._instance._initialized = False
         else:
@@ -750,14 +669,10 @@ def edit_config(self):
 <li><code><a title="hypertrace.agent.autoinstrumentation" href="autoinstrumentation/index.html">hypertrace.agent.autoinstrumentation</a></code></li>
 <li><code><a title="hypertrace.agent.config" href="config/index.html">hypertrace.agent.config</a></code></li>
 <li><code><a title="hypertrace.agent.constants" href="constants.html">hypertrace.agent.constants</a></code></li>
+<li><code><a title="hypertrace.agent.custom_logger" href="custom_logger.html">hypertrace.agent.custom_logger</a></code></li>
 <li><code><a title="hypertrace.agent.filter" href="filter/index.html">hypertrace.agent.filter</a></code></li>
 <li><code><a title="hypertrace.agent.init" href="init/index.html">hypertrace.agent.init</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation" href="instrumentation/index.html">hypertrace.agent.instrumentation</a></code></li>
-</ul>
-</li>
-<li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="">
-<li><code><a title="hypertrace.agent.setup_custom_logger" href="#hypertrace.agent.setup_custom_logger">setup_custom_logger</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>

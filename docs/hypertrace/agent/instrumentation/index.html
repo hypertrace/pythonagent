@@ -157,8 +157,6 @@ class BaseInstrumentorWrapper:
             &#39;Entering BaseInstrumentationWrapper.genericRequestHandler().&#39;)
         try: # pylint: disable=R1702
             logger.debug(&#39;span: %s&#39;, str(span))
-            logger.debug(&#39;requestHeaders: %s&#39;, str(request_headers))
-            logger.debug(&#39;requestBody: %s&#39;, str(request_body))
             # Only log if span is recording.
             if span.is_recording():
                 logger.debug(&#39;Span is Recording!&#39;)
@@ -171,9 +169,8 @@ class BaseInstrumentorWrapper:
                     logger.debug(str(header))
                     span.set_attribute(
                         self.HTTP_REQUEST_HEADER_PREFIX + header[0].lower(), header[1])
-            # Log request body if requested
+            # Process request body if enabled
             if self.get_process_request_body():
-                logger.debug(&#39;Request Body: %s&#39;, str(request_body))
                 # Get content-type value
                 content_type_header_tuple = [
                     item for item in request_headers if item[0].lower() == &#39;content-type&#39;]
@@ -197,6 +194,7 @@ class BaseInstrumentorWrapper:
                                 request_body_str = request_body.decode(&#39;UTF8&#39;, &#39;backslashreplace&#39;)
                             else:
                                 request_body_str = request_body
+
                             request_body_str = self.grab_first_n_bytes(request_body_str)
                             if content_type_header_tuple[0][1] == &#39;application/json&#39; \
                               or content_type_header_tuple[0][1] == &#39;application/graphql&#39;:
@@ -223,8 +221,6 @@ class BaseInstrumentorWrapper:
             &#39;Entering BaseInstrumentationWrapper.genericResponseHandler().&#39;)
         try: # pylint: disable=R1702
             logger.debug(&#39;span: %s&#39;, str(span))
-            logger.debug(&#39;responseHeaders: %s&#39;, str(response_headers))
-            logger.debug(&#39;responseBody: %s&#39;, str(response_body))
             # Only log if span is recording.
             if span.is_recording():
                 logger.debug(&#39;Span is Recording!&#39;)
@@ -237,7 +233,7 @@ class BaseInstrumentorWrapper:
                     logger.debug(str(header))
                     span.set_attribute(
                         self.HTTP_RESPONSE_HEADER_PREFIX + header[0].lower(), header[1])
-            # Log response body if requested
+            # Process response body if enabled
             if self.get_process_response_body():
                 logger.debug(&#39;Response Body: %s&#39;, str(response_body))
                 # Get content-type value
@@ -263,6 +259,7 @@ class BaseInstrumentorWrapper:
                                 response_body_str = response_body.decode(&#39;UTF8&#39;, &#39;backslashreplace&#39;)
                             else:
                                 response_body_str = response_body
+
                             response_body_str = self.grab_first_n_bytes(response_body_str)
                             # Format message body correctly
                             if content_type_header_tuple[0][1] == &#39;application/json&#39;\
@@ -310,8 +307,6 @@ class BaseInstrumentorWrapper:
             &#39;Entering BaseInstrumentationWrapper.genericRpcRequestHandler().&#39;)
         try:
             logger.debug(&#39;span: %s&#39;, str(span))
-            logger.debug(&#39;requestHeaders: %s&#39;, str(request_headers))
-            logger.debug(&#39;requestBody: %s&#39;, str(request_body))
             # Is the span currently recording?
             if span.is_recording():
                 logger.debug(&#39;Span is Recording!&#39;)
@@ -327,7 +322,6 @@ class BaseInstrumentorWrapper:
             # Log rpc body if requested
             if self.get_process_request_body():
                 request_body_str = str(request_body)
-                logger.debug(&#39;Request Body: %s&#39;, request_body_str)
                 request_body_str = self.grab_first_n_bytes(request_body_str)
                 span.set_attribute(self.RPC_REQUEST_BODY_PREFIX,
                                    request_body_str)
@@ -366,7 +360,7 @@ class BaseInstrumentorWrapper:
             # Log rpc body if requested
             if self.get_process_response_body():
                 response_body_str = str(response_body)
-                logger.debug(&#39;Response Body: %s&#39;, response_body_str)
+                logger.debug(&#39;Processing response body&#39;)
                 response_body_str = self.grab_first_n_bytes(response_body_str)
                 span.set_attribute(
                     self.RPC_RESPONSE_BODY_PREFIX, response_body_str)
@@ -564,8 +558,6 @@ class BaseInstrumentorWrapper:
             &#39;Entering BaseInstrumentationWrapper.genericRequestHandler().&#39;)
         try: # pylint: disable=R1702
             logger.debug(&#39;span: %s&#39;, str(span))
-            logger.debug(&#39;requestHeaders: %s&#39;, str(request_headers))
-            logger.debug(&#39;requestBody: %s&#39;, str(request_body))
             # Only log if span is recording.
             if span.is_recording():
                 logger.debug(&#39;Span is Recording!&#39;)
@@ -578,9 +570,8 @@ class BaseInstrumentorWrapper:
                     logger.debug(str(header))
                     span.set_attribute(
                         self.HTTP_REQUEST_HEADER_PREFIX + header[0].lower(), header[1])
-            # Log request body if requested
+            # Process request body if enabled
             if self.get_process_request_body():
-                logger.debug(&#39;Request Body: %s&#39;, str(request_body))
                 # Get content-type value
                 content_type_header_tuple = [
                     item for item in request_headers if item[0].lower() == &#39;content-type&#39;]
@@ -604,6 +595,7 @@ class BaseInstrumentorWrapper:
                                 request_body_str = request_body.decode(&#39;UTF8&#39;, &#39;backslashreplace&#39;)
                             else:
                                 request_body_str = request_body
+
                             request_body_str = self.grab_first_n_bytes(request_body_str)
                             if content_type_header_tuple[0][1] == &#39;application/json&#39; \
                               or content_type_header_tuple[0][1] == &#39;application/graphql&#39;:
@@ -630,8 +622,6 @@ class BaseInstrumentorWrapper:
             &#39;Entering BaseInstrumentationWrapper.genericResponseHandler().&#39;)
         try: # pylint: disable=R1702
             logger.debug(&#39;span: %s&#39;, str(span))
-            logger.debug(&#39;responseHeaders: %s&#39;, str(response_headers))
-            logger.debug(&#39;responseBody: %s&#39;, str(response_body))
             # Only log if span is recording.
             if span.is_recording():
                 logger.debug(&#39;Span is Recording!&#39;)
@@ -644,7 +634,7 @@ class BaseInstrumentorWrapper:
                     logger.debug(str(header))
                     span.set_attribute(
                         self.HTTP_RESPONSE_HEADER_PREFIX + header[0].lower(), header[1])
-            # Log response body if requested
+            # Process response body if enabled
             if self.get_process_response_body():
                 logger.debug(&#39;Response Body: %s&#39;, str(response_body))
                 # Get content-type value
@@ -670,6 +660,7 @@ class BaseInstrumentorWrapper:
                                 response_body_str = response_body.decode(&#39;UTF8&#39;, &#39;backslashreplace&#39;)
                             else:
                                 response_body_str = response_body
+
                             response_body_str = self.grab_first_n_bytes(response_body_str)
                             # Format message body correctly
                             if content_type_header_tuple[0][1] == &#39;application/json&#39;\
@@ -717,8 +708,6 @@ class BaseInstrumentorWrapper:
             &#39;Entering BaseInstrumentationWrapper.genericRpcRequestHandler().&#39;)
         try:
             logger.debug(&#39;span: %s&#39;, str(span))
-            logger.debug(&#39;requestHeaders: %s&#39;, str(request_headers))
-            logger.debug(&#39;requestBody: %s&#39;, str(request_body))
             # Is the span currently recording?
             if span.is_recording():
                 logger.debug(&#39;Span is Recording!&#39;)
@@ -734,7 +723,6 @@ class BaseInstrumentorWrapper:
             # Log rpc body if requested
             if self.get_process_request_body():
                 request_body_str = str(request_body)
-                logger.debug(&#39;Request Body: %s&#39;, request_body_str)
                 request_body_str = self.grab_first_n_bytes(request_body_str)
                 span.set_attribute(self.RPC_REQUEST_BODY_PREFIX,
                                    request_body_str)
@@ -773,7 +761,7 @@ class BaseInstrumentorWrapper:
             # Log rpc body if requested
             if self.get_process_response_body():
                 response_body_str = str(response_body)
-                logger.debug(&#39;Response Body: %s&#39;, response_body_str)
+                logger.debug(&#39;Processing response body&#39;)
                 response_body_str = self.grab_first_n_bytes(response_body_str)
                 span.set_attribute(
                     self.RPC_RESPONSE_BODY_PREFIX, response_body_str)
@@ -894,8 +882,6 @@ class BaseInstrumentorWrapper:
         &#39;Entering BaseInstrumentationWrapper.genericRequestHandler().&#39;)
     try: # pylint: disable=R1702
         logger.debug(&#39;span: %s&#39;, str(span))
-        logger.debug(&#39;requestHeaders: %s&#39;, str(request_headers))
-        logger.debug(&#39;requestBody: %s&#39;, str(request_body))
         # Only log if span is recording.
         if span.is_recording():
             logger.debug(&#39;Span is Recording!&#39;)
@@ -908,9 +894,8 @@ class BaseInstrumentorWrapper:
                 logger.debug(str(header))
                 span.set_attribute(
                     self.HTTP_REQUEST_HEADER_PREFIX + header[0].lower(), header[1])
-        # Log request body if requested
+        # Process request body if enabled
         if self.get_process_request_body():
-            logger.debug(&#39;Request Body: %s&#39;, str(request_body))
             # Get content-type value
             content_type_header_tuple = [
                 item for item in request_headers if item[0].lower() == &#39;content-type&#39;]
@@ -934,6 +919,7 @@ class BaseInstrumentorWrapper:
                             request_body_str = request_body.decode(&#39;UTF8&#39;, &#39;backslashreplace&#39;)
                         else:
                             request_body_str = request_body
+
                         request_body_str = self.grab_first_n_bytes(request_body_str)
                         if content_type_header_tuple[0][1] == &#39;application/json&#39; \
                           or content_type_header_tuple[0][1] == &#39;application/graphql&#39;:
@@ -969,8 +955,6 @@ class BaseInstrumentorWrapper:
         &#39;Entering BaseInstrumentationWrapper.genericResponseHandler().&#39;)
     try: # pylint: disable=R1702
         logger.debug(&#39;span: %s&#39;, str(span))
-        logger.debug(&#39;responseHeaders: %s&#39;, str(response_headers))
-        logger.debug(&#39;responseBody: %s&#39;, str(response_body))
         # Only log if span is recording.
         if span.is_recording():
             logger.debug(&#39;Span is Recording!&#39;)
@@ -983,7 +967,7 @@ class BaseInstrumentorWrapper:
                 logger.debug(str(header))
                 span.set_attribute(
                     self.HTTP_RESPONSE_HEADER_PREFIX + header[0].lower(), header[1])
-        # Log response body if requested
+        # Process response body if enabled
         if self.get_process_response_body():
             logger.debug(&#39;Response Body: %s&#39;, str(response_body))
             # Get content-type value
@@ -1009,6 +993,7 @@ class BaseInstrumentorWrapper:
                             response_body_str = response_body.decode(&#39;UTF8&#39;, &#39;backslashreplace&#39;)
                         else:
                             response_body_str = response_body
+
                         response_body_str = self.grab_first_n_bytes(response_body_str)
                         # Format message body correctly
                         if content_type_header_tuple[0][1] == &#39;application/json&#39;\
@@ -1045,8 +1030,6 @@ class BaseInstrumentorWrapper:
         &#39;Entering BaseInstrumentationWrapper.genericRpcRequestHandler().&#39;)
     try:
         logger.debug(&#39;span: %s&#39;, str(span))
-        logger.debug(&#39;requestHeaders: %s&#39;, str(request_headers))
-        logger.debug(&#39;requestBody: %s&#39;, str(request_body))
         # Is the span currently recording?
         if span.is_recording():
             logger.debug(&#39;Span is Recording!&#39;)
@@ -1062,7 +1045,6 @@ class BaseInstrumentorWrapper:
         # Log rpc body if requested
         if self.get_process_request_body():
             request_body_str = str(request_body)
-            logger.debug(&#39;Request Body: %s&#39;, request_body_str)
             request_body_str = self.grab_first_n_bytes(request_body_str)
             span.set_attribute(self.RPC_REQUEST_BODY_PREFIX,
                                request_body_str)
@@ -1110,7 +1092,7 @@ class BaseInstrumentorWrapper:
         # Log rpc body if requested
         if self.get_process_response_body():
             response_body_str = str(response_body)
-            logger.debug(&#39;Response Body: %s&#39;, response_body_str)
+            logger.debug(&#39;Processing response body&#39;)
             response_body_str = self.grab_first_n_bytes(response_body_str)
             span.set_attribute(
                 self.RPC_RESPONSE_BODY_PREFIX, response_body_str)

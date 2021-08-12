@@ -49,8 +49,6 @@ def get_active_span_for_call_wrapper(requests_wrapper):
         &#39;&#39;&#39;Hypertrace call wrapper function&#39;&#39;&#39;
         logger.debug(&#39;Entering get_active_span_for_request().&#39;)
         logger.debug(&#39;span: %s&#39;, str(span))
-        logger.debug(&#39;response: %s&#39;, str(response))
-        logger.debug(&#39;response headers: %s&#39;, str(response.headers))
         response_content = None
         if hasattr(response, &#39;content&#39;):
             logger.debug(&#39;Converting response message body to string.&#39;)
@@ -58,9 +56,6 @@ def get_active_span_for_call_wrapper(requests_wrapper):
         else:
             logger.debug(&#39;No response message body. Setting to blank string.&#39;)
             response_content = &#39;&#39;
-        logger.debug(&#39;response body: %s&#39;, str(response_content))
-        logger.debug(&#39;request: %s&#39;, str(response.request))
-        logger.debug(&#39;request headers: %s&#39;, str(response.request.headers))
         request_content = None
         if hasattr(response.request, &#39;content&#39;):
             logger.debug(&#39;Converting request message body to string.&#39;)
@@ -68,7 +63,7 @@ def get_active_span_for_call_wrapper(requests_wrapper):
         else:
             logger.debug(&#39;No request message body. Setting to blank string.&#39;)
             request_content = &#39;&#39;
-        logger.debug(&#39;request body: %s&#39;, str(request_content))
+
         if span.is_recording():
             logger.debug(&#39;Span is recording.&#39;)
             request_headers = [(k, v)
@@ -129,8 +124,6 @@ class RequestsInstrumentorWrapper(RequestsInstrumentor, BaseInstrumentorWrapper)
         &#39;&#39;&#39;Hypertrace call wrapper function&#39;&#39;&#39;
         logger.debug(&#39;Entering get_active_span_for_request().&#39;)
         logger.debug(&#39;span: %s&#39;, str(span))
-        logger.debug(&#39;response: %s&#39;, str(response))
-        logger.debug(&#39;response headers: %s&#39;, str(response.headers))
         response_content = None
         if hasattr(response, &#39;content&#39;):
             logger.debug(&#39;Converting response message body to string.&#39;)
@@ -138,9 +131,6 @@ class RequestsInstrumentorWrapper(RequestsInstrumentor, BaseInstrumentorWrapper)
         else:
             logger.debug(&#39;No response message body. Setting to blank string.&#39;)
             response_content = &#39;&#39;
-        logger.debug(&#39;response body: %s&#39;, str(response_content))
-        logger.debug(&#39;request: %s&#39;, str(response.request))
-        logger.debug(&#39;request headers: %s&#39;, str(response.request.headers))
         request_content = None
         if hasattr(response.request, &#39;content&#39;):
             logger.debug(&#39;Converting request message body to string.&#39;)
@@ -148,7 +138,7 @@ class RequestsInstrumentorWrapper(RequestsInstrumentor, BaseInstrumentorWrapper)
         else:
             logger.debug(&#39;No request message body. Setting to blank string.&#39;)
             request_content = &#39;&#39;
-        logger.debug(&#39;request body: %s&#39;, str(request_content))
+
         if span.is_recording():
             logger.debug(&#39;Span is recording.&#39;)
             request_headers = [(k, v)
