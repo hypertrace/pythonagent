@@ -2,7 +2,6 @@
 import os
 
 from hypertrace.agent.config import AgentConfig
-from hypertrace.agent.config import IGNORE_ATTRIBUTES
 from . import DEFAULT_AGENT_CONFIG
 from . import merge_config
 from . import load_config_from_file
@@ -11,7 +10,7 @@ from . import load_config_from_file
 def test_merge_config() -> None:
     '''Unittest for merging config results.'''
     # set Environment Variable
-    config_file_path = "./src/hypertrace/agent/config/test_agent-config.yaml"
+    config_file_path = os.path.join(os.path.dirname(__file__), 'test_agent-config.yaml')
     config_from_file = load_config_from_file(config_file_path)
 
     cfg = merge_config(
@@ -66,12 +65,3 @@ def unset_env_variables():
         if key[0:3] == "HT_":
             del os.environ[key]
 
-
-def test_ignore_attributes_are_removed() -> None:
-    """Test ignore keys are dropped"""
-    os.environ["HT_CONFIG_FILE"] = os.path.join(os.path.dirname(__file__),
-                                        'test_agent_config_ignored_keys.yaml')
-    IGNORE_ATTRIBUTES.append("custom_key_for_filter_library")
-    config = AgentConfig()
-    assert not config.config.get('custom_key_for_filter_library', False)
-    unset_env_variables()

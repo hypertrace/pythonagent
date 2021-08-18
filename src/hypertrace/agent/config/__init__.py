@@ -18,9 +18,6 @@ PYTHON_SPECIFIC_ATTRIBUTES: list = [
     '_use_console_span_exporter'
 ]
 
-# Can be used by filter libraries to extend configuration
-IGNORE_ATTRIBUTES: list = []
-
 # Initialize logger
 logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -69,9 +66,6 @@ class AgentConfig:  # pylint: disable=R0902,R0903
             else:
                 config_from_file = load_config_from_file(
                     os.environ['HT_CONFIG_FILE'])
-
-                for ignored_attribute in IGNORE_ATTRIBUTES:
-                    config_from_file.pop(ignored_attribute, False)
 
                 self.config = merge_config(
                     DEFAULT_AGENT_CONFIG, config_from_file)
@@ -187,7 +181,7 @@ class AgentConfig:  # pylint: disable=R0902,R0903
                                  err,
                                  traceback.format_exc())
                     continue
-            elif isinstance(config_element[key], (str, bool, int, list)):
+            elif isinstance(config_element[key], (str, bool, int, list, dict)):
                 if key in PYTHON_SPECIFIC_ATTRIBUTES:
                     logger.debug(
                         'Found pythonagent-specific attribute, attr=%s', key)
