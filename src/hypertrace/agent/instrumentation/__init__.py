@@ -49,12 +49,12 @@ class BaseInstrumentorWrapper:
                 logger.error("No data to display")
 
     def set_process_rules_from_config(self, config) -> None:
-        self._process_request_headers = config.agent_config.data_capture.http_headers.request
-        self._process_request_body = config.agent_config.data_capture.http_body.request
-        self._process_response_headers = config.agent_config.data_capture.http_headers.response
-        self._process_response_body = config.agent_config.data_capture.http_body.response
-        self._max_body_size = config.agent_config.data_capture.body_max_size_bytes
-        self._service_name = config.agent_config.service_name
+        self._process_request_headers = config.agent_config.data_capture.http_headers.request.value
+        self._process_request_body = config.agent_config.data_capture.http_body.request.value
+        self._process_response_headers = config.agent_config.data_capture.http_headers.response.value
+        self._process_response_body = config.agent_config.data_capture.http_body.response.value
+        self._max_body_size = config.agent_config.data_capture.body_max_size_bytes.value
+        self._service_name = config.agent_config.service_name.value
 
     # Generic HTTP Request Handler
     def generic_request_handler(self, # pylint: disable=R0912
