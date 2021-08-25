@@ -55,7 +55,7 @@ jobs:
           pip install --upgrade --no-input protobuf
 
       - name: Run tests
-        run:
+        run: |
           VERSION=echo "${{ matrix.python-version }}" | cut -c1-3
           echo "Version ${VERSION}"
           PYTHON_VERSION=${VERSION} make test
