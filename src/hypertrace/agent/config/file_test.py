@@ -1,4 +1,5 @@
 '''Tests for file module'''
+import os
 
 from .file import load_config_from_file
 
@@ -6,7 +7,7 @@ from .file import load_config_from_file
 def test_load_from_file() -> None:
     '''Unittest for merging config results.'''
     # set Environment Variable
-    config_file_path = "./src/hypertrace/agent/config/test_agent-config.yaml"
+    config_file_path = os.path.join(os.path.dirname(__file__), "test_agent-config.yaml")
     config_from_file = load_config_from_file(config_file_path)
 
     cfg = config_from_file
@@ -29,7 +30,6 @@ def test_load_from_file() -> None:
     assert cfg["data_capture"]["body_max_size_bytes"] == 123457
     assert 'B3' in cfg["propagation_formats"]
     assert not cfg["enabled"]
-    assert cfg["_use_console_span_exporter"] is True
     assert cfg["resource_attributes"] == {
         'tester01': 'tester01'
     }
