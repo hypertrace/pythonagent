@@ -28,14 +28,14 @@ def get_active_span_for_call_wrapper(requests_wrapper):
             logger.debug('No response message body. Setting to blank string.')
             response_content = ''
         request_content = None
-        if hasattr(response.request, 'content'):
+        if hasattr(response, 'request') and hasattr(response.request, 'content'):
             logger.debug('Converting request message body to string.')
             request_content = response.request.content.decode()
         else:
             logger.debug('No request message body. Setting to blank string.')
             request_content = ''
 
-        if span.is_recording():
+        if span.is_recording() and response is not None:
             logger.debug('Span is recording.')
             request_headers = [(k, v)
                                for k, v in response.request.headers.items()] # pylint: disable=R1721
