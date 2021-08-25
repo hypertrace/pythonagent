@@ -1,20 +1,14 @@
 import sys
-import os
 import logging
 import flask
-import pytest
 import traceback
 import json
 import pytest
 from werkzeug.serving import make_server
-from flask import request, Flask
-import time
-import atexit
+from flask import Flask
 import threading
-from opentelemetry import trace as trace_api
-from opentelemetry.sdk.trace import TracerProvider, export
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
-from opentelemetry.sdk.trace.export import BatchSpanProcessor, SimpleSpanProcessor
+from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 from hypertrace.agent import Agent
 
 def setup_custom_logger(name):

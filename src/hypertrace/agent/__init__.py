@@ -60,8 +60,9 @@ class Agent:
             # to regenerate Trace Provider with new options
             ot._TRACER_PROVIDER = None  # pylint:disable=W0212
             agent_config = self._config.agent_config
+            agent_config = AgentConfig()
             yield agent_config
-            self._config.agent_config = agent_config
+            # self._config.agent_config = agent_config
         finally:
             self._init.apply_config(self._config)
 

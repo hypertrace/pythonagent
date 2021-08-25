@@ -1,6 +1,6 @@
 '''The default configuration for pythonagent'''
 DEFAULT_AGENT_CONFIG = {
-    '_use_console_span_exporter': False,
+    # '_use_console_span_exporter': False,
     'enabled': True,
     'propagation_formats': ['TRACECONTEXT'],
     'service_name': 'pythonagent',

@@ -362,9 +362,9 @@ class AgentInit:  # pylint: disable=R0902,R0903
     def _init_otlp_exporter(self) -> None:
         '''Initialize OTLP exporter'''
         try:
-            otlp_exporter = OTLPSpanExporter(endpoint=self._config.agent_config.reporting.endpoint,
+            otlp_exporter = OTLPSpanExporter(endpoint=self._config.agent_config.reporting.endpoint.value,
                                              insecure= \
-                                               not self._config.agent_config.reporting.secure)
+                                               not self._config.agent_config.reporting.secure.value)
             span_processor = BatchSpanProcessor(otlp_exporter)
             self._tracer_provider.add_span_processor(span_processor)
 
