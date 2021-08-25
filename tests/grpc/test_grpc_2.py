@@ -23,6 +23,7 @@ import helloworld_pb2
 import helloworld_pb2_grpc
 from opentelemetry.sdk.trace.export import BatchSpanProcessor, SimpleSpanProcessor
 from hypertrace.agent import Agent
+from opentelemetry.sdk.trace.export.in_memory_span_exporter import (InMemorySpanExporter)
 
 logging.basicConfig(filename='agent.log', level=logging.DEBUG,)
 logger = logging.getLogger(__name__)
