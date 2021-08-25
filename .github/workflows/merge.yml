@@ -56,7 +56,7 @@ jobs:
 
       - name: Run tests
         run:
-          VERSION=$(${{ matrix.python-version }} | cut -c1-3)
+          VERSION=echo "${{ matrix.python-version }}" | cut -c1-3
           echo "Version ${VERSION}"
           PYTHON_VERSION=${VERSION} make test
 
