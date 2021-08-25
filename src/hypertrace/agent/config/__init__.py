@@ -166,7 +166,7 @@ class AgentConfig:  # pylint: disable=R0902,R0903
 
 def _apply_custom_config_options(current_custom, next_config):
     for key in PYTHON_SPECIFIC_ATTRIBUTES:
-        if next_config[key]:
+        if key in next_config:
             value = next_config.pop(key)
             current_custom[key] = value
     return current_custom
