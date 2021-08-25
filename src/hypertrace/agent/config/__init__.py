@@ -62,12 +62,13 @@ class AgentConfig:  # pylint: disable=R0902,R0903
         custom_config = {}
         file_dict = _read_from_file()
         if file_dict is not None:
+            custom_config = _apply_custom_config_options(custom_config, file_dict)
             config_dict = merge_config(config_dict, file_dict)
-            custom_config = merge_config(custom_config, file_dict)
 
         env_dict = load_config_from_env()
+        custom_config = _apply_custom_config_options(custom_config, env_dict)
         config_dict = merge_config(config_dict, env_dict)
-        custom_config = merge_config(custom_config, env_dict)
+
 
         config = config_pb2.AgentConfig()
         json_string = json.dumps(config_dict)
@@ -166,7 +167,8 @@ class AgentConfig:  # pylint: disable=R0902,R0903
 def _apply_custom_config_options(current_custom, next_config):
     for key in PYTHON_SPECIFIC_ATTRIBUTES:
         if next_config[key]:
-            current_custom[key] = next_config[key]
+            value = next_config.pop(key)
+            current_custom[key] = value
     return current_custom
 
 
