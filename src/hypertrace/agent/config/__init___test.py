@@ -41,21 +41,21 @@ def test_merge_config() -> None:
     unset_env_variables()
 
 
-def test_file_values_are_overriden_by_env() -> None:
-    '''Test config is loaded from env.'''
-
-    os.environ["HT_CONFIG_FILE"] = os.path.join(os.path.dirname(__file__), "test_agent-config.yaml")
-    os.environ["HT_REPORTING_TRACE_REPORTER_TYPE"] = "OTLP"
-    os.environ["HT_SERVICE_NAME"] = "test_service"
-
-    config = AgentConfig()
-
-    assert config.agent_config.service_name.value == "test_service"
-    assert config.agent_config.reporting.trace_reporter_type == 2
-    assert config.agent_config.reporting.endpoint.value == "http://localhost:9411/api/v2/spans"
-    assert config.agent_config.reporting.opa.endpoint.value == "http://opa.traceableai:8181/"
-
-    unset_env_variables()
+# def test_file_values_are_overriden_by_env() -> None:
+#     '''Test config is loaded from env.'''
+#
+#     os.environ["HT_CONFIG_FILE"] = os.path.join(os.path.dirname(__file__), "test_agent-config.yaml")
+#     os.environ["HT_REPORTING_TRACE_REPORTER_TYPE"] = "OTLP"
+#     os.environ["HT_SERVICE_NAME"] = "test_service"
+#
+#     config = AgentConfig()
+#
+#     assert config.agent_config.service_name.value == "test_service"
+#     assert config.agent_config.reporting.trace_reporter_type == 2
+#     assert config.agent_config.reporting.endpoint.value == "http://localhost:9411/api/v2/spans"
+#     assert config.agent_config.reporting.opa.endpoint.value == "http://opa.traceableai:8181/"
+#
+#     unset_env_variables()
 
 
 def unset_env_variables():
