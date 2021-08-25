@@ -35,7 +35,6 @@ def test_merge_config() -> None:
     assert cfg["data_capture"]["body_max_size_bytes"] == 123457
     assert 'B3' in cfg["propagation_formats"]
     assert not cfg["enabled"]
-    assert cfg["_use_console_span_exporter"] is True
     assert cfg["resource_attributes"] == {
         'tester01': 'tester01'
     }

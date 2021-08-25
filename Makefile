@@ -2,7 +2,7 @@
 
 TEST_DIR=tests
 
-PYTHON_VERSION ?= $(shell python --version | cut -c8- | cut -d'.' -f 1-2) # e.g. 3.9
+PYTHON_VERSION ?= python --version | cut -c8- | cut -d'.' -f 1-2 # e.g. 3.9
 PY_TARGET=py$(subst .,,$(PYTHON_VERSION)) # e.g. py39
 LOG_LEVEL ?= INFO
 
