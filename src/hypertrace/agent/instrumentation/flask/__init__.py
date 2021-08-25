@@ -129,11 +129,7 @@ class _HypertraceInstrumentedFlask(_InstrumentedFlask, BaseInstrumentorWrapper):
         self.before_request(_hypertrace_before_request(self))
         self.after_request(_hypertrace_after_request(self))
         config: AgentConfig = AgentConfig()
-        self.set_process_request_headers(config.agent_config.data_capture.http_headers.request)
-        self.set_process_request_body(config.agent_config.data_capture.http_body.request)
-        self.set_process_response_headers(config.agent_config.data_capture.http_headers.response)
-        self.set_process_response_body(config.agent_config.data_capture.http_body.response)
-        self.set_body_max_size(config.agent_config.data_capture.body_max_size_bytes)
+        self.set_process_rules_from_config(config)
 
 # Main Flask Instrumentor Wrapper class.
 class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):

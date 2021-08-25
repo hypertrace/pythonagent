@@ -48,75 +48,13 @@ class BaseInstrumentorWrapper:
             except Exception: # pylint: disable=W0703
                 logger.error("No data to display")
 
-    # Log request headers in extended options?
-    def get_process_request_headers(self) -> bool:
-        '''Should it process request headers?'''
-        return self._process_request_headers
-
-    # Log response headers in extended options?
-    def get_process_response_headers(self) -> bool:
-        '''Should it process response headers?'''
-        return self._process_response_headers
-
-    # Log request body in extended options?
-    def get_process_request_body(self) -> bool:
-        '''Should it process request body?'''
-        return self._process_request_body
-
-    # Log response body in extended options?
-    def get_process_response_body(self) -> bool:
-        '''Should it process response body?'''
-        return self._process_response_body
-
-    # Get the configured service name
-    def get_service_name(self) -> str:
-        '''get service name'''
-        return self._service_name
-
-    # Get the max body size that can be captured
-    def get_max_body_size(self) -> int:
-        '''get the max body size.'''
-        return self._max_body_size
-
-    # Set whether request headers should be put in extended span, takes a BoolValue as input
-    def set_process_request_headers(self, process_request_headers) -> None:
-        '''Should it process request headers?'''
-        logger.debug('Setting self._process_request_headers to \'%s\'',
-                     process_request_headers.value)
-        self._process_request_headers = process_request_headers
-
-    # Set whether response headers should be put in extended span, takes a BoolValue as input
-    def set_process_response_headers(self, process_response_headers) -> None:
-        '''Should it process response headers?'''
-        logger.debug('Setting self._process_response_headers to \'%s\'',
-                     process_response_headers.value)
-        self._process_response_headers = process_response_headers
-
-    # Set whether request body should be put in extended span, takes a BoolValue as input
-    def set_process_request_body(self, process_request_body) -> None:
-        '''should it process request body?'''
-        logger.debug('Setting self._process_request_body to \'%s\'',
-                     process_request_body.value)
-        self._process_request_body = process_request_body
-
-    # Set whether response body should be put in extended span, takes a BoolValue as input
-    def set_process_response_body(self, process_response_body) -> None:
-        '''should it process response body?'''
-        logger.debug('Setting self._process_response_body to \'%s\'',
-                     process_response_body.value)
-        self._process_response_body = process_response_body
-
-    # Set service name
-    def set_service_name(self, service_name) -> None:
-        '''Set the service name for this instrumentor.'''
-        logger.debug('Setting self._service_name to \'%s\'', service_name)
-        self._service_name = service_name
-
-    # Set max body size
-    def set_body_max_size(self, max_body_size) -> None:
-        '''Set the max body size that will be captured.'''
-        logger.debug('Setting self.body_max_size to %s.', max_body_size)
-        self._max_body_size = max_body_size
+    def set_process_rules_from_config(self, config) -> None:
+        self._process_request_headers = config.agent_config.data_capture.http_headers.request
+        self._process_request_body = config.agent_config.data_capture.http_body.request
+        self._process_response_headers = config.agent_config.data_capture.http_headers.response
+        self._process_response_body = config.agent_config.data_capture.http_body.response
+        self._max_body_size = config.agent_config.data_capture.body_max_size_bytes
+        self._service_name = config.agent_config.service_name
 
     # Generic HTTP Request Handler
     def generic_request_handler(self, # pylint: disable=R0912
@@ -134,14 +72,14 @@ class BaseInstrumentorWrapper:
             else:
                 return span
             # Log request headers if requested
-            if self.get_process_request_headers():
+            if self._process_request_headers:
                 logger.debug('Dumping Request Headers:')
                 for header in request_headers:
                     logger.debug(str(header))
                     span.set_attribute(
                         self.HTTP_REQUEST_HEADER_PREFIX + header[0].lower(), header[1])
             # Process request body if enabled
-            if self.get_process_request_body():
+            if self._process_request_body:
                 # Get content-type value
                 content_type_header_tuple = [
                     item for item in request_headers if item[0].lower() == 'content-type']
@@ -198,14 +136,14 @@ class BaseInstrumentorWrapper:
             else:
                 return span
             # Log response headers if requested
-            if self.get_process_response_headers():
+            if self._process_response_headers:
                 logger.debug('Dumping Response Headers:')
                 for header in response_headers:
                     logger.debug(str(header))
                     span.set_attribute(
                         self.HTTP_RESPONSE_HEADER_PREFIX + header[0].lower(), header[1])
             # Process response body if enabled
-            if self.get_process_response_body():
+            if self._process_response_body:
                 logger.debug('Response Body: %s', str(response_body))
                 # Get content-type value
                 content_type_header_tuple = [
@@ -284,14 +222,14 @@ class BaseInstrumentorWrapper:
             else:
                 return span
             # Log rpc metatdata if requested
-            if self.get_process_request_headers():
+            if self._process_request_headers:
                 logger.debug('Dumping Request Headers:')
                 for header in request_headers:
                     logger.debug(str(header))
                     span.set_attribute(
                         self.RPC_REQUEST_METADATA_PREFIX + header[0].lower(), header[1])
             # Log rpc body if requested
-            if self.get_process_request_body():
+            if self._process_request_body:
                 request_body_str = str(request_body)
                 request_body_str = self.grab_first_n_bytes(request_body_str)
                 span.set_attribute(self.RPC_REQUEST_BODY_PREFIX,
@@ -322,14 +260,14 @@ class BaseInstrumentorWrapper:
             else:
                 return span
             # Log rpc metadata if requested?
-            if self.get_process_response_headers():
+            if self._process_response_headers:
                 logger.debug('Dumping Response Headers:')
                 for header in response_headers:
                     logger.debug(str(header))
                     span.set_attribute(
                         self.RPC_RESPONSE_METADATA_PREFIX + header[0].lower(), header[1])
             # Log rpc body if requested
-            if self.get_process_response_body():
+            if self._process_response_body:
                 response_body_str = str(response_body)
                 logger.debug('Processing response body')
                 response_body_str = self.grab_first_n_bytes(response_body_str)
@@ -349,7 +287,7 @@ class BaseInstrumentorWrapper:
         if body in (None, ''):
             return False
         body_len = len(body)
-        max_body_size = self.get_max_body_size()
+        max_body_size = self._max_body_size
         if max_body_size and body_len > max_body_size:
             logger.debug('message body size is greater than max size.')
             return True
@@ -361,6 +299,6 @@ class BaseInstrumentorWrapper:
         if body in (None, ''):
             return ''
         if self.check_body_size(body): # pylint: disable=R1705
-            return body[0, self.get_max_body_size()]
+            return body[0, self._max_body_size]
         else:
             return body

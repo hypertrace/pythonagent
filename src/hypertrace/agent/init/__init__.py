@@ -182,16 +182,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self._modules_initialized['grpc:server'] = True
             self._grpc_instrumentor_server_wrapper = GrpcInstrumentorServerWrapper()
             self._grpc_instrumentor_server_wrapper.instrument()
-
-            self._grpc_instrumentor_server_wrapper.set_process_request_headers(
-                self._config.agent_config.data_capture.http_headers.request)
-            self._grpc_instrumentor_server_wrapper.set_process_request_body(
-                self._config.agent_config.data_capture.http_body.request)
-
-            self._grpc_instrumentor_server_wrapper.set_process_response_headers(
-                self._config.agent_config.data_capture.http_headers.response)
-            self._grpc_instrumentor_server_wrapper.set_process_response_body(
-                self._config.agent_config.data_capture.http_body.response)
+            self._grpc_instrumentor_server_wrapper.set_process_rules_from_config(self._config)
         except Exception as err:  # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
                          'grpc:server',
@@ -212,16 +203,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
 
             self._grpc_instrumentor_client_wrapper = GrpcInstrumentorClientWrapper()
             self._grpc_instrumentor_client_wrapper.instrument()
-
-            self._grpc_instrumentor_client_wrapper.set_process_request_headers(
-                self._config.agent_config.data_capture.http_headers.request)
-            self._grpc_instrumentor_client_wrapper.set_process_request_body(
-                self._config.agent_config.data_capture.http_body.request)
-
-            self._grpc_instrumentor_client_wrapper.set_process_response_headers(
-                self._config.agent_config.data_capture.http_headers.response)
-            self._grpc_instrumentor_client_wrapper.set_process_response_body(
-                self._config.agent_config.data_capture.http_body.response)
+            self._grpc_instrumentor_client_wrapper.set_process_rules_from_config(self._config)
         except Exception as err:  # pylint: disable=W0703
             logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
                          'grpc:client',
@@ -316,16 +298,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
         logger.debug('Calling AgentInit.initInstrumentorWrapperBaseForHTTP().')
         if call_instrument:
             instrumentor.instrument()
-        instrumentor.set_process_request_headers(
-            self._config.agent_config.data_capture.http_headers.request)
-        instrumentor.set_process_request_body(
-            self._config.agent_config.data_capture.http_body.request)
-        instrumentor.set_process_response_headers(
-            self._config.agent_config.data_capture.http_headers.response)
-        instrumentor.set_process_response_body(
-            self._config.agent_config.data_capture.http_body.response)
-        instrumentor.set_body_max_size(
-            self._config.agent_config.data_capture.body_max_size_bytes)
+
+        instrumentor.set_process_rules_from_config(self._config)
 
     def register_processor(self, processor) -> None:
         '''Register additional span exporter + processor'''
@@ -362,9 +336,9 @@ class AgentInit:  # pylint: disable=R0902,R0903
     def _init_otlp_exporter(self) -> None:
         '''Initialize OTLP exporter'''
         try:
-            otlp_exporter = OTLPSpanExporter(endpoint=self._config.agent_config.reporting.endpoint.value,
-                                             insecure= \
-                                               not self._config.agent_config.reporting.secure.value)
+            otlp_exporter = OTLPSpanExporter(
+                endpoint=self._config.agent_config.reporting.endpoint.value,  # pylint:disable=E1101
+                insecure=not self._config.agent_config.reporting.secure.value) # pylint:disable=E1101
             span_processor = BatchSpanProcessor(otlp_exporter)
             self._tracer_provider.add_span_processor(span_processor)
 

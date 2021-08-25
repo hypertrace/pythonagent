@@ -1,3 +1,4 @@
+
 """Agent init test"""
 from hypertrace.agent import Agent
 from hypertrace.agent.config import config_pb2
