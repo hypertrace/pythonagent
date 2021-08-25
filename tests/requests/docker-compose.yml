@@ -11,7 +11,7 @@ services:
       HT_ENABLE_CONSOLE_SPAN_EXPORTER: "True"
     ports:
       - "8000:8000"
-    command: gunicorn -w 1 -b 0.0.0.0:8000 wsgi1:server
+    command: gunicorn -w 1 -b 0.0.0.0:8000 wsgi1:server --log-level=debug --timeout 600
 
   requests_flask_app_b:
     container_name: requests_flask_app_b
@@ -23,7 +23,7 @@ services:
       HT_ENABLE_CONSOLE_SPAN_EXPORTER: "True"
     ports:
       - "8001:8000"
-    command: gunicorn -w 1 -b 0.0.0.0:8000 wsgi2:server
+    command: gunicorn -w 1 -b 0.0.0.0:8000 wsgi2:server --log-level=debug --timeout 600
 
   requests_flask_app_z:
     container_name: requests_flask_app_z
@@ -36,4 +36,4 @@ services:
       HT_PROPAGATION_FORMATS: B3
     ports:
       - "8002:8000"
-    command: gunicorn -w 1 -b 0.0.0.0:8000 wsgi1:server
+    command: gunicorn -w 1 -b 0.0.0.0:8000 wsgi1:server --log-level=debug --timeout 600
