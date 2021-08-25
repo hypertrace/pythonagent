@@ -74,7 +74,7 @@ class Agent:
             self._init.init_instrumentation_flask(app)
             self._init.dump_config()
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.EXCEPTION_MESSAGE,
+            logger.debug(constants.EXCEPTION_MESSAGE,
                          'flask',
                          err,
                          traceback.format_exc())
@@ -88,7 +88,7 @@ class Agent:
             self._init.init_instrumentation_grpc_server()
             self._init.dump_config()
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.EXCEPTION_MESSAGE,
+            logger.debug(constants.EXCEPTION_MESSAGE,
                          'grpc:server',
                          err,
                          traceback.format_exc())
@@ -102,7 +102,7 @@ class Agent:
             self._init.init_instrumentation_grpc_client()
             self._init.dump_config()
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.EXCEPTION_MESSAGE,
+            logger.debug(constants.EXCEPTION_MESSAGE,
                          'grpc:client',
                          err,
                          traceback.format_exc())
@@ -116,7 +116,7 @@ class Agent:
             self._init.init_instrumentation_mysql()
             self._init.dump_config()
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.EXCEPTION_MESSAGE,
+            logger.debug(constants.EXCEPTION_MESSAGE,
                          'mysql',
                          err,
                          traceback.format_exc())
@@ -130,7 +130,7 @@ class Agent:
             self._init.init_instrumentation_postgresql()
             self._init.dump_config()
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.EXCEPTION_MESSAGE,
+            logger.debug(constants.EXCEPTION_MESSAGE,
                          'postgresql',
                          err,
                          traceback.format_exc())
@@ -144,7 +144,7 @@ class Agent:
             self._init.init_instrumentation_requests()
             self._init.dump_config()
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.EXCEPTION_MESSAGE,
+            logger.debug(constants.EXCEPTION_MESSAGE,
                          'requests',
                          err,
                          traceback.format_exc())
@@ -158,7 +158,7 @@ class Agent:
             self._init.aiohttp_client_init()
             self._init.dump_config()
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.EXCEPTION_MESSAGE,
+            logger.debug(constants.EXCEPTION_MESSAGE,
                          'aiohttp_client',
                          err,
                          traceback.format_exc())
