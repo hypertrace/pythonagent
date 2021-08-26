@@ -40,6 +40,7 @@ from opentelemetry.sdk.trace import TracerProvider, export
 from opentelemetry.sdk.trace.export import ConsoleSpanExporter, SimpleSpanProcessor
 from opentelemetry.exporter.zipkin.proto.http import ZipkinExporter
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.trace import ProxyTracerProvider
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from hypertrace.agent import constants
@@ -65,7 +66,13 @@ class AgentInit:  # pylint: disable=R0902,R0903
             &#34;requests&#34;: False,
             &#34;aiohttp_client&#34;: False
         }
-        self._tracer_provider = None
+
+        # Only available in python &gt; 3.7
+        # this does prevent user from having to add post fork hooks to their
+        # web server config
+        if hasattr(os, &#39;register_at_fork&#39;):
+            logger.info(&#39;Registering after_in_child handler.&#39;)
+            os.register_at_fork(after_in_child=self.post_fork)  # pylint:disable=E1101
 
         try:
             self.apply_config(None)
@@ -84,6 +91,10 @@ class AgentInit:  # pylint: disable=R0902,R0903
                          traceback.format_exc())
             raise sys.exc_info()[0]
 
+    def post_fork(self):
+        &#34;&#34;&#34;Used to reinitialize exporter &amp; processors in separate worker processes&#34;&#34;&#34;
+        self.apply_config(None)  # pylint:disable=W0212
+
     def apply_config(self, agent_config: (Union[None, AgentConfig])):
         &#34;&#34;&#34;Initialize various aspects of the agent based on the most recent config&#34;&#34;&#34;
         if agent_config:
@@ -100,22 +111,27 @@ class AgentInit:  # pylint: disable=R0902,R0903
 
     def init_trace_provider(self) -&gt; None:
         &#39;&#39;&#39;Initialize trace provider and set resource attributes.&#39;&#39;&#39;
-        resource_attributes = {
-            &#34;service.name&#34;: self._config.agent_config.service_name,
-            &#34;service.instance.id&#34;: os.getpid(),
-            &#34;telemetry.sdk.version&#34;: constants.TELEMETRY_SDK_VERSION,
-            &#34;telemetry.sdk.name&#34;: constants.TELEMETRY_SDK_NAME,
-            &#34;telemetry.sdk.language&#34;: constants.TELEMETRY_SDK_LANGUAGE
-        }
-        if self._config.agent_config.resource_attributes:
-            logger.debug(
-                &#39;Custom attributes found. Adding to resource attributes dict.&#39;)
-            resource_attributes.update(
-                self._config.agent_config.resource_attributes)
-        self._tracer_provider = TracerProvider(
-            resource=Resource.create(resource_attributes)
-        )
-        trace.set_tracer_provider(self._tracer_provider)
+        if isinstance(trace.get_tracer_provider(), ProxyTracerProvider):
+            logger.debug(&#34;no configured trace provider detected, adding one&#34;)
+            resource_attributes = {
+                &#34;service.name&#34;: self._config.agent_config.service_name,
+                &#34;service.instance.id&#34;: os.getpid(),
+                &#34;telemetry.sdk.version&#34;: constants.TELEMETRY_SDK_VERSION,
+                &#34;telemetry.sdk.name&#34;: constants.TELEMETRY_SDK_NAME,
+                &#34;telemetry.sdk.language&#34;: constants.TELEMETRY_SDK_LANGUAGE
+            }
+            if self._config.agent_config.resource_attributes:
+                logger.debug(
+                    &#39;Custom attributes found. Adding to resource attributes dict.&#39;)
+                resource_attributes.update(
+                    self._config.agent_config.resource_attributes)
+            tracer_provider = TracerProvider(
+                resource=Resource.create(resource_attributes)
+            )
+            trace.set_tracer_provider(tracer_provider)
+        else:
+            logger.debug(&#34;tracer provider already configured, &#34;
+                         &#34;skipping trace provider configuration&#34;)
 
     def init_exporter(self) -&gt; None:
         &#34;&#34;&#34;Initialize exporter&#34;&#34;&#34;
@@ -356,10 +372,10 @@ class AgentInit:  # pylint: disable=R0902,R0903
         instrumentor.set_body_max_size(
             self._config.agent_config.data_capture.body_max_size_bytes)
 
-    def register_processor(self, processor) -&gt; None:
+    def register_processor(self, processor) -&gt; None:  # pylint:disable=R0201
         &#39;&#39;&#39;Register additional span exporter + processor&#39;&#39;&#39;
         logger.debug(&#39;Entering AgentInit.register_processor().&#39;)
-        self._tracer_provider.add_span_processor(processor)
+        trace.get_tracer_provider().add_span_processor(processor)
 
     def set_console_span_processor(self) -&gt; None:
         &#39;&#39;&#39;Register the console span processor for debugging purposes.&#39;&#39;&#39;
@@ -368,7 +384,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             service_name=self._config.agent_config.service_name)
         simple_export_span_processor = SimpleSpanProcessor(
             console_span_exporter)
-        self._tracer_provider.add_span_processor(simple_export_span_processor)
+        trace.get_tracer_provider().add_span_processor(simple_export_span_processor)
 
     def _init_zipkin_exporter(self) -&gt; None:
         &#39;&#39;&#39;Initialize Zipkin exporter&#39;&#39;&#39;
@@ -378,7 +394,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             )
 
             span_processor = BatchSpanProcessor(zipkin_exporter)
-            self._tracer_provider.add_span_processor(span_processor)
+            trace.get_tracer_provider().add_span_processor(span_processor)
 
             logger.info(
                 &#39;Initialized Zipkin exporter reporting to `%s`&#39;,
@@ -395,7 +411,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
                                              insecure= \
                                                not self._config.agent_config.reporting.secure)
             span_processor = BatchSpanProcessor(otlp_exporter)
-            self._tracer_provider.add_span_processor(span_processor)
+            trace.get_tracer_provider().add_span_processor(span_processor)
 
             logger.info(&#39;Initialized OTLP exporter reporting to `%s`&#39;,
                         self._config.agent_config.reporting.endpoint)
@@ -448,7 +464,13 @@ class AgentInit:  # pylint: disable=R0902,R0903
             &#34;requests&#34;: False,
             &#34;aiohttp_client&#34;: False
         }
-        self._tracer_provider = None
+
+        # Only available in python &gt; 3.7
+        # this does prevent user from having to add post fork hooks to their
+        # web server config
+        if hasattr(os, &#39;register_at_fork&#39;):
+            logger.info(&#39;Registering after_in_child handler.&#39;)
+            os.register_at_fork(after_in_child=self.post_fork)  # pylint:disable=E1101
 
         try:
             self.apply_config(None)
@@ -467,6 +489,10 @@ class AgentInit:  # pylint: disable=R0902,R0903
                          traceback.format_exc())
             raise sys.exc_info()[0]
 
+    def post_fork(self):
+        &#34;&#34;&#34;Used to reinitialize exporter &amp; processors in separate worker processes&#34;&#34;&#34;
+        self.apply_config(None)  # pylint:disable=W0212
+
     def apply_config(self, agent_config: (Union[None, AgentConfig])):
         &#34;&#34;&#34;Initialize various aspects of the agent based on the most recent config&#34;&#34;&#34;
         if agent_config:
@@ -483,22 +509,27 @@ class AgentInit:  # pylint: disable=R0902,R0903
 
     def init_trace_provider(self) -&gt; None:
         &#39;&#39;&#39;Initialize trace provider and set resource attributes.&#39;&#39;&#39;
-        resource_attributes = {
-            &#34;service.name&#34;: self._config.agent_config.service_name,
-            &#34;service.instance.id&#34;: os.getpid(),
-            &#34;telemetry.sdk.version&#34;: constants.TELEMETRY_SDK_VERSION,
-            &#34;telemetry.sdk.name&#34;: constants.TELEMETRY_SDK_NAME,
-            &#34;telemetry.sdk.language&#34;: constants.TELEMETRY_SDK_LANGUAGE
-        }
-        if self._config.agent_config.resource_attributes:
-            logger.debug(
-                &#39;Custom attributes found. Adding to resource attributes dict.&#39;)
-            resource_attributes.update(
-                self._config.agent_config.resource_attributes)
-        self._tracer_provider = TracerProvider(
-            resource=Resource.create(resource_attributes)
-        )
-        trace.set_tracer_provider(self._tracer_provider)
+        if isinstance(trace.get_tracer_provider(), ProxyTracerProvider):
+            logger.debug(&#34;no configured trace provider detected, adding one&#34;)
+            resource_attributes = {
+                &#34;service.name&#34;: self._config.agent_config.service_name,
+                &#34;service.instance.id&#34;: os.getpid(),
+                &#34;telemetry.sdk.version&#34;: constants.TELEMETRY_SDK_VERSION,
+                &#34;telemetry.sdk.name&#34;: constants.TELEMETRY_SDK_NAME,
+                &#34;telemetry.sdk.language&#34;: constants.TELEMETRY_SDK_LANGUAGE
+            }
+            if self._config.agent_config.resource_attributes:
+                logger.debug(
+                    &#39;Custom attributes found. Adding to resource attributes dict.&#39;)
+                resource_attributes.update(
+                    self._config.agent_config.resource_attributes)
+            tracer_provider = TracerProvider(
+                resource=Resource.create(resource_attributes)
+            )
+            trace.set_tracer_provider(tracer_provider)
+        else:
+            logger.debug(&#34;tracer provider already configured, &#34;
+                         &#34;skipping trace provider configuration&#34;)
 
     def init_exporter(self) -&gt; None:
         &#34;&#34;&#34;Initialize exporter&#34;&#34;&#34;
@@ -739,10 +770,10 @@ class AgentInit:  # pylint: disable=R0902,R0903
         instrumentor.set_body_max_size(
             self._config.agent_config.data_capture.body_max_size_bytes)
 
-    def register_processor(self, processor) -&gt; None:
+    def register_processor(self, processor) -&gt; None:  # pylint:disable=R0201
         &#39;&#39;&#39;Register additional span exporter + processor&#39;&#39;&#39;
         logger.debug(&#39;Entering AgentInit.register_processor().&#39;)
-        self._tracer_provider.add_span_processor(processor)
+        trace.get_tracer_provider().add_span_processor(processor)
 
     def set_console_span_processor(self) -&gt; None:
         &#39;&#39;&#39;Register the console span processor for debugging purposes.&#39;&#39;&#39;
@@ -751,7 +782,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             service_name=self._config.agent_config.service_name)
         simple_export_span_processor = SimpleSpanProcessor(
             console_span_exporter)
-        self._tracer_provider.add_span_processor(simple_export_span_processor)
+        trace.get_tracer_provider().add_span_processor(simple_export_span_processor)
 
     def _init_zipkin_exporter(self) -&gt; None:
         &#39;&#39;&#39;Initialize Zipkin exporter&#39;&#39;&#39;
@@ -761,7 +792,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             )
 
             span_processor = BatchSpanProcessor(zipkin_exporter)
-            self._tracer_provider.add_span_processor(span_processor)
+            trace.get_tracer_provider().add_span_processor(span_processor)
 
             logger.info(
                 &#39;Initialized Zipkin exporter reporting to `%s`&#39;,
@@ -778,7 +809,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
                                              insecure= \
                                                not self._config.agent_config.reporting.secure)
             span_processor = BatchSpanProcessor(otlp_exporter)
-            self._tracer_provider.add_span_processor(span_processor)
+            trace.get_tracer_provider().add_span_processor(span_processor)
 
             logger.info(&#39;Initialized OTLP exporter reporting to `%s`&#39;,
                         self._config.agent_config.reporting.endpoint)
@@ -1172,22 +1203,27 @@ class AgentInit:  # pylint: disable=R0902,R0903
 </summary>
 <pre><code class="python">def init_trace_provider(self) -&gt; None:
     &#39;&#39;&#39;Initialize trace provider and set resource attributes.&#39;&#39;&#39;
-    resource_attributes = {
-        &#34;service.name&#34;: self._config.agent_config.service_name,
-        &#34;service.instance.id&#34;: os.getpid(),
-        &#34;telemetry.sdk.version&#34;: constants.TELEMETRY_SDK_VERSION,
-        &#34;telemetry.sdk.name&#34;: constants.TELEMETRY_SDK_NAME,
-        &#34;telemetry.sdk.language&#34;: constants.TELEMETRY_SDK_LANGUAGE
-    }
-    if self._config.agent_config.resource_attributes:
-        logger.debug(
-            &#39;Custom attributes found. Adding to resource attributes dict.&#39;)
-        resource_attributes.update(
-            self._config.agent_config.resource_attributes)
-    self._tracer_provider = TracerProvider(
-        resource=Resource.create(resource_attributes)
-    )
-    trace.set_tracer_provider(self._tracer_provider)</code></pre>
+    if isinstance(trace.get_tracer_provider(), ProxyTracerProvider):
+        logger.debug(&#34;no configured trace provider detected, adding one&#34;)
+        resource_attributes = {
+            &#34;service.name&#34;: self._config.agent_config.service_name,
+            &#34;service.instance.id&#34;: os.getpid(),
+            &#34;telemetry.sdk.version&#34;: constants.TELEMETRY_SDK_VERSION,
+            &#34;telemetry.sdk.name&#34;: constants.TELEMETRY_SDK_NAME,
+            &#34;telemetry.sdk.language&#34;: constants.TELEMETRY_SDK_LANGUAGE
+        }
+        if self._config.agent_config.resource_attributes:
+            logger.debug(
+                &#39;Custom attributes found. Adding to resource attributes dict.&#39;)
+            resource_attributes.update(
+                self._config.agent_config.resource_attributes)
+        tracer_provider = TracerProvider(
+            resource=Resource.create(resource_attributes)
+        )
+        trace.set_tracer_provider(tracer_provider)
+    else:
+        logger.debug(&#34;tracer provider already configured, &#34;
+                     &#34;skipping trace provider configuration&#34;)</code></pre>
 </details>
 </dd>
 <dt id="hypertrace.agent.init.AgentInit.is_registered"><code class="name flex">
@@ -1207,6 +1243,20 @@ class AgentInit:  # pylint: disable=R0902,R0903
         return False</code></pre>
 </details>
 </dd>
+<dt id="hypertrace.agent.init.AgentInit.post_fork"><code class="name flex">
+<span>def <span class="ident">post_fork</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Used to reinitialize exporter &amp; processors in separate worker processes</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def post_fork(self):
+    &#34;&#34;&#34;Used to reinitialize exporter &amp; processors in separate worker processes&#34;&#34;&#34;
+    self.apply_config(None)  # pylint:disable=W0212</code></pre>
+</details>
+</dd>
 <dt id="hypertrace.agent.init.AgentInit.register_processor"><code class="name flex">
 <span>def <span class="ident">register_processor</span></span>(<span>self, processor) ‑> None</span>
 </code></dt>
@@ -1216,10 +1266,10 @@ class AgentInit:  # pylint: disable=R0902,R0903
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def register_processor(self, processor) -&gt; None:
+<pre><code class="python">def register_processor(self, processor) -&gt; None:  # pylint:disable=R0201
     &#39;&#39;&#39;Register additional span exporter + processor&#39;&#39;&#39;
     logger.debug(&#39;Entering AgentInit.register_processor().&#39;)
-    self._tracer_provider.add_span_processor(processor)</code></pre>
+    trace.get_tracer_provider().add_span_processor(processor)</code></pre>
 </details>
 </dd>
 <dt id="hypertrace.agent.init.AgentInit.set_console_span_processor"><code class="name flex">
@@ -1238,7 +1288,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
         service_name=self._config.agent_config.service_name)
     simple_export_span_processor = SimpleSpanProcessor(
         console_span_exporter)
-    self._tracer_provider.add_span_processor(simple_export_span_processor)</code></pre>
+    trace.get_tracer_provider().add_span_processor(simple_export_span_processor)</code></pre>
 </details>
 </dd>
 </dl>
@@ -1276,6 +1326,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
 <li><code><a title="hypertrace.agent.init.AgentInit.init_propagation" href="#hypertrace.agent.init.AgentInit.init_propagation">init_propagation</a></code></li>
 <li><code><a title="hypertrace.agent.init.AgentInit.init_trace_provider" href="#hypertrace.agent.init.AgentInit.init_trace_provider">init_trace_provider</a></code></li>
 <li><code><a title="hypertrace.agent.init.AgentInit.is_registered" href="#hypertrace.agent.init.AgentInit.is_registered">is_registered</a></code></li>
+<li><code><a title="hypertrace.agent.init.AgentInit.post_fork" href="#hypertrace.agent.init.AgentInit.post_fork">post_fork</a></code></li>
 <li><code><a title="hypertrace.agent.init.AgentInit.register_processor" href="#hypertrace.agent.init.AgentInit.register_processor">register_processor</a></code></li>
 <li><code><a title="hypertrace.agent.init.AgentInit.set_console_span_processor" href="#hypertrace.agent.init.AgentInit.set_console_span_processor">set_console_span_processor</a></code></li>
 </ul>
