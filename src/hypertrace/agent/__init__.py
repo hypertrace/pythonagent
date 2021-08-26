@@ -39,6 +39,7 @@ class Agent:
 
     def __init__(self):
         '''Initializer'''
+        self._initialized = False
         if not self._initialized: # pylint: disable=E0203:
             logger.debug('Initializing Agent.')
             if not self.is_enabled():
@@ -68,13 +69,13 @@ class Agent:
     def register_flask_app(self, app: flask.Flask = None) -> None:
         '''Register the flask instrumentation module wrapper'''
         logger.debug('Calling Agent.register_flask_app.')
-        if not self.is_enabled():
+        if not self.is_initialized():
             return
         try:
             self._init.init_instrumentation_flask(app)
             self._init.dump_config()
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.EXCEPTION_MESSAGE,
+            logger.debug(constants.EXCEPTION_MESSAGE,
                          'flask',
                          err,
                          traceback.format_exc())
@@ -82,13 +83,13 @@ class Agent:
     def register_grpc_server(self) -> None:
         '''Register the grpc:server instrumentation module wrapper'''
         logger.debug('Calling Agent.register_server_grpc().')
-        if not self.is_enabled():
+        if not self.is_initialized():
             return
         try:
             self._init.init_instrumentation_grpc_server()
             self._init.dump_config()
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.EXCEPTION_MESSAGE,
+            logger.debug(constants.EXCEPTION_MESSAGE,
                          'grpc:server',
                          err,
                          traceback.format_exc())
@@ -96,13 +97,13 @@ class Agent:
     def register_grpc_client(self) -> None:
         '''Register the grpc:client instrumentation module wrapper'''
         logger.debug('Calling Agent.register_client_grpc().')
-        if not self.is_enabled():
+        if not self.is_initialized():
             return
         try:
             self._init.init_instrumentation_grpc_client()
             self._init.dump_config()
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.EXCEPTION_MESSAGE,
+            logger.debug(constants.EXCEPTION_MESSAGE,
                          'grpc:client',
                          err,
                          traceback.format_exc())
@@ -110,13 +111,13 @@ class Agent:
     def register_mysql(self) -> None:
         '''Register the mysql instrumentation module wrapper'''
         logger.debug('Calling Agent.register_mysql().')
-        if not self.is_enabled():
+        if not self.is_initialized():
             return
         try:
             self._init.init_instrumentation_mysql()
             self._init.dump_config()
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.EXCEPTION_MESSAGE,
+            logger.debug(constants.EXCEPTION_MESSAGE,
                          'mysql',
                          err,
                          traceback.format_exc())
@@ -124,13 +125,13 @@ class Agent:
     def register_postgresql(self) -> None:
         '''Register the postgresql instrumentation module wrapper'''
         logger.debug('Calling Agent.register_postgresql().')
-        if not self.is_enabled():
+        if not self.is_initialized():
             return
         try:
             self._init.init_instrumentation_postgresql()
             self._init.dump_config()
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.EXCEPTION_MESSAGE,
+            logger.debug(constants.EXCEPTION_MESSAGE,
                          'postgresql',
                          err,
                          traceback.format_exc())
@@ -138,13 +139,13 @@ class Agent:
     def register_requests(self) -> None:
         '''Register the requests instrumentation module wrapper'''
         logger.debug('Calling Agent.register_requests()')
-        if not self.is_enabled():
+        if not self.is_initialized():
             return
         try:
             self._init.init_instrumentation_requests()
             self._init.dump_config()
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.EXCEPTION_MESSAGE,
+            logger.debug(constants.EXCEPTION_MESSAGE,
                          'requests',
                          err,
                          traceback.format_exc())
@@ -152,13 +153,13 @@ class Agent:
     def register_aiohttp_client(self) -> None:
         '''Register the aiohttp-client instrumentation module wrapper'''
         logger.debug('Calling Agent.register_aiohttp_client().')
-        if not self.is_enabled():
+        if not self.is_initialized():
             return
         try:
             self._init.aiohttp_client_init()
             self._init.dump_config()
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.EXCEPTION_MESSAGE,
+            logger.debug(constants.EXCEPTION_MESSAGE,
                          'aiohttp_client',
                          err,
                          traceback.format_exc())
@@ -166,10 +167,10 @@ class Agent:
     def register_processor(self, processor) -> None:  # pylint: disable=R1710
         '''Add additional span exporters + processors'''
         logger.debug('Entering Agent.register_processor().')
-        if not self.is_enabled():
+        logger.debug("initialized %s", self.is_initialized())
+        if not self.is_initialized():
             return None
-        if self.is_enabled():
-            return self._init.register_processor(processor)
+        return self._init.register_processor(processor)
 
     def is_enabled(self) -> bool:  # pylint: disable=R0201
         '''Is agent enabled?'''
@@ -177,4 +178,12 @@ class Agent:
             if os.environ['HT_ENABLED'] == 'false':
                 logger.debug("HT_ENABLED is disabled.")
                 return False
+        return True
+
+    def is_initialized(self) -> bool:  # pylint: disable=R0201
+        '''Is agent initialized - if an agent fails to init we should let the app continue'''
+        if not self.is_enabled():
+            return False
+        if not self._initialized:
+            return False
         return True
