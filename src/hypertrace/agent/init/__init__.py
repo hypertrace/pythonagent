@@ -11,6 +11,7 @@ from opentelemetry.sdk.trace import TracerProvider, export
 from opentelemetry.sdk.trace.export import ConsoleSpanExporter, SimpleSpanProcessor
 from opentelemetry.exporter.zipkin.proto.http import ZipkinExporter
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.trace import ProxyTracerProvider
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from hypertrace.agent import constants
@@ -36,7 +37,6 @@ class AgentInit:  # pylint: disable=R0902,R0903
             "requests": False,
             "aiohttp_client": False
         }
-        self._tracer_provider = None
 
         try:
             self.apply_config(None)
@@ -71,22 +71,27 @@ class AgentInit:  # pylint: disable=R0902,R0903
 
     def init_trace_provider(self) -> None:
         '''Initialize trace provider and set resource attributes.'''
-        resource_attributes = {
-            "service.name": self._config.agent_config.service_name,
-            "service.instance.id": os.getpid(),
-            "telemetry.sdk.version": constants.TELEMETRY_SDK_VERSION,
-            "telemetry.sdk.name": constants.TELEMETRY_SDK_NAME,
-            "telemetry.sdk.language": constants.TELEMETRY_SDK_LANGUAGE
-        }
-        if self._config.agent_config.resource_attributes:
-            logger.debug(
-                'Custom attributes found. Adding to resource attributes dict.')
-            resource_attributes.update(
-                self._config.agent_config.resource_attributes)
-        self._tracer_provider = TracerProvider(
-            resource=Resource.create(resource_attributes)
-        )
-        trace.set_tracer_provider(self._tracer_provider)
+        if isinstance(trace.get_tracer_provider(), ProxyTracerProvider):
+            logger.debug("no configured trace provider detected, adding one")
+            resource_attributes = {
+                "service.name": self._config.agent_config.service_name,
+                "service.instance.id": os.getpid(),
+                "telemetry.sdk.version": constants.TELEMETRY_SDK_VERSION,
+                "telemetry.sdk.name": constants.TELEMETRY_SDK_NAME,
+                "telemetry.sdk.language": constants.TELEMETRY_SDK_LANGUAGE
+            }
+            if self._config.agent_config.resource_attributes:
+                logger.debug(
+                    'Custom attributes found. Adding to resource attributes dict.')
+                resource_attributes.update(
+                    self._config.agent_config.resource_attributes)
+            tracer_provider = TracerProvider(
+                resource=Resource.create(resource_attributes)
+            )
+            trace.set_tracer_provider(tracer_provider)
+        else:
+            logger.debug("tracer provider already configured, "
+                         "skipping trace provider configuration")
 
     def init_exporter(self) -> None:
         """Initialize exporter"""
@@ -327,10 +332,10 @@ class AgentInit:  # pylint: disable=R0902,R0903
         instrumentor.set_body_max_size(
             self._config.agent_config.data_capture.body_max_size_bytes)
 
-    def register_processor(self, processor) -> None:
+    def register_processor(self, processor) -> None:  # pylint:disable=R0201
         '''Register additional span exporter + processor'''
         logger.debug('Entering AgentInit.register_processor().')
-        self._tracer_provider.add_span_processor(processor)
+        trace.get_tracer_provider().add_span_processor(processor)
 
     def set_console_span_processor(self) -> None:
         '''Register the console span processor for debugging purposes.'''
@@ -339,7 +344,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             service_name=self._config.agent_config.service_name)
         simple_export_span_processor = SimpleSpanProcessor(
             console_span_exporter)
-        self._tracer_provider.add_span_processor(simple_export_span_processor)
+        trace.get_tracer_provider().add_span_processor(simple_export_span_processor)
 
     def _init_zipkin_exporter(self) -> None:
         '''Initialize Zipkin exporter'''
@@ -349,7 +354,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             )
 
             span_processor = BatchSpanProcessor(zipkin_exporter)
-            self._tracer_provider.add_span_processor(span_processor)
+            trace.get_tracer_provider().add_span_processor(span_processor)
 
             logger.info(
                 'Initialized Zipkin exporter reporting to `%s`',
@@ -366,7 +371,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
                                              insecure= \
                                                not self._config.agent_config.reporting.secure)
             span_processor = BatchSpanProcessor(otlp_exporter)
-            self._tracer_provider.add_span_processor(span_processor)
+            trace.get_tracer_provider().add_span_processor(span_processor)
 
             logger.info('Initialized OTLP exporter reporting to `%s`',
                         self._config.agent_config.reporting.endpoint)

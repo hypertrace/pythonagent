@@ -88,6 +88,25 @@ with agent.edit_config() as config:
     config.propagation_formats = [hypertrace_config.PropagationFormat.B3]
 ```
 
+### Autoinstrumentation with pre-fork web servers
+When using auto instrumentation on some webservers you will need to configure a post fork hook.
+
+Add the following code snippet to your gunicorn config file, or create one if you don't already use a config file.
+```python
+# gunicorn_config.py
+import hypertrace
+
+def post_fork(server, worker):
+    hypertrace.post_fork(server, worker)
+```
+
+You would then reference the config file in your `gunicorn` launch command:
+ex: 
+<pre>
+hypertrace-instrument gunicorn -w 5 -b 0.0.0.0:5000 wsgi:app <b>-c gunicorn_config.py</b>
+</pre>
+
+
 ## Development
 
 ### Releases
