@@ -68,6 +68,7 @@ class Agent:
 
     def __init__(self):
         &#39;&#39;&#39;Initializer&#39;&#39;&#39;
+        self._initialized = False
         if not self._initialized: # pylint: disable=E0203:
             logger.debug(&#39;Initializing Agent.&#39;)
             if not self.is_enabled():
@@ -97,13 +98,13 @@ class Agent:
     def register_flask_app(self, app: flask.Flask = None) -&gt; None:
         &#39;&#39;&#39;Register the flask instrumentation module wrapper&#39;&#39;&#39;
         logger.debug(&#39;Calling Agent.register_flask_app.&#39;)
-        if not self.is_enabled():
+        if not self.is_initialized():
             return
         try:
             self._init.init_instrumentation_flask(app)
             self._init.dump_config()
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.EXCEPTION_MESSAGE,
+            logger.debug(constants.EXCEPTION_MESSAGE,
                          &#39;flask&#39;,
                          err,
                          traceback.format_exc())
@@ -111,13 +112,13 @@ class Agent:
     def register_grpc_server(self) -&gt; None:
         &#39;&#39;&#39;Register the grpc:server instrumentation module wrapper&#39;&#39;&#39;
         logger.debug(&#39;Calling Agent.register_server_grpc().&#39;)
-        if not self.is_enabled():
+        if not self.is_initialized():
             return
         try:
             self._init.init_instrumentation_grpc_server()
             self._init.dump_config()
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.EXCEPTION_MESSAGE,
+            logger.debug(constants.EXCEPTION_MESSAGE,
                          &#39;grpc:server&#39;,
                          err,
                          traceback.format_exc())
@@ -125,13 +126,13 @@ class Agent:
     def register_grpc_client(self) -&gt; None:
         &#39;&#39;&#39;Register the grpc:client instrumentation module wrapper&#39;&#39;&#39;
         logger.debug(&#39;Calling Agent.register_client_grpc().&#39;)
-        if not self.is_enabled():
+        if not self.is_initialized():
             return
         try:
             self._init.init_instrumentation_grpc_client()
             self._init.dump_config()
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.EXCEPTION_MESSAGE,
+            logger.debug(constants.EXCEPTION_MESSAGE,
                          &#39;grpc:client&#39;,
                          err,
                          traceback.format_exc())
@@ -139,13 +140,13 @@ class Agent:
     def register_mysql(self) -&gt; None:
         &#39;&#39;&#39;Register the mysql instrumentation module wrapper&#39;&#39;&#39;
         logger.debug(&#39;Calling Agent.register_mysql().&#39;)
-        if not self.is_enabled():
+        if not self.is_initialized():
             return
         try:
             self._init.init_instrumentation_mysql()
             self._init.dump_config()
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.EXCEPTION_MESSAGE,
+            logger.debug(constants.EXCEPTION_MESSAGE,
                          &#39;mysql&#39;,
                          err,
                          traceback.format_exc())
@@ -153,13 +154,13 @@ class Agent:
     def register_postgresql(self) -&gt; None:
         &#39;&#39;&#39;Register the postgresql instrumentation module wrapper&#39;&#39;&#39;
         logger.debug(&#39;Calling Agent.register_postgresql().&#39;)
-        if not self.is_enabled():
+        if not self.is_initialized():
             return
         try:
             self._init.init_instrumentation_postgresql()
             self._init.dump_config()
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.EXCEPTION_MESSAGE,
+            logger.debug(constants.EXCEPTION_MESSAGE,
                          &#39;postgresql&#39;,
                          err,
                          traceback.format_exc())
@@ -167,13 +168,13 @@ class Agent:
     def register_requests(self) -&gt; None:
         &#39;&#39;&#39;Register the requests instrumentation module wrapper&#39;&#39;&#39;
         logger.debug(&#39;Calling Agent.register_requests()&#39;)
-        if not self.is_enabled():
+        if not self.is_initialized():
             return
         try:
             self._init.init_instrumentation_requests()
             self._init.dump_config()
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.EXCEPTION_MESSAGE,
+            logger.debug(constants.EXCEPTION_MESSAGE,
                          &#39;requests&#39;,
                          err,
                          traceback.format_exc())
@@ -181,13 +182,13 @@ class Agent:
     def register_aiohttp_client(self) -&gt; None:
         &#39;&#39;&#39;Register the aiohttp-client instrumentation module wrapper&#39;&#39;&#39;
         logger.debug(&#39;Calling Agent.register_aiohttp_client().&#39;)
-        if not self.is_enabled():
+        if not self.is_initialized():
             return
         try:
             self._init.aiohttp_client_init()
             self._init.dump_config()
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.EXCEPTION_MESSAGE,
+            logger.debug(constants.EXCEPTION_MESSAGE,
                          &#39;aiohttp_client&#39;,
                          err,
                          traceback.format_exc())
@@ -195,10 +196,10 @@ class Agent:
     def register_processor(self, processor) -&gt; None:  # pylint: disable=R1710
         &#39;&#39;&#39;Add additional span exporters + processors&#39;&#39;&#39;
         logger.debug(&#39;Entering Agent.register_processor().&#39;)
-        if not self.is_enabled():
+        logger.debug(&#34;initialized %s&#34;, self.is_initialized())
+        if not self.is_initialized():
             return None
-        if self.is_enabled():
-            return self._init.register_processor(processor)
+        return self._init.register_processor(processor)
 
     def is_enabled(self) -&gt; bool:  # pylint: disable=R0201
         &#39;&#39;&#39;Is agent enabled?&#39;&#39;&#39;
@@ -206,6 +207,14 @@ class Agent:
             if os.environ[&#39;HT_ENABLED&#39;] == &#39;false&#39;:
                 logger.debug(&#34;HT_ENABLED is disabled.&#34;)
                 return False
+        return True
+
+    def is_initialized(self) -&gt; bool:  # pylint: disable=R0201
+        &#39;&#39;&#39;Is agent initialized - if an agent fails to init we should let the app continue&#39;&#39;&#39;
+        if not self.is_enabled():
+            return False
+        if not self._initialized:
+            return False
         return True</code></pre>
 </details>
 </section>
@@ -279,6 +288,7 @@ environment variables, and the agent-config.yaml file.</p></div>
 
     def __init__(self):
         &#39;&#39;&#39;Initializer&#39;&#39;&#39;
+        self._initialized = False
         if not self._initialized: # pylint: disable=E0203:
             logger.debug(&#39;Initializing Agent.&#39;)
             if not self.is_enabled():
@@ -308,13 +318,13 @@ environment variables, and the agent-config.yaml file.</p></div>
     def register_flask_app(self, app: flask.Flask = None) -&gt; None:
         &#39;&#39;&#39;Register the flask instrumentation module wrapper&#39;&#39;&#39;
         logger.debug(&#39;Calling Agent.register_flask_app.&#39;)
-        if not self.is_enabled():
+        if not self.is_initialized():
             return
         try:
             self._init.init_instrumentation_flask(app)
             self._init.dump_config()
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.EXCEPTION_MESSAGE,
+            logger.debug(constants.EXCEPTION_MESSAGE,
                          &#39;flask&#39;,
                          err,
                          traceback.format_exc())
@@ -322,13 +332,13 @@ environment variables, and the agent-config.yaml file.</p></div>
     def register_grpc_server(self) -&gt; None:
         &#39;&#39;&#39;Register the grpc:server instrumentation module wrapper&#39;&#39;&#39;
         logger.debug(&#39;Calling Agent.register_server_grpc().&#39;)
-        if not self.is_enabled():
+        if not self.is_initialized():
             return
         try:
             self._init.init_instrumentation_grpc_server()
             self._init.dump_config()
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.EXCEPTION_MESSAGE,
+            logger.debug(constants.EXCEPTION_MESSAGE,
                          &#39;grpc:server&#39;,
                          err,
                          traceback.format_exc())
@@ -336,13 +346,13 @@ environment variables, and the agent-config.yaml file.</p></div>
     def register_grpc_client(self) -&gt; None:
         &#39;&#39;&#39;Register the grpc:client instrumentation module wrapper&#39;&#39;&#39;
         logger.debug(&#39;Calling Agent.register_client_grpc().&#39;)
-        if not self.is_enabled():
+        if not self.is_initialized():
             return
         try:
             self._init.init_instrumentation_grpc_client()
             self._init.dump_config()
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.EXCEPTION_MESSAGE,
+            logger.debug(constants.EXCEPTION_MESSAGE,
                          &#39;grpc:client&#39;,
                          err,
                          traceback.format_exc())
@@ -350,13 +360,13 @@ environment variables, and the agent-config.yaml file.</p></div>
     def register_mysql(self) -&gt; None:
         &#39;&#39;&#39;Register the mysql instrumentation module wrapper&#39;&#39;&#39;
         logger.debug(&#39;Calling Agent.register_mysql().&#39;)
-        if not self.is_enabled():
+        if not self.is_initialized():
             return
         try:
             self._init.init_instrumentation_mysql()
             self._init.dump_config()
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.EXCEPTION_MESSAGE,
+            logger.debug(constants.EXCEPTION_MESSAGE,
                          &#39;mysql&#39;,
                          err,
                          traceback.format_exc())
@@ -364,13 +374,13 @@ environment variables, and the agent-config.yaml file.</p></div>
     def register_postgresql(self) -&gt; None:
         &#39;&#39;&#39;Register the postgresql instrumentation module wrapper&#39;&#39;&#39;
         logger.debug(&#39;Calling Agent.register_postgresql().&#39;)
-        if not self.is_enabled():
+        if not self.is_initialized():
             return
         try:
             self._init.init_instrumentation_postgresql()
             self._init.dump_config()
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.EXCEPTION_MESSAGE,
+            logger.debug(constants.EXCEPTION_MESSAGE,
                          &#39;postgresql&#39;,
                          err,
                          traceback.format_exc())
@@ -378,13 +388,13 @@ environment variables, and the agent-config.yaml file.</p></div>
     def register_requests(self) -&gt; None:
         &#39;&#39;&#39;Register the requests instrumentation module wrapper&#39;&#39;&#39;
         logger.debug(&#39;Calling Agent.register_requests()&#39;)
-        if not self.is_enabled():
+        if not self.is_initialized():
             return
         try:
             self._init.init_instrumentation_requests()
             self._init.dump_config()
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.EXCEPTION_MESSAGE,
+            logger.debug(constants.EXCEPTION_MESSAGE,
                          &#39;requests&#39;,
                          err,
                          traceback.format_exc())
@@ -392,13 +402,13 @@ environment variables, and the agent-config.yaml file.</p></div>
     def register_aiohttp_client(self) -&gt; None:
         &#39;&#39;&#39;Register the aiohttp-client instrumentation module wrapper&#39;&#39;&#39;
         logger.debug(&#39;Calling Agent.register_aiohttp_client().&#39;)
-        if not self.is_enabled():
+        if not self.is_initialized():
             return
         try:
             self._init.aiohttp_client_init()
             self._init.dump_config()
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.EXCEPTION_MESSAGE,
+            logger.debug(constants.EXCEPTION_MESSAGE,
                          &#39;aiohttp_client&#39;,
                          err,
                          traceback.format_exc())
@@ -406,10 +416,10 @@ environment variables, and the agent-config.yaml file.</p></div>
     def register_processor(self, processor) -&gt; None:  # pylint: disable=R1710
         &#39;&#39;&#39;Add additional span exporters + processors&#39;&#39;&#39;
         logger.debug(&#39;Entering Agent.register_processor().&#39;)
-        if not self.is_enabled():
+        logger.debug(&#34;initialized %s&#34;, self.is_initialized())
+        if not self.is_initialized():
             return None
-        if self.is_enabled():
-            return self._init.register_processor(processor)
+        return self._init.register_processor(processor)
 
     def is_enabled(self) -&gt; bool:  # pylint: disable=R0201
         &#39;&#39;&#39;Is agent enabled?&#39;&#39;&#39;
@@ -417,6 +427,14 @@ environment variables, and the agent-config.yaml file.</p></div>
             if os.environ[&#39;HT_ENABLED&#39;] == &#39;false&#39;:
                 logger.debug(&#34;HT_ENABLED is disabled.&#34;)
                 return False
+        return True
+
+    def is_initialized(self) -&gt; bool:  # pylint: disable=R0201
+        &#39;&#39;&#39;Is agent initialized - if an agent fails to init we should let the app continue&#39;&#39;&#39;
+        if not self.is_enabled():
+            return False
+        if not self._initialized:
+            return False
         return True</code></pre>
 </details>
 <h3>Methods</h3>
@@ -462,6 +480,24 @@ def edit_config(self):
     return True</code></pre>
 </details>
 </dd>
+<dt id="hypertrace.agent.Agent.is_initialized"><code class="name flex">
+<span>def <span class="ident">is_initialized</span></span>(<span>self) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Is agent initialized - if an agent fails to init we should let the app continue</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_initialized(self) -&gt; bool:  # pylint: disable=R0201
+    &#39;&#39;&#39;Is agent initialized - if an agent fails to init we should let the app continue&#39;&#39;&#39;
+    if not self.is_enabled():
+        return False
+    if not self._initialized:
+        return False
+    return True</code></pre>
+</details>
+</dd>
 <dt id="hypertrace.agent.Agent.register_aiohttp_client"><code class="name flex">
 <span>def <span class="ident">register_aiohttp_client</span></span>(<span>self) ‑> None</span>
 </code></dt>
@@ -474,13 +510,13 @@ def edit_config(self):
 <pre><code class="python">def register_aiohttp_client(self) -&gt; None:
     &#39;&#39;&#39;Register the aiohttp-client instrumentation module wrapper&#39;&#39;&#39;
     logger.debug(&#39;Calling Agent.register_aiohttp_client().&#39;)
-    if not self.is_enabled():
+    if not self.is_initialized():
         return
     try:
         self._init.aiohttp_client_init()
         self._init.dump_config()
     except Exception as err:  # pylint: disable=W0703
-        logger.error(constants.EXCEPTION_MESSAGE,
+        logger.debug(constants.EXCEPTION_MESSAGE,
                      &#39;aiohttp_client&#39;,
                      err,
                      traceback.format_exc())</code></pre>
@@ -498,13 +534,13 @@ def edit_config(self):
 <pre><code class="python">def register_flask_app(self, app: flask.Flask = None) -&gt; None:
     &#39;&#39;&#39;Register the flask instrumentation module wrapper&#39;&#39;&#39;
     logger.debug(&#39;Calling Agent.register_flask_app.&#39;)
-    if not self.is_enabled():
+    if not self.is_initialized():
         return
     try:
         self._init.init_instrumentation_flask(app)
         self._init.dump_config()
     except Exception as err:  # pylint: disable=W0703
-        logger.error(constants.EXCEPTION_MESSAGE,
+        logger.debug(constants.EXCEPTION_MESSAGE,
                      &#39;flask&#39;,
                      err,
                      traceback.format_exc())</code></pre>
@@ -522,13 +558,13 @@ def edit_config(self):
 <pre><code class="python">def register_grpc_client(self) -&gt; None:
     &#39;&#39;&#39;Register the grpc:client instrumentation module wrapper&#39;&#39;&#39;
     logger.debug(&#39;Calling Agent.register_client_grpc().&#39;)
-    if not self.is_enabled():
+    if not self.is_initialized():
         return
     try:
         self._init.init_instrumentation_grpc_client()
         self._init.dump_config()
     except Exception as err:  # pylint: disable=W0703
-        logger.error(constants.EXCEPTION_MESSAGE,
+        logger.debug(constants.EXCEPTION_MESSAGE,
                      &#39;grpc:client&#39;,
                      err,
                      traceback.format_exc())</code></pre>
@@ -546,13 +582,13 @@ def edit_config(self):
 <pre><code class="python">def register_grpc_server(self) -&gt; None:
     &#39;&#39;&#39;Register the grpc:server instrumentation module wrapper&#39;&#39;&#39;
     logger.debug(&#39;Calling Agent.register_server_grpc().&#39;)
-    if not self.is_enabled():
+    if not self.is_initialized():
         return
     try:
         self._init.init_instrumentation_grpc_server()
         self._init.dump_config()
     except Exception as err:  # pylint: disable=W0703
-        logger.error(constants.EXCEPTION_MESSAGE,
+        logger.debug(constants.EXCEPTION_MESSAGE,
                      &#39;grpc:server&#39;,
                      err,
                      traceback.format_exc())</code></pre>
@@ -570,13 +606,13 @@ def edit_config(self):
 <pre><code class="python">def register_mysql(self) -&gt; None:
     &#39;&#39;&#39;Register the mysql instrumentation module wrapper&#39;&#39;&#39;
     logger.debug(&#39;Calling Agent.register_mysql().&#39;)
-    if not self.is_enabled():
+    if not self.is_initialized():
         return
     try:
         self._init.init_instrumentation_mysql()
         self._init.dump_config()
     except Exception as err:  # pylint: disable=W0703
-        logger.error(constants.EXCEPTION_MESSAGE,
+        logger.debug(constants.EXCEPTION_MESSAGE,
                      &#39;mysql&#39;,
                      err,
                      traceback.format_exc())</code></pre>
@@ -594,13 +630,13 @@ def edit_config(self):
 <pre><code class="python">def register_postgresql(self) -&gt; None:
     &#39;&#39;&#39;Register the postgresql instrumentation module wrapper&#39;&#39;&#39;
     logger.debug(&#39;Calling Agent.register_postgresql().&#39;)
-    if not self.is_enabled():
+    if not self.is_initialized():
         return
     try:
         self._init.init_instrumentation_postgresql()
         self._init.dump_config()
     except Exception as err:  # pylint: disable=W0703
-        logger.error(constants.EXCEPTION_MESSAGE,
+        logger.debug(constants.EXCEPTION_MESSAGE,
                      &#39;postgresql&#39;,
                      err,
                      traceback.format_exc())</code></pre>
@@ -618,10 +654,10 @@ def edit_config(self):
 <pre><code class="python">def register_processor(self, processor) -&gt; None:  # pylint: disable=R1710
     &#39;&#39;&#39;Add additional span exporters + processors&#39;&#39;&#39;
     logger.debug(&#39;Entering Agent.register_processor().&#39;)
-    if not self.is_enabled():
+    logger.debug(&#34;initialized %s&#34;, self.is_initialized())
+    if not self.is_initialized():
         return None
-    if self.is_enabled():
-        return self._init.register_processor(processor)</code></pre>
+    return self._init.register_processor(processor)</code></pre>
 </details>
 </dd>
 <dt id="hypertrace.agent.Agent.register_requests"><code class="name flex">
@@ -636,13 +672,13 @@ def edit_config(self):
 <pre><code class="python">def register_requests(self) -&gt; None:
     &#39;&#39;&#39;Register the requests instrumentation module wrapper&#39;&#39;&#39;
     logger.debug(&#39;Calling Agent.register_requests()&#39;)
-    if not self.is_enabled():
+    if not self.is_initialized():
         return
     try:
         self._init.init_instrumentation_requests()
         self._init.dump_config()
     except Exception as err:  # pylint: disable=W0703
-        logger.error(constants.EXCEPTION_MESSAGE,
+        logger.debug(constants.EXCEPTION_MESSAGE,
                      &#39;requests&#39;,
                      err,
                      traceback.format_exc())</code></pre>
@@ -682,6 +718,7 @@ def edit_config(self):
 <ul class="">
 <li><code><a title="hypertrace.agent.Agent.edit_config" href="#hypertrace.agent.Agent.edit_config">edit_config</a></code></li>
 <li><code><a title="hypertrace.agent.Agent.is_enabled" href="#hypertrace.agent.Agent.is_enabled">is_enabled</a></code></li>
+<li><code><a title="hypertrace.agent.Agent.is_initialized" href="#hypertrace.agent.Agent.is_initialized">is_initialized</a></code></li>
 <li><code><a title="hypertrace.agent.Agent.register_aiohttp_client" href="#hypertrace.agent.Agent.register_aiohttp_client">register_aiohttp_client</a></code></li>
 <li><code><a title="hypertrace.agent.Agent.register_flask_app" href="#hypertrace.agent.Agent.register_flask_app">register_flask_app</a></code></li>
 <li><code><a title="hypertrace.agent.Agent.register_grpc_client" href="#hypertrace.agent.Agent.register_grpc_client">register_grpc_client</a></code></li>
