@@ -43,7 +43,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
         # web server config
         if hasattr(os, 'register_at_fork'):
             logger.info('Registering after_in_child handler.')
-            os.register_at_fork(after_in_child=self.post_fork)
+            os.register_at_fork(after_in_child=self.post_fork)  # pylint:disable=E1101
 
         try:
             self.apply_config(None)
