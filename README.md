@@ -88,6 +88,27 @@ with agent.edit_config() as config:
     config.propagation_formats = [hypertrace_config.PropagationFormat.B3]
 ```
 
+### Autoinstrumentation with pre-fork web servers
+If you are using Python > 3.7 forked worker processes will also be instrumented automatically
+
+If you are using Python 3.6 please see below for a gunicorn example.
+
+Add the following code snippet to your gunicorn config file, or create one if you don't already use a config file.
+```python
+# gunicorn_config.py
+import hypertrace
+
+def post_fork(server, worker):
+    hypertrace.post_fork(server, worker)
+```
+
+You would then reference the config file in your `gunicorn` launch command:
+ex: 
+<pre>
+hypertrace-instrument gunicorn -w 5 -b 0.0.0.0:5000 wsgi:app <b>-c gunicorn_config.py</b>
+</pre>
+
+
 ## Development
 
 ### Releases
