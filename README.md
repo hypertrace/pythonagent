@@ -89,7 +89,9 @@ with agent.edit_config() as config:
 ```
 
 ### Autoinstrumentation with pre-fork web servers
-When using auto instrumentation on some webservers you will need to configure a post fork hook.
+If you are using Python > 3.7 forked worker processes will also be instrumented automatically
+
+If you are using Python 3.6 please see below for a gunicorn example.
 
 Add the following code snippet to your gunicorn config file, or create one if you don't already use a config file.
 ```python

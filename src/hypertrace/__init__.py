@@ -4,4 +4,4 @@ from hypertrace.agent import Agent
 def post_fork(server, worker):
     """Used to reinitialize exporter & processors in separate worker processes"""
     server.log.info("Add post hook %s", worker.pid)
-    Agent()._init.apply_config(None)  # pylint:disable=W0212
+    Agent()._init.post_fork()  # pylint:disable=W0212

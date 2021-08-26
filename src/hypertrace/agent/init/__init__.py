@@ -38,6 +38,13 @@ class AgentInit:  # pylint: disable=R0902,R0903
             "aiohttp_client": False
         }
 
+        # Only available in python > 3.7
+        # this does prevent user from having to add post fork hooks to their
+        # web server config
+        if hasattr(os, 'register_at_fork'):
+            logger.info('Registering after_in_child handler.')
+            os.register_at_fork(after_in_child=self.post_fork)
+
         try:
             self.apply_config(None)
 
@@ -54,6 +61,10 @@ class AgentInit:  # pylint: disable=R0902,R0903
                          err,
                          traceback.format_exc())
             raise sys.exc_info()[0]
+
+    def post_fork(self):
+        """Used to reinitialize exporter & processors in separate worker processes"""
+        self.apply_config(None)  # pylint:disable=W0212
 
     def apply_config(self, agent_config: (Union[None, AgentConfig])):
         """Initialize various aspects of the agent based on the most recent config"""
