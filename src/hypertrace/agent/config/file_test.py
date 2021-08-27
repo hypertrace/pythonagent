@@ -1,4 +1,5 @@
 '''Tests for file module'''
+import os.path
 
 from .file import load_config_from_file
 
@@ -6,7 +7,7 @@ from .file import load_config_from_file
 def test_load_from_file() -> None:
     '''Unittest for merging config results.'''
     # set Environment Variable
-    config_file_path = "./src/hypertrace/agent/config/test_agent-config.yaml"
+    config_file_path = os.path.join(os.path.dirname(__file__), 'test_agent-config.yaml')
     config_from_file = load_config_from_file(config_file_path)
 
     cfg = config_from_file

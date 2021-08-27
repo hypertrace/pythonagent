@@ -45,8 +45,6 @@ def merge_config(base_config, overriding_config):
     return base_config
 
 # Read agent-config file and override with environment variables as necessaary
-
-
 class AgentConfig:  # pylint: disable=R0902,R0903
     '''A wrapper around the agent configuration logic'''
 
@@ -57,47 +55,40 @@ class AgentConfig:  # pylint: disable=R0902,R0903
         If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'
         """
 
-        self.config = None
-        if 'HT_CONFIG_FILE' in os.environ:
-            if len(os.environ['HT_CONFIG_FILE']) == 0:
-                # HT_CONFIG_FILE can be passed as empty string which is invalid
-                logger.error(
-                    'Failed to load HT_CONFIG_FILE env var being empty')
-            else:
-                config_from_file = load_config_from_file(
-                    os.environ['HT_CONFIG_FILE'])
+        config_dict = DEFAULT_AGENT_CONFIG
+        custom_config = {}
+        file_dict = _read_from_file()
+        if file_dict is not None:
+            config_dict = merge_config(config_dict, file_dict)
 
-                self.config = merge_config(
-                    DEFAULT_AGENT_CONFIG, config_from_file)
+        env_dict = load_config_from_env()
+        config_dict = merge_config(config_dict, env_dict)
 
-                logger.debug(
-                    'Successfully loaded config, config=%s', str(self.config))
-        else:
-            logger.info('Loading default configuration.')
-            self.config = DEFAULT_AGENT_CONFIG
+        self.custom_config = _apply_custom_config_options(custom_config, config_dict)
 
-        self.config = merge_config(self.config, load_config_from_env())
+        # transform(to not break old support) like zipkin != proto def of ZIPKIN
+        _transform_values(config_dict)
 
         # Create Protobuf AgentConfig object
         #
         # Create Protobuf Opa object
         opa = jf.Parse(jf.MessageToJson(config_pb2.Opa()), config_pb2.Opa)
-        opa.endpoint = self.config['reporting']['opa']['endpoint']
-        opa.poll_period_seconds = self.config['reporting']['opa']['poll_period_seconds']
-        opa.enabled = self.config['reporting']['opa']['enabled']
+        opa.endpoint = config_dict['reporting']['opa']['endpoint']
+        opa.poll_period_seconds = config_dict['reporting']['opa']['poll_period_seconds']
+        opa.enabled = config_dict['reporting']['opa']['enabled']
 
         # Create protobuf Reporting object
         reporting = jf.Parse(jf.MessageToJson(
             config_pb2.Reporting()), config_pb2.Reporting)
-        reporting.endpoint = self.config['reporting']['endpoint']
-        reporting.secure = self.config['reporting']['secure']
-        reporting.token = self.config['reporting']['token']
+        reporting.endpoint = config_dict['reporting']['endpoint']
+        reporting.secure = config_dict['reporting']['secure']
+        reporting.token = config_dict['reporting']['token']
         reporting.opa = opa
 
         # Set trace_reporter_type
-        if self.config['reporting']['trace_reporter_type'] == 'OTLP':
+        if config_dict['reporting']['trace_reporter_type'] == 'OTLP':
             reporting.trace_reporter_type = config_pb2.TraceReporterType.OTLP
-        elif self.config['reporting']['trace_reporter_type'] == 'ZIPKIN':
+        elif config_dict['reporting']['trace_reporter_type'] == 'ZIPKIN':
             reporting.trace_reporter_type = config_pb2.TraceReporterType.ZIPKIN
         else:
             # Default to ZIPKIN
@@ -105,21 +96,21 @@ class AgentConfig:  # pylint: disable=R0902,R0903
 
         # Create DataCapture Message components
         rpc_body = config_pb2.Message(request=BoolValue(
-            value=self.config['data_capture']['rpc_body']['request']),
+            value=config_dict['data_capture']['rpc_body']['request']),
             response=BoolValue(
-                value=self.config['data_capture']['rpc_body']['response']))
+                value=config_dict['data_capture']['rpc_body']['response']))
         rpc_metadata = config_pb2.Message(request=BoolValue(
-            value=self.config['data_capture']['rpc_metadata']['request']),
+            value=config_dict['data_capture']['rpc_metadata']['request']),
             response=BoolValue(
-                value=self.config['data_capture']['rpc_metadata']['response']))
+                value=config_dict['data_capture']['rpc_metadata']['response']))
         http_body = config_pb2.Message(request=BoolValue(
-            value=self.config['data_capture']['http_body']['request']),
+            value=config_dict['data_capture']['http_body']['request']),
             response=BoolValue(
-                value=self.config['data_capture']['http_body']['response']))
+                value=config_dict['data_capture']['http_body']['response']))
         http_headers = config_pb2.Message(request=BoolValue(
-            value=self.config['data_capture']['http_headers']['request']),
+            value=config_dict['data_capture']['http_headers']['request']),
             response=BoolValue(
-                value=self.config['data_capture']['http_headers']['response']))
+                value=config_dict['data_capture']['http_headers']['response']))
 
         # Create Protobuf DataCapture object
         data_capture = jf.Parse(jf.MessageToJson(
@@ -128,20 +119,20 @@ class AgentConfig:  # pylint: disable=R0902,R0903
         data_capture.http_body = http_body
         data_capture.rpc_metadata = rpc_metadata
         data_capture.rpc_body = rpc_body
-        data_capture.body_max_size_bytes = self.config['data_capture']['body_max_size_bytes']
+        data_capture.body_max_size_bytes = config_dict['data_capture']['body_max_size_bytes']
 
         # Create Protobuf AgentConfig object
         self.agent_config: config_pb2.AgentConfig = jf.Parse(jf.MessageToJson(
             config_pb2.AgentConfig()), config_pb2.AgentConfig)
-        self.agent_config.service_name = self.config['service_name']
+        self.agent_config.service_name = config_dict['service_name']
         self.agent_config.reporting = reporting
         self.agent_config.data_capture = data_capture
         tmp_propagation_formats = []
-        if 'TRACECONTEXT' in self.config['propagation_formats']:
+        if 'TRACECONTEXT' in config_dict['propagation_formats']:
             tmp_propagation_formats.append(
                 config_pb2.PropagationFormat.TRACECONTEXT)
             tmp_propagation_formats = list(set(tmp_propagation_formats))
-        if 'B3' in self.config['propagation_formats']:
+        if 'B3' in config_dict['propagation_formats']:
             tmp_propagation_formats.append(config_pb2.PropagationFormat.B3)
             tmp_propagation_formats = list(set(tmp_propagation_formats))
         if not tmp_propagation_formats:
@@ -149,68 +140,41 @@ class AgentConfig:  # pylint: disable=R0902,R0903
             tmp_propagation_formats.append(
                 config_pb2.PropagationFormat.TRACECONTEXT)
         self.agent_config.propagation_formats = tmp_propagation_formats
-        self.agent_config.enabled = self.config['enabled']
+        self.agent_config.enabled = config_dict['enabled']
 
-        self.agent_config.resource_attributes = self.config['resource_attributes']
-
-        # Validate configuration
-        self.validate_config_elements(self.config, self.agent_config)
-
-    def validate_config_elements(self, config_element, agent_config_base):
-        """Validate that all present elements in the parse configuration are
-        defined in the config_pb2.AgentConfig"""
-        # Check for configuration entries that do not belong
-        for key in config_element:
-            logger.debug('Checking key=%s, type=%s', key,
-                         str(type(config_element[key])))
-            if isinstance(config_element[key], dict):
-                try:
-                    if not hasattr(agent_config_base, key):
-                        logger.error(
-                            'Unknown attribute encountered. key=%s', key)
-                    logger.debug('config_element=%s, agent_config_base=%s',
-                                 str(config_element),
-                                 str(agent_config_base))
-                    if key == 'resource_attributes':
-                        continue
-                    self.validate_config_elements(config_element[key],
-                                                  getattr(agent_config_base, key))  # pylint: disable=W0123
-                    continue
-                except AttributeError as err:
-                    logger.error('Unknown attribute encountered: exception=%s, stacktrace=%s',
-                                 err,
-                                 traceback.format_exc())
-                    continue
-            elif isinstance(config_element[key], (str, bool, int, list)):
-                if key in PYTHON_SPECIFIC_ATTRIBUTES:
-                    logger.debug(
-                        'Found pythonagent-specific attribute, attr=%s', key)
-                    continue
-                try:
-                    if hasattr(agent_config_base, key):
-                        #                      and key != 'propagation_formats':
-                        logger.debug('Is valid: %s', key)
-                    else:
-                        logger.debug('Not valid: %s', key)
-                        raise AttributeError
-                except AttributeError as err:
-                    logger.error('Unknown attribute %s encountered: exception=%s, stacktrace=%s',
-                                 key,
-                                 err,
-                                 traceback.format_exc())
-            else:
-                logger.error('Unknown attribute type encountered: exception=%s, stacktrace=%s',
-                             err,
-                             traceback.format_exc())
+        self.agent_config.resource_attributes = config_dict['resource_attributes']
 
     def dump_config(self):
         '''Dump configuration information.'''
         logger.debug(self.__dict__)
 
-    def get_config(self) -> config_pb2.AgentConfig:
-        '''Return configuration information.'''
-        return self.agent_config
-
     def use_console_span_exporter(self) -> bool:
         '''Initialize InMemorySpanExporter'''
-        return self.config['_use_console_span_exporter']
+        return self.custom_config.get('_use_console_span_exporter')
+
+
+def _transform_values(config_dict):
+    # This has to be upcase or else enum lookup fails
+    config_dict['reporting']['trace_reporter_type'] = config_dict['reporting']['trace_reporter_type'].upper() # pylint:disable=C0301
+    config_dict['propagation_formats'] = list(map(str.upper, config_dict['propagation_formats']))
+
+def _apply_custom_config_options(current_custom, next_config):
+    for key in PYTHON_SPECIFIC_ATTRIBUTES:
+        if key in next_config:
+            value = next_config.pop(key)
+            current_custom[key] = value
+    return current_custom
+
+def _read_from_file():
+    if 'HT_CONFIG_FILE' not in os.environ:
+        return None
+
+    if len(os.environ['HT_CONFIG_FILE']) == 0:  # pylint:disable=R1705:
+        # HT_CONFIG_FILE can be passed as empty string which is invalid
+        logger.error('Failed to load HT_CONFIG_FILE env var is empty')
+        return None
+    else:
+        config_from_file = load_config_from_file(os.environ['HT_CONFIG_FILE'])
+
+        logger.debug('Successfully loaded config file')
+        return config_from_file
