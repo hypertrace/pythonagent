@@ -29,59 +29,64 @@
 </summary>
 <pre><code class="python">&#39;&#39;&#39;Environment config loader&#39;&#39;&#39;
 
-import os
 import logging
+
+from hypertrace.env_var_settings import get_env_value
 
 logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
 
-def load_config_from_env() -&gt; dict:  # pylint: disable=R0912,R0915
+def load_config_from_env() -&gt; dict:  # pylint: disable=R0912,R0915,R0914
     &#39;&#39;&#39;Loads config from environment variables&#39;&#39;&#39;
     config = {}
 
-    if &#39;HT_SERVICE_NAME&#39; in os.environ:
-        logger.debug(&#34;[env] Loaded HT_SERVICE_NAME from env&#34;)
-        config[&#39;service_name&#39;] = os.environ[&#39;HT_SERVICE_NAME&#39;]
+    service_name = get_env_value(&#39;SERVICE_NAME&#39;)
+    if service_name:
+        logger.debug(&#34;[env] Loaded SERVICE_NAME from env&#34;)
+        config[&#39;service_name&#39;] = service_name
 
     # Reporting
     config[&#39;reporting&#39;] = {}
 
-    if &#39;HT_REPORTING_ENDPOINT&#39; in os.environ:
-        logger.debug(&#34;[env] Loaded HT_REPORTING_ENDPOINT from env&#34;)
-        config[&#39;reporting&#39;][&#39;endpoint&#39;] = os.environ[&#39;HT_REPORTING_ENDPOINT&#39;]
+    reporting_endpoint = get_env_value(&#39;REPORTING_ENDPOINT&#39;)
+    if reporting_endpoint:
+        logger.debug(&#34;[env] Loaded REPORTING_ENDPOINT from env&#34;)
+        config[&#39;reporting&#39;][&#39;endpoint&#39;] = reporting_endpoint
 
-    if &#39;HT_REPORTING_TRACE_REPORTER_TYPE&#39; in os.environ:
+    reporter_type = get_env_value(&#39;REPORTING_TRACE_REPORTER_TYPE&#39;)
+    if reporter_type:
         logger.info(
-            &#34;[env] Loaded HT_REPORTING_TRACE_REPORTER_TYPE from env&#34;)
-        config[&#39;reporting&#39;][&#39;trace_reporter_type&#39;] = \
-            os.environ[&#39;HT_REPORTING_TRACE_REPORTER_TYPE&#39;]
+            &#34;[env] Loaded REPORTING_TRACE_REPORTER_TYPE from env&#34;)
+        config[&#39;reporting&#39;][&#39;trace_reporter_type&#39;] = reporter_type
 
-    if &#39;HT_REPORTING_SECURE&#39; in os.environ:
-        logger.debug(&#34;[env] Loaded HT_REPORTING_SECURE from env&#34;)
-        config[&#39;reporting&#39;][&#39;secure&#39;] = os.environ[&#39;HT_REPORTING_SECURE&#39;].lower(
+    reporting_secure = get_env_value(&#39;REPORTING_SECURE&#39;)
+    if reporting_secure:
+        logger.debug(&#34;[env] Loaded REPORTING_SECURE from env&#34;)
+        config[&#39;reporting&#39;][&#39;secure&#39;] = reporting_secure.lower(
         ) == &#39;true&#39;
 
-    if &#39;HT_REPORTING_TOKEN&#39; in os.environ:
-        logger.debug(&#34;[env] Loaded HT_REPORTING_TOKEN from env&#34;)
-        config[&#39;reporting&#39;][&#39;token&#39;] = os.environ[&#39;HT_REPORTING_TOKEN&#39;]
+    reporting_token = get_env_value(&#39;REPORTING_TOKEN&#39;)
+    if reporting_token:
+        logger.debug(&#34;[env] Loaded REPORTING_TOKEN from env&#34;)
+        config[&#39;reporting&#39;][&#39;token&#39;] = reporting_token
 
     config[&#39;reporting&#39;][&#39;opa&#39;] = {}
 
-    if &#39;HT_REPORTING_OPA_ENDPOINT&#39; in os.environ:
-        logger.debug(&#34;[env] Loaded HT_REPORTING_OPA_ENDPOINT from env&#34;)
-        config[&#39;reporting&#39;][&#39;opa&#39;][&#39;endpoint&#39;] = os.environ[&#39;HT_REPORTING_OPA_ENDPOINT&#39;]
+    reporting_opa_endpoint = get_env_value(&#39;REPORTING_OPA_ENDPOINT&#39;)
+    if reporting_opa_endpoint:
+        logger.debug(&#34;[env] Loaded REPORTING_OPA_ENDPOINT from env&#34;)
+        config[&#39;reporting&#39;][&#39;opa&#39;][&#39;endpoint&#39;] = reporting_opa_endpoint
 
-    if &#39;HT_REPORTING_OPA_POLL_PERIOD_SECONDS&#39; in os.environ:
+    opa_poll_period = get_env_value(&#39;REPORTING_OPA_POLL_PERIOD_SECONDS&#39;)
+    if opa_poll_period:
         logger.debug(
-            &#34;[env] Loaded HT_REPORTING_OPA_POLL_PERIOD_SECONDS from env&#34;)
-        config[&#39;reporting&#39;][&#39;opa&#39;][&#39;poll_period_seconds&#39;] \
-            = int(os.environ[&#39;HT_REPORTING_OPA_POLL_PERIOD_SECONDS&#39;])
+            &#34;[env] Loaded REPORTING_OPA_POLL_PERIOD_SECONDS from env&#34;)
+        config[&#39;reporting&#39;][&#39;opa&#39;][&#39;poll_period_seconds&#39;] = int(opa_poll_period)
 
-    if &#39;HT_REPORTING_OPA_ENABLED&#39; in os.environ:
-        logger.debug(&#34;[env] Loaded HT_REPORTING_OPA_ENABLED from env&#34;)
-        config[&#39;reporting&#39;][&#39;opa&#39;][&#39;enabled&#39;] \
-            = os.environ[&#39;HT_REPORTING_OPA_ENABLED&#39;].lower() \
-            == &#39;true&#39;
+    opa_enabled = get_env_value(&#39;REPORTING_OPA_ENABLED&#39;)
+    if opa_enabled:
+        logger.debug(&#34;[env] Loaded REPORTING_OPA_ENABLED from env&#34;)
+        config[&#39;reporting&#39;][&#39;opa&#39;][&#39;enabled&#39;] = _is_true(opa_enabled)
 
     if len(config[&#39;reporting&#39;][&#39;opa&#39;]) == 0:
         del config[&#39;reporting&#39;][&#39;opa&#39;]
@@ -93,102 +98,97 @@ def load_config_from_env() -&gt; dict:  # pylint: disable=R0912,R0915
     config[&#39;data_capture&#39;] = {}
 
     config[&#39;data_capture&#39;][&#39;http_headers&#39;] = {}
-    if &#39;HT_DATA_CAPTURE_HTTP_HEADERS_REQUEST&#39; in os.environ:
+    headers_request = get_env_value(&#39;DATA_CAPTURE_HTTP_HEADERS_REQUEST&#39;)
+    if headers_request:
         logger.debug(
-            &#34;[env] Loaded HT_DATA_CAPTURE_HTTP_HEADERS_REQUEST from env&#34;)
-        config[&#39;data_capture&#39;][&#39;http_headers&#39;][&#39;request&#39;] \
-            = os.environ[&#39;HT_DATA_CAPTURE_HTTP_HEADERS_REQUEST&#39;].lower() \
-            == &#39;true&#39;
+            &#34;[env] Loaded DATA_CAPTURE_HTTP_HEADERS_REQUEST from env&#34;)
+        config[&#39;data_capture&#39;][&#39;http_headers&#39;][&#39;request&#39;] = _is_true(headers_request)
 
-    if &#39;HT_DATA_CAPTURE_HTTP_HEADERS_RESPONSE&#39; in os.environ:
+    headers_response = get_env_value(&#39;DATA_CAPTURE_HTTP_HEADERS_RESPONSE&#39;)
+    if headers_response:
         logger.debug(
-            &#34;[env] Loaded HT_DATA_CAPTURE_HTTP_HEADERS_RESPONSE from env&#34;)
-        config[&#39;data_capture&#39;][&#39;http_headers&#39;][&#39;response&#39;] \
-            = os.environ[&#39;HT_DATA_CAPTURE_HTTP_HEADERS_RESPONSE&#39;].lower() \
-            == &#39;true&#39;
+            &#34;[env] Loaded DATA_CAPTURE_HTTP_HEADERS_RESPONSE from env&#34;)
+        config[&#39;data_capture&#39;][&#39;http_headers&#39;][&#39;response&#39;] = _is_true(headers_response)
 
     if len(config[&#39;data_capture&#39;][&#39;http_headers&#39;]) == 0:
         del config[&#39;data_capture&#39;][&#39;http_headers&#39;]
 
     config[&#39;data_capture&#39;][&#39;http_body&#39;] = {}
-    if &#39;HT_DATA_CAPTURE_HTTP_BODY_REQUEST&#39; in os.environ:
+    body_request = get_env_value(&#39;DATA_CAPTURE_HTTP_BODY_REQUEST&#39;)
+    if body_request:
         logger.debug(
-            &#34;[env] Loaded HT_DATA_CAPTURE_HTTP_BODY_REQUEST from env&#34;)
-        config[&#39;data_capture&#39;][&#39;http_body&#39;][&#39;request&#39;] \
-            = os.environ[&#39;HT_DATA_CAPTURE_HTTP_BODY_REQUEST&#39;].lower() \
-            == &#39;true&#39;
+            &#34;[env] Loaded DATA_CAPTURE_HTTP_BODY_REQUEST from env&#34;)
+        config[&#39;data_capture&#39;][&#39;http_body&#39;][&#39;request&#39;] = _is_true(body_request)
 
-    if &#39;HT_DATA_CAPTURE_HTTP_BODY_RESPONSE&#39; in os.environ:
+    body_response = get_env_value(&#39;DATA_CAPTURE_HTTP_BODY_RESPONSE&#39;)
+    if body_response:
         logger.debug(
-            &#34;[env] Loaded HT_DATA_CAPTURE_HTTP_BODY_RESPONSE from env&#34;)
-        config[&#39;data_capture&#39;][&#39;http_body&#39;][&#39;response&#39;] \
-            = os.environ[&#39;HT_DATA_CAPTURE_HTTP_BODY_RESPONSE&#39;].lower() \
-            == &#39;true&#39;
+            &#34;[env] Loaded DATA_CAPTURE_HTTP_BODY_RESPONSE from env&#34;)
+        config[&#39;data_capture&#39;][&#39;http_body&#39;][&#39;response&#39;] = _is_true(body_response)
 
     if len(config[&#39;data_capture&#39;][&#39;http_body&#39;]) == 0:
         del config[&#39;data_capture&#39;][&#39;http_body&#39;]
 
     config[&#39;data_capture&#39;][&#39;rpc_metadata&#39;] = {}
-    if &#39;HT_DATA_CAPTURE_RPC_METADATA_REQUEST&#39; in os.environ:
+    rpc_metadata_request = get_env_value(&#39;DATA_CAPTURE_RPC_METADATA_REQUEST&#39;)
+    if rpc_metadata_request:
         logger.debug(
-            &#34;[env] Loaded HT_DATA_CAPTURE_RPC_METADATA_REQUEST from env&#34;)
-        config[&#39;data_capture&#39;][&#39;rpc_metadata&#39;][&#39;request&#39;] \
-            = os.environ[&#39;HT_DATA_CAPTURE_RPC_METADATA_REQUEST&#39;].lower() \
-            == &#39;true&#39;
+            &#34;[env] Loaded DATA_CAPTURE_RPC_METADATA_REQUEST from env&#34;)
+        config[&#39;data_capture&#39;][&#39;rpc_metadata&#39;][&#39;request&#39;] = _is_true(rpc_metadata_request)
 
-    if &#39;HT_DATA_CAPTURE_RPC_METADATA_RESPONSE&#39; in os.environ:
+    rpc_metadata_response = get_env_value(&#39;DATA_CAPTURE_RPC_METADATA_RESPONSE&#39;)
+    if rpc_metadata_response:
         logger.debug(
-            &#34;[env] Loaded HT_DATA_CAPTURE_RPC_METADATA_RESPONSE from env&#34;)
-        config[&#39;data_capture&#39;][&#39;rpc_metadata&#39;][&#39;response&#39;] \
-            = os.environ[&#39;HT_DATA_CAPTURE_RPC_METADATA_RESPONSE&#39;].lower() \
-            == &#39;true&#39;
+            &#34;[env] Loaded DATA_CAPTURE_RPC_METADATA_RESPONSE from env&#34;)
+        config[&#39;data_capture&#39;][&#39;rpc_metadata&#39;][&#39;response&#39;] = _is_true(rpc_metadata_response)
 
     if len(config[&#39;data_capture&#39;][&#39;rpc_metadata&#39;]) == 0:
         del config[&#39;data_capture&#39;][&#39;rpc_metadata&#39;]
 
     config[&#39;data_capture&#39;][&#39;rpc_body&#39;] = {}
-    if &#39;HT_DATA_CAPTURE_RPC_BODY_REQUEST&#39; in os.environ:
+    rpc_body_request = get_env_value(&#39;DATA_CAPTURE_RPC_BODY_REQUEST&#39;)
+    if rpc_body_request:
         logger.debug(
-            &#34;[env] Loaded HT_DATA_CAPTURE_RPC_BODY_REQUEST from env&#34;)
-        config[&#39;data_capture&#39;][&#39;rpc_body&#39;][&#39;request&#39;] \
-            = os.environ[&#39;HT_DATA_CAPTURE_RPC_BODY_REQUEST&#39;].lower() \
-            == &#39;true&#39;
+            &#34;[env] Loaded DATA_CAPTURE_RPC_BODY_REQUEST from env&#34;)
+        config[&#39;data_capture&#39;][&#39;rpc_body&#39;][&#39;request&#39;] = _is_true(rpc_body_request)
 
-    if &#39;HT_DATA_CAPTURE_RPC_BODY_RESPONSE&#39; in os.environ:
+    rpc_body_response = get_env_value(&#39;DATA_CAPTURE_RPC_BODY_RESPONSE&#39;)
+    if rpc_body_response:
         logger.debug(
-            &#34;[env] Loaded HT_DATA_CAPTURE_RPC_BODY_RESPONSE from env&#34;)
-        config[&#39;data_capture&#39;][&#39;rpc_body&#39;][&#39;response&#39;] \
-            = os.environ[&#39;HT_DATA_CAPTURE_RPC_BODY_RESPONSE&#39;].lower() \
-            == &#39;true&#39;
+            &#34;[env] Loaded DATA_CAPTURE_RPC_BODY_RESPONSE from env&#34;)
+        config[&#39;data_capture&#39;][&#39;rpc_body&#39;][&#39;response&#39;] = _is_true(rpc_body_response)
 
     if len(config[&#39;data_capture&#39;][&#39;rpc_body&#39;]) == 0:
         del config[&#39;data_capture&#39;][&#39;rpc_body&#39;]
 
-    if &#39;HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES&#39; in os.environ:
+    body_max_size_bytes = get_env_value(&#39;DATA_CAPTURE_BODY_MAX_SIZE_BYTES&#39;)
+    if body_max_size_bytes:
         logger.debug(
-            &#34;[env] Loaded HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES from env&#34;)
-        config[&#39;data_capture&#39;][&#39;body_max_size_bytes&#39;] \
-            = int(os.environ[&#39;HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES&#39;])
+            &#34;[env] Loaded DATA_CAPTURE_BODY_MAX_SIZE_BYTES from env&#34;)
+        config[&#39;data_capture&#39;][&#39;body_max_size_bytes&#39;] = int(body_max_size_bytes)
 
     if len(config[&#39;data_capture&#39;]) == 0:
         del config[&#39;data_capture&#39;]
 
-    if &#39;HT_PROPAGATION_FORMATS&#39; in os.environ and len(os.environ[&#39;HT_PROPAGATION_FORMATS&#39;]) &gt; 0:
-        logger.debug(&#34;[env] Loaded HT_PROPAGATION_FORMATS from env&#34;)
-        config[&#39;propagation_formats&#39;] = os.environ[&#39;HT_PROPAGATION_FORMATS&#39;].split(
-            &#39;,&#39;)
+    propagation_formats = get_env_value(&#39;PROPAGATION_FORMATS&#39;)
+    if propagation_formats and len(propagation_formats) &gt; 0:
+        logger.debug(&#34;[env] Loaded PROPAGATION_FORMATS from env&#34;)
+        config[&#39;propagation_formats&#39;] = propagation_formats.split(&#39;,&#39;)
 
-    if &#39;HT_ENABLED&#39; in os.environ:
-        logger.debug(&#34;[env] Loaded HT_ENABLED from env&#34;)
-        config[&#39;enabled&#39;] = os.environ[&#39;HT_ENABLED&#39;].lower() == &#39;true&#39;
+    enabled = get_env_value(&#39;ENABLED&#39;)
+    if enabled:
+        logger.debug(&#34;[env] Loaded ENABLED from env&#34;)
+        config[&#39;enabled&#39;] = _is_true(enabled)
 
-    if &#39;HT_ENABLE_CONSOLE_SPAN_EXPORTER&#39; in os.environ:
-        logger.debug(&#34;[env] Loaded HT_ENABLE_CONSOLE_SPAN_EXPORTER from env, %s&#34;,
-                     str(os.environ[&#39;HT_ENABLE_CONSOLE_SPAN_EXPORTER&#39;].lower()))
-        config[&#39;_use_console_span_exporter&#39;] = \
-            os.environ[&#39;HT_ENABLE_CONSOLE_SPAN_EXPORTER&#39;].lower() == &#39;true&#39;
+    console_span_exporter = get_env_value(&#39;ENABLE_CONSOLE_SPAN_EXPORTER&#39;)
+    if console_span_exporter:
+        logger.debug(&#34;[env] Loaded ENABLE_CONSOLE_SPAN_EXPORTER from env&#34;)
+        config[&#39;_use_console_span_exporter&#39;] = _is_true(console_span_exporter)
 
-    return config</code></pre>
+    return config
+
+def _is_true(value):
+    return value.lower() == &#39;true&#39;</code></pre>
 </details>
 </section>
 <section>
@@ -207,53 +207,57 @@ def load_config_from_env() -&gt; dict:  # pylint: disable=R0912,R0915
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def load_config_from_env() -&gt; dict:  # pylint: disable=R0912,R0915
+<pre><code class="python">def load_config_from_env() -&gt; dict:  # pylint: disable=R0912,R0915,R0914
     &#39;&#39;&#39;Loads config from environment variables&#39;&#39;&#39;
     config = {}
 
-    if &#39;HT_SERVICE_NAME&#39; in os.environ:
-        logger.debug(&#34;[env] Loaded HT_SERVICE_NAME from env&#34;)
-        config[&#39;service_name&#39;] = os.environ[&#39;HT_SERVICE_NAME&#39;]
+    service_name = get_env_value(&#39;SERVICE_NAME&#39;)
+    if service_name:
+        logger.debug(&#34;[env] Loaded SERVICE_NAME from env&#34;)
+        config[&#39;service_name&#39;] = service_name
 
     # Reporting
     config[&#39;reporting&#39;] = {}
 
-    if &#39;HT_REPORTING_ENDPOINT&#39; in os.environ:
-        logger.debug(&#34;[env] Loaded HT_REPORTING_ENDPOINT from env&#34;)
-        config[&#39;reporting&#39;][&#39;endpoint&#39;] = os.environ[&#39;HT_REPORTING_ENDPOINT&#39;]
+    reporting_endpoint = get_env_value(&#39;REPORTING_ENDPOINT&#39;)
+    if reporting_endpoint:
+        logger.debug(&#34;[env] Loaded REPORTING_ENDPOINT from env&#34;)
+        config[&#39;reporting&#39;][&#39;endpoint&#39;] = reporting_endpoint
 
-    if &#39;HT_REPORTING_TRACE_REPORTER_TYPE&#39; in os.environ:
+    reporter_type = get_env_value(&#39;REPORTING_TRACE_REPORTER_TYPE&#39;)
+    if reporter_type:
         logger.info(
-            &#34;[env] Loaded HT_REPORTING_TRACE_REPORTER_TYPE from env&#34;)
-        config[&#39;reporting&#39;][&#39;trace_reporter_type&#39;] = \
-            os.environ[&#39;HT_REPORTING_TRACE_REPORTER_TYPE&#39;]
+            &#34;[env] Loaded REPORTING_TRACE_REPORTER_TYPE from env&#34;)
+        config[&#39;reporting&#39;][&#39;trace_reporter_type&#39;] = reporter_type
 
-    if &#39;HT_REPORTING_SECURE&#39; in os.environ:
-        logger.debug(&#34;[env] Loaded HT_REPORTING_SECURE from env&#34;)
-        config[&#39;reporting&#39;][&#39;secure&#39;] = os.environ[&#39;HT_REPORTING_SECURE&#39;].lower(
+    reporting_secure = get_env_value(&#39;REPORTING_SECURE&#39;)
+    if reporting_secure:
+        logger.debug(&#34;[env] Loaded REPORTING_SECURE from env&#34;)
+        config[&#39;reporting&#39;][&#39;secure&#39;] = reporting_secure.lower(
         ) == &#39;true&#39;
 
-    if &#39;HT_REPORTING_TOKEN&#39; in os.environ:
-        logger.debug(&#34;[env] Loaded HT_REPORTING_TOKEN from env&#34;)
-        config[&#39;reporting&#39;][&#39;token&#39;] = os.environ[&#39;HT_REPORTING_TOKEN&#39;]
+    reporting_token = get_env_value(&#39;REPORTING_TOKEN&#39;)
+    if reporting_token:
+        logger.debug(&#34;[env] Loaded REPORTING_TOKEN from env&#34;)
+        config[&#39;reporting&#39;][&#39;token&#39;] = reporting_token
 
     config[&#39;reporting&#39;][&#39;opa&#39;] = {}
 
-    if &#39;HT_REPORTING_OPA_ENDPOINT&#39; in os.environ:
-        logger.debug(&#34;[env] Loaded HT_REPORTING_OPA_ENDPOINT from env&#34;)
-        config[&#39;reporting&#39;][&#39;opa&#39;][&#39;endpoint&#39;] = os.environ[&#39;HT_REPORTING_OPA_ENDPOINT&#39;]
+    reporting_opa_endpoint = get_env_value(&#39;REPORTING_OPA_ENDPOINT&#39;)
+    if reporting_opa_endpoint:
+        logger.debug(&#34;[env] Loaded REPORTING_OPA_ENDPOINT from env&#34;)
+        config[&#39;reporting&#39;][&#39;opa&#39;][&#39;endpoint&#39;] = reporting_opa_endpoint
 
-    if &#39;HT_REPORTING_OPA_POLL_PERIOD_SECONDS&#39; in os.environ:
+    opa_poll_period = get_env_value(&#39;REPORTING_OPA_POLL_PERIOD_SECONDS&#39;)
+    if opa_poll_period:
         logger.debug(
-            &#34;[env] Loaded HT_REPORTING_OPA_POLL_PERIOD_SECONDS from env&#34;)
-        config[&#39;reporting&#39;][&#39;opa&#39;][&#39;poll_period_seconds&#39;] \
-            = int(os.environ[&#39;HT_REPORTING_OPA_POLL_PERIOD_SECONDS&#39;])
+            &#34;[env] Loaded REPORTING_OPA_POLL_PERIOD_SECONDS from env&#34;)
+        config[&#39;reporting&#39;][&#39;opa&#39;][&#39;poll_period_seconds&#39;] = int(opa_poll_period)
 
-    if &#39;HT_REPORTING_OPA_ENABLED&#39; in os.environ:
-        logger.debug(&#34;[env] Loaded HT_REPORTING_OPA_ENABLED from env&#34;)
-        config[&#39;reporting&#39;][&#39;opa&#39;][&#39;enabled&#39;] \
-            = os.environ[&#39;HT_REPORTING_OPA_ENABLED&#39;].lower() \
-            == &#39;true&#39;
+    opa_enabled = get_env_value(&#39;REPORTING_OPA_ENABLED&#39;)
+    if opa_enabled:
+        logger.debug(&#34;[env] Loaded REPORTING_OPA_ENABLED from env&#34;)
+        config[&#39;reporting&#39;][&#39;opa&#39;][&#39;enabled&#39;] = _is_true(opa_enabled)
 
     if len(config[&#39;reporting&#39;][&#39;opa&#39;]) == 0:
         del config[&#39;reporting&#39;][&#39;opa&#39;]
@@ -265,100 +269,92 @@ def load_config_from_env() -&gt; dict:  # pylint: disable=R0912,R0915
     config[&#39;data_capture&#39;] = {}
 
     config[&#39;data_capture&#39;][&#39;http_headers&#39;] = {}
-    if &#39;HT_DATA_CAPTURE_HTTP_HEADERS_REQUEST&#39; in os.environ:
+    headers_request = get_env_value(&#39;DATA_CAPTURE_HTTP_HEADERS_REQUEST&#39;)
+    if headers_request:
         logger.debug(
-            &#34;[env] Loaded HT_DATA_CAPTURE_HTTP_HEADERS_REQUEST from env&#34;)
-        config[&#39;data_capture&#39;][&#39;http_headers&#39;][&#39;request&#39;] \
-            = os.environ[&#39;HT_DATA_CAPTURE_HTTP_HEADERS_REQUEST&#39;].lower() \
-            == &#39;true&#39;
+            &#34;[env] Loaded DATA_CAPTURE_HTTP_HEADERS_REQUEST from env&#34;)
+        config[&#39;data_capture&#39;][&#39;http_headers&#39;][&#39;request&#39;] = _is_true(headers_request)
 
-    if &#39;HT_DATA_CAPTURE_HTTP_HEADERS_RESPONSE&#39; in os.environ:
+    headers_response = get_env_value(&#39;DATA_CAPTURE_HTTP_HEADERS_RESPONSE&#39;)
+    if headers_response:
         logger.debug(
-            &#34;[env] Loaded HT_DATA_CAPTURE_HTTP_HEADERS_RESPONSE from env&#34;)
-        config[&#39;data_capture&#39;][&#39;http_headers&#39;][&#39;response&#39;] \
-            = os.environ[&#39;HT_DATA_CAPTURE_HTTP_HEADERS_RESPONSE&#39;].lower() \
-            == &#39;true&#39;
+            &#34;[env] Loaded DATA_CAPTURE_HTTP_HEADERS_RESPONSE from env&#34;)
+        config[&#39;data_capture&#39;][&#39;http_headers&#39;][&#39;response&#39;] = _is_true(headers_response)
 
     if len(config[&#39;data_capture&#39;][&#39;http_headers&#39;]) == 0:
         del config[&#39;data_capture&#39;][&#39;http_headers&#39;]
 
     config[&#39;data_capture&#39;][&#39;http_body&#39;] = {}
-    if &#39;HT_DATA_CAPTURE_HTTP_BODY_REQUEST&#39; in os.environ:
+    body_request = get_env_value(&#39;DATA_CAPTURE_HTTP_BODY_REQUEST&#39;)
+    if body_request:
         logger.debug(
-            &#34;[env] Loaded HT_DATA_CAPTURE_HTTP_BODY_REQUEST from env&#34;)
-        config[&#39;data_capture&#39;][&#39;http_body&#39;][&#39;request&#39;] \
-            = os.environ[&#39;HT_DATA_CAPTURE_HTTP_BODY_REQUEST&#39;].lower() \
-            == &#39;true&#39;
+            &#34;[env] Loaded DATA_CAPTURE_HTTP_BODY_REQUEST from env&#34;)
+        config[&#39;data_capture&#39;][&#39;http_body&#39;][&#39;request&#39;] = _is_true(body_request)
 
-    if &#39;HT_DATA_CAPTURE_HTTP_BODY_RESPONSE&#39; in os.environ:
+    body_response = get_env_value(&#39;DATA_CAPTURE_HTTP_BODY_RESPONSE&#39;)
+    if body_response:
         logger.debug(
-            &#34;[env] Loaded HT_DATA_CAPTURE_HTTP_BODY_RESPONSE from env&#34;)
-        config[&#39;data_capture&#39;][&#39;http_body&#39;][&#39;response&#39;] \
-            = os.environ[&#39;HT_DATA_CAPTURE_HTTP_BODY_RESPONSE&#39;].lower() \
-            == &#39;true&#39;
+            &#34;[env] Loaded DATA_CAPTURE_HTTP_BODY_RESPONSE from env&#34;)
+        config[&#39;data_capture&#39;][&#39;http_body&#39;][&#39;response&#39;] = _is_true(body_response)
 
     if len(config[&#39;data_capture&#39;][&#39;http_body&#39;]) == 0:
         del config[&#39;data_capture&#39;][&#39;http_body&#39;]
 
     config[&#39;data_capture&#39;][&#39;rpc_metadata&#39;] = {}
-    if &#39;HT_DATA_CAPTURE_RPC_METADATA_REQUEST&#39; in os.environ:
+    rpc_metadata_request = get_env_value(&#39;DATA_CAPTURE_RPC_METADATA_REQUEST&#39;)
+    if rpc_metadata_request:
         logger.debug(
-            &#34;[env] Loaded HT_DATA_CAPTURE_RPC_METADATA_REQUEST from env&#34;)
-        config[&#39;data_capture&#39;][&#39;rpc_metadata&#39;][&#39;request&#39;] \
-            = os.environ[&#39;HT_DATA_CAPTURE_RPC_METADATA_REQUEST&#39;].lower() \
-            == &#39;true&#39;
+            &#34;[env] Loaded DATA_CAPTURE_RPC_METADATA_REQUEST from env&#34;)
+        config[&#39;data_capture&#39;][&#39;rpc_metadata&#39;][&#39;request&#39;] = _is_true(rpc_metadata_request)
 
-    if &#39;HT_DATA_CAPTURE_RPC_METADATA_RESPONSE&#39; in os.environ:
+    rpc_metadata_response = get_env_value(&#39;DATA_CAPTURE_RPC_METADATA_RESPONSE&#39;)
+    if rpc_metadata_response:
         logger.debug(
-            &#34;[env] Loaded HT_DATA_CAPTURE_RPC_METADATA_RESPONSE from env&#34;)
-        config[&#39;data_capture&#39;][&#39;rpc_metadata&#39;][&#39;response&#39;] \
-            = os.environ[&#39;HT_DATA_CAPTURE_RPC_METADATA_RESPONSE&#39;].lower() \
-            == &#39;true&#39;
+            &#34;[env] Loaded DATA_CAPTURE_RPC_METADATA_RESPONSE from env&#34;)
+        config[&#39;data_capture&#39;][&#39;rpc_metadata&#39;][&#39;response&#39;] = _is_true(rpc_metadata_response)
 
     if len(config[&#39;data_capture&#39;][&#39;rpc_metadata&#39;]) == 0:
         del config[&#39;data_capture&#39;][&#39;rpc_metadata&#39;]
 
     config[&#39;data_capture&#39;][&#39;rpc_body&#39;] = {}
-    if &#39;HT_DATA_CAPTURE_RPC_BODY_REQUEST&#39; in os.environ:
+    rpc_body_request = get_env_value(&#39;DATA_CAPTURE_RPC_BODY_REQUEST&#39;)
+    if rpc_body_request:
         logger.debug(
-            &#34;[env] Loaded HT_DATA_CAPTURE_RPC_BODY_REQUEST from env&#34;)
-        config[&#39;data_capture&#39;][&#39;rpc_body&#39;][&#39;request&#39;] \
-            = os.environ[&#39;HT_DATA_CAPTURE_RPC_BODY_REQUEST&#39;].lower() \
-            == &#39;true&#39;
+            &#34;[env] Loaded DATA_CAPTURE_RPC_BODY_REQUEST from env&#34;)
+        config[&#39;data_capture&#39;][&#39;rpc_body&#39;][&#39;request&#39;] = _is_true(rpc_body_request)
 
-    if &#39;HT_DATA_CAPTURE_RPC_BODY_RESPONSE&#39; in os.environ:
+    rpc_body_response = get_env_value(&#39;DATA_CAPTURE_RPC_BODY_RESPONSE&#39;)
+    if rpc_body_response:
         logger.debug(
-            &#34;[env] Loaded HT_DATA_CAPTURE_RPC_BODY_RESPONSE from env&#34;)
-        config[&#39;data_capture&#39;][&#39;rpc_body&#39;][&#39;response&#39;] \
-            = os.environ[&#39;HT_DATA_CAPTURE_RPC_BODY_RESPONSE&#39;].lower() \
-            == &#39;true&#39;
+            &#34;[env] Loaded DATA_CAPTURE_RPC_BODY_RESPONSE from env&#34;)
+        config[&#39;data_capture&#39;][&#39;rpc_body&#39;][&#39;response&#39;] = _is_true(rpc_body_response)
 
     if len(config[&#39;data_capture&#39;][&#39;rpc_body&#39;]) == 0:
         del config[&#39;data_capture&#39;][&#39;rpc_body&#39;]
 
-    if &#39;HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES&#39; in os.environ:
+    body_max_size_bytes = get_env_value(&#39;DATA_CAPTURE_BODY_MAX_SIZE_BYTES&#39;)
+    if body_max_size_bytes:
         logger.debug(
-            &#34;[env] Loaded HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES from env&#34;)
-        config[&#39;data_capture&#39;][&#39;body_max_size_bytes&#39;] \
-            = int(os.environ[&#39;HT_DATA_CAPTURE_BODY_MAX_SIZE_BYTES&#39;])
+            &#34;[env] Loaded DATA_CAPTURE_BODY_MAX_SIZE_BYTES from env&#34;)
+        config[&#39;data_capture&#39;][&#39;body_max_size_bytes&#39;] = int(body_max_size_bytes)
 
     if len(config[&#39;data_capture&#39;]) == 0:
         del config[&#39;data_capture&#39;]
 
-    if &#39;HT_PROPAGATION_FORMATS&#39; in os.environ and len(os.environ[&#39;HT_PROPAGATION_FORMATS&#39;]) &gt; 0:
-        logger.debug(&#34;[env] Loaded HT_PROPAGATION_FORMATS from env&#34;)
-        config[&#39;propagation_formats&#39;] = os.environ[&#39;HT_PROPAGATION_FORMATS&#39;].split(
-            &#39;,&#39;)
+    propagation_formats = get_env_value(&#39;PROPAGATION_FORMATS&#39;)
+    if propagation_formats and len(propagation_formats) &gt; 0:
+        logger.debug(&#34;[env] Loaded PROPAGATION_FORMATS from env&#34;)
+        config[&#39;propagation_formats&#39;] = propagation_formats.split(&#39;,&#39;)
 
-    if &#39;HT_ENABLED&#39; in os.environ:
-        logger.debug(&#34;[env] Loaded HT_ENABLED from env&#34;)
-        config[&#39;enabled&#39;] = os.environ[&#39;HT_ENABLED&#39;].lower() == &#39;true&#39;
+    enabled = get_env_value(&#39;ENABLED&#39;)
+    if enabled:
+        logger.debug(&#34;[env] Loaded ENABLED from env&#34;)
+        config[&#39;enabled&#39;] = _is_true(enabled)
 
-    if &#39;HT_ENABLE_CONSOLE_SPAN_EXPORTER&#39; in os.environ:
-        logger.debug(&#34;[env] Loaded HT_ENABLE_CONSOLE_SPAN_EXPORTER from env, %s&#34;,
-                     str(os.environ[&#39;HT_ENABLE_CONSOLE_SPAN_EXPORTER&#39;].lower()))
-        config[&#39;_use_console_span_exporter&#39;] = \
-            os.environ[&#39;HT_ENABLE_CONSOLE_SPAN_EXPORTER&#39;].lower() == &#39;true&#39;
+    console_span_exporter = get_env_value(&#39;ENABLE_CONSOLE_SPAN_EXPORTER&#39;)
+    if console_span_exporter:
+        logger.debug(&#34;[env] Loaded ENABLE_CONSOLE_SPAN_EXPORTER from env&#34;)
+        config[&#39;_use_console_span_exporter&#39;] = _is_true(console_span_exporter)
 
     return config</code></pre>
 </details>

@@ -28,18 +28,16 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">&#39;&#39;&#39;Main entry point for Hypertrace agent module.&#39;&#39;&#39;
-import os
-import os.path
 import sys
 import threading
 import traceback
 from contextlib import contextmanager
-import logging
 
 import flask
 
 import opentelemetry.trace as ot
 
+from hypertrace.env_var_settings import get_env_value
 from hypertrace.agent.init import AgentInit
 from hypertrace.agent.config import AgentConfig
 from hypertrace.agent import constants
@@ -203,9 +201,10 @@ class Agent:
 
     def is_enabled(self) -&gt; bool:  # pylint: disable=R0201
         &#39;&#39;&#39;Is agent enabled?&#39;&#39;&#39;
-        if &#39;HT_ENABLED&#39; in os.environ:
-            if os.environ[&#39;HT_ENABLED&#39;] == &#39;false&#39;:
-                logger.debug(&#34;HT_ENABLED is disabled.&#34;)
+        enabled = get_env_value(&#39;ENABLED&#39;)
+        if enabled:
+            if enabled.lower() == &#39;false&#39;:
+                logger.debug(&#34;ENABLED is disabled.&#34;)
                 return False
         return True
 
@@ -423,9 +422,10 @@ environment variables, and the agent-config.yaml file.</p></div>
 
     def is_enabled(self) -&gt; bool:  # pylint: disable=R0201
         &#39;&#39;&#39;Is agent enabled?&#39;&#39;&#39;
-        if &#39;HT_ENABLED&#39; in os.environ:
-            if os.environ[&#39;HT_ENABLED&#39;] == &#39;false&#39;:
-                logger.debug(&#34;HT_ENABLED is disabled.&#34;)
+        enabled = get_env_value(&#39;ENABLED&#39;)
+        if enabled:
+            if enabled.lower() == &#39;false&#39;:
+                logger.debug(&#34;ENABLED is disabled.&#34;)
                 return False
         return True
 
@@ -473,9 +473,10 @@ def edit_config(self):
 </summary>
 <pre><code class="python">def is_enabled(self) -&gt; bool:  # pylint: disable=R0201
     &#39;&#39;&#39;Is agent enabled?&#39;&#39;&#39;
-    if &#39;HT_ENABLED&#39; in os.environ:
-        if os.environ[&#39;HT_ENABLED&#39;] == &#39;false&#39;:
-            logger.debug(&#34;HT_ENABLED is disabled.&#34;)
+    enabled = get_env_value(&#39;ENABLED&#39;)
+    if enabled:
+        if enabled.lower() == &#39;false&#39;:
+            logger.debug(&#34;ENABLED is disabled.&#34;)
             return False
     return True</code></pre>
 </details>

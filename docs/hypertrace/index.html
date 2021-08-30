@@ -28,10 +28,10 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">&#34;&#34;&#34;Exposes wrapper for user to re-init agent in prefork web servers&#34;&#34;&#34;
-from hypertrace.agent import Agent
 
 def post_fork(server, worker):
     &#34;&#34;&#34;Used to reinitialize exporter &amp; processors in separate worker processes&#34;&#34;&#34;
+    from hypertrace.agent import Agent  # pylint:disable=C0411,C0415
     server.log.info(&#34;Add post hook %s&#34;, worker.pid)
     Agent()._init.post_fork()  # pylint:disable=W0212</code></pre>
 </details>
@@ -42,6 +42,11 @@ def post_fork(server, worker):
 <dt><code class="name"><a title="hypertrace.agent" href="agent/index.html">hypertrace.agent</a></code></dt>
 <dd>
 <div class="desc"><p>Main entry point for Hypertrace agent module.</p></div>
+</dd>
+<dt><code class="name"><a title="hypertrace.env_var_settings" href="env_var_settings.html">hypertrace.env_var_settings</a></code></dt>
+<dd>
+<div class="desc"><p>Used to override env var prefix
+these are separated out to prevent any classes from being imported before being customized</p></div>
 </dd>
 <dt><code class="name"><a title="hypertrace.version" href="version.html">hypertrace.version</a></code></dt>
 <dd>
@@ -65,6 +70,7 @@ def post_fork(server, worker):
 </summary>
 <pre><code class="python">def post_fork(server, worker):
     &#34;&#34;&#34;Used to reinitialize exporter &amp; processors in separate worker processes&#34;&#34;&#34;
+    from hypertrace.agent import Agent  # pylint:disable=C0411,C0415
     server.log.info(&#34;Add post hook %s&#34;, worker.pid)
     Agent()._init.post_fork()  # pylint:disable=W0212</code></pre>
 </details>
@@ -83,6 +89,7 @@ def post_fork(server, worker):
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
 <li><code><a title="hypertrace.agent" href="agent/index.html">hypertrace.agent</a></code></li>
+<li><code><a title="hypertrace.env_var_settings" href="env_var_settings.html">hypertrace.env_var_settings</a></code></li>
 <li><code><a title="hypertrace.version" href="version.html">hypertrace.version</a></code></li>
 </ul>
 </li>

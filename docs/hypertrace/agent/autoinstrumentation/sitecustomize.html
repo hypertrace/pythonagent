@@ -28,9 +28,9 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">&#39;&#39;&#39;Enable instrumentationon all supported modules.&#39;&#39;&#39; # pylint: disable=R0401
-import os
 import logging
 from hypertrace.agent import Agent
+from hypertrace.env_var_settings import get_env_value
 
 DEFAULTS = [
   &#39;flask&#39;,
@@ -46,9 +46,10 @@ DEFAULTS = [
 logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
 MODULES = &#39;&#39;
-if &#39;HT_INSTRUMENTED_MODULES&#39; in os.environ:
-    logger.debug(&#34;[env] Loaded HT_INSTRUMENTED_MODULES from env&#34;)
-    MODULES = os.environ[&#39;HT_INSTRUMENTED_MODULES&#39;]
+instrumented_modules = get_env_value(&#39;INSTRUMENTED_MODULES&#39;)
+if instrumented_modules:
+    logger.debug(&#34;[env] Loaded INSTRUMENTED_MODULES from env&#34;)
+    MODULES = instrumented_modules
     if len(MODULES) &gt; 0:
         MODULES = MODULES.replace(&#39; &#39;, &#39;&#39;)
 
