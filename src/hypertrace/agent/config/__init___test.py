@@ -10,7 +10,7 @@ from . import load_config_from_file
 def test_merge_config() -> None:
     '''Unittest for merging config results.'''
     # set Environment Variable
-    config_file_path = "./src/hypertrace/agent/config/test_agent-config.yaml"
+    config_file_path = os.path.join(os.path.dirname(__file__), "test_agent-config.yaml")
     config_from_file = load_config_from_file(config_file_path)
 
     cfg = merge_config(
@@ -45,7 +45,7 @@ def test_merge_config() -> None:
 def test_file_values_are_overriden_by_env() -> None:
     '''Test config is loaded from env.'''
 
-    os.environ["HT_CONFIG_FILE"] = "./src/hypertrace/agent/config/test_agent-config.yaml"
+    os.environ["HT_CONFIG_FILE"] = os.path.join(os.path.dirname(__file__), "test_agent-config.yaml")
     os.environ["HT_REPORTING_TRACE_REPORTER_TYPE"] = "OTLP"
     os.environ["HT_SERVICE_NAME"] = "test_service"
 
