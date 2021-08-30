@@ -1,6 +1,5 @@
 '''Environment config loader'''
 
-import os
 import logging
 
 from hypertrace.agent.env_var_settings import get_env_value
@@ -125,7 +124,7 @@ def load_config_from_env() -> dict:  # pylint: disable=R0912,R0915,R0914
         config['data_capture']['rpc_body']['request'] = _is_true(rpc_body_request)
 
     rpc_body_response = get_env_value('DATA_CAPTURE_RPC_BODY_RESPONSE')
-    if rpc_body_response in os.environ:
+    if rpc_body_response:
         logger.debug(
             "[env] Loaded DATA_CAPTURE_RPC_BODY_RESPONSE from env")
         config['data_capture']['rpc_body']['response'] = _is_true(rpc_body_response)
@@ -143,7 +142,7 @@ def load_config_from_env() -> dict:  # pylint: disable=R0912,R0915,R0914
         del config['data_capture']
 
     propagation_formats = get_env_value('PROPAGATION_FORMATS')
-    if propagation_formats in os.environ and len(propagation_formats) > 0:
+    if propagation_formats and len(propagation_formats) > 0:
         logger.debug("[env] Loaded PROPAGATION_FORMATS from env")
         config['propagation_formats'] = propagation_formats.split(',')
 
