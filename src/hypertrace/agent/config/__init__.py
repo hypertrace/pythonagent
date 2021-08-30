@@ -2,20 +2,17 @@
 Agent configuration logic that pull in values from a defaults list,
 environment variables, and the agent-config.yaml file.
 """
-import os
 import logging
-import traceback
-import yaml
 from google.protobuf import json_format as jf
 from google.protobuf.wrappers_pb2 import BoolValue
 from hypertrace.agent.config import config_pb2
 from hypertrace.agent.config.default import *
+from hypertrace.env_var_settings import get_env_value
 from .file import load_config_from_file
 from .environment import load_config_from_env
 
-# Configuration attributes specific to pythonagent
-from ..env_var_settings import get_env_value
 
+# Configuration attributes specific to pythonagent
 PYTHON_SPECIFIC_ATTRIBUTES: list = [
     '_use_console_span_exporter'
 ]

@@ -1,17 +1,14 @@
 '''Main entry point for Hypertrace agent module.'''
-import os
-import os.path
 import sys
 import threading
 import traceback
 from contextlib import contextmanager
-import logging
 
 import flask
 
 import opentelemetry.trace as ot
 
-from hypertrace.agent.env_var_settings import get_env_value
+from hypertrace.env_var_settings import get_env_value
 from hypertrace.agent.init import AgentInit
 from hypertrace.agent.config import AgentConfig
 from hypertrace.agent import constants

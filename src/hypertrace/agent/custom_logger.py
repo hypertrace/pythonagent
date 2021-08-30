@@ -5,7 +5,7 @@ import logging
 import sys
 import traceback
 
-from hypertrace.agent.env_var_settings import get_env_value
+from hypertrace.env_var_settings import get_env_value
 
 _LOG_LEVEL = {
     None: logging.INFO,

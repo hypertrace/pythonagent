@@ -1,7 +1,7 @@
 '''Enable instrumentationon all supported modules.''' # pylint: disable=R0401
 import logging
 from hypertrace.agent import Agent
-from hypertrace.agent.env_var_settings import get_env_value
+from hypertrace.env_var_settings import get_env_value
 
 DEFAULTS = [
   'flask',

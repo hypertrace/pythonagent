@@ -2,7 +2,7 @@
 
 import logging
 
-from hypertrace.agent.env_var_settings import get_env_value
+from hypertrace.env_var_settings import get_env_value
 
 logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
