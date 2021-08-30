@@ -8,7 +8,7 @@ from hypertrace.agent.env_var_settings import get_env_value
 logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
 
-def load_config_from_env() -> dict:  # pylint: disable=R0912,R0915
+def load_config_from_env() -> dict:  # pylint: disable=R0912,R0915,R0914
     '''Loads config from environment variables'''
     config = {}
 
