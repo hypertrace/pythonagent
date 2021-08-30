@@ -1,16 +1,14 @@
 '''Main entry point for Hypertrace agent module.'''
-import os
-import os.path
 import sys
 import threading
 import traceback
 from contextlib import contextmanager
-import logging
 
 import flask
 
 import opentelemetry.trace as ot
 
+from hypertrace.env_var_settings import get_env_value
 from hypertrace.agent.init import AgentInit
 from hypertrace.agent.config import AgentConfig
 from hypertrace.agent import constants
@@ -174,9 +172,10 @@ class Agent:
 
     def is_enabled(self) -> bool:  # pylint: disable=R0201
         '''Is agent enabled?'''
-        if 'HT_ENABLED' in os.environ:
-            if os.environ['HT_ENABLED'] == 'false':
-                logger.debug("HT_ENABLED is disabled.")
+        enabled = get_env_value('ENABLED')
+        if enabled:
+            if enabled.lower() == 'false':
+                logger.debug("ENABLED is disabled.")
                 return False
         return True
 
