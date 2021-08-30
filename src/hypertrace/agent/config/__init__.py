@@ -175,6 +175,5 @@ def _read_from_file():
         return None
     else:
         config_from_file = load_config_from_file(config_file)
-
         logger.debug('Successfully loaded config file')
         return config_from_file
