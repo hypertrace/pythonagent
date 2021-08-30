@@ -14,6 +14,8 @@ from .file import load_config_from_file
 from .environment import load_config_from_env
 
 # Configuration attributes specific to pythonagent
+from ..env_var_settings import get_env_value
+
 PYTHON_SPECIFIC_ATTRIBUTES: list = [
     '_use_console_span_exporter'
 ]
@@ -166,15 +168,16 @@ def _apply_custom_config_options(current_custom, next_config):
     return current_custom
 
 def _read_from_file():
-    if 'HT_CONFIG_FILE' not in os.environ:
+    config_file = get_env_value('CONFIG_FILE')
+    if config_file is None:
         return None
 
-    if len(os.environ['HT_CONFIG_FILE']) == 0:  # pylint:disable=R1705:
+    if len(config_file) == 0:  # pylint:disable=R1705:
         # HT_CONFIG_FILE can be passed as empty string which is invalid
-        logger.error('Failed to load HT_CONFIG_FILE env var is empty')
+        logger.error('Failed to load CONFIG_FILE env var is empty')
         return None
     else:
-        config_from_file = load_config_from_file(os.environ['HT_CONFIG_FILE'])
+        config_from_file = load_config_from_file(config_file)
 
         logger.debug('Successfully loaded config file')
         return config_from_file

@@ -2,6 +2,7 @@
 import os
 import logging
 from hypertrace.agent import Agent
+from hypertrace.agent.env_var_settings import get_env_value
 
 DEFAULTS = [
   'flask',
@@ -17,9 +18,10 @@ DEFAULTS = [
 logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
 MODULES = ''
-if 'HT_INSTRUMENTED_MODULES' in os.environ:
-    logger.debug("[env] Loaded HT_INSTRUMENTED_MODULES from env")
-    MODULES = os.environ['HT_INSTRUMENTED_MODULES']
+instrumented_modules = get_env_value('INSTRUMENTED_MODULES')
+if instrumented_modules:
+    logger.debug("[env] Loaded INSTRUMENTED_MODULES from env")
+    MODULES = instrumented_modules
     if len(MODULES) > 0:
         MODULES = MODULES.replace(' ', '')
 
