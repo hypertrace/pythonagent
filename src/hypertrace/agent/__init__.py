@@ -62,7 +62,7 @@ class Agent:
         finally:
             self._init.apply_config(self._config)
 
-    def register_flask_app(self, app) -> None:
+    def register_flask_app(self, app = None) -> None:
         '''Register the flask instrumentation module wrapper'''
         logger.debug('Calling Agent.register_flask_app.')
         if not self.is_initialized():
