@@ -4,8 +4,6 @@ import threading
 import traceback
 from contextlib import contextmanager
 
-import flask
-
 import opentelemetry.trace as ot
 
 from hypertrace.env_var_settings import get_env_value
@@ -64,7 +62,7 @@ class Agent:
         finally:
             self._init.apply_config(self._config)
 
-    def register_flask_app(self, app: flask.Flask = None) -> None:
+    def register_flask_app(self, app) -> None:
         '''Register the flask instrumentation module wrapper'''
         logger.debug('Calling Agent.register_flask_app.')
         if not self.is_initialized():
