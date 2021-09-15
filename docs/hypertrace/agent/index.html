@@ -33,8 +33,6 @@ import threading
 import traceback
 from contextlib import contextmanager
 
-import flask
-
 import opentelemetry.trace as ot
 
 from hypertrace.env_var_settings import get_env_value
@@ -93,7 +91,7 @@ class Agent:
         finally:
             self._init.apply_config(self._config)
 
-    def register_flask_app(self, app: flask.Flask = None) -&gt; None:
+    def register_flask_app(self, app = None) -&gt; None:
         &#39;&#39;&#39;Register the flask instrumentation module wrapper&#39;&#39;&#39;
         logger.debug(&#39;Calling Agent.register_flask_app.&#39;)
         if not self.is_initialized():
@@ -314,7 +312,7 @@ environment variables, and the agent-config.yaml file.</p></div>
         finally:
             self._init.apply_config(self._config)
 
-    def register_flask_app(self, app: flask.Flask = None) -&gt; None:
+    def register_flask_app(self, app = None) -&gt; None:
         &#39;&#39;&#39;Register the flask instrumentation module wrapper&#39;&#39;&#39;
         logger.debug(&#39;Calling Agent.register_flask_app.&#39;)
         if not self.is_initialized():
@@ -524,7 +522,7 @@ def edit_config(self):
 </details>
 </dd>
 <dt id="hypertrace.agent.Agent.register_flask_app"><code class="name flex">
-<span>def <span class="ident">register_flask_app</span></span>(<span>self, app: flask.app.Flask = None) ‑> None</span>
+<span>def <span class="ident">register_flask_app</span></span>(<span>self, app=None) ‑> None</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Register the flask instrumentation module wrapper</p></div>
@@ -532,7 +530,7 @@ def edit_config(self):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def register_flask_app(self, app: flask.Flask = None) -&gt; None:
+<pre><code class="python">def register_flask_app(self, app = None) -&gt; None:
     &#39;&#39;&#39;Register the flask instrumentation module wrapper&#39;&#39;&#39;
     logger.debug(&#39;Calling Agent.register_flask_app.&#39;)
     if not self.is_initialized():
