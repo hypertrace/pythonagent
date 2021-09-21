@@ -181,7 +181,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self.init_instrumentor_wrapper_base_for_http(self._flask_instrumentor_wrapper,
                                                          call_default_instrumentor)
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
+            logger.debug(constants.INST_WRAP_EXCEPTION_MSSG,
                          'flask',
                          err,
                          traceback.format_exc())
@@ -209,7 +209,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self._grpc_instrumentor_server_wrapper.set_process_response_body(
                 self._config.agent_config.data_capture.http_body.response)
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
+            logger.debug(constants.INST_WRAP_EXCEPTION_MSSG,
                          'grpc:server',
                          err,
                          traceback.format_exc())
@@ -239,7 +239,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self._grpc_instrumentor_client_wrapper.set_process_response_body(
                 self._config.agent_config.data_capture.http_body.response)
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
+            logger.debug(constants.INST_WRAP_EXCEPTION_MSSG,
                          'grpc:client',
                          err,
                          traceback.format_exc())
@@ -259,7 +259,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self.init_instrumentor_wrapper_base_for_http(
                 self._mysql_instrumentor_wrapper)
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
+            logger.debug(constants.INST_WRAP_EXCEPTION_MSSG,
                          'mysql',
                          err,
                          traceback.format_exc())
@@ -279,7 +279,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self.init_instrumentor_wrapper_base_for_http(
                 self._postgresql_instrumentor_wrapper)
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
+            logger.debug(constants.INST_WRAP_EXCEPTION_MSSG,
                          'postgresql',
                          err,
                          traceback.format_exc())
@@ -299,7 +299,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self.init_instrumentor_wrapper_base_for_http(
                 self._requests_instrumentor_wrapper)
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
+            logger.debug(constants.INST_WRAP_EXCEPTION_MSSG,
                          'requests',
                          err,
                          traceback.format_exc())
@@ -319,7 +319,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self.init_instrumentor_wrapper_base_for_http(
                 self._aiohttp_client_instrumentor_wrapper)
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
+            logger.debug(constants.INST_WRAP_EXCEPTION_MSSG,
                          'aiohttp_client',
                          err,
                          traceback.format_exc())
