@@ -35,10 +35,6 @@ class DjangoInstrumentationWrapper(BaseInstrumentorWrapper):
                                                     body)
             if block_result:
                 logger.debug('should block evaluated to true, aborting with 403')
-                # for some reason the span isnt marked as ended when we raise here
-                # since at this point middleware chain will halt
-                # we will end it
-                span.end()
                 raise PermissionDenied
         except PermissionDenied as permission_denied:
             raise permission_denied

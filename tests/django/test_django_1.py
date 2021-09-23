@@ -28,6 +28,7 @@ def test_basic_span_data(client):
     assert response.status_code == 200
 
     span_list = memoryExporter.get_finished_spans()
+    memoryExporter.clear()
     assert len(span_list) == 1
     django_span = span_list[0]
     assert django_span.name == 'GET test/<int:id>'
@@ -43,6 +44,7 @@ def test_collects_body_data(client):
     assert response.status_code == 200
 
     span_list = memoryExporter.get_finished_spans()
+    memoryExporter.clear()
     assert len(span_list) == 1
     django_span = span_list[0]
     assert django_span.name == 'POST test/<int:id>'
@@ -61,8 +63,6 @@ def test_can_block(client):
     response = client.post('/test/123', data={"some_client_data": "123"}, content_type="application/json")
     assert response.status_code == 403
     r.filters.clear()
-
-    span_list = memoryExporter.get_finished_spans()
-    assert len(span_list) == 1
+    memoryExporter.clear()
 
 
