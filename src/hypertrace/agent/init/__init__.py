@@ -148,13 +148,14 @@ class AgentInit:  # pylint: disable=R0902,R0903
 
 
     def init_instrumentation_django(self) -> None:
+        '''Creates a django instrumentation wrapper using the config defined in hypertraceconfig'''
         logger.debug('Calling AgentInit.init_instrumentation_django')
         try:
             if self.is_registered('Django'):
                 return
             self._modules_initialized['Django'] = True
 
-            from hypertrace.agent.instrumentation import django
+            from hypertrace.agent.instrumentation import django # pylint:disable=C0415
 
             wrapper = django.DjangoInstrumentationWrapper()
             data_cap = self._config.agent_config.data_capture
