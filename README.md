@@ -12,6 +12,7 @@ This agent supports these frameworks and adds following capabilities:
 | Module/Framework | Description | Python Versions Tested/Supported|
 |------|-------------| ---------------|
 | [flask](https://flask.palletsprojects.com/en/1.1.x/api)|A micro web framework written in Python.| Python 3.6, 3.7, 3.8, 3.9|
+| [django](https://docs.djangoproject.com/)|Python web framework | Python 3.6, 3.7, 3.8, 3.9|
 | [grpc](https://grpc.github.io/grpc/python/)|Python GRPC library.| Python 3.6, 3.7, 3.8, 3.9|
 | [mysql-connector](https://dev.mysql.com/doc/connector-python/en/)| Python MySQL database client library.| Python 3.6, 3.7, 3.8, 3.9|
 | [psycopg2/postgresql](https://www.psycopg.org/docs/)|Python Postgresql database client library. | Python 3.8, 3.9|
@@ -43,7 +44,8 @@ from hypertrace.agent import Agent
 agent = Agent() # initialize the agent
 
 # Instrument libraries that are used within your application
-agent.register_flask_app(app)  # instrument a flask application
+agent.register_flask_app(app)   # instrument a flask application
+agent.register_django()         # instrument a Django application
 agent.register_mysql()          # instrument the MySQL client
 agent.register_postgresql()     # instrument the postgres client
 agent.register_grpc_server()    # instrument a grpc server

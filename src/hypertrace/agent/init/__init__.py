@@ -18,6 +18,8 @@ from hypertrace.agent import constants
 from hypertrace.agent.config import config_pb2, AgentConfig
 
 # Initialize logger
+from hypertrace.agent.instrumentation.django import DjangoInstrumentationWrapper
+
 logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
 
@@ -29,6 +31,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
         logger.debug('Initializing AgentInit object.')
         self._config = agent_config
         self._modules_initialized = {
+            "django": False,
             "flask": False,
             "grpc:server": False,
             "grpc:client": False,
@@ -142,6 +145,31 @@ class AgentInit:  # pylint: disable=R0902,R0903
         logger.debug('Calling DumpConfig().')
         for mod in self._modules_initialized:
             logger.debug('%s : %s', mod, str(self._modules_initialized[mod]))
+
+
+    def init_instrumentation_django(self) -> None:
+        logger.debug('Calling AgentInit.init_instrumentation_django')
+        try:
+            if self.is_registered('Django'):
+                return
+            self._modules_initialized['Django'] = True
+
+            from hypertrace.agent.instrumentation import django
+
+            wrapper = django.DjangoInstrumentationWrapper()
+            data_cap = self._config.agent_config.data_capture
+            wrapper.set_process_request_headers(data_cap.http_headers.request)
+            wrapper.set_process_request_body(data_cap.http_body.request)
+            wrapper.set_process_response_headers(data_cap.http_headers.response)
+            wrapper.set_process_response_body(data_cap.http_body.response)
+            wrapper.set_body_max_size(data_cap.body_max_size_bytes)
+            wrapper.instrument()
+        except Exception as err:  # pylint: disable=W0703:
+            logger.debug(constants.INST_WRAP_EXCEPTION_MSSG,
+                         'Django',
+                         err,
+                         traceback.format_exc())
+
 
     # Creates a flask wrapper using the config defined in hypertraceconfig
     def init_instrumentation_flask(self, app) -> None:

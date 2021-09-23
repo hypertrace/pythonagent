@@ -62,6 +62,20 @@ class Agent:
         finally:
             self._init.apply_config(self._config)
 
+    def register_django(self) -> None:
+        '''Register the django instrumentation module wrapper'''
+        logger.debug('Calling Agent.register_django.')
+        if not self.is_initialized():
+            return
+        try:
+            self._init.init_instrumentation_django()
+            self._init.dump_config()
+        except Exception as err:  # pylint: disable=W0703
+            logger.debug(constants.EXCEPTION_MESSAGE,
+                         'Django',
+                         err,
+                         traceback.format_exc())
+
     def register_flask_app(self, app = None) -> None:
         '''Register the flask instrumentation module wrapper'''
         logger.debug('Calling Agent.register_flask_app.')

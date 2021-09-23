@@ -127,8 +127,6 @@ class BaseInstrumentorWrapper:
         logger.debug(
             'Entering BaseInstrumentationWrapper.genericRequestHandler().')
         try: # pylint: disable=R1702
-            logger.debug('span: %s', str(span))
-            # Only log if span is recording.
             if span.is_recording():
                 logger.debug('Span is Recording!')
             else:
@@ -184,14 +182,13 @@ class BaseInstrumentorWrapper:
 
     # Generic HTTP Response Handler
     def generic_response_handler(self, # pylint: disable=R0912
-                                 response_headers: tuple,
+                                 response_headers: [tuple],
                                  response_body,
                                  span: Span) -> Span: # pylint: disable=R0912
         '''Add extended response data to span.'''
         logger.debug(
             'Entering BaseInstrumentationWrapper.genericResponseHandler().')
         try: # pylint: disable=R1702
-            logger.debug('span: %s', str(span))
             # Only log if span is recording.
             if span.is_recording():
                 logger.debug('Span is Recording!')
@@ -313,9 +310,6 @@ class BaseInstrumentorWrapper:
         logger.debug(
             'Entering BaseInstrumentationWrapper.genericRpcResponseHandler().')
         try:
-            logger.debug('span: %s', str(span))
-            logger.debug('responseHeaders: %s', str(response_headers))
-            logger.debug('responseBody: %s', str(response_body))
             # is the span currently recording?
             if span.is_recording():
                 logger.debug('Span is Recording!')
