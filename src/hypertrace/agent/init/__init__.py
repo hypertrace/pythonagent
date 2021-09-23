@@ -18,8 +18,6 @@ from hypertrace.agent import constants
 from hypertrace.agent.config import config_pb2, AgentConfig
 
 # Initialize logger
-from hypertrace.agent.instrumentation.django import DjangoInstrumentationWrapper
-
 logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
 
@@ -31,7 +29,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
         logger.debug('Initializing AgentInit object.')
         self._config = agent_config
         self._modules_initialized = {
-            "django": False,
+            "Django": False,
             "flask": False,
             "grpc:server": False,
             "grpc:client": False,
