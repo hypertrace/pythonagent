@@ -1,12 +1,6 @@
 '''Hypertrace wrapper around OTel instrumentation class'''
-import sys
-import os.path
 import logging
-import traceback
-import functools
-import types
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
-from requests.models import Response
 from hypertrace.agent.instrumentation import BaseInstrumentorWrapper
 
 # Initialize logger with local module name
@@ -19,7 +13,6 @@ def get_active_span_for_call_wrapper(requests_wrapper):
     def get_active_span_for_call(span, response) -> None:
         '''Hypertrace call wrapper function'''
         logger.debug('Entering get_active_span_for_request().')
-        logger.debug('span: %s', str(span))
         response_content = None
         if hasattr(response, 'content'):
             logger.debug('Converting response message body to string.')
@@ -37,9 +30,8 @@ def get_active_span_for_call_wrapper(requests_wrapper):
 
         if span.is_recording():
             logger.debug('Span is recording.')
-            request_headers = [(k, v)
-                               for k, v in response.request.headers.items()] # pylint: disable=R1721
-            response_headers = [(k, v) for k, v in response.headers.items()] #pylint: disable=R1721
+            request_headers = response.request.headers
+            response_headers = response.headers
             requests_wrapper.generic_request_handler(
                 request_headers, request_content, span)
             requests_wrapper.generic_response_handler(
