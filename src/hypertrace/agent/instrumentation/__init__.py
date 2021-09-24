@@ -35,26 +35,6 @@ class BaseInstrumentorWrapper:
         self._process_response_body = False
         self._max_body_size = 128 * 1024
 
-    # Log request headers in extended options?
-    def get_process_request_headers(self) -> bool:
-        '''Should it process request headers?'''
-        return self._process_request_headers
-
-    # Log response headers in extended options?
-    def get_process_response_headers(self) -> bool:
-        '''Should it process response headers?'''
-        return self._process_response_headers
-
-    # Log request body in extended options?
-    def get_process_request_body(self) -> bool:
-        '''Should it process request body?'''
-        return self._process_request_body
-
-    # Log response body in extended options?
-    def get_process_response_body(self) -> bool:
-        '''Should it process response body?'''
-        return self._process_response_body
-
     # Set whether request headers should be put in extended span, takes a BoolValue as input
     def set_process_request_headers(self, process_request_headers) -> None:
         '''Should it process request headers?'''
@@ -194,7 +174,7 @@ class BaseInstrumentorWrapper:
             if self._process_request_headers:
                 self.add_headers_to_span(self.RPC_REQUEST_METADATA_PREFIX, span, request_headers)
             # Log rpc body if requested
-            if self.get_process_request_body():
+            if self._process_response_body:
                 request_body_str = str(request_body)
                 request_body_str = self.grab_first_n_bytes(request_body_str)
                 span.set_attribute(self.RPC_REQUEST_BODY_PREFIX,
@@ -217,18 +197,18 @@ class BaseInstrumentorWrapper:
             'Entering BaseInstrumentationWrapper.genericRpcResponseHandler().')
         try:
             # is the span currently recording?
-            if span.is_recording():
-                logger.debug('Span is Recording!')
-            else:
+            if not span.is_recording():
                 return span
+
+            logger.debug('Span is Recording!')
+            lowercased_headers = self.lowercase_headers(response_headers)
             # Log rpc metadata if requested?
             if self._process_response_headers:
+
                 logger.debug('Dumping Response Headers:')
-                for header in response_headers:
-                    span.set_attribute(
-                        self.RPC_RESPONSE_METADATA_PREFIX + header[0].lower(), header[1])
+                self.add_headers_to_span(self.RPC_RESPONSE_METADATA_PREFIX, span, lowercased_headers)
             # Log rpc body if requested
-            if self.get_process_response_body():
+            if self._process_response_body:
                 response_body_str = str(response_body)
                 logger.debug('Processing response body')
                 response_body_str = self.grab_first_n_bytes(response_body_str)
