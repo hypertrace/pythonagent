@@ -254,7 +254,7 @@ class OpenTelemetryClientInterceptorWrapper(_client.OpenTelemetryClientIntercept
             'Entering OpenTelemetryClientInterceptorWrapper.intercept_unary().')
         try:
             # Not sure how to obtain span object here
-            result = invoker(request, metadata)
+            result = invoker(request, metadata)  # pylint:disable=W0612
             # Not sure how to obtain trailing metadata here
         except grpc.RpcError as err:
             logger.error(constants.INST_RUNTIME_EXCEPTION_MSSG,
