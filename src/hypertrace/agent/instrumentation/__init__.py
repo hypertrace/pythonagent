@@ -91,7 +91,7 @@ class BaseInstrumentorWrapper:
     # otherwise don't capture
     def eligible_based_on_content_type(self, headers: dict):
         '''find content-type in headers'''
-        content_type = headers["content-type"]
+        content_type = headers.get("content-type")
         return content_type if content_type in self._ALLOWED_CONTENT_TYPES else None # plyint:disable=R1710
 
     def _generic_handler(self, record_headers: bool, header_prefix: str, # pylint:disable=R0913
@@ -169,10 +169,11 @@ class BaseInstrumentorWrapper:
                 return span
 
             logger.debug('Span is Recording!')
+            lowercased_headers = self.lowercase_headers(request_headers)
 
             # Log rpc metatdata if requested
             if self._process_request_headers:
-                self.add_headers_to_span(self.RPC_REQUEST_METADATA_PREFIX, span, request_headers)
+                self.add_headers_to_span(self.RPC_REQUEST_METADATA_PREFIX, span, lowercased_headers)
             # Log rpc body if requested
             if self._process_response_body:
                 request_body_str = str(request_body)
