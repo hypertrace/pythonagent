@@ -83,23 +83,20 @@ class BaseInstrumentorWrapper:
                      process_response_body.value)
         self._process_response_body = process_response_body
 
-    # Set service name
-    def set_service_name(self, service_name) -> None:
-        '''Set the service name for this instrumentor.'''
-        logger.debug('Setting self._service_name to \'%s\'', service_name)
-        self._service_name = service_name
-
     # Set max body size
     def set_body_max_size(self, max_body_size) -> None:
+        '''Set the max body size for this instrumentor.'''
         logger.debug('Setting self.body_max_size to %s.', max_body_size)
         self._max_body_size = max_body_size
 
     # we need the headers lowercased multiple times
     # just do it once upfront
-    def lowercase_headers(self, headers):
+    def lowercase_headers(self, headers): # pylint:disable=R0201
+        '''convert all headers to lowercase'''
         return {k.lower(): v for k, v in headers.items()}
 
-    def add_headers_to_span(self, prefix: str, span: Span, headers: dict):
+    def add_headers_to_span(self, prefix: str, span: Span, headers: dict): # pylint:disable=R0201
+        '''set header attributes on the span'''
         for header_key, header_value in headers.items():
             span.set_attribute(f"{prefix}{header_key}", header_value)
 
@@ -113,10 +110,11 @@ class BaseInstrumentorWrapper:
     # so if we return a content type, that indicates valid for capture,
     # otherwise don't capture
     def eligible_based_on_content_type(self, headers: dict):
+        '''find content-type in headers'''
         content_type = headers["content-type"]
-        return content_type if content_type in self._ALLOWED_CONTENT_TYPES else None
+        return content_type if content_type in self._ALLOWED_CONTENT_TYPES else None # plyint:disable=R1710
 
-    def _generic_handler(self, record_headers: bool, header_prefix: str,
+    def _generic_handler(self, record_headers: bool, header_prefix: str, # pylint:disable=R0913
                          record_body: bool, body_prefix: str,
                          span: Span, headers: dict, body):
         logger.debug('Entering BaseInstrumentationWrapper.generic_handler().')
@@ -132,7 +130,7 @@ class BaseInstrumentorWrapper:
             if record_body:
                 content_type = self.eligible_based_on_content_type(lowercased_headers)
                 if content_type is None:
-                    return
+                    return span
 
                 body_str = None
                 if isinstance(body, bytes):
@@ -141,7 +139,7 @@ class BaseInstrumentorWrapper:
                     body_str = body
 
                 request_body_str = self.grab_first_n_bytes(body_str)
-                if content_type == 'application/json' or content_type == 'application/graphql':
+                if content_type in ['application/json', 'application/graphql']:
                     # why do we need to do this?
                     span.set_attribute(body_prefix, request_body_str.replace("'", '"'))
                 else:
@@ -170,6 +168,7 @@ class BaseInstrumentorWrapper:
                                  response_headers: dict,
                                  response_body,
                                  span: Span) -> Span:  # pylint: disable=R0912
+        '''generic response handler'''
         logger.debug(
             'Entering BaseInstrumentationWrapper.genericResponseHandler().')
         return self._generic_handler(self._process_response_headers, self.HTTP_RESPONSE_HEADER_PREFIX,
