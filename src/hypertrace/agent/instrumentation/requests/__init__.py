@@ -30,12 +30,10 @@ def get_active_span_for_call_wrapper(requests_wrapper):
 
         if span.is_recording():
             logger.debug('Span is recording.')
-            request_headers = response.request.headers
-            response_headers = response.headers
             requests_wrapper.generic_request_handler(
-                request_headers, request_content, span)
+                response.request.headers, request_content, span)
             requests_wrapper.generic_response_handler(
-                response_headers, response_content, span)
+                response.headers, response_content, span)
     return get_active_span_for_call
 
 def hypertrace_name_callback(method, url) -> str:
