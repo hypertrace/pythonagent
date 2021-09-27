@@ -24,14 +24,13 @@ class DjangoInstrumentationWrapper(BaseInstrumentorWrapper):
     def request_hook(self, span: Span, request):
         """django request hook before request is processed by app"""
         try:
-            headers = list(dict(request.headers).items())
             body = request.body
             span.update_name(f"{request.method} {span.name}")
-            self.generic_request_handler(headers, body, span)
+            self.generic_request_handler(request.headers, body, span)
             full_url = request.build_absolute_uri()
             block_result = Registry().apply_filters(span,
                                                     full_url,
-                                                    headers,
+                                                    request.headers,
                                                     body)
             if block_result:
                 logger.debug('should block evaluated to true, aborting with 403')
@@ -48,9 +47,8 @@ class DjangoInstrumentationWrapper(BaseInstrumentorWrapper):
     def response_hook(self, span, _request, response):
         """django response hook before response is written out"""
         try:
-            headers = list(dict(response.headers).items())
             body = response.content
-            self.generic_response_handler(headers, body, span)
+            self.generic_response_handler(response.headers, body, span)
         except Exception as err:  # pylint:disable=W0703
             logger.debug(constants.INST_RUNTIME_EXCEPTION_MSSG,
                          'django response hook',

@@ -8,7 +8,8 @@ import logging
 from opentelemetry.trace.span import Span
 
 # Setup logger name
-logger = logging.getLogger(__name__) # pylint: disable=C0103
+logger = logging.getLogger(__name__)  # pylint: disable=C0103
+
 
 # This is a base class for all Hypertrace Instrumentation wrapper classes
 class BaseInstrumentorWrapper:
@@ -32,51 +33,7 @@ class BaseInstrumentorWrapper:
         self._process_response_headers = False
         self._process_request_body = False
         self._process_response_body = False
-        self._service_name = 'hypertrace-python-agent'
         self._max_body_size = 128 * 1024
-
-    # Dump object for troubleshooting purposes
-    def introspect(self, obj) -> None:
-        '''Dump object for troubleshooting purposes'''
-        logger.debug('Describing object.')
-        for func in [type, id, dir, vars, callable]:
-            try:
-                logger.debug("%s(%s):\t\t%s",
-                             func.__name__, self.introspect.__code__.co_varnames[0], func(obj))
-                logger.debug("%s: %s",
-                             func.__name__, inspect.getmembers(obj))
-            except Exception: # pylint: disable=W0703
-                logger.error("No data to display")
-
-    # Log request headers in extended options?
-    def get_process_request_headers(self) -> bool:
-        '''Should it process request headers?'''
-        return self._process_request_headers
-
-    # Log response headers in extended options?
-    def get_process_response_headers(self) -> bool:
-        '''Should it process response headers?'''
-        return self._process_response_headers
-
-    # Log request body in extended options?
-    def get_process_request_body(self) -> bool:
-        '''Should it process request body?'''
-        return self._process_request_body
-
-    # Log response body in extended options?
-    def get_process_response_body(self) -> bool:
-        '''Should it process response body?'''
-        return self._process_response_body
-
-    # Get the configured service name
-    def get_service_name(self) -> str:
-        '''get service name'''
-        return self._service_name
-
-    # Get the max body size that can be captured
-    def get_max_body_size(self) -> int:
-        '''get the max body size.'''
-        return self._max_body_size
 
     # Set whether request headers should be put in extended span, takes a BoolValue as input
     def set_process_request_headers(self, process_request_headers) -> None:
@@ -106,204 +63,134 @@ class BaseInstrumentorWrapper:
                      process_response_body.value)
         self._process_response_body = process_response_body
 
-    # Set service name
-    def set_service_name(self, service_name) -> None:
-        '''Set the service name for this instrumentor.'''
-        logger.debug('Setting self._service_name to \'%s\'', service_name)
-        self._service_name = service_name
-
     # Set max body size
     def set_body_max_size(self, max_body_size) -> None:
-        '''Set the max body size that will be captured.'''
+        '''Set the max body size for this instrumentor.'''
         logger.debug('Setting self.body_max_size to %s.', max_body_size)
         self._max_body_size = max_body_size
 
-    # Generic HTTP Request Handler
-    def generic_request_handler(self, # pylint: disable=R0912
-                                request_headers: tuple,
-                                request_body,
-                                span: Span) -> Span :
-        '''Add extended request data to the span'''
-        logger.debug(
-            'Entering BaseInstrumentationWrapper.genericRequestHandler().')
-        try: # pylint: disable=R1702
-            if span.is_recording():
-                logger.debug('Span is Recording!')
-            else:
-                return span
-            # Log request headers if requested
-            if self.get_process_request_headers():
-                logger.debug('Dumping Request Headers:')
-                for header in request_headers:
-                    logger.debug(str(header))
-                    span.set_attribute(
-                        self.HTTP_REQUEST_HEADER_PREFIX + header[0].lower(), header[1])
-            # Process request body if enabled
-            if self.get_process_request_body():
-                # Get content-type value
-                content_type_header_tuple = [
-                    item for item in request_headers if item[0].lower() == 'content-type']
-                logger.debug('content_type_header_tuple=%s',
-                             str(content_type_header_tuple))
-                # Does the content-type exist?
-                if len(content_type_header_tuple) > 0:
-                    logger.debug('Found content-type header.')
-                    # Does the content-type exist?
-                    if content_type_header_tuple[0][1] is not None\
-                      and content_type_header_tuple[0][1] != '':
-                        logger.debug(
-                            'Mimetype/content-type value exists. %s',
-                            content_type_header_tuple[0][1])
-                        # Is this an interesting content-type?
-                        if self.is_interesting_content_type(content_type_header_tuple[0][1]):
-                            logger.debug(
-                                'This is an interesting content-type.')
-                            request_body_str = None
-                            if isinstance(request_body, bytes):
-                                request_body_str = request_body.decode('UTF8', 'backslashreplace')
-                            else:
-                                request_body_str = request_body
+    # we need the headers lowercased multiple times
+    # just do it once upfront
+    def lowercase_headers(self, headers): # pylint:disable=R0201
+        '''convert all headers to lowercase'''
+        return {k.lower(): v for k, v in headers.items()}
 
-                            request_body_str = self.grab_first_n_bytes(request_body_str)
-                            if content_type_header_tuple[0][1] == 'application/json' \
-                              or content_type_header_tuple[0][1] == 'application/graphql':
-                                span.set_attribute(self.HTTP_REQUEST_BODY_PREFIX,\
-                                  request_body_str.replace("'", '"'))
-                            else:
-                                span.set_attribute(
-                                    self.HTTP_REQUEST_BODY_PREFIX, request_body_str)
-        except: # pylint: disable=W0702
+    def add_headers_to_span(self, prefix: str, span: Span, headers: dict): # pylint:disable=R0201
+        '''set header attributes on the span'''
+        for header_key, header_value in headers.items():
+            span.set_attribute(f"{prefix}{header_key}", header_value)
+
+    _ALLOWED_CONTENT_TYPES = [
+        "application/json",
+        "application/graphql",
+        'application/x-www-form-urlencoded'
+    ]
+
+    # We need the content type to do some escaping
+    # so if we return a content type, that indicates valid for capture,
+    # otherwise don't capture
+    def eligible_based_on_content_type(self, headers: dict):
+        '''find content-type in headers'''
+        content_type = headers.get("content-type")
+        return content_type if content_type in self._ALLOWED_CONTENT_TYPES else None # plyint:disable=R1710
+
+    def _generic_handler(self, record_headers: bool, header_prefix: str, # pylint:disable=R0913
+                         record_body: bool, body_prefix: str,
+                         span: Span, headers: dict, body):
+        logger.debug('Entering BaseInstrumentationWrapper.generic_handler().')
+        try:  # pylint: disable=R1702
+            if not span.is_recording():
+                return span
+
+            logger.debug('Span is Recording!')
+            lowercased_headers = self.lowercase_headers(headers)
+            if record_headers:
+                self.add_headers_to_span(header_prefix, span, lowercased_headers)
+
+            if record_body:
+                content_type = self.eligible_based_on_content_type(lowercased_headers)
+                if content_type is None:
+                    return span
+
+                body_str = None
+                if isinstance(body, bytes):
+                    body_str = body.decode('UTF8', 'backslashreplace')
+                else:
+                    body_str = body
+
+                request_body_str = self.grab_first_n_bytes(body_str)
+                if content_type in ['application/json', 'application/graphql']:
+                    # why do we need to do this?
+                    span.set_attribute(body_prefix, request_body_str.replace("'", '"'))
+                else:
+                    span.set_attribute(body_prefix, request_body_str)
+
+        except:  # pylint: disable=W0702
             logger.debug('An error occurred in genericRequestHandler: exception=%s, stacktrace=%s',
                          sys.exc_info()[0],
                          traceback.format_exc())
-            # Not rethrowing to avoid causing runtime errors
         finally:
-            return span # pylint: disable=W0150
+            return span  # pylint: disable=W0150
+
+    # Generic HTTP Request Handler
+    def generic_request_handler(self,  # pylint: disable=R0912
+                                request_headers: dict,
+                                request_body,
+                                span: Span) -> Span:
+        '''Add extended request data to the span'''
+        logger.debug('Entering BaseInstrumentationWrapper.genericRequestHandler().')
+        return self._generic_handler(self._process_request_headers, self.HTTP_REQUEST_HEADER_PREFIX,
+                                     self._process_request_body, self.HTTP_REQUEST_BODY_PREFIX,
+                                     span, request_headers, request_body)
 
     # Generic HTTP Response Handler
-    def generic_response_handler(self, # pylint: disable=R0912
-                                 response_headers: [tuple],
+    def generic_response_handler(self,  # pylint: disable=R0912
+                                 response_headers: dict,
                                  response_body,
-                                 span: Span) -> Span: # pylint: disable=R0912
-        '''Add extended response data to span.'''
+                                 span: Span) -> Span:  # pylint: disable=R0912
+        '''generic response handler'''
         logger.debug(
             'Entering BaseInstrumentationWrapper.genericResponseHandler().')
-        try: # pylint: disable=R1702
-            # Only log if span is recording.
-            if span.is_recording():
-                logger.debug('Span is Recording!')
-            else:
-                return span
-            # Log response headers if requested
-            if self.get_process_response_headers():
-                logger.debug('Dumping Response Headers:')
-                for header in response_headers:
-                    logger.debug(str(header))
-                    span.set_attribute(
-                        self.HTTP_RESPONSE_HEADER_PREFIX + header[0].lower(), header[1])
-            # Process response body if enabled
-            if self.get_process_response_body():
-                logger.debug('Response Body: %s', str(response_body))
-                # Get content-type value
-                content_type_header_tuple = [
-                    item for item in response_headers if item[0].lower() == 'content-type']
-                logger.debug('content_type_header_tuple=%s',
-                             str(content_type_header_tuple))
-                # Does the content-type exist?
-                if len(content_type_header_tuple) > 0:
-                    logger.debug('Found content-type header.')
-                    # Does the content-type exist?
-                    if content_type_header_tuple[0][1] is not None\
-                      and content_type_header_tuple[0][1] != '':
-                        logger.debug(
-                            'Mimetype/content-type value exists. %s',
-                            content_type_header_tuple[0][1])
-                        # Is this an interesting content-type?
-                        if self.is_interesting_content_type(content_type_header_tuple[0][1]):
-                            logger.debug(
-                                'This is an interesting content-type.')
-                            response_body_str = None
-                            if isinstance(response_body, bytes):
-                                response_body_str = response_body.decode('UTF8', 'backslashreplace')
-                            else:
-                                response_body_str = response_body
-
-                            response_body_str = self.grab_first_n_bytes(response_body_str)
-                            # Format message body correctly
-                            if content_type_header_tuple[0][1] == 'application/json'\
-                              and content_type_header_tuple[0][1] == 'application/graphql':
-                                span.set_attribute(self.HTTP_RESPONSE_BODY_PREFIX,\
-                                  response_body_str.replace("'", '"'))
-                            else:
-                                span.set_attribute(
-                                    self.HTTP_RESPONSE_BODY_PREFIX, response_body_str)
-        except: # pylint: disable=W0702
-            logger.debug('An error occurred in genericResponseHandler: exception=%s, stacktrace=%s',
-                         sys.exc_info()[0],
-                         traceback.format_exc())
-            # Not rethrowing to avoid causing runtime errors
-        finally:
-            return span # pylint: disable=W0150
-
-    # Should this mimetype be put in the extended span?
-    def is_interesting_content_type(self, content_type: str) -> bool: # pylint: disable=R0201
-        '''Is this a content-type we want to write to the span?'''
-        logger.debug(
-            'Entering BaseInstrumentorWrapper.isInterestingContentType().')
-        try:
-            if content_type == 'application/json':
-                return True
-            if content_type == 'application/graphql':
-                return True
-            if content_type == 'application/x-www-form-urlencoded':
-                return True
-            return False
-        except: # pylint: disable=W0702
-            logger.debug("""An error occurred while inspecting content-type:
-                         exception=%s, stacktrace=%s""",
-                         sys.exc_info()[0],
-                         traceback.format_exc())
-            return False
+        return self._generic_handler(self._process_response_headers, self.HTTP_RESPONSE_HEADER_PREFIX,
+                                     self._process_response_body, self.HTTP_RESPONSE_BODY_PREFIX,
+                                     span, response_headers, response_body)
 
     # Generic RPC Request Handler
     def generic_rpc_request_handler(self,
-                                    request_headers: tuple,
+                                    request_headers: dict,
                                     request_body,
                                     span: Span) -> Span:
         '''Add extended request rpc data to span.'''
         logger.debug(
             'Entering BaseInstrumentationWrapper.genericRpcRequestHandler().')
         try:
-            logger.debug('span: %s', str(span))
             # Is the span currently recording?
-            if span.is_recording():
-                logger.debug('Span is Recording!')
-            else:
+            if not span.is_recording():
                 return span
+
+            logger.debug('Span is Recording!')
+            lowercased_headers = self.lowercase_headers(request_headers)
+
             # Log rpc metatdata if requested
-            if self.get_process_request_headers():
-                logger.debug('Dumping Request Headers:')
-                for header in request_headers:
-                    logger.debug(str(header))
-                    span.set_attribute(
-                        self.RPC_REQUEST_METADATA_PREFIX + header[0].lower(), header[1])
+            if self._process_request_headers:
+                self.add_headers_to_span(self.RPC_REQUEST_METADATA_PREFIX, span, lowercased_headers)
             # Log rpc body if requested
-            if self.get_process_request_body():
+            if self._process_response_body:
                 request_body_str = str(request_body)
                 request_body_str = self.grab_first_n_bytes(request_body_str)
                 span.set_attribute(self.RPC_REQUEST_BODY_PREFIX,
                                    request_body_str)
-        except: # pylint: disable=W0702
+        except:  # pylint: disable=W0702
             logger.debug('An error occurred in genericRequestHandler: exception=%s, stacktrace=%s',
                          sys.exc_info()[0],
                          traceback.format_exc())
             # Not rethrowing to avoid causing runtime errors
         finally:
-            return span # pylint: disable=W0150
+            return span  # pylint: disable=W0150
 
     # Generic RPC Response Handler
     def generic_rpc_response_handler(self,
-                                     response_headers: tuple,
+                                     response_headers: dict,
                                      response_body,
                                      span: Span) -> Span:
         '''Add extended response rpc data to span'''
@@ -311,31 +198,30 @@ class BaseInstrumentorWrapper:
             'Entering BaseInstrumentationWrapper.genericRpcResponseHandler().')
         try:
             # is the span currently recording?
-            if span.is_recording():
-                logger.debug('Span is Recording!')
-            else:
+            if not span.is_recording():
                 return span
+
+            logger.debug('Span is Recording!')
+            lowercased_headers = self.lowercase_headers(response_headers)
             # Log rpc metadata if requested?
-            if self.get_process_response_headers():
+            if self._process_response_headers:
+
                 logger.debug('Dumping Response Headers:')
-                for header in response_headers:
-                    logger.debug(str(header))
-                    span.set_attribute(
-                        self.RPC_RESPONSE_METADATA_PREFIX + header[0].lower(), header[1])
+                self.add_headers_to_span(self.RPC_RESPONSE_METADATA_PREFIX, span, lowercased_headers)
             # Log rpc body if requested
-            if self.get_process_response_body():
+            if self._process_response_body:
                 response_body_str = str(response_body)
                 logger.debug('Processing response body')
                 response_body_str = self.grab_first_n_bytes(response_body_str)
                 span.set_attribute(
                     self.RPC_RESPONSE_BODY_PREFIX, response_body_str)
-        except: # pylint: disable=W0702
+        except:  # pylint: disable=W0702
             logger.debug('An error occurred in genericResponseHandler: exception=%s, stacktrace=%s',
                          sys.exc_info()[0],
                          traceback.format_exc())
             # Not rethrowing to avoid causing runtime errors
         finally:
-            return span # pylint: disable=W0150
+            return span  # pylint: disable=W0150
 
     # Check body size
     def check_body_size(self, body: str) -> bool:
@@ -343,7 +229,7 @@ class BaseInstrumentorWrapper:
         if body in (None, ''):
             return False
         body_len = len(body)
-        max_body_size = self.get_max_body_size()
+        max_body_size = self._max_body_size
         if max_body_size and body_len > max_body_size:
             logger.debug('message body size is greater than max size.')
             return True
@@ -354,7 +240,7 @@ class BaseInstrumentorWrapper:
         '''Return the first N (max_body_size) bytes of a request'''
         if body in (None, ''):
             return ''
-        if self.check_body_size(body): # pylint: disable=R1705
-            return body[0, self.get_max_body_size()]
+        if self.check_body_size(body):  # pylint: disable=R1705
+            return body[0, self._max_body_size]
         else:
             return body

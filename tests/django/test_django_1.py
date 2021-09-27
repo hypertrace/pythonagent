@@ -16,7 +16,7 @@ simpleExportSpanProcessor = SimpleSpanProcessor(memoryExporter)
 TEST_AGENT_INSTANCE.register_processor(simpleExportSpanProcessor)
 
 class SampleBlockingFilter(Filter):
-    def evaluate_url_and_headers(self, span: Span, url: str, headers: tuple) -> bool:
+    def evaluate_url_and_headers(self, span: Span, url: str, headers: dict) -> bool:
         return True
 
     def evaluate_body(self, span: Span, body) -> bool:
