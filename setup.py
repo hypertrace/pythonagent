@@ -37,6 +37,7 @@ setup(
         "opentelemetry-instrumentation-psycopg2==0.23b0",
         "opentelemetry-instrumentation-requests==0.23b0",
         "opentelemetry-instrumentation-grpc==0.23b0",
+        "opentelemetry-instrumentation-django==0.23b0",
         "opentelemetry-propagator-b3==1.4.0",
         "opentelemetry-sdk==1.4.0",
         "opentelemetry-util-http==0.23b0",

@@ -14,6 +14,7 @@ test-unit:
 test-integration:
 	@echo "Running integration tests over $(PY_TARGET) with LOG_LEVEL=$(LOG_LEVEL)" 
 	cd ${TEST_DIR}/flask; HT_LOG_LEVEL=${LOG_LEVEL} tox -e ${PY_TARGET}
+	cd ${TEST_DIR}/django; HT_LOG_LEVEL=${LOG_LEVEL} tox -e ${PY_TARGET}
 	cd ${TEST_DIR}/grpc; HT_LOG_LEVEL=${LOG_LEVEL} tox -e ${PY_TARGET}
 	cd ${TEST_DIR}/mysql; HT_LOG_LEVEL=${LOG_LEVEL} tox -e ${PY_TARGET}
 	cd ${TEST_DIR}/postgresql; HT_LOG_LEVEL=${LOG_LEVEL} tox -e ${PY_TARGET}
