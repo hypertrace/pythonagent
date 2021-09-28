@@ -8,8 +8,8 @@ from deprecated import deprecated
 import opentelemetry.trace as ot
 
 from hypertrace.agent.instrumentation.instrumentation_definitions import SUPPORTED_LIBRARIES, \
-    get_instrumentation_wrapper, REQUESTS_KEY, GRPC_CLIENT_KEY, DJANGO_KEY, MYSQL_KEY, GRPC_SERVER_KEY, POSTGRESQL_KEY, \
-    AIOHTTP_CLIENT_KEY, FLASK_KEY
+    get_instrumentation_wrapper, REQUESTS_KEY, GRPC_CLIENT_KEY, DJANGO_KEY, MYSQL_KEY, GRPC_SERVER_KEY, \
+    POSTGRESQL_KEY, AIOHTTP_CLIENT_KEY, FLASK_KEY
 from hypertrace.env_var_settings import get_env_value
 from hypertrace.agent.init import AgentInit
 from hypertrace.agent.config import AgentConfig
@@ -90,6 +90,7 @@ class Agent:
         self.register_library(library_key, wrapper_instance)
 
     def register_library(self, library_name, wrapper_instance):
+        """will configure settings on an instrumentation wrapper + apply"""
         logger.debug('attempting to register library instrumentation: %s', library_name)
         try:
             self._init.init_library_instrumentation(library_name, wrapper_instance)
@@ -127,32 +128,40 @@ class Agent:
 
     @deprecated(version=AGENT_INSTRUMENT_VERSION, reason=AGENT_INSTRUMENT_INSTEAD)
     def register_requests(self):
+        """just a proxy to support deprecated method for instrumenting requests"""
         self._instrument(REQUESTS_KEY)
 
     @deprecated(version=AGENT_INSTRUMENT_VERSION, reason=AGENT_INSTRUMENT_INSTEAD)
     def register_grpc_client(self):
+        """just a proxy to support deprecated method for instrumenting grpc_client"""
         self._instrument(GRPC_CLIENT_KEY)
 
     @deprecated(version=AGENT_INSTRUMENT_VERSION, reason=AGENT_INSTRUMENT_INSTEAD)
     def register_django(self):
+        """just a proxy to support deprecated method for instrumenting django"""
         self._instrument(DJANGO_KEY)
 
     @deprecated(version=AGENT_INSTRUMENT_VERSION, reason=AGENT_INSTRUMENT_INSTEAD)
     def register_mysql(self):
+        """just a proxy to support deprecated method for instrumenting mysql"""
         self._instrument(MYSQL_KEY)
 
     @deprecated(version=AGENT_INSTRUMENT_VERSION, reason=AGENT_INSTRUMENT_INSTEAD)
     def register_grpc_server(self):
+        """just a proxy to support deprecated method for instrumenting grpc server"""
         self._instrument(GRPC_SERVER_KEY)
 
     @deprecated(version=AGENT_INSTRUMENT_VERSION, reason=AGENT_INSTRUMENT_INSTEAD)
     def register_postgresql(self):
+        """just a proxy to support deprecated method for instrumenting postgresql"""
         self._instrument(POSTGRESQL_KEY)
 
     @deprecated(version=AGENT_INSTRUMENT_VERSION, reason=AGENT_INSTRUMENT_INSTEAD)
     def register_aiohttp_client(self):
+        """just a proxy to support deprecated method for instrumenting aiohttp"""
         self._instrument(AIOHTTP_CLIENT_KEY)
 
     @deprecated(version=AGENT_INSTRUMENT_VERSION, reason=AGENT_INSTRUMENT_INSTEAD)
     def register_flask_app(self, _app=None):
+        """just a proxy to support deprecated method for instrumenting flask"""
         self._instrument(FLASK_KEY)

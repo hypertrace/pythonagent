@@ -123,6 +123,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
         wrapper.set_body_max_size(data_cap.body_max_size_bytes)
 
     def init_library_instrumentation(self, instrumentation_name, instrumentation_class):
+        """used to configure instrumentation wrapper settings + apply instrumentation"""
         logger.debug("Attempting to initialize %s instrumentation", instrumentation_name)
         try:
             wrapper = instrumentation_class()
