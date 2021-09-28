@@ -1,9 +1,5 @@
 '''Hypertrace wrapper around OTel MySQL Instrumentor''' # pylint: disable=R0801
-import sys
-import os.path
 import logging
-import json
-import traceback
 from opentelemetry.instrumentation.mysql import MySQLInstrumentor
 from hypertrace.agent.instrumentation import BaseInstrumentorWrapper
 

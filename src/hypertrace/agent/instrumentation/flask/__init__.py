@@ -24,24 +24,6 @@ from hypertrace.agent.config import AgentConfig
 # Initialize logger
 logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
-
-
-# Dump metadata about an object; useful for initial discovery of interestin ginfo
-
-
-def introspect(obj) -> None:
-    '''Troubleshooting assistance function for inspecting new flask-related objects'''
-    logger.debug('Describing object.')
-    try:
-        for func in [type, id, dir, vars, callable]:
-            logger.debug("%s(%s):\t\t%s",
-                         func.__name__, introspect.__code__.co_varnames[0], func(obj))
-        logger.debug("%s: %s", func.__name__, inspect.getmembers(obj))
-    except:  # pylint: disable=W0702
-        logger.error('Error dumping object: exception=%s, stacktrace=%s',
-                     sys.exc_info()[0],
-                     traceback.format_exc())
-
 # Per request pre-handler
 def _hypertrace_before_request(flask_wrapper):
     '''This function is invoked by flask to set the handler'''

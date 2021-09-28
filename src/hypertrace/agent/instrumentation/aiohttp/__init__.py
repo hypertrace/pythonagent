@@ -25,19 +25,6 @@ logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
 # Max time to wait for response data to be read.
 MAX_WAIT_TIME = 0.1 # seconds
-# Object introspection, used for debugging purposes
-def introspect(obj) -> None:
-    '''Object introspection, used for debugging purposes'''
-    logger.debug('Describing object.')
-    try:
-        for func in [type, id, dir, vars, callable]:
-            logger.debug("%s(%s):\t\t%s",
-                         func.__name__, introspect.__code__.co_varnames[0], func(obj))
-        logger.debug("%s: %s", func.__name__, inspect.getmembers(obj))
-    except Exception as err: # pylint: disable=W0703
-        logger.error('No data to display, exception=%s, stacktrace=%s',
-                     err,
-                     traceback.print_exc())
 
 # aiohttp-client instrumentation module wrapper class
 class AioHttpClientInstrumentorWrapper(AioHttpClientInstrumentor, BaseInstrumentorWrapper):

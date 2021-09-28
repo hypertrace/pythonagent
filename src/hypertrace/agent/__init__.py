@@ -6,6 +6,8 @@ from contextlib import contextmanager
 
 import opentelemetry.trace as ot
 
+from hypertrace.agent.instrumentation.instrumentation_definitions import SUPPORTED_LIBRARIES, \
+    get_instrumentation_wrapper
 from hypertrace.env_var_settings import get_env_value
 from hypertrace.agent.init import AgentInit
 from hypertrace.agent.config import AgentConfig
@@ -62,117 +64,45 @@ class Agent:
         finally:
             self._init.apply_config(self._config)
 
-    def register_django(self) -> None:
-        '''Register the django instrumentation module wrapper'''
-        logger.debug('Calling Agent.register_django.')
+    def instrument(self, skip_libraries: []):
+        '''used to register applicable instrumentation wrappers'''
         if not self.is_initialized():
+            logger.debug('agent is not initialized, not instrumenting')
             return
-        try:
-            self._init.init_instrumentation_django()
-            self._init.dump_config()
-        except Exception as err:  # pylint: disable=W0703
-            logger.debug(constants.EXCEPTION_MESSAGE,
-                         'Django',
-                         err,
-                         traceback.format_exc())
 
-    def register_flask_app(self, app = None) -> None:
-        '''Register the flask instrumentation module wrapper'''
-        logger.debug('Calling Agent.register_flask_app.')
-        if not self.is_initialized():
-            return
-        try:
-            self._init.init_instrumentation_flask(app)
-            self._init.dump_config()
-        except Exception as err:  # pylint: disable=W0703
-            logger.debug(constants.EXCEPTION_MESSAGE,
-                         'flask',
-                         err,
-                         traceback.format_exc())
+        for library_key in SUPPORTED_LIBRARIES:
+            if library_key in skip_libraries:
+                logger.debug('not attempting to instrument %s', library_key)
+                continue
+            wrapper_instance = get_instrumentation_wrapper(library_key)
+            self.register_library(library_key, wrapper_instance)
 
-    def register_grpc_server(self) -> None:
-        '''Register the grpc:server instrumentation module wrapper'''
-        logger.debug('Calling Agent.register_server_grpc().')
-        if not self.is_initialized():
-            return
-        try:
-            self._init.init_instrumentation_grpc_server()
-            self._init.dump_config()
-        except Exception as err:  # pylint: disable=W0703
-            logger.debug(constants.EXCEPTION_MESSAGE,
-                         'grpc:server',
-                         err,
-                         traceback.format_exc())
 
-    def register_grpc_client(self) -> None:
-        '''Register the grpc:client instrumentation module wrapper'''
-        logger.debug('Calling Agent.register_client_grpc().')
-        if not self.is_initialized():
-            return
+    def register_library(self, library_name, wrapper_instance) -> bool:
+        logger.debug('attempting to register library instrumentation: %s', library_name)
         try:
-            self._init.init_instrumentation_grpc_client()
-            self._init.dump_config()
+            self._init.init_library_instrumentation(library_name, wrapper_instance)
+            return True
         except Exception as err:  # pylint: disable=W0703
             logger.debug(constants.EXCEPTION_MESSAGE,
-                         'grpc:client',
+                         library_name,
                          err,
                          traceback.format_exc())
+            return False
 
-    def register_mysql(self) -> None:
-        '''Register the mysql instrumentation module wrapper'''
-        logger.debug('Calling Agent.register_mysql().')
-        if not self.is_initialized():
-            return
-        try:
-            self._init.init_instrumentation_mysql()
-            self._init.dump_config()
-        except Exception as err:  # pylint: disable=W0703
-            logger.debug(constants.EXCEPTION_MESSAGE,
-                         'mysql',
-                         err,
-                         traceback.format_exc())
-
-    def register_postgresql(self) -> None:
-        '''Register the postgresql instrumentation module wrapper'''
-        logger.debug('Calling Agent.register_postgresql().')
-        if not self.is_initialized():
-            return
-        try:
-            self._init.init_instrumentation_postgresql()
-            self._init.dump_config()
-        except Exception as err:  # pylint: disable=W0703
-            logger.debug(constants.EXCEPTION_MESSAGE,
-                         'postgresql',
-                         err,
-                         traceback.format_exc())
-
-    def register_requests(self) -> None:
-        '''Register the requests instrumentation module wrapper'''
-        logger.debug('Calling Agent.register_requests()')
-        if not self.is_initialized():
-            return
-        try:
-            self._init.init_instrumentation_requests()
-            self._init.dump_config()
-        except Exception as err:  # pylint: disable=W0703
-            logger.debug(constants.EXCEPTION_MESSAGE,
-                         'requests',
-                         err,
-                         traceback.format_exc())
-
-    def register_aiohttp_client(self) -> None:
-        '''Register the aiohttp-client instrumentation module wrapper'''
-        logger.debug('Calling Agent.register_aiohttp_client().')
-        if not self.is_initialized():
-            return
-        try:
-            self._init.aiohttp_client_init()
-            self._init.dump_config()
-        except Exception as err:  # pylint: disable=W0703
-            logger.debug(constants.EXCEPTION_MESSAGE,
-                         'aiohttp_client',
-                         err,
-                         traceback.format_exc())
+    # def register_flask_app(self, app = None) -> None:
+    #     '''Register the flask instrumentation module wrapper'''
+    #     logger.debug('Calling Agent.register_flask_app.')
+    #     if not self.is_initialized():
+    #         return
+    #     try:
+    #         self._init.init_instrumentation_flask(app)
+    #         self._init.dump_config()
+    #     except Exception as err:  # pylint: disable=W0703
+    #         logger.debug(constants.EXCEPTION_MESSAGE,
+    #                      'flask',
+    #                      err,
+    #                      traceback.format_exc())
 
     def register_processor(self, processor) -> None:  # pylint: disable=R1710
         '''Add additional span exporters + processors'''
