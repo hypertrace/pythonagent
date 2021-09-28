@@ -41,7 +41,7 @@ setup(
         "opentelemetry-propagator-b3==1.4.0",
         "opentelemetry-sdk==1.4.0",
         "opentelemetry-util-http==0.23b0",
-        "deprecated==1.2.12"
+        "deprecated==1.2.12",
         "google>=3.0.0",
         "pyyaml",
         "protobuf>=3.15.8"
