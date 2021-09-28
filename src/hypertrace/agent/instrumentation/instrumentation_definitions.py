@@ -1,6 +1,3 @@
-# Define instrumentation unique keys here
-from hypertrace.agent import AgentInit
-
 FLASK_KEY = 'flask'
 DJANGO_KEY = 'Django'
 GRPC_SERVER_KEY = 'grpc:server'
@@ -17,6 +14,7 @@ SUPPORTED_LIBRARIES = [
     REQUESTS_KEY, AIOHTTP_CLIENT_KEY
 ]
 
+REGISTERED_LIBRARIES = {}
 
 def get_instrumentation_wrapper(library_key):
     # TODO add flask
@@ -24,6 +22,9 @@ def get_instrumentation_wrapper(library_key):
     if DJANGO_KEY == library_key:
         from hypertrace.agent.instrumentation.django import DjangoInstrumentationWrapper
         return DjangoInstrumentationWrapper()
+    elif FLASK_KEY == library_key:
+        from hypertrace.agent.instrumentation.flask import FlaskInstrumentorWrapper
+        return FlaskInstrumentorWrapper()
     elif GRPC_SERVER_KEY == library_key:
         from hypertrace.agent.instrumentation.grpc import GrpcInstrumentorServerWrapper
         return GrpcInstrumentorServerWrapper()
