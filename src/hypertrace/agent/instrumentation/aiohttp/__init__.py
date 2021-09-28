@@ -116,8 +116,6 @@ def create_trace_config(
             params: aiohttp.TraceRequestEndParams,
     ) -> None:
         logger.debug('Entering hypertrace on_request_end().')
-        logger.debug('request headers: %s', str(params.headers))
-        logger.debug('response headers: %s', str(params.response.headers))
         # utf8_decoder = codecs.getincrementaldecoder('utf-8')
         response_body = b''
         if hasattr(params.response, 'content') \
@@ -151,19 +149,13 @@ def create_trace_config(
         request_body = ''
         if hasattr(trace_config_ctx, 'request_body') and trace_config_ctx.request_body is not None:
             request_body = trace_config_ctx.request_body
-            logger.debug('request_body: %s', request_body)
         span = trace.get_current_span()
-        logger.debug('Found span: %s', str(span))
         # Add headers & body to span
         if span.is_recording():
-            request_headers = [
-                (k, v) for k, v in params.headers.items()]  # pylint: disable=R1721
             aiohttp_client_wrapper.generic_request_handler(
-                request_headers, request_body, span)
-            response_headers = [(k, v)
-                                for k, v in params.response.headers.items()]  # pylint: disable=R1721
+                params.headers, request_body, span)
             aiohttp_client_wrapper.generic_response_handler(
-                response_headers, response_body, span)
+                params.response.headers, response_body, span)
         trace_config_ctx.end_callback_called = True
         trace_config_ctx.span = span
 

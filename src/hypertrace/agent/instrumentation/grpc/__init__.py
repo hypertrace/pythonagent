@@ -148,8 +148,6 @@ class _OpenTelemetryWrapperServicerContext(_server._OpenTelemetryServicerContext
         Allows us to capture the response headers"""
         logger.debug(
             'Entering _OpenTelemetryWrapperServicerContext.set_trailing_metadata().')
-        logger.debug('Span Object: %s', str(self._active_span))
-        logger.debug('Response Headers: %s', str(args))
         self._response_headers = args
         return self._servicer_context.set_trailing_metadata(*args, **kwargs)
 
@@ -191,13 +189,10 @@ class OpenTelemetryServerInterceptorWrapper(_server.OpenTelemetryServerIntercept
                         request_or_iterator,
                         context,
                     )
-                logger.debug('Span Object: %s', str(context._active_span)) # pylint: disable=W0212
-                span = context._active_span # pylint: disable=W0212
-                logger.debug('Request Metadata: %s',
-                             str(handler_call_details.invocation_metadata))
-                logger.debug('Request Body: %s', str(request_or_iterator))
 
-                invocation_metadata = handler_call_details.invocation_metadata
+                span = context._active_span # pylint: disable=W0212
+
+                invocation_metadata = dict(handler_call_details.invocation_metadata)
 
                 self._gisw.generic_rpc_request_handler(
                     invocation_metadata, request_or_iterator, span)
@@ -214,13 +209,11 @@ class OpenTelemetryServerInterceptorWrapper(_server.OpenTelemetryServerIntercept
                     context = _OpenTelemetryWrapperServicerContext(
                         context, span)
                     response = behavior(request_or_iterator, context)
-                    logger.debug('Response Body: %s', str(response))
-                    logger.debug('Response Headers: %s',
-                                 str(context.get_trailing_metadata()))
                     trailing_metadata = context.get_trailing_metadata()
+                    trailing_metadata = dict(trailing_metadata[0])
                     if len(trailing_metadata) > 0:
                         self._gisw.generic_rpc_response_handler(
-                            trailing_metadata[0], response, span)
+                            trailing_metadata, response, span)
 
                     return response
                 except Exception as error: # pylint: disable=W0703
@@ -261,10 +254,7 @@ class OpenTelemetryClientInterceptorWrapper(_client.OpenTelemetryClientIntercept
             'Entering OpenTelemetryClientInterceptorWrapper.intercept_unary().')
         try:
             # Not sure how to obtain span object here
-            logger.debug('request: %s', str(request))
-            logger.debug('metadata: %s', str(metadata))
-            result = invoker(request, metadata)
-            logger.debug('result: %s', str(result))
+            result = invoker(request, metadata)  # pylint:disable=W0612
             # Not sure how to obtain trailing metadata here
         except grpc.RpcError as err:
             logger.error(constants.INST_RUNTIME_EXCEPTION_MSSG,

@@ -59,13 +59,11 @@ def _hypertrace_before_request(flask_wrapper):
             request_headers = flask.request.headers
             # Pull message body
             request_body = flask.request.data       # same
-            logger.debug('span: %s', str(span))
 
             span.update_name(str(flask.request.method) + ' ' + str(flask.request.url_rule))
 
             # Call base request handler
-            flask_wrapper.generic_request_handler(
-                request_headers, request_body, span)
+            flask_wrapper.generic_request_handler(request_headers, request_body, span)
 
             block_result = Registry().apply_filters(span,
                                                     flask.request.url,
@@ -102,8 +100,6 @@ def _hypertrace_after_request(flask_wrapper) -> flask.wrappers.Response:
             # dont extract response content if body is a file
             if not response.direct_passthrough:
                 response_body = response.data
-
-            logger.debug('Span: %s', str(span))
 
             # Call base response handler
             flask_wrapper.generic_response_handler(

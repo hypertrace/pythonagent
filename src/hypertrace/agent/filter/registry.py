@@ -25,7 +25,7 @@ class Registry:
         instance = filter_class()
         self.filters.append(instance)
 
-    def apply_filters(self, span: Span, url: Union[str, None], headers: tuple, body) -> bool:
+    def apply_filters(self, span: Span, url: Union[str, None], headers: dict, body) -> bool:
         '''Apply all registered filters'''
         if url or headers:
             for filter_instance in self.filters:
