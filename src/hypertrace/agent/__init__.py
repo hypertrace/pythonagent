@@ -15,7 +15,7 @@ from hypertrace.agent.init import AgentInit
 from hypertrace.agent.config import AgentConfig
 from hypertrace.agent import constants
 from hypertrace.agent import custom_logger
-
+from hypertrace.version import __version__
 # The Hypertrace Python Agent class
 
 logger = custom_logger.get_custom_logger(__name__)
