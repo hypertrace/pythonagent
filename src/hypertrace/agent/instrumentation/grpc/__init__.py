@@ -1,20 +1,13 @@
-'''Hypertrace wrapper around OTel Flask instrumentor'''
-import sys
-import os.path
+'''Hypertrace wrapper around OTel GRPC instrumentor'''
 import logging
-import inspect
-import json
 import traceback
-from contextlib import contextmanager
-import flask
 import grpc
-from opentelemetry import propagators, trace
+from opentelemetry import trace
 from opentelemetry.instrumentation.grpc import (
     GrpcInstrumentorServer,
     GrpcInstrumentorClient,
     _server,
     _client,
-    server_interceptor
 )
 from opentelemetry.instrumentation.grpc.version import __version__
 from opentelemetry.instrumentation.grpc.grpcext import intercept_channel

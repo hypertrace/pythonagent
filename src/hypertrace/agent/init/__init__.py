@@ -27,16 +27,6 @@ class AgentInit:  # pylint: disable=R0902,R0903
         '''constructor'''
         logger.debug('Initializing AgentInit object.')
         self._config = agent_config
-        self._modules_initialized = {
-            "Django": False,
-            "flask": False,
-            "grpc:server": False,
-            "grpc:client": False,
-            "mysql": False,
-            "postgresql": False,
-            "requests": False,
-            "aiohttp_client": False
-        }
 
         # Only available in python > 3.7
         # this does prevent user from having to add post fork hooks to their
@@ -47,14 +37,6 @@ class AgentInit:  # pylint: disable=R0902,R0903
 
         try:
             self.apply_config(None)
-
-            self._flask_instrumentor_wrapper = None
-            self._grpc_instrumentor_client_wrapper = None
-            self._grpc_instrumentor_server_wrapper = None
-            self._mysql_instrumentor_wrapper = None
-            self._postgresql_instrumentor_wrapper = None
-            self._requests_instrumentor_wrapper = None
-            self._aiohttp_client_instrumentor_wrapper = None
 
         except Exception as err:  # pylint: disable=W0703
             logger.error('Failed to initialize tracer: exception=%s, stacktrace=%s',
@@ -132,12 +114,6 @@ class AgentInit:  # pylint: disable=R0902,R0903
         composite_propagators = CompositePropagator(propagator_list)
         set_global_textmap(composite_propagators)
 
-    def dump_config(self) -> None:
-        '''dump the current state of AgentInit.'''
-        logger.debug('Calling DumpConfig().')
-        for mod in self._modules_initialized:
-            logger.debug('%s : %s', mod, str(self._modules_initialized[mod]))
-
     def _set_wrapper_fields(self, wrapper):
         data_cap = self._config.agent_config.data_capture
         wrapper.set_process_request_headers(data_cap.http_headers.request)
@@ -149,57 +125,12 @@ class AgentInit:  # pylint: disable=R0902,R0903
     def init_library_instrumentation(self, instrumentation_name, instrumentation_class):
         logger.debug("Attempting to initialize %s instrumentation", instrumentation_name)
         try:
-            if self.is_registered(instrumentation_name):
-                return
-            self._modules_initialized[instrumentation_name] = True
             wrapper = instrumentation_class()
             self._set_wrapper_fields(wrapper)
             wrapper.instrument()
         except Exception as err: # pylint: disable=W0703
             logger.debug(constants.INST_WRAP_EXCEPTION_MSSG,
                          instrumentation_name,
-                         err,
-                         traceback.format_exc())
-
-    # Creates a flask wrapper using the config defined in hypertraceconfig
-    def init_instrumentation_flask(self, app) -> None:
-        '''Creates a flask instrumentation wrapper using the config defined in hypertraceconfig'''
-        logger.debug('Calling AgentInit.flaskInit().')
-        try:
-            if self.is_registered('flask'):
-                return
-            from hypertrace.agent.instrumentation.flask import FlaskInstrumentorWrapper  # pylint: disable=C0415
-            self._modules_initialized['flask'] = True
-            self._flask_instrumentor_wrapper = FlaskInstrumentorWrapper()
-            call_default_instrumentor = True
-            # There are two ways to initialize the flask instrumenation
-            # wrapper. The first (and original way) instruments the specific
-            # Flask object that is passed in). The second way is to globally
-            # replace the Flask class definition with the hypertrace instrumentation
-            # wrapper class.
-            #
-            # If an app object is provided, then the flask wrapper is initialized
-            # by calling the instrument_app method. Then, there is no need to call
-            # instrument() (so, we pass False as the second argument to
-            # self.init_instrumentor_wrapper_base_for_http().
-            #
-            # If no app object was provided, then instrument() is called.
-
-            from hypertrace.agent.instrumentation.flask import _hypertrace_before_request # pylint: disable=C0415
-            from hypertrace.agent.instrumentation.flask import _hypertrace_after_request # pylint: disable=C0415
-            before_hook = _hypertrace_before_request(self._flask_instrumentor_wrapper)
-            after_hook = _hypertrace_after_request(self._flask_instrumentor_wrapper)
-            if app:
-                FlaskInstrumentorWrapper.instrument_app(app)
-                call_default_instrumentor = False
-                app.before_request(before_hook)
-                app.after_request(after_hook)
-            self._set_wrapper_fields(self._flask_instrumentor_wrapper)
-            if call_default_instrumentor:
-                self._flask_instrumentor_wrapper.instrument()
-        except Exception as err:  # pylint: disable=W0703
-            logger.debug(constants.INST_WRAP_EXCEPTION_MSSG,
-                         'flask',
                          err,
                          traceback.format_exc())
 
@@ -229,7 +160,6 @@ class AgentInit:  # pylint: disable=R0902,R0903
             else:
                 logger.error("Unknown exporter type `%s`", trace_reporter_type)
 
-
             span_processor = BatchSpanProcessor(exporter)
             trace.get_tracer_provider().add_span_processor(span_processor)
 
@@ -240,7 +170,3 @@ class AgentInit:  # pylint: disable=R0902,R0903
             logger.error('Failed to initialize Zipkin exporter: exception=%s, stacktrace=%s',
                          err,
                          traceback.format_exc())
-
-    def is_registered(self, module: str) -> bool:
-        '''Is an instrumentation module already registered?'''
-        return self._modules_initialized.get(module, False)

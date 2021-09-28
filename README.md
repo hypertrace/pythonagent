@@ -44,31 +44,29 @@ from hypertrace.agent import Agent
 agent = Agent() # initialize the agent
 
 # Instrument libraries that are used within your application
-agent.register_flask_app(app)   # instrument a flask application
-agent.register_django()         # instrument a Django application
-agent.register_mysql()          # instrument the MySQL client
-agent.register_postgresql()     # instrument the postgres client
-agent.register_grpc_server()    # instrument a grpc server
-agent.register_grpc_client()    # instrument a grpc client
-agent.register_requests()       # instrument the requests library
-agent.register_aiohttp_client() # instrument an aiohttp client
+agent.instrument()
+
+# if there are libraries you want to opt out of instrumentation for, you can pass an array of library keys
+# the full list of opt out library keys can be found here: 
+# src/hypertrace/agent/instrumentation/instrumentation_definitions.py
+agent.instrument(['flask', 'mysql'])
 ...
 ```
 
-_Note: The `HT_INSTRUMENTED_MODULES` environment variable does not have any effect for manual instrumentation_
+_Note: The `HT_SKIP_MODULES` environment variable does not have any effect for manual instrumentation_
 
 ### Autoinstrumentation
 Hypertrace provides a CLI that will instrument the code without code modification
 
 ```
-HT_INSTRUMENTED_MODULES=flask,mysql
+HT_SKIP_MODULES=flask,mysql
 hypertrace-instrument python app.py
 ```
 
 By default, all supported modules are instrumented.
 
-When using auto instrumentation you can use the `HT_INSTRUMENTED_MODULES` environment variable to limit which modules are instrumented.
-In the above example, only flask and mysql would be instrumented.
+When using auto instrumentation you can use the `HT_SKIP_MODULES` environment variable to limit which modules are instrumented.
+In the above example, flask and mysql would not be instrumented
 
 For further examples, check our [examples section](./examples)
 
