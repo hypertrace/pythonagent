@@ -108,9 +108,10 @@ def exit_callback():
             span_list = memoryExporter.get_finished_spans()
             # Confirm something was returned.
             assert span_list
-            # Confirm there are three spans
+
             logger.debug('len(span_list): ' + str(len(span_list)))
-            assert len(span_list) == 1
+            # 1 span for server + 1 span for client
+            assert len(span_list) == 2
             logger.debug('span_list: ' + str(span_list[0].attributes))
             flaskSpanAsObject = json.loads(span_list[0].to_json())
             # Check that the expected results are in the flask extended span attributes
