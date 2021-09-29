@@ -39,17 +39,19 @@ pip install hypertrace-agent
 ```python
 from hypertrace.agent import Agent
 
-...
-
 agent = Agent() # initialize the agent
 
-# Instrument libraries that are used within your application
-agent.instrument()
+# Instrument a specific flask app + any other applicable libraries
+agent.instrument(app)
 
-# if there are libraries you want to opt out of instrumentation for, you can pass an array of library keys
-# the full list of opt out library keys can be found here: 
-# src/hypertrace/agent/instrumentation/instrumentation_definitions.py
-agent.instrument(['flask', 'mysql'])
+# Instrument a flask app, additional libraries, except for mysql
+# the second arg tells the agent to skip these specific libraries from being instrumented
+agent.instrument(app, ['mysql'])
+
+
+# if you aren't using flask, you can pass None
+# and still provide skip libraries if needed
+agent.instrument(None, ['flask', 'mysql'])
 ...
 ```
 
