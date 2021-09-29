@@ -68,8 +68,10 @@ class Agent:
         finally:
             self._init.apply_config(self._config)
 
-    def instrument(self, app=None, skip_libraries=[]):
+    def instrument(self, app=None, skip_libraries=None):
         '''used to register applicable instrumentation wrappers'''
+        if skip_libraries is None:
+            skip_libraries = []
         if not self.is_initialized():
             logger.debug('agent is not initialized, not instrumenting')
             return

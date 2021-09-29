@@ -123,18 +123,20 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
         self._app = None
 
     def with_app(self, app=None):
+        """when instrumenting via code we need to instrument
+        the app directly, this is conditionally called from agent.instrument"""
         self._app = app
 
     def instrument(self, **kwargs):
         if self._app:
-            from hypertrace.agent.instrumentation.flask import _hypertrace_before_request  # pylint: disable=C0415
-            from hypertrace.agent.instrumentation.flask import _hypertrace_after_request  # pylint: disable=C0415
+            # code based instrumentation
             before_hook = _hypertrace_before_request(self)
             after_hook = _hypertrace_after_request(self)
             FlaskInstrumentorWrapper.instrument_app(self._app)
             self._app.before_request(before_hook)
             self._app.after_request(after_hook)
         else:
+            # auto instrumentation
             super().instrument()
 
 
