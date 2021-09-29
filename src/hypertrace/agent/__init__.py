@@ -68,24 +68,37 @@ class Agent:
         finally:
             self._init.apply_config(self._config)
 
-    def instrument(self, skip_libraries: []):
+    def instrument(self, app=None, skip_libraries=[]):
         '''used to register applicable instrumentation wrappers'''
         if not self.is_initialized():
             logger.debug('agent is not initialized, not instrumenting')
             return
+
 
         for library_key in SUPPORTED_LIBRARIES:
             if library_key in skip_libraries:
                 logger.debug('not attempting to instrument %s', library_key)
                 continue
 
-            self._instrument(library_key)
+            self._instrument(library_key, app)
 
-    def _instrument(self, library_key):
+    def _instrument(self, library_key, app=None):
         """only used to allow the deprecated register_x library methods to still work"""
         wrapper_instance = get_instrumentation_wrapper(library_key)
         if wrapper_instance is None:
             return
+
+        # Flask is a special case compared to rest of instrumentation
+        # using hypertrace-instrument we can replace flask class def before app is initialized
+        # however during code based instr we wrap the existing app
+        # since replacing class def after app is initialized doesnt have an effect
+        # the user has to pass the app in to agent.instrument()
+        # we could resolve this edge case by instead having users directly add the middleware
+        # ex: app = Flask();
+        # app = HypertraceMiddleware(App) => this in turn does agent.instrument()
+        # + we have ref to app
+        if library_key == FLASK_KEY and app is not None:
+            wrapper_instance.with_app(app)
 
         self.register_library(library_key, wrapper_instance)
 
@@ -162,6 +175,6 @@ class Agent:
         self._instrument(AIOHTTP_CLIENT_KEY)
 
     @deprecated(version=AGENT_INSTRUMENT_VERSION, reason=AGENT_INSTRUMENT_INSTEAD)
-    def register_flask_app(self, _app=None):
+    def register_flask_app(self, app=None):
         """just a proxy to support deprecated method for instrumenting flask"""
-        self._instrument(FLASK_KEY)
+        self._instrument(AIOHTTP_CLIENT_KEY, app)

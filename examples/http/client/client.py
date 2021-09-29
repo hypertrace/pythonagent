@@ -6,7 +6,7 @@ import json
 import logging
 
 agent = Agent()
-agent.register_aiohttp_client()
+agent.instrument()
 
 logging.basicConfig()
 logging.getLogger().setLevel(logging.DEBUG)

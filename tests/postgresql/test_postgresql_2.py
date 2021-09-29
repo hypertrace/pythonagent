@@ -101,8 +101,7 @@ def test_run():
   #
   logger.info('Initializing agent.')
   agent = Agent()
-  agent.register_flask_app(app)
-  agent.register_postgresql() 
+  agent.instrument(app)
   #
   # End initialization logic for Python Agent
   #

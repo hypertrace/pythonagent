@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 #
 logger.info('Initializing agent.')
 agent = Agent()
-agent.register_grpc_client()
+agent.instrument()
 logger.info('Agent initialized.')
 #
 # End initialization logic for Python Agent

@@ -122,13 +122,12 @@ class AgentInit:  # pylint: disable=R0902,R0903
         wrapper.set_process_response_body(data_cap.http_body.response)
         wrapper.set_body_max_size(data_cap.body_max_size_bytes)
 
-    def init_library_instrumentation(self, instrumentation_name, instrumentation_class):
+    def init_library_instrumentation(self, instrumentation_name, wrapper_instance):
         """used to configure instrumentation wrapper settings + apply instrumentation"""
         logger.debug("Attempting to initialize %s instrumentation", instrumentation_name)
         try:
-            wrapper = instrumentation_class()
-            self._set_wrapper_fields(wrapper)
-            wrapper.instrument()
+            self._set_wrapper_fields(wrapper_instance)
+            wrapper_instance.instrument()
         except Exception as err: # pylint: disable=W0703
             logger.debug(constants.INST_WRAP_EXCEPTION_MSSG,
                          instrumentation_name,

@@ -122,6 +122,22 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
         super().__init__()
         self._app = None
 
+    def with_app(self, app=None):
+        self._app = app
+
+    def instrument(self, **kwargs):
+        if self._app:
+            from hypertrace.agent.instrumentation.flask import _hypertrace_before_request  # pylint: disable=C0415
+            from hypertrace.agent.instrumentation.flask import _hypertrace_after_request  # pylint: disable=C0415
+            before_hook = _hypertrace_before_request(self)
+            after_hook = _hypertrace_after_request(self)
+            FlaskInstrumentorWrapper.instrument_app(self._app)
+            self._app.before_request(before_hook)
+            self._app.after_request(after_hook)
+        else:
+            super().instrument()
+
+
     def _instrument(self, **kwargs):
         '''Override OTel method that sets up global flask instrumentation'''
         self._original_flask = flask.Flask # pylint: disable = W0201

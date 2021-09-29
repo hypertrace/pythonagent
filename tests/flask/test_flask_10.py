@@ -117,7 +117,7 @@ def test_run():
     registry = Registry()
     registry.register(SampleBlockingFilter)
 
-    agent.register_flask_app(app)
+    agent.instrument(app)
     #
     # End initialization logic for Python Agent
     #

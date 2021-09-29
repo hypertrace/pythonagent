@@ -72,7 +72,7 @@ logger.info('Initializing agent.')
 agent = Agent()
 registry = Registry().register(SampleBlockingFilter)
 
-agent.register_grpc_server()
+agent.instrument()
 logger.info('Agent initialized.')
 #
 # End initialization logic for Python Agent
