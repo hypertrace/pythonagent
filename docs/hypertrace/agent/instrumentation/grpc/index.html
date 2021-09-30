@@ -177,8 +177,6 @@ class _OpenTelemetryWrapperServicerContext(_server._OpenTelemetryServicerContext
         Allows us to capture the response headers&#34;&#34;&#34;
         logger.debug(
             &#39;Entering _OpenTelemetryWrapperServicerContext.set_trailing_metadata().&#39;)
-        logger.debug(&#39;Span Object: %s&#39;, str(self._active_span))
-        logger.debug(&#39;Response Headers: %s&#39;, str(args))
         self._response_headers = args
         return self._servicer_context.set_trailing_metadata(*args, **kwargs)
 
@@ -220,13 +218,10 @@ class OpenTelemetryServerInterceptorWrapper(_server.OpenTelemetryServerIntercept
                         request_or_iterator,
                         context,
                     )
-                logger.debug(&#39;Span Object: %s&#39;, str(context._active_span)) # pylint: disable=W0212
-                span = context._active_span # pylint: disable=W0212
-                logger.debug(&#39;Request Metadata: %s&#39;,
-                             str(handler_call_details.invocation_metadata))
-                logger.debug(&#39;Request Body: %s&#39;, str(request_or_iterator))
 
-                invocation_metadata = handler_call_details.invocation_metadata
+                span = context._active_span # pylint: disable=W0212
+
+                invocation_metadata = dict(handler_call_details.invocation_metadata)
 
                 self._gisw.generic_rpc_request_handler(
                     invocation_metadata, request_or_iterator, span)
@@ -243,13 +238,11 @@ class OpenTelemetryServerInterceptorWrapper(_server.OpenTelemetryServerIntercept
                     context = _OpenTelemetryWrapperServicerContext(
                         context, span)
                     response = behavior(request_or_iterator, context)
-                    logger.debug(&#39;Response Body: %s&#39;, str(response))
-                    logger.debug(&#39;Response Headers: %s&#39;,
-                                 str(context.get_trailing_metadata()))
                     trailing_metadata = context.get_trailing_metadata()
+                    trailing_metadata = dict(trailing_metadata[0])
                     if len(trailing_metadata) &gt; 0:
                         self._gisw.generic_rpc_response_handler(
-                            trailing_metadata[0], response, span)
+                            trailing_metadata, response, span)
 
                     return response
                 except Exception as error: # pylint: disable=W0703
@@ -290,10 +283,7 @@ class OpenTelemetryClientInterceptorWrapper(_client.OpenTelemetryClientIntercept
             &#39;Entering OpenTelemetryClientInterceptorWrapper.intercept_unary().&#39;)
         try:
             # Not sure how to obtain span object here
-            logger.debug(&#39;request: %s&#39;, str(request))
-            logger.debug(&#39;metadata: %s&#39;, str(metadata))
-            result = invoker(request, metadata)
-            logger.debug(&#39;result: %s&#39;, str(result))
+            result = invoker(request, metadata)  # pylint:disable=W0612
             # Not sure how to obtain trailing metadata here
         except grpc.RpcError as err:
             logger.error(constants.INST_RUNTIME_EXCEPTION_MSSG,
@@ -462,26 +452,20 @@ class OpenTelemetryClientInterceptorWrapper(_client.OpenTelemetryClientIntercept
 <ul class="hlist">
 <li><code><b><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper">BaseInstrumentorWrapper</a></b></code>:
 <ul class="hlist">
+<li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.add_headers_to_span" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.add_headers_to_span">add_headers_to_span</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.check_body_size" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.check_body_size">check_body_size</a></code></li>
+<li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.eligible_based_on_content_type" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.eligible_based_on_content_type">eligible_based_on_content_type</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.generic_request_handler" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.generic_request_handler">generic_request_handler</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.generic_response_handler" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.generic_response_handler">generic_response_handler</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.generic_rpc_request_handler" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.generic_rpc_request_handler">generic_rpc_request_handler</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.generic_rpc_response_handler" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.generic_rpc_response_handler">generic_rpc_response_handler</a></code></li>
-<li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_max_body_size" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_max_body_size">get_max_body_size</a></code></li>
-<li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_process_request_body" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_process_request_body">get_process_request_body</a></code></li>
-<li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_process_request_headers" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_process_request_headers">get_process_request_headers</a></code></li>
-<li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_process_response_body" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_process_response_body">get_process_response_body</a></code></li>
-<li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_process_response_headers" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_process_response_headers">get_process_response_headers</a></code></li>
-<li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_service_name" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_service_name">get_service_name</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.grab_first_n_bytes" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.grab_first_n_bytes">grab_first_n_bytes</a></code></li>
-<li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.introspect" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.introspect">introspect</a></code></li>
-<li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.is_interesting_content_type" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.is_interesting_content_type">is_interesting_content_type</a></code></li>
+<li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.lowercase_headers" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.lowercase_headers">lowercase_headers</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_body_max_size" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_body_max_size">set_body_max_size</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_process_request_body" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_process_request_body">set_process_request_body</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_process_request_headers" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_process_request_headers">set_process_request_headers</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_process_response_body" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_process_response_body">set_process_response_body</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_process_response_headers" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_process_response_headers">set_process_response_headers</a></code></li>
-<li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_service_name" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_service_name">set_service_name</a></code></li>
 </ul>
 </li>
 </ul>
@@ -582,26 +566,20 @@ class OpenTelemetryClientInterceptorWrapper(_client.OpenTelemetryClientIntercept
 <ul class="hlist">
 <li><code><b><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper">BaseInstrumentorWrapper</a></b></code>:
 <ul class="hlist">
+<li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.add_headers_to_span" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.add_headers_to_span">add_headers_to_span</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.check_body_size" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.check_body_size">check_body_size</a></code></li>
+<li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.eligible_based_on_content_type" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.eligible_based_on_content_type">eligible_based_on_content_type</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.generic_request_handler" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.generic_request_handler">generic_request_handler</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.generic_response_handler" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.generic_response_handler">generic_response_handler</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.generic_rpc_request_handler" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.generic_rpc_request_handler">generic_rpc_request_handler</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.generic_rpc_response_handler" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.generic_rpc_response_handler">generic_rpc_response_handler</a></code></li>
-<li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_max_body_size" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_max_body_size">get_max_body_size</a></code></li>
-<li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_process_request_body" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_process_request_body">get_process_request_body</a></code></li>
-<li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_process_request_headers" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_process_request_headers">get_process_request_headers</a></code></li>
-<li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_process_response_body" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_process_response_body">get_process_response_body</a></code></li>
-<li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_process_response_headers" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_process_response_headers">get_process_response_headers</a></code></li>
-<li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_service_name" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_service_name">get_service_name</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.grab_first_n_bytes" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.grab_first_n_bytes">grab_first_n_bytes</a></code></li>
-<li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.introspect" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.introspect">introspect</a></code></li>
-<li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.is_interesting_content_type" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.is_interesting_content_type">is_interesting_content_type</a></code></li>
+<li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.lowercase_headers" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.lowercase_headers">lowercase_headers</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_body_max_size" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_body_max_size">set_body_max_size</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_process_request_body" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_process_request_body">set_process_request_body</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_process_request_headers" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_process_request_headers">set_process_request_headers</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_process_response_body" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_process_response_body">set_process_response_body</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_process_response_headers" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_process_response_headers">set_process_response_headers</a></code></li>
-<li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_service_name" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_service_name">set_service_name</a></code></li>
 </ul>
 </li>
 </ul>
@@ -631,10 +609,7 @@ class OpenTelemetryClientInterceptorWrapper(_client.OpenTelemetryClientIntercept
             &#39;Entering OpenTelemetryClientInterceptorWrapper.intercept_unary().&#39;)
         try:
             # Not sure how to obtain span object here
-            logger.debug(&#39;request: %s&#39;, str(request))
-            logger.debug(&#39;metadata: %s&#39;, str(metadata))
-            result = invoker(request, metadata)
-            logger.debug(&#39;result: %s&#39;, str(result))
+            result = invoker(request, metadata)  # pylint:disable=W0612
             # Not sure how to obtain trailing metadata here
         except grpc.RpcError as err:
             logger.error(constants.INST_RUNTIME_EXCEPTION_MSSG,
@@ -703,10 +678,7 @@ class OpenTelemetryClientInterceptorWrapper(_client.OpenTelemetryClientIntercept
         &#39;Entering OpenTelemetryClientInterceptorWrapper.intercept_unary().&#39;)
     try:
         # Not sure how to obtain span object here
-        logger.debug(&#39;request: %s&#39;, str(request))
-        logger.debug(&#39;metadata: %s&#39;, str(metadata))
-        result = invoker(request, metadata)
-        logger.debug(&#39;result: %s&#39;, str(result))
+        result = invoker(request, metadata)  # pylint:disable=W0612
         # Not sure how to obtain trailing metadata here
     except grpc.RpcError as err:
         logger.error(constants.INST_RUNTIME_EXCEPTION_MSSG,
@@ -760,13 +732,10 @@ class OpenTelemetryClientInterceptorWrapper(_client.OpenTelemetryClientIntercept
                         request_or_iterator,
                         context,
                     )
-                logger.debug(&#39;Span Object: %s&#39;, str(context._active_span)) # pylint: disable=W0212
-                span = context._active_span # pylint: disable=W0212
-                logger.debug(&#39;Request Metadata: %s&#39;,
-                             str(handler_call_details.invocation_metadata))
-                logger.debug(&#39;Request Body: %s&#39;, str(request_or_iterator))
 
-                invocation_metadata = handler_call_details.invocation_metadata
+                span = context._active_span # pylint: disable=W0212
+
+                invocation_metadata = dict(handler_call_details.invocation_metadata)
 
                 self._gisw.generic_rpc_request_handler(
                     invocation_metadata, request_or_iterator, span)
@@ -783,13 +752,11 @@ class OpenTelemetryClientInterceptorWrapper(_client.OpenTelemetryClientIntercept
                     context = _OpenTelemetryWrapperServicerContext(
                         context, span)
                     response = behavior(request_or_iterator, context)
-                    logger.debug(&#39;Response Body: %s&#39;, str(response))
-                    logger.debug(&#39;Response Headers: %s&#39;,
-                                 str(context.get_trailing_metadata()))
                     trailing_metadata = context.get_trailing_metadata()
+                    trailing_metadata = dict(trailing_metadata[0])
                     if len(trailing_metadata) &gt; 0:
                         self._gisw.generic_rpc_response_handler(
-                            trailing_metadata[0], response, span)
+                            trailing_metadata, response, span)
 
                     return response
                 except Exception as error: # pylint: disable=W0703
@@ -853,13 +820,10 @@ class OpenTelemetryClientInterceptorWrapper(_client.OpenTelemetryClientIntercept
                     request_or_iterator,
                     context,
                 )
-            logger.debug(&#39;Span Object: %s&#39;, str(context._active_span)) # pylint: disable=W0212
-            span = context._active_span # pylint: disable=W0212
-            logger.debug(&#39;Request Metadata: %s&#39;,
-                         str(handler_call_details.invocation_metadata))
-            logger.debug(&#39;Request Body: %s&#39;, str(request_or_iterator))
 
-            invocation_metadata = handler_call_details.invocation_metadata
+            span = context._active_span # pylint: disable=W0212
+
+            invocation_metadata = dict(handler_call_details.invocation_metadata)
 
             self._gisw.generic_rpc_request_handler(
                 invocation_metadata, request_or_iterator, span)
@@ -876,13 +840,11 @@ class OpenTelemetryClientInterceptorWrapper(_client.OpenTelemetryClientIntercept
                 context = _OpenTelemetryWrapperServicerContext(
                     context, span)
                 response = behavior(request_or_iterator, context)
-                logger.debug(&#39;Response Body: %s&#39;, str(response))
-                logger.debug(&#39;Response Headers: %s&#39;,
-                             str(context.get_trailing_metadata()))
                 trailing_metadata = context.get_trailing_metadata()
+                trailing_metadata = dict(trailing_metadata[0])
                 if len(trailing_metadata) &gt; 0:
                     self._gisw.generic_rpc_response_handler(
-                        trailing_metadata[0], response, span)
+                        trailing_metadata, response, span)
 
                 return response
             except Exception as error: # pylint: disable=W0703

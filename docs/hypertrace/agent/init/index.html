@@ -58,6 +58,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
         logger.debug(&#39;Initializing AgentInit object.&#39;)
         self._config = agent_config
         self._modules_initialized = {
+            &#34;Django&#34;: False,
             &#34;flask&#34;: False,
             &#34;grpc:server&#34;: False,
             &#34;grpc:client&#34;: False,
@@ -172,6 +173,32 @@ class AgentInit:  # pylint: disable=R0902,R0903
         for mod in self._modules_initialized:
             logger.debug(&#39;%s : %s&#39;, mod, str(self._modules_initialized[mod]))
 
+
+    def init_instrumentation_django(self) -&gt; None:
+        &#39;&#39;&#39;Creates a django instrumentation wrapper using the config defined in hypertraceconfig&#39;&#39;&#39;
+        logger.debug(&#39;Calling AgentInit.init_instrumentation_django&#39;)
+        try:
+            if self.is_registered(&#39;Django&#39;):
+                return
+            self._modules_initialized[&#39;Django&#39;] = True
+
+            from hypertrace.agent.instrumentation import django # pylint:disable=C0415
+
+            wrapper = django.DjangoInstrumentationWrapper()
+            data_cap = self._config.agent_config.data_capture
+            wrapper.set_process_request_headers(data_cap.http_headers.request)
+            wrapper.set_process_request_body(data_cap.http_body.request)
+            wrapper.set_process_response_headers(data_cap.http_headers.response)
+            wrapper.set_process_response_body(data_cap.http_body.response)
+            wrapper.set_body_max_size(data_cap.body_max_size_bytes)
+            wrapper.instrument()
+        except Exception as err:  # pylint: disable=W0703:
+            logger.debug(constants.INST_WRAP_EXCEPTION_MSSG,
+                         &#39;Django&#39;,
+                         err,
+                         traceback.format_exc())
+
+
     # Creates a flask wrapper using the config defined in hypertraceconfig
     def init_instrumentation_flask(self, app) -&gt; None:
         &#39;&#39;&#39;Creates a flask instrumentation wrapper using the config defined in hypertraceconfig&#39;&#39;&#39;
@@ -210,7 +237,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self.init_instrumentor_wrapper_base_for_http(self._flask_instrumentor_wrapper,
                                                          call_default_instrumentor)
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
+            logger.debug(constants.INST_WRAP_EXCEPTION_MSSG,
                          &#39;flask&#39;,
                          err,
                          traceback.format_exc())
@@ -238,7 +265,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self._grpc_instrumentor_server_wrapper.set_process_response_body(
                 self._config.agent_config.data_capture.http_body.response)
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
+            logger.debug(constants.INST_WRAP_EXCEPTION_MSSG,
                          &#39;grpc:server&#39;,
                          err,
                          traceback.format_exc())
@@ -268,7 +295,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self._grpc_instrumentor_client_wrapper.set_process_response_body(
                 self._config.agent_config.data_capture.http_body.response)
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
+            logger.debug(constants.INST_WRAP_EXCEPTION_MSSG,
                          &#39;grpc:client&#39;,
                          err,
                          traceback.format_exc())
@@ -288,7 +315,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self.init_instrumentor_wrapper_base_for_http(
                 self._mysql_instrumentor_wrapper)
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
+            logger.debug(constants.INST_WRAP_EXCEPTION_MSSG,
                          &#39;mysql&#39;,
                          err,
                          traceback.format_exc())
@@ -308,7 +335,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self.init_instrumentor_wrapper_base_for_http(
                 self._postgresql_instrumentor_wrapper)
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
+            logger.debug(constants.INST_WRAP_EXCEPTION_MSSG,
                          &#39;postgresql&#39;,
                          err,
                          traceback.format_exc())
@@ -328,7 +355,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self.init_instrumentor_wrapper_base_for_http(
                 self._requests_instrumentor_wrapper)
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
+            logger.debug(constants.INST_WRAP_EXCEPTION_MSSG,
                          &#39;requests&#39;,
                          err,
                          traceback.format_exc())
@@ -348,7 +375,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self.init_instrumentor_wrapper_base_for_http(
                 self._aiohttp_client_instrumentor_wrapper)
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
+            logger.debug(constants.INST_WRAP_EXCEPTION_MSSG,
                          &#39;aiohttp_client&#39;,
                          err,
                          traceback.format_exc())
@@ -456,6 +483,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
         logger.debug(&#39;Initializing AgentInit object.&#39;)
         self._config = agent_config
         self._modules_initialized = {
+            &#34;Django&#34;: False,
             &#34;flask&#34;: False,
             &#34;grpc:server&#34;: False,
             &#34;grpc:client&#34;: False,
@@ -570,6 +598,32 @@ class AgentInit:  # pylint: disable=R0902,R0903
         for mod in self._modules_initialized:
             logger.debug(&#39;%s : %s&#39;, mod, str(self._modules_initialized[mod]))
 
+
+    def init_instrumentation_django(self) -&gt; None:
+        &#39;&#39;&#39;Creates a django instrumentation wrapper using the config defined in hypertraceconfig&#39;&#39;&#39;
+        logger.debug(&#39;Calling AgentInit.init_instrumentation_django&#39;)
+        try:
+            if self.is_registered(&#39;Django&#39;):
+                return
+            self._modules_initialized[&#39;Django&#39;] = True
+
+            from hypertrace.agent.instrumentation import django # pylint:disable=C0415
+
+            wrapper = django.DjangoInstrumentationWrapper()
+            data_cap = self._config.agent_config.data_capture
+            wrapper.set_process_request_headers(data_cap.http_headers.request)
+            wrapper.set_process_request_body(data_cap.http_body.request)
+            wrapper.set_process_response_headers(data_cap.http_headers.response)
+            wrapper.set_process_response_body(data_cap.http_body.response)
+            wrapper.set_body_max_size(data_cap.body_max_size_bytes)
+            wrapper.instrument()
+        except Exception as err:  # pylint: disable=W0703:
+            logger.debug(constants.INST_WRAP_EXCEPTION_MSSG,
+                         &#39;Django&#39;,
+                         err,
+                         traceback.format_exc())
+
+
     # Creates a flask wrapper using the config defined in hypertraceconfig
     def init_instrumentation_flask(self, app) -&gt; None:
         &#39;&#39;&#39;Creates a flask instrumentation wrapper using the config defined in hypertraceconfig&#39;&#39;&#39;
@@ -608,7 +662,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self.init_instrumentor_wrapper_base_for_http(self._flask_instrumentor_wrapper,
                                                          call_default_instrumentor)
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
+            logger.debug(constants.INST_WRAP_EXCEPTION_MSSG,
                          &#39;flask&#39;,
                          err,
                          traceback.format_exc())
@@ -636,7 +690,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self._grpc_instrumentor_server_wrapper.set_process_response_body(
                 self._config.agent_config.data_capture.http_body.response)
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
+            logger.debug(constants.INST_WRAP_EXCEPTION_MSSG,
                          &#39;grpc:server&#39;,
                          err,
                          traceback.format_exc())
@@ -666,7 +720,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self._grpc_instrumentor_client_wrapper.set_process_response_body(
                 self._config.agent_config.data_capture.http_body.response)
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
+            logger.debug(constants.INST_WRAP_EXCEPTION_MSSG,
                          &#39;grpc:client&#39;,
                          err,
                          traceback.format_exc())
@@ -686,7 +740,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self.init_instrumentor_wrapper_base_for_http(
                 self._mysql_instrumentor_wrapper)
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
+            logger.debug(constants.INST_WRAP_EXCEPTION_MSSG,
                          &#39;mysql&#39;,
                          err,
                          traceback.format_exc())
@@ -706,7 +760,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self.init_instrumentor_wrapper_base_for_http(
                 self._postgresql_instrumentor_wrapper)
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
+            logger.debug(constants.INST_WRAP_EXCEPTION_MSSG,
                          &#39;postgresql&#39;,
                          err,
                          traceback.format_exc())
@@ -726,7 +780,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self.init_instrumentor_wrapper_base_for_http(
                 self._requests_instrumentor_wrapper)
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
+            logger.debug(constants.INST_WRAP_EXCEPTION_MSSG,
                          &#39;requests&#39;,
                          err,
                          traceback.format_exc())
@@ -746,7 +800,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
             self.init_instrumentor_wrapper_base_for_http(
                 self._aiohttp_client_instrumentor_wrapper)
         except Exception as err:  # pylint: disable=W0703
-            logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
+            logger.debug(constants.INST_WRAP_EXCEPTION_MSSG,
                          &#39;aiohttp_client&#39;,
                          err,
                          traceback.format_exc())
@@ -850,7 +904,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
         self.init_instrumentor_wrapper_base_for_http(
             self._aiohttp_client_instrumentor_wrapper)
     except Exception as err:  # pylint: disable=W0703
-        logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
+        logger.debug(constants.INST_WRAP_EXCEPTION_MSSG,
                      &#39;aiohttp_client&#39;,
                      err,
                      traceback.format_exc())</code></pre>
@@ -915,6 +969,40 @@ class AgentInit:  # pylint: disable=R0902,R0903
         logger.error(&#34;Unknown exporter type `%s`&#34;, reporter_type)</code></pre>
 </details>
 </dd>
+<dt id="hypertrace.agent.init.AgentInit.init_instrumentation_django"><code class="name flex">
+<span>def <span class="ident">init_instrumentation_django</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Creates a django instrumentation wrapper using the config defined in hypertraceconfig</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def init_instrumentation_django(self) -&gt; None:
+    &#39;&#39;&#39;Creates a django instrumentation wrapper using the config defined in hypertraceconfig&#39;&#39;&#39;
+    logger.debug(&#39;Calling AgentInit.init_instrumentation_django&#39;)
+    try:
+        if self.is_registered(&#39;Django&#39;):
+            return
+        self._modules_initialized[&#39;Django&#39;] = True
+
+        from hypertrace.agent.instrumentation import django # pylint:disable=C0415
+
+        wrapper = django.DjangoInstrumentationWrapper()
+        data_cap = self._config.agent_config.data_capture
+        wrapper.set_process_request_headers(data_cap.http_headers.request)
+        wrapper.set_process_request_body(data_cap.http_body.request)
+        wrapper.set_process_response_headers(data_cap.http_headers.response)
+        wrapper.set_process_response_body(data_cap.http_body.response)
+        wrapper.set_body_max_size(data_cap.body_max_size_bytes)
+        wrapper.instrument()
+    except Exception as err:  # pylint: disable=W0703:
+        logger.debug(constants.INST_WRAP_EXCEPTION_MSSG,
+                     &#39;Django&#39;,
+                     err,
+                     traceback.format_exc())</code></pre>
+</details>
+</dd>
 <dt id="hypertrace.agent.init.AgentInit.init_instrumentation_flask"><code class="name flex">
 <span>def <span class="ident">init_instrumentation_flask</span></span>(<span>self, app) ‑> None</span>
 </code></dt>
@@ -961,7 +1049,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
         self.init_instrumentor_wrapper_base_for_http(self._flask_instrumentor_wrapper,
                                                      call_default_instrumentor)
     except Exception as err:  # pylint: disable=W0703
-        logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
+        logger.debug(constants.INST_WRAP_EXCEPTION_MSSG,
                      &#39;flask&#39;,
                      err,
                      traceback.format_exc())</code></pre>
@@ -1000,7 +1088,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
         self._grpc_instrumentor_client_wrapper.set_process_response_body(
             self._config.agent_config.data_capture.http_body.response)
     except Exception as err:  # pylint: disable=W0703
-        logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
+        logger.debug(constants.INST_WRAP_EXCEPTION_MSSG,
                      &#39;grpc:client&#39;,
                      err,
                      traceback.format_exc())</code></pre>
@@ -1038,7 +1126,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
         self._grpc_instrumentor_server_wrapper.set_process_response_body(
             self._config.agent_config.data_capture.http_body.response)
     except Exception as err:  # pylint: disable=W0703
-        logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
+        logger.debug(constants.INST_WRAP_EXCEPTION_MSSG,
                      &#39;grpc:server&#39;,
                      err,
                      traceback.format_exc())</code></pre>
@@ -1067,7 +1155,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
         self.init_instrumentor_wrapper_base_for_http(
             self._mysql_instrumentor_wrapper)
     except Exception as err:  # pylint: disable=W0703
-        logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
+        logger.debug(constants.INST_WRAP_EXCEPTION_MSSG,
                      &#39;mysql&#39;,
                      err,
                      traceback.format_exc())</code></pre>
@@ -1096,7 +1184,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
         self.init_instrumentor_wrapper_base_for_http(
             self._postgresql_instrumentor_wrapper)
     except Exception as err:  # pylint: disable=W0703
-        logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
+        logger.debug(constants.INST_WRAP_EXCEPTION_MSSG,
                      &#39;postgresql&#39;,
                      err,
                      traceback.format_exc())</code></pre>
@@ -1125,7 +1213,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
         self.init_instrumentor_wrapper_base_for_http(
             self._requests_instrumentor_wrapper)
     except Exception as err:  # pylint: disable=W0703
-        logger.error(constants.INST_WRAP_EXCEPTION_MSSG,
+        logger.debug(constants.INST_WRAP_EXCEPTION_MSSG,
                      &#39;requests&#39;,
                      err,
                      traceback.format_exc())</code></pre>
@@ -1316,6 +1404,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
 <li><code><a title="hypertrace.agent.init.AgentInit.apply_config" href="#hypertrace.agent.init.AgentInit.apply_config">apply_config</a></code></li>
 <li><code><a title="hypertrace.agent.init.AgentInit.dump_config" href="#hypertrace.agent.init.AgentInit.dump_config">dump_config</a></code></li>
 <li><code><a title="hypertrace.agent.init.AgentInit.init_exporter" href="#hypertrace.agent.init.AgentInit.init_exporter">init_exporter</a></code></li>
+<li><code><a title="hypertrace.agent.init.AgentInit.init_instrumentation_django" href="#hypertrace.agent.init.AgentInit.init_instrumentation_django">init_instrumentation_django</a></code></li>
 <li><code><a title="hypertrace.agent.init.AgentInit.init_instrumentation_flask" href="#hypertrace.agent.init.AgentInit.init_instrumentation_flask">init_instrumentation_flask</a></code></li>
 <li><code><a title="hypertrace.agent.init.AgentInit.init_instrumentation_grpc_client" href="#hypertrace.agent.init.AgentInit.init_instrumentation_grpc_client">init_instrumentation_grpc_client</a></code></li>
 <li><code><a title="hypertrace.agent.init.AgentInit.init_instrumentation_grpc_server" href="#hypertrace.agent.init.AgentInit.init_instrumentation_grpc_server">init_instrumentation_grpc_server</a></code></li>

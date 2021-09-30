@@ -33,6 +33,7 @@ from hypertrace.agent import Agent
 from hypertrace.env_var_settings import get_env_value
 
 DEFAULTS = [
+  &#39;Django&#39;,
   &#39;flask&#39;,
   &#39;mysql&#39;,
   &#39;postgresql&#39;,
@@ -68,6 +69,8 @@ for mod in modules_array:
 
     if mod == &#39;flask&#39;:
         agent.register_flask_app()
+    elif mod == &#39;Django&#39;:
+        agent.register_django()
     elif mod == &#39;grpc:server&#39;:
         agent.register_grpc_server()
     elif mod == &#39;grpc:client&#39;:

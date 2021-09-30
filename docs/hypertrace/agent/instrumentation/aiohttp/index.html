@@ -145,8 +145,6 @@ def create_trace_config(
             params: aiohttp.TraceRequestEndParams,
     ) -&gt; None:
         logger.debug(&#39;Entering hypertrace on_request_end().&#39;)
-        logger.debug(&#39;request headers: %s&#39;, str(params.headers))
-        logger.debug(&#39;response headers: %s&#39;, str(params.response.headers))
         # utf8_decoder = codecs.getincrementaldecoder(&#39;utf-8&#39;)
         response_body = b&#39;&#39;
         if hasattr(params.response, &#39;content&#39;) \
@@ -180,19 +178,13 @@ def create_trace_config(
         request_body = &#39;&#39;
         if hasattr(trace_config_ctx, &#39;request_body&#39;) and trace_config_ctx.request_body is not None:
             request_body = trace_config_ctx.request_body
-            logger.debug(&#39;request_body: %s&#39;, request_body)
         span = trace.get_current_span()
-        logger.debug(&#39;Found span: %s&#39;, str(span))
         # Add headers &amp; body to span
         if span.is_recording():
-            request_headers = [
-                (k, v) for k, v in params.headers.items()]  # pylint: disable=R1721
             aiohttp_client_wrapper.generic_request_handler(
-                request_headers, request_body, span)
-            response_headers = [(k, v)
-                                for k, v in params.response.headers.items()]  # pylint: disable=R1721
+                params.headers, request_body, span)
             aiohttp_client_wrapper.generic_response_handler(
-                response_headers, response_body, span)
+                params.response.headers, response_body, span)
         trace_config_ctx.end_callback_called = True
         trace_config_ctx.span = span
 
@@ -300,8 +292,6 @@ def _instrument(
             params: aiohttp.TraceRequestEndParams,
     ) -&gt; None:
         logger.debug(&#39;Entering hypertrace on_request_end().&#39;)
-        logger.debug(&#39;request headers: %s&#39;, str(params.headers))
-        logger.debug(&#39;response headers: %s&#39;, str(params.response.headers))
         # utf8_decoder = codecs.getincrementaldecoder(&#39;utf-8&#39;)
         response_body = b&#39;&#39;
         if hasattr(params.response, &#39;content&#39;) \
@@ -335,19 +325,13 @@ def _instrument(
         request_body = &#39;&#39;
         if hasattr(trace_config_ctx, &#39;request_body&#39;) and trace_config_ctx.request_body is not None:
             request_body = trace_config_ctx.request_body
-            logger.debug(&#39;request_body: %s&#39;, request_body)
         span = trace.get_current_span()
-        logger.debug(&#39;Found span: %s&#39;, str(span))
         # Add headers &amp; body to span
         if span.is_recording():
-            request_headers = [
-                (k, v) for k, v in params.headers.items()]  # pylint: disable=R1721
             aiohttp_client_wrapper.generic_request_handler(
-                request_headers, request_body, span)
-            response_headers = [(k, v)
-                                for k, v in params.response.headers.items()]  # pylint: disable=R1721
+                params.headers, request_body, span)
             aiohttp_client_wrapper.generic_response_handler(
-                response_headers, response_body, span)
+                params.response.headers, response_body, span)
         trace_config_ctx.end_callback_called = True
         trace_config_ctx.span = span
 
@@ -447,26 +431,20 @@ def _instrument(
 <ul class="hlist">
 <li><code><b><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper">BaseInstrumentorWrapper</a></b></code>:
 <ul class="hlist">
+<li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.add_headers_to_span" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.add_headers_to_span">add_headers_to_span</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.check_body_size" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.check_body_size">check_body_size</a></code></li>
+<li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.eligible_based_on_content_type" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.eligible_based_on_content_type">eligible_based_on_content_type</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.generic_request_handler" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.generic_request_handler">generic_request_handler</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.generic_response_handler" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.generic_response_handler">generic_response_handler</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.generic_rpc_request_handler" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.generic_rpc_request_handler">generic_rpc_request_handler</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.generic_rpc_response_handler" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.generic_rpc_response_handler">generic_rpc_response_handler</a></code></li>
-<li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_max_body_size" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_max_body_size">get_max_body_size</a></code></li>
-<li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_process_request_body" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_process_request_body">get_process_request_body</a></code></li>
-<li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_process_request_headers" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_process_request_headers">get_process_request_headers</a></code></li>
-<li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_process_response_body" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_process_response_body">get_process_response_body</a></code></li>
-<li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_process_response_headers" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_process_response_headers">get_process_response_headers</a></code></li>
-<li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_service_name" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.get_service_name">get_service_name</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.grab_first_n_bytes" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.grab_first_n_bytes">grab_first_n_bytes</a></code></li>
-<li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.introspect" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.introspect">introspect</a></code></li>
-<li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.is_interesting_content_type" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.is_interesting_content_type">is_interesting_content_type</a></code></li>
+<li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.lowercase_headers" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.lowercase_headers">lowercase_headers</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_body_max_size" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_body_max_size">set_body_max_size</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_process_request_body" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_process_request_body">set_process_request_body</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_process_request_headers" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_process_request_headers">set_process_request_headers</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_process_response_body" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_process_response_body">set_process_response_body</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_process_response_headers" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_process_response_headers">set_process_response_headers</a></code></li>
-<li><code><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_service_name" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper.set_service_name">set_service_name</a></code></li>
 </ul>
 </li>
 </ul>

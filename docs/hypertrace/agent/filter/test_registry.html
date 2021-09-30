@@ -35,7 +35,7 @@ from hypertrace.agent.filter.registry import Registry
 
 class TestFilter(Filter):
     &#39;&#39;&#39;Example of a filter that always returns true&#39;&#39;&#39;
-    def evaluate_url_and_headers(self, span: Span, url: str, headers: tuple) -&gt; bool:
+    def evaluate_url_and_headers(self, span: Span, url: str, headers: dict) -&gt; bool:
         return True
 
     def evaluate_body(self, span: Span, body) -&gt; bool:
@@ -52,13 +52,13 @@ def test_apply_filter_with_values_can_return_true():
     &#39;&#39;&#39;Assert that apply_filters will return true when a filter returns true&#39;&#39;&#39;
     registry = Registry()
     registry.register(TestFilter)
-    assert registry.apply_filters(NonRecordingSpan(None), &#39;a_url&#39;, (&#39;key&#39;, &#39;v&#39;), &#39;body_data&#39;)
+    assert registry.apply_filters(NonRecordingSpan(None), &#39;a_url&#39;, {&#39;key&#39;: &#39;v&#39;}, &#39;body_data&#39;)
 
 def test_apply_filter_returns_false_by_default():
     &#39;&#39;&#39;Assert that apply_filters will return false by default&#39;&#39;&#39;
     registry = Registry()
     registry.register(TestFilter)
-    assert registry.apply_filters(NonRecordingSpan(None), None, tuple(), None) is False</code></pre>
+    assert registry.apply_filters(NonRecordingSpan(None), None, {}, None) is False</code></pre>
 </details>
 </section>
 <section>
@@ -81,7 +81,7 @@ def test_apply_filter_returns_false_by_default():
     &#39;&#39;&#39;Assert that apply_filters will return false by default&#39;&#39;&#39;
     registry = Registry()
     registry.register(TestFilter)
-    assert registry.apply_filters(NonRecordingSpan(None), None, tuple(), None) is False</code></pre>
+    assert registry.apply_filters(NonRecordingSpan(None), None, {}, None) is False</code></pre>
 </details>
 </dd>
 <dt id="hypertrace.agent.filter.test_registry.test_apply_filter_with_values_can_return_true"><code class="name flex">
@@ -97,7 +97,7 @@ def test_apply_filter_returns_false_by_default():
     &#39;&#39;&#39;Assert that apply_filters will return true when a filter returns true&#39;&#39;&#39;
     registry = Registry()
     registry.register(TestFilter)
-    assert registry.apply_filters(NonRecordingSpan(None), &#39;a_url&#39;, (&#39;key&#39;, &#39;v&#39;), &#39;body_data&#39;)</code></pre>
+    assert registry.apply_filters(NonRecordingSpan(None), &#39;a_url&#39;, {&#39;key&#39;: &#39;v&#39;}, &#39;body_data&#39;)</code></pre>
 </details>
 </dd>
 <dt id="hypertrace.agent.filter.test_registry.test_register"><code class="name flex">
@@ -133,7 +133,7 @@ def test_apply_filter_returns_false_by_default():
 </summary>
 <pre><code class="python">class TestFilter(Filter):
     &#39;&#39;&#39;Example of a filter that always returns true&#39;&#39;&#39;
-    def evaluate_url_and_headers(self, span: Span, url: str, headers: tuple) -&gt; bool:
+    def evaluate_url_and_headers(self, span: Span, url: str, headers: dict) -&gt; bool:
         return True
 
     def evaluate_body(self, span: Span, body) -&gt; bool:

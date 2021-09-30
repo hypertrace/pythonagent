@@ -38,7 +38,7 @@ class Filter(ABC):
     continues it.
     &#34;&#34;&#34;
     @abstractmethod
-    def evaluate_url_and_headers(self, span: Span, url: str, headers: tuple) -&gt; bool:
+    def evaluate_url_and_headers(self, span: Span, url: str, headers: dict) -&gt; bool:
         &#34;&#34;&#34;evaluate_url_and_headers can be used to evaluate both URL and Header&#34;&#34;&#34;
 
     @abstractmethod
@@ -49,7 +49,7 @@ class Filter(ABC):
 class NoopFilter(Filter):
     &#34;&#34;&#34;NoopFilter is a filter that never blocks&#34;&#34;&#34;
 
-    def evaluate_url_and_headers(self, span: Span, url: str, headers: tuple) -&gt; bool:
+    def evaluate_url_and_headers(self, span: Span, url: str, headers: dict) -&gt; bool:
         return False
 
     def evaluate_body(self, span: Span, body) -&gt; bool:
@@ -92,7 +92,7 @@ continues it.</p></div>
     continues it.
     &#34;&#34;&#34;
     @abstractmethod
-    def evaluate_url_and_headers(self, span: Span, url: str, headers: tuple) -&gt; bool:
+    def evaluate_url_and_headers(self, span: Span, url: str, headers: dict) -&gt; bool:
         &#34;&#34;&#34;evaluate_url_and_headers can be used to evaluate both URL and Header&#34;&#34;&#34;
 
     @abstractmethod
@@ -125,7 +125,7 @@ def evaluate_body(self, span: Span, body) -&gt; bool:
 </details>
 </dd>
 <dt id="hypertrace.agent.filter.Filter.evaluate_url_and_headers"><code class="name flex">
-<span>def <span class="ident">evaluate_url_and_headers</span></span>(<span>self, span: opentelemetry.trace.span.Span, url: str, headers: tuple) ‑> bool</span>
+<span>def <span class="ident">evaluate_url_and_headers</span></span>(<span>self, span: opentelemetry.trace.span.Span, url: str, headers: dict) ‑> bool</span>
 </code></dt>
 <dd>
 <div class="desc"><p>evaluate_url_and_headers can be used to evaluate both URL and Header</p></div>
@@ -134,7 +134,7 @@ def evaluate_body(self, span: Span, body) -&gt; bool:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abstractmethod
-def evaluate_url_and_headers(self, span: Span, url: str, headers: tuple) -&gt; bool:
+def evaluate_url_and_headers(self, span: Span, url: str, headers: dict) -&gt; bool:
     &#34;&#34;&#34;evaluate_url_and_headers can be used to evaluate both URL and Header&#34;&#34;&#34;</code></pre>
 </details>
 </dd>
@@ -152,7 +152,7 @@ def evaluate_url_and_headers(self, span: Span, url: str, headers: tuple) -&gt; b
 <pre><code class="python">class NoopFilter(Filter):
     &#34;&#34;&#34;NoopFilter is a filter that never blocks&#34;&#34;&#34;
 
-    def evaluate_url_and_headers(self, span: Span, url: str, headers: tuple) -&gt; bool:
+    def evaluate_url_and_headers(self, span: Span, url: str, headers: dict) -&gt; bool:
         return False
 
     def evaluate_body(self, span: Span, body) -&gt; bool:

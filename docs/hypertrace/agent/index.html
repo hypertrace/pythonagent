@@ -91,6 +91,20 @@ class Agent:
         finally:
             self._init.apply_config(self._config)
 
+    def register_django(self) -&gt; None:
+        &#39;&#39;&#39;Register the django instrumentation module wrapper&#39;&#39;&#39;
+        logger.debug(&#39;Calling Agent.register_django.&#39;)
+        if not self.is_initialized():
+            return
+        try:
+            self._init.init_instrumentation_django()
+            self._init.dump_config()
+        except Exception as err:  # pylint: disable=W0703
+            logger.debug(constants.EXCEPTION_MESSAGE,
+                         &#39;Django&#39;,
+                         err,
+                         traceback.format_exc())
+
     def register_flask_app(self, app = None) -&gt; None:
         &#39;&#39;&#39;Register the flask instrumentation module wrapper&#39;&#39;&#39;
         logger.debug(&#39;Calling Agent.register_flask_app.&#39;)
@@ -312,6 +326,20 @@ environment variables, and the agent-config.yaml file.</p></div>
         finally:
             self._init.apply_config(self._config)
 
+    def register_django(self) -&gt; None:
+        &#39;&#39;&#39;Register the django instrumentation module wrapper&#39;&#39;&#39;
+        logger.debug(&#39;Calling Agent.register_django.&#39;)
+        if not self.is_initialized():
+            return
+        try:
+            self._init.init_instrumentation_django()
+            self._init.dump_config()
+        except Exception as err:  # pylint: disable=W0703
+            logger.debug(constants.EXCEPTION_MESSAGE,
+                         &#39;Django&#39;,
+                         err,
+                         traceback.format_exc())
+
     def register_flask_app(self, app = None) -&gt; None:
         &#39;&#39;&#39;Register the flask instrumentation module wrapper&#39;&#39;&#39;
         logger.debug(&#39;Calling Agent.register_flask_app.&#39;)
@@ -521,6 +549,30 @@ def edit_config(self):
                      traceback.format_exc())</code></pre>
 </details>
 </dd>
+<dt id="hypertrace.agent.Agent.register_django"><code class="name flex">
+<span>def <span class="ident">register_django</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Register the django instrumentation module wrapper</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def register_django(self) -&gt; None:
+    &#39;&#39;&#39;Register the django instrumentation module wrapper&#39;&#39;&#39;
+    logger.debug(&#39;Calling Agent.register_django.&#39;)
+    if not self.is_initialized():
+        return
+    try:
+        self._init.init_instrumentation_django()
+        self._init.dump_config()
+    except Exception as err:  # pylint: disable=W0703
+        logger.debug(constants.EXCEPTION_MESSAGE,
+                     &#39;Django&#39;,
+                     err,
+                     traceback.format_exc())</code></pre>
+</details>
+</dd>
 <dt id="hypertrace.agent.Agent.register_flask_app"><code class="name flex">
 <span>def <span class="ident">register_flask_app</span></span>(<span>self, app=None) ‑> None</span>
 </code></dt>
@@ -719,6 +771,7 @@ def edit_config(self):
 <li><code><a title="hypertrace.agent.Agent.is_enabled" href="#hypertrace.agent.Agent.is_enabled">is_enabled</a></code></li>
 <li><code><a title="hypertrace.agent.Agent.is_initialized" href="#hypertrace.agent.Agent.is_initialized">is_initialized</a></code></li>
 <li><code><a title="hypertrace.agent.Agent.register_aiohttp_client" href="#hypertrace.agent.Agent.register_aiohttp_client">register_aiohttp_client</a></code></li>
+<li><code><a title="hypertrace.agent.Agent.register_django" href="#hypertrace.agent.Agent.register_django">register_django</a></code></li>
 <li><code><a title="hypertrace.agent.Agent.register_flask_app" href="#hypertrace.agent.Agent.register_flask_app">register_flask_app</a></code></li>
 <li><code><a title="hypertrace.agent.Agent.register_grpc_client" href="#hypertrace.agent.Agent.register_grpc_client">register_grpc_client</a></code></li>
 <li><code><a title="hypertrace.agent.Agent.register_grpc_server" href="#hypertrace.agent.Agent.register_grpc_server">register_grpc_server</a></code></li>
