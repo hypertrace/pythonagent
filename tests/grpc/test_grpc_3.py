@@ -72,7 +72,7 @@ logger.info('Initializing agent.')
 agent = Agent()
 registry = Registry().register(SampleBlockingFilter)
 
-agent.register_grpc_server()
+agent.instrument()
 logger.info('Agent initialized.')
 #
 # End initialization logic for Python Agent
@@ -124,9 +124,9 @@ def exit_callback():
             span_list = memoryExporter.get_finished_spans()
             # Confirm something was returned.
             assert span_list
-            # Confirm there are three spans
+
             logger.debug('len(span_list): ' + str(len(span_list)))
-            assert len(span_list) == 1
+            assert len(span_list) == 2
             logger.debug('span_list: ' + str(span_list[0].attributes))
             flaskSpanAsObject = json.loads(span_list[0].to_json())
 

@@ -39,8 +39,7 @@ def insert_user(name: str) -> int:
 def create_app():
     app = Flask(__name__)
     agent = Agent()
-    agent.register_flask_app(app)
-    agent.register_mysql()
+    agent.instrument(app)
 
     @app.route('/', methods=['POST'])
     def hello():

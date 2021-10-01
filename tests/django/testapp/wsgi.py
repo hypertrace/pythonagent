@@ -15,5 +15,5 @@ from hypertrace.agent import Agent
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'testapp.settings')
 TEST_AGENT_INSTANCE = Agent()
-TEST_AGENT_INSTANCE.register_django()
+TEST_AGENT_INSTANCE.instrument()
 application = get_wsgi_application()

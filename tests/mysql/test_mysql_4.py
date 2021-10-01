@@ -33,7 +33,7 @@ def test_run():
     # Code snippet here represents the current initialization logic
     logger.info('Initializing agent.')
     agent = Agent()
-    agent.register_mysql()
+    agent.instrument()
 
     # End initialization logic for Python Agent
     logger.info('Agent initialized.')

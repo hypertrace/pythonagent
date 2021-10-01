@@ -1,12 +1,8 @@
 '''Hypertrace instrumentation logic for aiohttp-client'''
-import sys
-import os.path
 import logging
 import traceback
-import inspect
 import types
 import typing
-import codecs
 from collections import deque
 import asyncio
 import aiohttp
@@ -14,9 +10,7 @@ import wrapt
 from opentelemetry import context as context_api
 from opentelemetry import trace
 from opentelemetry.instrumentation.aiohttp_client.version import __version__
-from opentelemetry.instrumentation.instrumentor import BaseInstrumentor
-from opentelemetry.trace import SpanKind, TracerProvider, get_tracer
-from opentelemetry.trace.status import Status, StatusCode
+from opentelemetry.trace import TracerProvider, get_tracer
 from opentelemetry.instrumentation.aiohttp_client import AioHttpClientInstrumentor
 from hypertrace.agent.instrumentation import BaseInstrumentorWrapper
 
@@ -25,19 +19,6 @@ logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
 # Max time to wait for response data to be read.
 MAX_WAIT_TIME = 0.1 # seconds
-# Object introspection, used for debugging purposes
-def introspect(obj) -> None:
-    '''Object introspection, used for debugging purposes'''
-    logger.debug('Describing object.')
-    try:
-        for func in [type, id, dir, vars, callable]:
-            logger.debug("%s(%s):\t\t%s",
-                         func.__name__, introspect.__code__.co_varnames[0], func(obj))
-        logger.debug("%s: %s", func.__name__, inspect.getmembers(obj))
-    except Exception as err: # pylint: disable=W0703
-        logger.error('No data to display, exception=%s, stacktrace=%s',
-                     err,
-                     traceback.print_exc())
 
 # aiohttp-client instrumentation module wrapper class
 class AioHttpClientInstrumentorWrapper(AioHttpClientInstrumentor, BaseInstrumentorWrapper):

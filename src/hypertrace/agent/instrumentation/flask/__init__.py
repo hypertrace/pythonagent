@@ -24,24 +24,6 @@ from hypertrace.agent.config import AgentConfig
 # Initialize logger
 logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
-
-
-# Dump metadata about an object; useful for initial discovery of interestin ginfo
-
-
-def introspect(obj) -> None:
-    '''Troubleshooting assistance function for inspecting new flask-related objects'''
-    logger.debug('Describing object.')
-    try:
-        for func in [type, id, dir, vars, callable]:
-            logger.debug("%s(%s):\t\t%s",
-                         func.__name__, introspect.__code__.co_varnames[0], func(obj))
-        logger.debug("%s: %s", func.__name__, inspect.getmembers(obj))
-    except:  # pylint: disable=W0702
-        logger.error('Error dumping object: exception=%s, stacktrace=%s',
-                     sys.exc_info()[0],
-                     traceback.format_exc())
-
 # Per request pre-handler
 def _hypertrace_before_request(flask_wrapper):
     '''This function is invoked by flask to set the handler'''
@@ -139,6 +121,24 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
         logger.debug('Entering FlaskInstrumentorWrapper constructor.')
         super().__init__()
         self._app = None
+
+    def with_app(self, app=None):
+        """when instrumenting via code we need to instrument
+        the app directly, this is conditionally called from agent.instrument"""
+        self._app = app
+
+    def instrument(self, **kwargs):
+        if self._app:
+            # code based instrumentation
+            before_hook = _hypertrace_before_request(self)
+            after_hook = _hypertrace_after_request(self)
+            FlaskInstrumentorWrapper.instrument_app(self._app)
+            self._app.before_request(before_hook)
+            self._app.after_request(after_hook)
+        else:
+            # auto instrumentation
+            super().instrument()
+
 
     def _instrument(self, **kwargs):
         '''Override OTel method that sets up global flask instrumentation'''

@@ -167,6 +167,7 @@ def _apply_custom_config_options(current_custom, next_config):
 def _read_from_file():
     config_file = get_env_value('CONFIG_FILE')
     if config_file is None:
+        logger.debug("no config file found")
         return None
 
     if len(config_file) == 0:  # pylint:disable=R1705:

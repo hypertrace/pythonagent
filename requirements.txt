@@ -16,3 +16,4 @@ opentelemetry-util-http==0.23b0
 google>=3.0.0
 pyyaml
 protobuf>=3.15.8
+deprecated==1.2.12

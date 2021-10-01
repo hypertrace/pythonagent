@@ -120,7 +120,7 @@ if ENABLE_INSTRUMENTATION == True:
   #
   logger.info('Initializing agent.')
   agent = Agent()
-  agent.register_flask_app(server)
+  agent.instrument(server)
   #
   # End initialization logic for Python Agent
   #

@@ -4,17 +4,22 @@ import threading
 import traceback
 from contextlib import contextmanager
 
+from deprecated import deprecated
 import opentelemetry.trace as ot
 
+from hypertrace.agent.instrumentation.instrumentation_definitions import SUPPORTED_LIBRARIES, \
+    get_instrumentation_wrapper, REQUESTS_KEY, GRPC_CLIENT_KEY, DJANGO_KEY, MYSQL_KEY, GRPC_SERVER_KEY, \
+    POSTGRESQL_KEY, AIOHTTP_CLIENT_KEY, FLASK_KEY
 from hypertrace.env_var_settings import get_env_value
 from hypertrace.agent.init import AgentInit
 from hypertrace.agent.config import AgentConfig
 from hypertrace.agent import constants
 from hypertrace.agent import custom_logger
-
+from hypertrace.version import __version__
 # The Hypertrace Python Agent class
 
 logger = custom_logger.get_custom_logger(__name__)
+
 
 class Agent:
     '''Top-level entry point for Hypertrace agent.'''
@@ -27,6 +32,7 @@ class Agent:
             with cls._singleton_lock:
                 logger.debug('Creating Agent')
                 logger.debug('Python version: %s', sys.version)
+                logger.debug('Hypertrace Agent version: %s', __version__)
                 cls._instance = super(Agent, cls).__new__(cls)
                 cls._instance._initialized = False
         else:
@@ -36,7 +42,7 @@ class Agent:
     def __init__(self):
         '''Initializer'''
         self._initialized = False
-        if not self._initialized: # pylint: disable=E0203:
+        if not self._initialized:  # pylint: disable=E0203:
             logger.debug('Initializing Agent.')
             if not self.is_enabled():
                 return
@@ -62,117 +68,48 @@ class Agent:
         finally:
             self._init.apply_config(self._config)
 
-    def register_django(self) -> None:
-        '''Register the django instrumentation module wrapper'''
-        logger.debug('Calling Agent.register_django.')
+    def instrument(self, app=None, skip_libraries=None):
+        '''used to register applicable instrumentation wrappers'''
+        if skip_libraries is None:
+            skip_libraries = []
         if not self.is_initialized():
+            logger.debug('agent is not initialized, not instrumenting')
             return
-        try:
-            self._init.init_instrumentation_django()
-            self._init.dump_config()
-        except Exception as err:  # pylint: disable=W0703
-            logger.debug(constants.EXCEPTION_MESSAGE,
-                         'Django',
-                         err,
-                         traceback.format_exc())
 
-    def register_flask_app(self, app = None) -> None:
-        '''Register the flask instrumentation module wrapper'''
-        logger.debug('Calling Agent.register_flask_app.')
-        if not self.is_initialized():
-            return
-        try:
-            self._init.init_instrumentation_flask(app)
-            self._init.dump_config()
-        except Exception as err:  # pylint: disable=W0703
-            logger.debug(constants.EXCEPTION_MESSAGE,
-                         'flask',
-                         err,
-                         traceback.format_exc())
+        for library_key in SUPPORTED_LIBRARIES:
+            if library_key in skip_libraries:
+                logger.debug('not attempting to instrument %s', library_key)
+                continue
 
-    def register_grpc_server(self) -> None:
-        '''Register the grpc:server instrumentation module wrapper'''
-        logger.debug('Calling Agent.register_server_grpc().')
-        if not self.is_initialized():
-            return
-        try:
-            self._init.init_instrumentation_grpc_server()
-            self._init.dump_config()
-        except Exception as err:  # pylint: disable=W0703
-            logger.debug(constants.EXCEPTION_MESSAGE,
-                         'grpc:server',
-                         err,
-                         traceback.format_exc())
+            self._instrument(library_key, app)
 
-    def register_grpc_client(self) -> None:
-        '''Register the grpc:client instrumentation module wrapper'''
-        logger.debug('Calling Agent.register_client_grpc().')
-        if not self.is_initialized():
+    def _instrument(self, library_key, app=None):
+        """only used to allow the deprecated register_x library methods to still work"""
+        wrapper_instance = get_instrumentation_wrapper(library_key)
+        if wrapper_instance is None:
             return
-        try:
-            self._init.init_instrumentation_grpc_client()
-            self._init.dump_config()
-        except Exception as err:  # pylint: disable=W0703
-            logger.debug(constants.EXCEPTION_MESSAGE,
-                         'grpc:client',
-                         err,
-                         traceback.format_exc())
 
-    def register_mysql(self) -> None:
-        '''Register the mysql instrumentation module wrapper'''
-        logger.debug('Calling Agent.register_mysql().')
-        if not self.is_initialized():
-            return
-        try:
-            self._init.init_instrumentation_mysql()
-            self._init.dump_config()
-        except Exception as err:  # pylint: disable=W0703
-            logger.debug(constants.EXCEPTION_MESSAGE,
-                         'mysql',
-                         err,
-                         traceback.format_exc())
+        # Flask is a special case compared to rest of instrumentation
+        # using hypertrace-instrument we can replace flask class def before app is initialized
+        # however during code based instr we wrap the existing app
+        # since replacing class def after app is initialized doesnt have an effect
+        # the user has to pass the app in to agent.instrument()
+        # we could resolve this edge case by instead having users directly add the middleware
+        # ex: app = Flask();
+        # app = HypertraceMiddleware(App) => this in turn does agent.instrument()
+        # + we have ref to app
+        if library_key == FLASK_KEY and app is not None:
+            wrapper_instance.with_app(app)
 
-    def register_postgresql(self) -> None:
-        '''Register the postgresql instrumentation module wrapper'''
-        logger.debug('Calling Agent.register_postgresql().')
-        if not self.is_initialized():
-            return
-        try:
-            self._init.init_instrumentation_postgresql()
-            self._init.dump_config()
-        except Exception as err:  # pylint: disable=W0703
-            logger.debug(constants.EXCEPTION_MESSAGE,
-                         'postgresql',
-                         err,
-                         traceback.format_exc())
+        self.register_library(library_key, wrapper_instance)
 
-    def register_requests(self) -> None:
-        '''Register the requests instrumentation module wrapper'''
-        logger.debug('Calling Agent.register_requests()')
-        if not self.is_initialized():
-            return
+    def register_library(self, library_name, wrapper_instance):
+        """will configure settings on an instrumentation wrapper + apply"""
+        logger.debug('attempting to register library instrumentation: %s', library_name)
         try:
-            self._init.init_instrumentation_requests()
-            self._init.dump_config()
+            self._init.init_library_instrumentation(library_name, wrapper_instance)
         except Exception as err:  # pylint: disable=W0703
-            logger.debug(constants.EXCEPTION_MESSAGE,
-                         'requests',
-                         err,
-                         traceback.format_exc())
-
-    def register_aiohttp_client(self) -> None:
-        '''Register the aiohttp-client instrumentation module wrapper'''
-        logger.debug('Calling Agent.register_aiohttp_client().')
-        if not self.is_initialized():
-            return
-        try:
-            self._init.aiohttp_client_init()
-            self._init.dump_config()
-        except Exception as err:  # pylint: disable=W0703
-            logger.debug(constants.EXCEPTION_MESSAGE,
-                         'aiohttp_client',
-                         err,
-                         traceback.format_exc())
+            logger.debug(constants.EXCEPTION_MESSAGE, library_name, err, traceback.format_exc())
 
     def register_processor(self, processor) -> None:  # pylint: disable=R1710
         '''Add additional span exporters + processors'''
@@ -198,3 +135,47 @@ class Agent:
         if not self._initialized:
             return False
         return True
+
+    # These methods are deprecated and replaced by a single call to `agent_instance.instrument()`
+    AGENT_INSTRUMENT_INSTEAD = "You should use agent.instrument() instead"
+    AGENT_INSTRUMENT_VERSION = '0.6.0'
+
+    @deprecated(version=AGENT_INSTRUMENT_VERSION, reason=AGENT_INSTRUMENT_INSTEAD)
+    def register_requests(self):
+        """just a proxy to support deprecated method for instrumenting requests"""
+        self._instrument(REQUESTS_KEY)
+
+    @deprecated(version=AGENT_INSTRUMENT_VERSION, reason=AGENT_INSTRUMENT_INSTEAD)
+    def register_grpc_client(self):
+        """just a proxy to support deprecated method for instrumenting grpc_client"""
+        self._instrument(GRPC_CLIENT_KEY)
+
+    @deprecated(version=AGENT_INSTRUMENT_VERSION, reason=AGENT_INSTRUMENT_INSTEAD)
+    def register_django(self):
+        """just a proxy to support deprecated method for instrumenting django"""
+        self._instrument(DJANGO_KEY)
+
+    @deprecated(version=AGENT_INSTRUMENT_VERSION, reason=AGENT_INSTRUMENT_INSTEAD)
+    def register_mysql(self):
+        """just a proxy to support deprecated method for instrumenting mysql"""
+        self._instrument(MYSQL_KEY)
+
+    @deprecated(version=AGENT_INSTRUMENT_VERSION, reason=AGENT_INSTRUMENT_INSTEAD)
+    def register_grpc_server(self):
+        """just a proxy to support deprecated method for instrumenting grpc server"""
+        self._instrument(GRPC_SERVER_KEY)
+
+    @deprecated(version=AGENT_INSTRUMENT_VERSION, reason=AGENT_INSTRUMENT_INSTEAD)
+    def register_postgresql(self):
+        """just a proxy to support deprecated method for instrumenting postgresql"""
+        self._instrument(POSTGRESQL_KEY)
+
+    @deprecated(version=AGENT_INSTRUMENT_VERSION, reason=AGENT_INSTRUMENT_INSTEAD)
+    def register_aiohttp_client(self):
+        """just a proxy to support deprecated method for instrumenting aiohttp"""
+        self._instrument(AIOHTTP_CLIENT_KEY)
+
+    @deprecated(version=AGENT_INSTRUMENT_VERSION, reason=AGENT_INSTRUMENT_INSTEAD)
+    def register_flask_app(self, app=None):
+        """just a proxy to support deprecated method for instrumenting flask"""
+        self._instrument(FLASK_KEY, app)
