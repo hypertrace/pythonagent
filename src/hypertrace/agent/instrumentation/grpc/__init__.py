@@ -210,8 +210,8 @@ class OpenTelemetryServerInterceptorWrapper(_server.OpenTelemetryServerIntercept
                         context, span)
                     response = behavior(request_or_iterator, context)
                     trailing_metadata = context.get_trailing_metadata()
-                    trailing_metadata = dict(trailing_metadata[0])
                     if len(trailing_metadata) > 0:
+                        trailing_metadata = dict(trailing_metadata[0])
                         self._gisw.generic_rpc_response_handler(
                             trailing_metadata, response, span)
 
