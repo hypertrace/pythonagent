@@ -53,24 +53,6 @@ from hypertrace.agent.config import AgentConfig
 # Initialize logger
 logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
-
-
-# Dump metadata about an object; useful for initial discovery of interestin ginfo
-
-
-def introspect(obj) -&gt; None:
-    &#39;&#39;&#39;Troubleshooting assistance function for inspecting new flask-related objects&#39;&#39;&#39;
-    logger.debug(&#39;Describing object.&#39;)
-    try:
-        for func in [type, id, dir, vars, callable]:
-            logger.debug(&#34;%s(%s):\t\t%s&#34;,
-                         func.__name__, introspect.__code__.co_varnames[0], func(obj))
-        logger.debug(&#34;%s: %s&#34;, func.__name__, inspect.getmembers(obj))
-    except:  # pylint: disable=W0702
-        logger.error(&#39;Error dumping object: exception=%s, stacktrace=%s&#39;,
-                     sys.exc_info()[0],
-                     traceback.format_exc())
-
 # Per request pre-handler
 def _hypertrace_before_request(flask_wrapper):
     &#39;&#39;&#39;This function is invoked by flask to set the handler&#39;&#39;&#39;
@@ -169,6 +151,24 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
         super().__init__()
         self._app = None
 
+    def with_app(self, app=None):
+        &#34;&#34;&#34;when instrumenting via code we need to instrument
+        the app directly, this is conditionally called from agent.instrument&#34;&#34;&#34;
+        self._app = app
+
+    def instrument(self, **kwargs):
+        if self._app:
+            # code based instrumentation
+            before_hook = _hypertrace_before_request(self)
+            after_hook = _hypertrace_after_request(self)
+            FlaskInstrumentorWrapper.instrument_app(self._app)
+            self._app.before_request(before_hook)
+            self._app.after_request(after_hook)
+        else:
+            # auto instrumentation
+            super().instrument()
+
+
     def _instrument(self, **kwargs):
         &#39;&#39;&#39;Override OTel method that sets up global flask instrumentation&#39;&#39;&#39;
         self._original_flask = flask.Flask # pylint: disable = W0201
@@ -223,32 +223,6 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
 <section>
 </section>
 <section>
-<h2 class="section-title" id="header-functions">Functions</h2>
-<dl>
-<dt id="hypertrace.agent.instrumentation.flask.introspect"><code class="name flex">
-<span>def <span class="ident">introspect</span></span>(<span>obj) ‑> None</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Troubleshooting assistance function for inspecting new flask-related objects</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def introspect(obj) -&gt; None:
-    &#39;&#39;&#39;Troubleshooting assistance function for inspecting new flask-related objects&#39;&#39;&#39;
-    logger.debug(&#39;Describing object.&#39;)
-    try:
-        for func in [type, id, dir, vars, callable]:
-            logger.debug(&#34;%s(%s):\t\t%s&#34;,
-                         func.__name__, introspect.__code__.co_varnames[0], func(obj))
-        logger.debug(&#34;%s: %s&#34;, func.__name__, inspect.getmembers(obj))
-    except:  # pylint: disable=W0702
-        logger.error(&#39;Error dumping object: exception=%s, stacktrace=%s&#39;,
-                     sys.exc_info()[0],
-                     traceback.format_exc())</code></pre>
-</details>
-</dd>
-</dl>
 </section>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
@@ -269,6 +243,24 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
         logger.debug(&#39;Entering FlaskInstrumentorWrapper constructor.&#39;)
         super().__init__()
         self._app = None
+
+    def with_app(self, app=None):
+        &#34;&#34;&#34;when instrumenting via code we need to instrument
+        the app directly, this is conditionally called from agent.instrument&#34;&#34;&#34;
+        self._app = app
+
+    def instrument(self, **kwargs):
+        if self._app:
+            # code based instrumentation
+            before_hook = _hypertrace_before_request(self)
+            after_hook = _hypertrace_after_request(self)
+            FlaskInstrumentorWrapper.instrument_app(self._app)
+            self._app.before_request(before_hook)
+            self._app.after_request(after_hook)
+        else:
+            # auto instrumentation
+            super().instrument()
+
 
     def _instrument(self, **kwargs):
         &#39;&#39;&#39;Override OTel method that sets up global flask instrumentation&#39;&#39;&#39;
@@ -395,6 +387,49 @@ def uninstrument_app(app) -&gt; None:
     return self._app</code></pre>
 </details>
 </dd>
+<dt id="hypertrace.agent.instrumentation.flask.FlaskInstrumentorWrapper.instrument"><code class="name flex">
+<span>def <span class="ident">instrument</span></span>(<span>self, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Instrument the library</p>
+<p>This method will be called without any optional arguments by the
+<code>opentelemetry-instrument</code> command.</p>
+<p>This means that calling this method directly without passing any
+optional values should do the very same thing that the
+<code>opentelemetry-instrument</code> command does.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def instrument(self, **kwargs):
+    if self._app:
+        # code based instrumentation
+        before_hook = _hypertrace_before_request(self)
+        after_hook = _hypertrace_after_request(self)
+        FlaskInstrumentorWrapper.instrument_app(self._app)
+        self._app.before_request(before_hook)
+        self._app.after_request(after_hook)
+    else:
+        # auto instrumentation
+        super().instrument()</code></pre>
+</details>
+</dd>
+<dt id="hypertrace.agent.instrumentation.flask.FlaskInstrumentorWrapper.with_app"><code class="name flex">
+<span>def <span class="ident">with_app</span></span>(<span>self, app=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>when instrumenting via code we need to instrument
+the app directly, this is conditionally called from agent.instrument</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def with_app(self, app=None):
+    &#34;&#34;&#34;when instrumenting via code we need to instrument
+    the app directly, this is conditionally called from agent.instrument&#34;&#34;&#34;
+    self._app = app</code></pre>
+</details>
+</dd>
 </dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
@@ -432,19 +467,16 @@ def uninstrument_app(app) -&gt; None:
 <li><code><a title="hypertrace.agent.instrumentation" href="../index.html">hypertrace.agent.instrumentation</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="">
-<li><code><a title="hypertrace.agent.instrumentation.flask.introspect" href="#hypertrace.agent.instrumentation.flask.introspect">introspect</a></code></li>
-</ul>
-</li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
 <h4><code><a title="hypertrace.agent.instrumentation.flask.FlaskInstrumentorWrapper" href="#hypertrace.agent.instrumentation.flask.FlaskInstrumentorWrapper">FlaskInstrumentorWrapper</a></code></h4>
 <ul class="">
 <li><code><a title="hypertrace.agent.instrumentation.flask.FlaskInstrumentorWrapper.get_app" href="#hypertrace.agent.instrumentation.flask.FlaskInstrumentorWrapper.get_app">get_app</a></code></li>
+<li><code><a title="hypertrace.agent.instrumentation.flask.FlaskInstrumentorWrapper.instrument" href="#hypertrace.agent.instrumentation.flask.FlaskInstrumentorWrapper.instrument">instrument</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.flask.FlaskInstrumentorWrapper.instrument_app" href="#hypertrace.agent.instrumentation.flask.FlaskInstrumentorWrapper.instrument_app">instrument_app</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.flask.FlaskInstrumentorWrapper.uninstrument_app" href="#hypertrace.agent.instrumentation.flask.FlaskInstrumentorWrapper.uninstrument_app">uninstrument_app</a></code></li>
+<li><code><a title="hypertrace.agent.instrumentation.flask.FlaskInstrumentorWrapper.with_app" href="#hypertrace.agent.instrumentation.flask.FlaskInstrumentorWrapper.with_app">with_app</a></code></li>
 </ul>
 </li>
 </ul>

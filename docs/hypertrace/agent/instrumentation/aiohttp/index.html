@@ -28,14 +28,10 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">&#39;&#39;&#39;Hypertrace instrumentation logic for aiohttp-client&#39;&#39;&#39;
-import sys
-import os.path
 import logging
 import traceback
-import inspect
 import types
 import typing
-import codecs
 from collections import deque
 import asyncio
 import aiohttp
@@ -43,9 +39,7 @@ import wrapt
 from opentelemetry import context as context_api
 from opentelemetry import trace
 from opentelemetry.instrumentation.aiohttp_client.version import __version__
-from opentelemetry.instrumentation.instrumentor import BaseInstrumentor
-from opentelemetry.trace import SpanKind, TracerProvider, get_tracer
-from opentelemetry.trace.status import Status, StatusCode
+from opentelemetry.trace import TracerProvider, get_tracer
 from opentelemetry.instrumentation.aiohttp_client import AioHttpClientInstrumentor
 from hypertrace.agent.instrumentation import BaseInstrumentorWrapper
 
@@ -54,19 +48,6 @@ logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
 # Max time to wait for response data to be read.
 MAX_WAIT_TIME = 0.1 # seconds
-# Object introspection, used for debugging purposes
-def introspect(obj) -&gt; None:
-    &#39;&#39;&#39;Object introspection, used for debugging purposes&#39;&#39;&#39;
-    logger.debug(&#39;Describing object.&#39;)
-    try:
-        for func in [type, id, dir, vars, callable]:
-            logger.debug(&#34;%s(%s):\t\t%s&#34;,
-                         func.__name__, introspect.__code__.co_varnames[0], func(obj))
-        logger.debug(&#34;%s: %s&#34;, func.__name__, inspect.getmembers(obj))
-    except Exception as err: # pylint: disable=W0703
-        logger.error(&#39;No data to display, exception=%s, stacktrace=%s&#39;,
-                     err,
-                     traceback.print_exc())
 
 # aiohttp-client instrumentation module wrapper class
 class AioHttpClientInstrumentorWrapper(AioHttpClientInstrumentor, BaseInstrumentorWrapper):
@@ -356,29 +337,6 @@ def _instrument(
     return trace_config</code></pre>
 </details>
 </dd>
-<dt id="hypertrace.agent.instrumentation.aiohttp.introspect"><code class="name flex">
-<span>def <span class="ident">introspect</span></span>(<span>obj) ‑> None</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Object introspection, used for debugging purposes</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def introspect(obj) -&gt; None:
-    &#39;&#39;&#39;Object introspection, used for debugging purposes&#39;&#39;&#39;
-    logger.debug(&#39;Describing object.&#39;)
-    try:
-        for func in [type, id, dir, vars, callable]:
-            logger.debug(&#34;%s(%s):\t\t%s&#34;,
-                         func.__name__, introspect.__code__.co_varnames[0], func(obj))
-        logger.debug(&#34;%s: %s&#34;, func.__name__, inspect.getmembers(obj))
-    except Exception as err: # pylint: disable=W0703
-        logger.error(&#39;No data to display, exception=%s, stacktrace=%s&#39;,
-                     err,
-                     traceback.print_exc())</code></pre>
-</details>
-</dd>
 </dl>
 </section>
 <section>
@@ -466,7 +424,6 @@ def _instrument(
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="hypertrace.agent.instrumentation.aiohttp.create_trace_config" href="#hypertrace.agent.instrumentation.aiohttp.create_trace_config">create_trace_config</a></code></li>
-<li><code><a title="hypertrace.agent.instrumentation.aiohttp.introspect" href="#hypertrace.agent.instrumentation.aiohttp.introspect">introspect</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>

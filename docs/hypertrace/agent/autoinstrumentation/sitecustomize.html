@@ -32,59 +32,21 @@ import logging
 from hypertrace.agent import Agent
 from hypertrace.env_var_settings import get_env_value
 
-DEFAULTS = [
-  &#39;Django&#39;,
-  &#39;flask&#39;,
-  &#39;mysql&#39;,
-  &#39;postgresql&#39;,
-  &#39;grpc:server&#39;,
-  &#39;grpc:client&#39;,
-  &#39;requests&#39;,
-  &#39;aiohttp-client&#39;
-]
-
 # Initialize logger
 logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
-MODULES = &#39;&#39;
-instrumented_modules = get_env_value(&#39;INSTRUMENTED_MODULES&#39;)
-if instrumented_modules:
-    logger.debug(&#34;[env] Loaded INSTRUMENTED_MODULES from env&#34;)
-    MODULES = instrumented_modules
-    if len(MODULES) &gt; 0:
-        MODULES = MODULES.replace(&#39; &#39;, &#39;&#39;)
-
-if len(MODULES) &gt; 0:
-    modules_array = MODULES.split(&#39;,&#39;)
+skip_modules = get_env_value(&#39;SKIP_MODULES&#39;)
+if skip_modules:
+    logger.debug(&#34;[env] Loaded SKIP_MODULES from env&#34;)
+    if len(skip_modules) &gt; 0:
+        skip_modules = skip_modules.replace(&#39; &#39;, &#39;&#39;)
+        skip_modules = skip_modules.split(&#39;,&#39;)
 else:
-    modules_array = DEFAULTS
+    skip_modules = []
 
 # Create Hypertrace agent
 agent = Agent()
-
-# Initialize desired instrumentation wrappers
-for mod in modules_array:
-    if mod is None or len(mod) == 0:
-        continue
-
-    if mod == &#39;flask&#39;:
-        agent.register_flask_app()
-    elif mod == &#39;Django&#39;:
-        agent.register_django()
-    elif mod == &#39;grpc:server&#39;:
-        agent.register_grpc_server()
-    elif mod == &#39;grpc:client&#39;:
-        agent.register_grpc_client()
-    elif mod == &#39;mysql&#39;:
-        agent.register_mysql()
-    elif mod == &#39;postgresql&#39;:
-        agent.register_postgresql()
-    elif mod == &#39;requests&#39;:
-        agent.register_requests()
-    elif mod == &#39;aiohttp-client&#39;:
-        agent.register_aiohttp_client()
-    else:
-        logger.error(&#39;Unknown module name: %s&#39;, mod)</code></pre>
+agent.instrument(None, skip_modules)</code></pre>
 </details>
 </section>
 <section>
