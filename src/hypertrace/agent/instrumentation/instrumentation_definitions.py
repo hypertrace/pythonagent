@@ -69,5 +69,5 @@ def get_instrumentation_wrapper(library_key):
         _mark_as_instrumented(library_key, wrapper_instance)
         return wrapper_instance
     except Exception as _err: # pylint:disable=W0703
-        logger.warning("Error while attempting to load instrumentation wrapper for %s", library_key)
+        logger.debug("Error while attempting to load instrumentation wrapper for %s", library_key)
         return None

@@ -76,7 +76,6 @@ class Agent:
             logger.debug('agent is not initialized, not instrumenting')
             return
 
-
         for library_key in SUPPORTED_LIBRARIES:
             if library_key in skip_libraries:
                 logger.debug('not attempting to instrument %s', library_key)
@@ -179,4 +178,4 @@ class Agent:
     @deprecated(version=AGENT_INSTRUMENT_VERSION, reason=AGENT_INSTRUMENT_INSTEAD)
     def register_flask_app(self, app=None):
         """just a proxy to support deprecated method for instrumenting flask"""
-        self._instrument(AIOHTTP_CLIENT_KEY, app)
+        self._instrument(FLASK_KEY, app)
