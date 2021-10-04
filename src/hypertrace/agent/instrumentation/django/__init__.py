@@ -34,6 +34,9 @@ class DjangoInstrumentationWrapper(BaseInstrumentorWrapper):
                                                     body)
             if block_result:
                 logger.debug('should block evaluated to true, aborting with 403')
+                # since middleware chain is halted the status code is not set when blocked
+                span.set_attribute('http.status_code', 403)
+                span.end()
                 raise PermissionDenied
         except PermissionDenied as permission_denied:
             raise permission_denied

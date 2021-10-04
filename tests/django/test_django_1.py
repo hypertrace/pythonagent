@@ -1,6 +1,3 @@
-import sys
-import logging
-import traceback
 import pytest
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
 from opentelemetry.sdk.trace.export import SimpleSpanProcessor
@@ -62,6 +59,11 @@ def test_can_block(client):
     r.register(SampleBlockingFilter)
     response = client.post('/test/123', data={"some_client_data": "123"}, content_type="application/json")
     assert response.status_code == 403
+    simpleExportSpanProcessor.force_flush(1)
+    span_list = memoryExporter.get_finished_spans()
+    django_span = span_list[0]
+    attrs = django_span.attributes
+    assert attrs['http.status_code'] == 403
     r.filters.clear()
     memoryExporter.clear()
 
