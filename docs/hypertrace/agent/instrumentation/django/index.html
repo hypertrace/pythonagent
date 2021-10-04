@@ -63,6 +63,9 @@ class DjangoInstrumentationWrapper(BaseInstrumentorWrapper):
                                                     body)
             if block_result:
                 logger.debug(&#39;should block evaluated to true, aborting with 403&#39;)
+                # since middleware chain is halted the status code is not set when blocked
+                span.set_attribute(&#39;http.status_code&#39;, 403)
+                span.end()
                 raise PermissionDenied
         except PermissionDenied as permission_denied:
             raise permission_denied
@@ -124,6 +127,9 @@ class DjangoInstrumentationWrapper(BaseInstrumentorWrapper):
                                                     body)
             if block_result:
                 logger.debug(&#39;should block evaluated to true, aborting with 403&#39;)
+                # since middleware chain is halted the status code is not set when blocked
+                span.set_attribute(&#39;http.status_code&#39;, 403)
+                span.end()
                 raise PermissionDenied
         except PermissionDenied as permission_denied:
             raise permission_denied
@@ -188,6 +194,9 @@ class DjangoInstrumentationWrapper(BaseInstrumentorWrapper):
                                                 body)
         if block_result:
             logger.debug(&#39;should block evaluated to true, aborting with 403&#39;)
+            # since middleware chain is halted the status code is not set when blocked
+            span.set_attribute(&#39;http.status_code&#39;, 403)
+            span.end()
             raise PermissionDenied
     except PermissionDenied as permission_denied:
         raise permission_denied
