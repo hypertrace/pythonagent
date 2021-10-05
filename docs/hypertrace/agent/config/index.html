@@ -98,6 +98,7 @@ class AgentConfig:  # pylint: disable=R0902,R0903
 
         # transform(to not break old support) like zipkin != proto def of ZIPKIN
         _transform_values(config_dict)
+        logger.info(&#34;Config init complete - config state: %s&#34;, config_dict)
 
         # Create Protobuf AgentConfig object
         #
@@ -317,6 +318,7 @@ If not, data would be loaded from 'DEFAULT_AGENT_CONFIG' on 'default.py'</p></di
 
         # transform(to not break old support) like zipkin != proto def of ZIPKIN
         _transform_values(config_dict)
+        logger.info(&#34;Config init complete - config state: %s&#34;, config_dict)
 
         # Create Protobuf AgentConfig object
         #
