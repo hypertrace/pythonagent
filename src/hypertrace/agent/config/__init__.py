@@ -67,6 +67,7 @@ class AgentConfig:  # pylint: disable=R0902,R0903
 
         # transform(to not break old support) like zipkin != proto def of ZIPKIN
         _transform_values(config_dict)
+        logger.info("Config init complete - config state: %s", config_dict)
 
         # Create Protobuf AgentConfig object
         #

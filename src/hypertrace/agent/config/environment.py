@@ -26,7 +26,7 @@ def load_config_from_env() -> dict:  # pylint: disable=R0912,R0915,R0914
 
     reporter_type = get_env_value('REPORTING_TRACE_REPORTER_TYPE')
     if reporter_type:
-        logger.info(
+        logger.debug(
             "[env] Loaded REPORTING_TRACE_REPORTER_TYPE from env")
         config['reporting']['trace_reporter_type'] = reporter_type
 

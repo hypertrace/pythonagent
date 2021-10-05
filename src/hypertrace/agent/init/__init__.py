@@ -149,12 +149,15 @@ class AgentInit:  # pylint: disable=R0902,R0903
         trace.get_tracer_provider().add_span_processor(simple_export_span_processor)
 
     def _init_exporter(self, trace_reporter_type):
+        exporter_type = ''
         try:
             if trace_reporter_type == config_pb2.TraceReporterType.ZIPKIN:
+                exporter_type = 'zipkin'
                 exporter = ZipkinExporter(
                     endpoint=self._config.agent_config.reporting.endpoint
                 )
             elif trace_reporter_type == config_pb2.TraceReporterType.OTLP:
+                exporter_type = 'otlp'
                 exporter = OTLPSpanExporter(endpoint=self._config.agent_config.reporting.endpoint,
                                             insecure= not self._config.agent_config.reporting.secure)
             else:
@@ -163,10 +166,11 @@ class AgentInit:  # pylint: disable=R0902,R0903
             span_processor = BatchSpanProcessor(exporter)
             trace.get_tracer_provider().add_span_processor(span_processor)
 
-            logger.info(
-                'Initialized Zipkin exporter reporting to `%s`',
-                self._config.agent_config.reporting.endpoint)
+            logger.info('Initialized %s exporter reporting to `%s`',
+                        exporter_type,
+                        self._config.agent_config.reporting.endpoint)
         except Exception as err:  # pylint: disable=W0703
-            logger.error('Failed to initialize Zipkin exporter: exception=%s, stacktrace=%s',
+            logger.error('Failed to initialize %s exporter: exception=%s, stacktrace=%s',
+                         exporter_type,
                          err,
                          traceback.format_exc())
