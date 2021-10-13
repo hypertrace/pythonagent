@@ -13,7 +13,7 @@ class Filter(ABC):
         """evaluate_url_and_headers can be used to evaluate both URL and Header"""
 
     @abstractmethod
-    def evaluate_body(self, span: Span, body) -> bool:
+    def evaluate_body(self, span: Span, body, headers: dict) -> bool:
         """evaluate_body can be used to evaluate the body content"""
 
 
@@ -23,5 +23,5 @@ class NoopFilter(Filter):
     def evaluate_url_and_headers(self, span: Span, url: str, headers: dict) -> bool:
         return False
 
-    def evaluate_body(self, span: Span, body) -> bool:
+    def evaluate_body(self, span: Span, body, headers: dict) -> bool:
         return False
