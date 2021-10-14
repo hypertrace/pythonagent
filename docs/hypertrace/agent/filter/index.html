@@ -42,7 +42,7 @@ class Filter(ABC):
         &#34;&#34;&#34;evaluate_url_and_headers can be used to evaluate both URL and Header&#34;&#34;&#34;
 
     @abstractmethod
-    def evaluate_body(self, span: Span, body) -&gt; bool:
+    def evaluate_body(self, span: Span, body, headers: dict) -&gt; bool:
         &#34;&#34;&#34;evaluate_body can be used to evaluate the body content&#34;&#34;&#34;
 
 
@@ -52,7 +52,7 @@ class NoopFilter(Filter):
     def evaluate_url_and_headers(self, span: Span, url: str, headers: dict) -&gt; bool:
         return False
 
-    def evaluate_body(self, span: Span, body) -&gt; bool:
+    def evaluate_body(self, span: Span, body, headers: dict) -&gt; bool:
         return False</code></pre>
 </details>
 </section>
@@ -96,7 +96,7 @@ continues it.</p></div>
         &#34;&#34;&#34;evaluate_url_and_headers can be used to evaluate both URL and Header&#34;&#34;&#34;
 
     @abstractmethod
-    def evaluate_body(self, span: Span, body) -&gt; bool:
+    def evaluate_body(self, span: Span, body, headers: dict) -&gt; bool:
         &#34;&#34;&#34;evaluate_body can be used to evaluate the body content&#34;&#34;&#34;</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -111,7 +111,7 @@ continues it.</p></div>
 <h3>Methods</h3>
 <dl>
 <dt id="hypertrace.agent.filter.Filter.evaluate_body"><code class="name flex">
-<span>def <span class="ident">evaluate_body</span></span>(<span>self, span: opentelemetry.trace.span.Span, body) ‑> bool</span>
+<span>def <span class="ident">evaluate_body</span></span>(<span>self, span: opentelemetry.trace.span.Span, body, headers: dict) ‑> bool</span>
 </code></dt>
 <dd>
 <div class="desc"><p>evaluate_body can be used to evaluate the body content</p></div>
@@ -120,7 +120,7 @@ continues it.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abstractmethod
-def evaluate_body(self, span: Span, body) -&gt; bool:
+def evaluate_body(self, span: Span, body, headers: dict) -&gt; bool:
     &#34;&#34;&#34;evaluate_body can be used to evaluate the body content&#34;&#34;&#34;</code></pre>
 </details>
 </dd>
@@ -155,7 +155,7 @@ def evaluate_url_and_headers(self, span: Span, url: str, headers: dict) -&gt; bo
     def evaluate_url_and_headers(self, span: Span, url: str, headers: dict) -&gt; bool:
         return False
 
-    def evaluate_body(self, span: Span, body) -&gt; bool:
+    def evaluate_body(self, span: Span, body, headers: dict) -&gt; bool:
         return False</code></pre>
 </details>
 <h3>Ancestors</h3>
