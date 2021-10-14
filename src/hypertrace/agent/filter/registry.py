@@ -34,7 +34,7 @@ class Registry:
 
         if body:
             for filter_instance in self.filters:
-                if filter_instance.evaluate_body(span, body):
+                if filter_instance.evaluate_body(span, body, headers):
                     return True
 
         return False

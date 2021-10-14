@@ -9,7 +9,7 @@ class TestFilter(Filter):
     def evaluate_url_and_headers(self, span: Span, url: str, headers: dict) -> bool:
         return True
 
-    def evaluate_body(self, span: Span, body) -> bool:
+    def evaluate_body(self, span: Span, body, headers: dict) -> bool:
         return True
 
 def test_register():
