@@ -2,7 +2,8 @@
 from opentelemetry.trace import Span, NonRecordingSpan
 
 from hypertrace.agent.filter import Filter
-from hypertrace.agent.filter.registry import Registry
+from hypertrace.agent.filter.registry import Registry, TYPE_HTTP
+
 
 class TestFilter(Filter):
     '''Example of a filter that always returns true'''
@@ -23,10 +24,10 @@ def test_apply_filter_with_values_can_return_true():
     '''Assert that apply_filters will return true when a filter returns true'''
     registry = Registry()
     registry.register(TestFilter)
-    assert registry.apply_filters(NonRecordingSpan(None), 'a_url', {'key': 'v'}, 'body_data')
+    assert registry.apply_filters(NonRecordingSpan(None), 'a_url', {'key': 'v'}, 'body_data', TYPE_HTTP)
 
 def test_apply_filter_returns_false_by_default():
     '''Assert that apply_filters will return false by default'''
     registry = Registry()
     registry.register(TestFilter)
-    assert registry.apply_filters(NonRecordingSpan(None), None, {}, None) is False
+    assert registry.apply_filters(NonRecordingSpan(None), None, {}, None, TYPE_HTTP) is False
