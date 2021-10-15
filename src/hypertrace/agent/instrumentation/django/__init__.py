@@ -7,7 +7,7 @@ from opentelemetry.trace import Span
 from django.core.exceptions import PermissionDenied  # pylint:disable=C0415
 
 from hypertrace.agent import constants
-from hypertrace.agent.filter.registry import Registry
+from hypertrace.agent.filter.registry import Registry, TYPE_HTTP
 from hypertrace.agent.instrumentation import BaseInstrumentorWrapper
 
 
@@ -31,7 +31,8 @@ class DjangoInstrumentationWrapper(BaseInstrumentorWrapper):
             block_result = Registry().apply_filters(span,
                                                     full_url,
                                                     request.headers,
-                                                    body)
+                                                    body,
+                                                    TYPE_HTTP)
             if block_result:
                 logger.debug('should block evaluated to true, aborting with 403')
                 # since middleware chain is halted the status code is not set when blocked

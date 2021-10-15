@@ -5,6 +5,8 @@ from opentelemetry.trace import Span
 
 from hypertrace.agent.filter import Filter
 
+TYPE_HTTP = 'http'
+TYPE_RPC = 'rpc'
 
 class Registry:
     """
@@ -25,16 +27,16 @@ class Registry:
         instance = filter_class()
         self.filters.append(instance)
 
-    def apply_filters(self, span: Span, url: Union[str, None], headers: dict, body) -> bool:
+    def apply_filters(self, span: Span, url: Union[str, None], headers: dict, body, request_type) -> bool:
         '''Apply all registered filters'''
         if url or headers:
             for filter_instance in self.filters:
-                if filter_instance.evaluate_url_and_headers(span, url, headers):
+                if filter_instance.evaluate_url_and_headers(span, url, headers, request_type):
                     return True
 
         if body:
             for filter_instance in self.filters:
-                if filter_instance.evaluate_body(span, body, headers):
+                if filter_instance.evaluate_body(span, body, headers, request_type):
                     return True
 
         return False
