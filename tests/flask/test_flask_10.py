@@ -25,10 +25,10 @@ from hypertrace.agent.filter.registry import Registry
 
 class SampleBlockingFilter(Filter):
 
-    def evaluate_url_and_headers(self, span: Span, url: str, headers: tuple) -> bool:
+    def evaluate_url_and_headers(self, span: Span, url: str, headers: tuple, request_type) -> bool:
         return True
 
-    def evaluate_body(self, span: Span, body, headers: dict) -> bool:
+    def evaluate_body(self, span: Span, body, headers: dict, request_type) -> bool:
         pass
 
 

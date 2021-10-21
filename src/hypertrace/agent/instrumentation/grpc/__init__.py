@@ -13,7 +13,7 @@ from opentelemetry.instrumentation.grpc.version import __version__
 from opentelemetry.instrumentation.grpc.grpcext import intercept_channel
 from wrapt import wrap_function_wrapper as _wrap # pylint: disable=R0801
 from hypertrace.agent import constants
-from hypertrace.agent.filter.registry import Registry
+from hypertrace.agent.filter.registry import Registry, TYPE_RPC
 from hypertrace.agent.instrumentation import BaseInstrumentorWrapper
 
 # Initialize logger with local module name
@@ -179,7 +179,8 @@ class OpenTelemetryServerInterceptorWrapper(_server.OpenTelemetryServerIntercept
                     block_result = Registry().apply_filters(span,
                                                             '',
                                                             invocation_metadata,
-                                                            request_or_iterator)
+                                                            request_or_iterator,
+                                                            TYPE_RPC)
                     if block_result:
                         logger.debug('should block evaluated to true, aborting with 403')
                         return context.abort(grpc.StatusCode.PERMISSION_DENIED, 'Permission Denied')

@@ -16,7 +16,7 @@ from opentelemetry.instrumentation.flask import (
 from werkzeug.exceptions import Forbidden
 
 from hypertrace.agent import constants  # pylint: disable=R0801
-from hypertrace.agent.filter.registry import Registry
+from hypertrace.agent.filter.registry import Registry, TYPE_HTTP
 from hypertrace.agent.instrumentation import BaseInstrumentorWrapper
 from hypertrace.agent.init import AgentInit
 from hypertrace.agent.config import AgentConfig
@@ -50,7 +50,8 @@ def _hypertrace_before_request(flask_wrapper):
             block_result = Registry().apply_filters(span,
                                                     flask.request.url,
                                                     flask.request.headers,
-                                                    flask.request.data)
+                                                    flask.request.data,
+                                                    TYPE_HTTP)
             if block_result:
                 logger.debug('should block evaluated to true, aborting with 403')
                 flask.abort(403)
