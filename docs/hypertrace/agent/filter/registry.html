@@ -34,6 +34,8 @@ from opentelemetry.trace import Span
 
 from hypertrace.agent.filter import Filter
 
+TYPE_HTTP = &#39;http&#39;
+TYPE_RPC = &#39;rpc&#39;
 
 class Registry:
     &#34;&#34;&#34;
@@ -54,16 +56,16 @@ class Registry:
         instance = filter_class()
         self.filters.append(instance)
 
-    def apply_filters(self, span: Span, url: Union[str, None], headers: dict, body) -&gt; bool:
+    def apply_filters(self, span: Span, url: Union[str, None], headers: dict, body, request_type) -&gt; bool: # pylint:disable=R0913
         &#39;&#39;&#39;Apply all registered filters&#39;&#39;&#39;
         if url or headers:
             for filter_instance in self.filters:
-                if filter_instance.evaluate_url_and_headers(span, url, headers):
+                if filter_instance.evaluate_url_and_headers(span, url, headers, request_type):
                     return True
 
         if body:
             for filter_instance in self.filters:
-                if filter_instance.evaluate_body(span, body, headers):
+                if filter_instance.evaluate_body(span, body, headers, request_type):
                     return True
 
         return False</code></pre>
@@ -106,16 +108,16 @@ class Registry:
         instance = filter_class()
         self.filters.append(instance)
 
-    def apply_filters(self, span: Span, url: Union[str, None], headers: dict, body) -&gt; bool:
+    def apply_filters(self, span: Span, url: Union[str, None], headers: dict, body, request_type) -&gt; bool: # pylint:disable=R0913
         &#39;&#39;&#39;Apply all registered filters&#39;&#39;&#39;
         if url or headers:
             for filter_instance in self.filters:
-                if filter_instance.evaluate_url_and_headers(span, url, headers):
+                if filter_instance.evaluate_url_and_headers(span, url, headers, request_type):
                     return True
 
         if body:
             for filter_instance in self.filters:
-                if filter_instance.evaluate_body(span, body, headers):
+                if filter_instance.evaluate_body(span, body, headers, request_type):
                     return True
 
         return False</code></pre>
@@ -123,7 +125,7 @@ class Registry:
 <h3>Methods</h3>
 <dl>
 <dt id="hypertrace.agent.filter.registry.Registry.apply_filters"><code class="name flex">
-<span>def <span class="ident">apply_filters</span></span>(<span>self, span: opentelemetry.trace.span.Span, url: Optional[str], headers: dict, body) ‑> bool</span>
+<span>def <span class="ident">apply_filters</span></span>(<span>self, span: opentelemetry.trace.span.Span, url: Optional[str], headers: dict, body, request_type) ‑> bool</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Apply all registered filters</p></div>
@@ -131,16 +133,16 @@ class Registry:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def apply_filters(self, span: Span, url: Union[str, None], headers: dict, body) -&gt; bool:
+<pre><code class="python">def apply_filters(self, span: Span, url: Union[str, None], headers: dict, body, request_type) -&gt; bool: # pylint:disable=R0913
     &#39;&#39;&#39;Apply all registered filters&#39;&#39;&#39;
     if url or headers:
         for filter_instance in self.filters:
-            if filter_instance.evaluate_url_and_headers(span, url, headers):
+            if filter_instance.evaluate_url_and_headers(span, url, headers, request_type):
                 return True
 
     if body:
         for filter_instance in self.filters:
-            if filter_instance.evaluate_body(span, body, headers):
+            if filter_instance.evaluate_body(span, body, headers, request_type):
                 return True
 
     return False</code></pre>
