@@ -7,7 +7,6 @@ from contextlib import contextmanager
 from deprecated import deprecated
 import opentelemetry.trace as ot
 
-from hypertrace.agent.instrumentation.django.django_auto_instrumentation_compat import add_django_auto_instr_wrappers
 from hypertrace.agent.instrumentation.instrumentation_definitions import SUPPORTED_LIBRARIES, \
     get_instrumentation_wrapper, REQUESTS_KEY, GRPC_CLIENT_KEY, DJANGO_KEY, MYSQL_KEY, GRPC_SERVER_KEY, \
     POSTGRESQL_KEY, AIOHTTP_CLIENT_KEY, FLASK_KEY
@@ -109,6 +108,8 @@ class Agent:
         # and instrument as soon as the app is retrieved(since settings have to be configured
         # before returning loaded app)
         if library_key == DJANGO_KEY and auto_instrument is True:
+            from hypertrace.agent.instrumentation.django.django_auto_instrumentation_compat import \
+                add_django_auto_instr_wrappers  # pylint: disable=C0415
             add_django_auto_instr_wrappers(self, wrapper_instance)
             return
 
