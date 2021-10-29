@@ -17,4 +17,4 @@ else:
 
 # Create Hypertrace agent
 agent = Agent()
-agent.instrument(None, skip_modules)
+agent.instrument(None, skip_modules, auto_instrument=True)
