@@ -9,15 +9,18 @@ This agent supports these frameworks and adds following capabilities:
 - capture SQL queries
 - tracing context propagation
 
-| Module/Framework | Description | Python Versions Tested/Supported|
+
+Hypertrace python agent supports Python 3.6+
+
+| Library | Description | Supported Library Versions|
 |------|-------------| ---------------|
-| [flask](https://flask.palletsprojects.com/en/1.1.x/api)|A micro web framework written in Python.| Python 3.6, 3.7, 3.8, 3.9|
-| [django](https://docs.djangoproject.com/)|Python web framework | Python 3.6, 3.7, 3.8, 3.9|
-| [grpc](https://grpc.github.io/grpc/python/)|Python GRPC library.| Python 3.6, 3.7, 3.8, 3.9|
-| [mysql-connector](https://dev.mysql.com/doc/connector-python/en/)| Python MySQL database client library.| Python 3.6, 3.7, 3.8, 3.9|
-| [psycopg2/postgresql](https://www.psycopg.org/docs/)|Python Postgresql database client library. | Python 3.8, 3.9|
-| [requests](https://docs.python-requests.org/en/master/)|Python HTTP client library.| Python 3.6, 3.7, 3.8, 3.9|
-| [aiohttp](https://docs.aiohttp.org/en/stable/)|Python async HTTP client library.| Python 3.6, 3.7, 3.8, 3.9|
+| [flask](https://flask.palletsprojects.com/en/1.1.x/api)|A micro web framework written in Python.| 1.\*, 2.\*|
+| [django](https://docs.djangoproject.com/)|Python web framework | 1.10+|
+| [grpc](https://grpc.github.io/grpc/python/)|Python GRPC library.| 1.27+|
+| [mysql-connector](https://dev.mysql.com/doc/connector-python/en/)| Python MySQL database client library.| 8.\*|
+| [psycopg2/postgresql](https://www.psycopg.org/docs/)|Python Postgresql database client library. | 2.7.3.1+ |
+| [requests](https://docs.python-requests.org/en/master/)|Python HTTP client library.| 2.\*|
+| [aiohttp](https://docs.aiohttp.org/en/stable/)|Python async HTTP client library.| 3.\*|
 
 ## Getting started
 
