@@ -68,16 +68,16 @@ def test_can_block(client):
     r.filters.clear()
     memoryExporter.clear()
 
-
-def test_wsgi_is_wrapped():
+@pytest.mark.django_db
+def test_wsgi_is_wrapped(client):
     del _INSTRUMENTATION_STATE[DJANGO_KEY]
     TEST_AGENT_INSTANCE._instrument(DJANGO_KEY, auto_instrument=True)
     from django.core import wsgi
     # since we cant test that its a lambda just test that our function is included in the string signature
     assert str(wsgi.get_wsgi_application).index('add_wsgi_wrapper') > 0
 
-
-def test_asgi_is_wrapped():
+@pytest.mark.django_db
+def test_asgi_is_wrapped(client):
     del _INSTRUMENTATION_STATE[DJANGO_KEY]
     TEST_AGENT_INSTANCE._instrument(DJANGO_KEY, auto_instrument=True)
     from django.core import asgi
