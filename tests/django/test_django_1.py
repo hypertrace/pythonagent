@@ -1,4 +1,5 @@
 import pytest
+from hypertrace.agent.instrumentation.instrumentation_definitions import DJANGO_KEY, _INSTRUMENTATION_STATE
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
 from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 from opentelemetry.trace import Span
@@ -66,5 +67,21 @@ def test_can_block(client):
     assert attrs['http.status_code'] == 403
     r.filters.clear()
     memoryExporter.clear()
+
+@pytest.mark.django_db
+def test_wsgi_is_wrapped(client):
+    del _INSTRUMENTATION_STATE[DJANGO_KEY]
+    TEST_AGENT_INSTANCE._instrument(DJANGO_KEY, auto_instrument=True)
+    from django.core import wsgi
+    # since we cant test that its a lambda just test that our function is included in the string signature
+    assert str(wsgi.get_wsgi_application).index('add_wsgi_wrapper') > 0
+
+@pytest.mark.django_db
+def test_asgi_is_wrapped(client):
+    del _INSTRUMENTATION_STATE[DJANGO_KEY]
+    TEST_AGENT_INSTANCE._instrument(DJANGO_KEY, auto_instrument=True)
+    from django.core import asgi
+    # since we cant test that its a lambda just test that our function is included in the string signature
+    assert str(asgi.get_asgi_application).index('add_asgi_wrapper') > 0
 
 

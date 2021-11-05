@@ -68,7 +68,7 @@ class Agent:
         finally:
             self._init.apply_config(self._config)
 
-    def instrument(self, app=None, skip_libraries=None):
+    def instrument(self, app=None, skip_libraries=None, auto_instrument=False):
         '''used to register applicable instrumentation wrappers'''
         if skip_libraries is None:
             skip_libraries = []
@@ -81,9 +81,9 @@ class Agent:
                 logger.debug('not attempting to instrument %s', library_key)
                 continue
 
-            self._instrument(library_key, app)
+            self._instrument(library_key, app, auto_instrument)
 
-    def _instrument(self, library_key, app=None):
+    def _instrument(self, library_key, app=None, auto_instrument=False):
         """only used to allow the deprecated register_x library methods to still work"""
         wrapper_instance = get_instrumentation_wrapper(library_key)
         if wrapper_instance is None:
@@ -100,6 +100,18 @@ class Agent:
         # + we have ref to app
         if library_key == FLASK_KEY and app is not None:
             wrapper_instance.with_app(app)
+
+        # since ht sitecustomize pushes the agent to the front of the load path django instrumentation will error
+        # when using autoinstrumentation since we need the django app settings loaded to add middleware
+        #
+        # in order to resolve this if we detect django we wrap the wsgi/asgi app getter
+        # and instrument as soon as the app is retrieved(since settings have to be configured
+        # before returning loaded app)
+        if library_key == DJANGO_KEY and auto_instrument is True:
+            from hypertrace.agent.instrumentation.django.django_auto_instrumentation_compat import \
+                add_django_auto_instr_wrappers  # pylint: disable=C0415
+            add_django_auto_instr_wrappers(self, wrapper_instance)
+            return
 
         self.register_library(library_key, wrapper_instance)
 
