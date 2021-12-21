@@ -131,3 +131,5 @@ dmypy.json
 tests/agent.log
 
 .idea
+
+.DS_STORE

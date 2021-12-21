@@ -9,12 +9,14 @@ POSTGRESQL_KEY = 'postgresql'
 MYSQL_KEY = 'mysql'
 REQUESTS_KEY = 'requests'
 AIOHTTP_CLIENT_KEY = 'aiohttp:client'
+LAMBDA = 'lambda'
 
 SUPPORTED_LIBRARIES = [
     FLASK_KEY, DJANGO_KEY,
     GRPC_SERVER_KEY, GRPC_CLIENT_KEY,
     POSTGRESQL_KEY, MYSQL_KEY,
-    REQUESTS_KEY, AIOHTTP_CLIENT_KEY
+    REQUESTS_KEY, AIOHTTP_CLIENT_KEY,
+    LAMBDA
 ]
 
 # map of library_key => instrumentation wrapper instance
@@ -63,6 +65,9 @@ def get_instrumentation_wrapper(library_key):
         elif AIOHTTP_CLIENT_KEY == library_key:
             from hypertrace.agent.instrumentation.aiohttp import AioHttpClientInstrumentorWrapper #pylint:disable=C0415
             wrapper_instance = AioHttpClientInstrumentorWrapper()
+        elif LAMBDA == library_key:
+            from hypertrace.agent.instrumentation.aws_lambda import AwsLambdaInstrumentorWrapper #pylint:disable=C0415
+            wrapper_instance = AwsLambdaInstrumentorWrapper()
         else:
             return None
 
