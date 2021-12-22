@@ -27,3 +27,4 @@ Django==3.2.7
 pytest-django==4.4.0
 psycopg2>=2.9.1
 mysql-connector-python>=8.0.26
+setuptools==49.2.1
