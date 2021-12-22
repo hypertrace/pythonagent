@@ -1,5 +1,5 @@
 FROM centos/python-36-centos7
-RUN echo "asdf"
+
 USER root
 RUN pwd
 

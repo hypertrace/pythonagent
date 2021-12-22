@@ -1,9 +1,8 @@
 #!/bin/bash
 export LAMBDA_LAYER_PKGS_DIR="/opt/python";
 
-# - Set Lambda Layer python packages in PYTHONPATH so `opentelemetry-instrument`
-#   script can find them (it needs to find `opentelemetry` to find the auto
-#   instrumentation `run()` method later)
+# - Set Lambda Layer python packages in PYTHONPATH so `hypertrace-instrument`
+#   script can find them
 
 export PYTHONPATH="$LAMBDA_LAYER_PKGS_DIR:$PYTHONPATH";
 
