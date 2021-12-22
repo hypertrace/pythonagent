@@ -161,8 +161,8 @@ def load_config_from_env() -> dict:  # pylint: disable=R0912,R0915,R0914
         logger.debug('[env] Loaded RESOURCE_ATTRIBUTES from env')
         groups = resource_attributes.split(',')
         for group in groups:
-            k, v = group.split('=')
-            config['resource_attributes'][k] = v
+            key, value = group.split('=')
+            config['resource_attributes'][key] = value
     return config
 
 def _is_true(value):

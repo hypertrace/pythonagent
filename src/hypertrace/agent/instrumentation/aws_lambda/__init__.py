@@ -1,15 +1,11 @@
 '''Hypertrace wrapper around OTel Lambda Instrumentor'''  # pylint: disable=R0801
 import logging
-from opentelemetry.instrumentation.aws_lambda import AwsLambdaInstrumentor
-from hypertrace.agent.instrumentation import BaseInstrumentorWrapper
-
 import os
-from typing import Any, Callable, Collection
-
+from typing import Any, Callable
 from wrapt import wrap_function_wrapper
 
+from opentelemetry.instrumentation.aws_lambda import AwsLambdaInstrumentor
 from opentelemetry.context.context import Context
-
 from opentelemetry.instrumentation.aws_lambda.version import __version__
 from opentelemetry.instrumentation.aws_lambda import _default_event_context_extractor
 from opentelemetry.semconv.resource import ResourceAttributes
@@ -22,6 +18,7 @@ from opentelemetry.trace import (
 )
 from opentelemetry.instrumentation import aws_lambda
 
+from hypertrace.agent.instrumentation import BaseInstrumentorWrapper
 logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
 
@@ -41,8 +38,8 @@ class AwsLambdaInstrumentorWrapper(AwsLambdaInstrumentor, BaseInstrumentorWrappe
             tracer_provider: TracerProvider = None,
     ):
         wrapper_instance = self
-        def _instrumented_lambda_handler_call(
-                call_wrapped, instance, args, kwargs
+        def _instrumented_lambda_handler_call( # pylint:disable=R0914
+                call_wrapped, _instance, args, kwargs
         ):
 
             orig_handler_name = ".".join(
@@ -51,7 +48,8 @@ class AwsLambdaInstrumentorWrapper(AwsLambdaInstrumentor, BaseInstrumentorWrappe
 
             lambda_event = args[0]
 
-            parent_context = aws_lambda._determine_parent_context(
+
+            parent_context = aws_lambda._determine_parent_context(  # pylint:disable=W0212
                 lambda_event, event_context_extractor
             )
 
@@ -113,7 +111,8 @@ class AwsLambdaInstrumentorWrapper(AwsLambdaInstrumentor, BaseInstrumentorWrappe
                 _tracer_provider.force_flush()
             except Exception:  # pylint: disable=broad-except
                 logger.error(
-                    "TracerProvider was missing `force_flush` method. This is necessary in case of a Lambda freeze and would exist in the OTel SDK implementation."
+                    "TracerProvider was missing `force_flush` method. \
+                    This is necessary in case of a Lambda freeze and would exist in the OTel SDK implementation."
                 )
 
             return result
@@ -139,7 +138,7 @@ class AwsLambdaInstrumentorWrapper(AwsLambdaInstrumentor, BaseInstrumentorWrappe
                     request.
         """
         logger.debug("in AwsLambdaInstrumentorWrapper _instrument")
-        lambda_handler = os.environ.get(aws_lambda.ORIG_HANDLER, os.environ.get(aws_lambda._HANDLER))
+        lambda_handler = os.environ.get(aws_lambda.ORIG_HANDLER, os.environ.get(aws_lambda._HANDLER))  # pylint:disable=W0212
         # pylint: disable=attribute-defined-outside-init
         (
             self._wrapped_module_name,
