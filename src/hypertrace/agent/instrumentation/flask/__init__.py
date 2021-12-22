@@ -9,8 +9,6 @@ import flask
 from opentelemetry.instrumentation.flask import (
     _InstrumentedFlask,
     FlaskInstrumentor,
-    get_default_span_name,
-    _teardown_request,
     _ENVIRON_SPAN_KEY,
 )
 from werkzeug.exceptions import Forbidden
@@ -18,7 +16,7 @@ from werkzeug.exceptions import Forbidden
 from hypertrace.agent import constants  # pylint: disable=R0801
 from hypertrace.agent.filter.registry import Registry, TYPE_HTTP
 from hypertrace.agent.instrumentation import BaseInstrumentorWrapper
-from hypertrace.agent.init import AgentInit
+
 from hypertrace.agent.config import AgentConfig
 
 # Initialize logger
@@ -153,13 +151,15 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
 
     # Initialize instrumentation wrapper
     @staticmethod
-    def instrument_app(app, request_hook=None, response_hook=None, tracer_provider=None):
+    def instrument_app(app, request_hook=None, response_hook=None,
+        tracer_provider=None,
+        excluded_urls=None):
         '''Initialize instrumentation'''
         logger.debug('Entering FlaskInstrumentorWrapper.instument_app().')
         try:
 
             # Call parent class's initialization
-            FlaskInstrumentor.instrument_app(app, request_hook, response_hook, None)
+            FlaskInstrumentor.instrument_app(app, request_hook, response_hook)
 
         except Exception as err:  # pylint: disable=W0703
             logger.error("""An error occurred initializing flask otel
