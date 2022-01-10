@@ -16,7 +16,10 @@ if [ -z ${HT_REPORTING_TRACE_REPORTING_TYPE} ]; then
     export HT_REPORTING_TRACE_REPORTING_TYPE=OTLP;
 fi
 
-# - Set the service name
+# when deployed with otel collector layer set default reporting to the lambdas localhost
+if [ -z ${HT_REPORTING_ENDPOINT} ]; then
+    export HT_REPORTING_ENDPOINT="0.0.0.0:4317";
+fi
 
 if [ -z ${HT_SERVICE_NAME} ]; then
     export HT_SERVICE_NAME=$AWS_LAMBDA_FUNCTION_NAME;

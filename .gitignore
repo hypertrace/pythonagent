@@ -133,3 +133,5 @@ tests/agent.log
 .idea
 
 .DS_STORE
+
+lambda_layer/collector-build

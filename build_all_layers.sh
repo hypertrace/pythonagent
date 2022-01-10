@@ -1,6 +1,6 @@
 #!/bin/sh
 REGION=$1    # required # ex: us-east-2
-HT_ARTIFACT_FROM_PYPI="${$2:=true}" # true/false - default=true, if true pypi artifact is used instead of local source build, if false build agent from source locally
+HT_ARTIFACT_FROM_PYPI=$2 # true/false - default=true, if true pypi artifact is used instead of local source build, if false build agent from source locally
 
 if [ -z ${REGION} ]; then
   echo "must pass argument to indicate the region to deploy the layer into"
