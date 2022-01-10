@@ -21,9 +21,9 @@ Resources:
         - AWSLambda_ReadOnlyAccess
         - AWSXrayWriteOnlyAccess
         - AmazonS3FullAccess
-      Environment:
-        Variables:
-          AWS_LAMBDA_EXEC_WRAPPER: /opt/hypertrace-instrument
+#      Environment:
+#        Variables:
+#          AWS_LAMBDA_EXEC_WRAPPER: /opt/hypertrace-instrument
 #      Layers:
 #        - arn:aws:lambda:us-east-1:286278240186:layer:collector-layer:1
 #        - arn:aws:lambda:us-east-1:286278240186:layer:hypertrace-layer-python38:2
