@@ -34,6 +34,7 @@ mkdir -p lambda_layer/build
 
 if [ "false" = "$PYPI_ARTIFACT" ]; then
   echo "Using local source build"
+  pip install build
   python3 -m build
   rm lambda_layer/hypertrace-agent-*.tar.gz
   mv dist/hypertrace-agent-*.tar.gz ./lambda_layer
