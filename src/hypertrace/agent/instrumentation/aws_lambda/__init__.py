@@ -90,6 +90,8 @@ class AwsLambdaInstrumentorWrapper(AwsLambdaInstrumentor, BaseInstrumentorWrappe
                         span.set_attribute(SpanAttributes.HTTP_HOST,
                                            lambda_event.get('multiValueHeaders', {}).get('Host', None))
 
+
+                    wrapper_instance.generic_request_handler(headers, lambda_event.get('body', None), span)
                     lambda_context = args[1]
                     # NOTE: The specs mention an exception here, allowing the
                     # `ResourceAttributes.FAAS_ID` attribute to be set as a span
