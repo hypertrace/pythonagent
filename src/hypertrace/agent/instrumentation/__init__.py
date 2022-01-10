@@ -119,11 +119,7 @@ class BaseInstrumentorWrapper:
                     body_str = body
 
                 request_body_str = self.grab_first_n_bytes(body_str)
-                if content_type in ['application/json', 'application/graphql']:
-                    # why do we need to do this?
-                    span.set_attribute(body_prefix, request_body_str.replace("'", '"'))
-                else:
-                    span.set_attribute(body_prefix, request_body_str)
+                span.set_attribute(body_prefix, request_body_str)
 
         except:  # pylint: disable=W0702
             logger.debug('An error occurred in genericRequestHandler: exception=%s, stacktrace=%s',

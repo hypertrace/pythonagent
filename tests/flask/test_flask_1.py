@@ -79,7 +79,11 @@ def test_run():
     logger.info('Serving request for /route2.')
     response = flask.Response(mimetype='application/json')
     response.headers['tester3'] = 'tester3'
-    response.data = str('{ "a": "a", "xyz": "xyz" }')
+    json_data = {
+      "id": "root",
+      "message": "Hello [('mysql.infoschema', 'localhost'), ('mysql.session', 'localhost'), ('mysql.sys', 'localhost'), ('root', 'localhost')]"
+    }
+    response.data = json.dumps(json_data)
     return response
 
   @app.route("/terminate")
@@ -111,17 +115,8 @@ def test_run():
   memoryExporter = InMemorySpanExporter()
   simpleExportSpanProcessor = SimpleSpanProcessor(memoryExporter)
   agent.register_processor(simpleExportSpanProcessor)
-  logger.info('Added in-memoy span exporter')
+  logger.info('Added in-memory span exporter')
 
-#  # Setup Jaeger Exporter
-#  logger.info('Adding jaeger span exporter.')
-#  jaegerExporter = JaegerExporter(
-#      agent_host_name='localhost',
-#      agent_port=6831,
-#  )
-#  batchExportSpanProcessor = BatchSpanProcessor(jaegerExporter)
-#  agent.register_processor(batchExportSpanProcessor)
-#  logger.info('Added jaeger span exporter.')
 
   logger.info('Running test calls.')
   with app.test_client() as c:
@@ -162,7 +157,7 @@ def test_run():
       assert flaskSpanAsObject['attributes']['http.request.header.tester1'] == 'tester1'
       assert flaskSpanAsObject['attributes']['http.request.header.tester2'] == 'tester2'
       assert flaskSpanAsObject['attributes']['http.response.header.content-type'] == 'application/json'
-      assert flaskSpanAsObject['attributes']['http.response.body'] == '{ "a": "a", "xyz": "xyz" }'
+      assert flaskSpanAsObject['attributes']['http.response.body'] == """{"id": "root","message": "Hello [('mysql.infoschema', 'localhost'), ('mysql.session', 'localhost'), ('mysql.sys', 'localhost'), ('root', 'localhost')]"}"""
       assert flaskSpanAsObject['attributes']['http.status_code'] == 200
       assert flaskSpanAsObject['attributes']['http.response.header.tester3'] == 'tester3'
       memoryExporter.clear()
