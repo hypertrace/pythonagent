@@ -77,9 +77,10 @@ logger.info('Added in-memoy span exporter')
 class Greeter(helloworld_pb2_grpc.GreeterServicer):
     def SayHello(self, request, context):
         logger.debug('Received request.')
-        metadata = (('tester', 'tester'), ('tester2', 'tester2'))
-        logger.debug('Setting custom headers.')
-        context.set_trailing_metadata(metadata)
+        if request.name != 'no-metadata':
+            metadata = (('tester', 'tester'), ('tester2', 'tester2'))
+            logger.debug('Setting custom headers.')
+            context.set_trailing_metadata(metadata)
         logger.debug('Returning response.')
         return helloworld_pb2.HelloReply(message='Hello, %s!' % request.name)
 
@@ -114,21 +115,7 @@ def exit_callback():
             assert len(span_list) == 2
             logger.debug('span_list: ' + str(span_list[0].attributes))
             flaskSpanAsObject = json.loads(span_list[0].to_json())
-            # Check that the expected results are in the flask extended span attributes
-#      "attributes": {
-#        "rpc.system": "grpc",
-#        "rpc.grpc.status_code": 0,
-#        "rpc.method": "SayHello",
-#        "rpc.service": "helloworld.Greeter",
-#        "rpc.user_agent": "grpc-python/1.36.1 grpc-c/15.0.0 (linux; chttp2)",
-#        "net.peer.ip": "[::1]",
-#        "net.peer.port": "47132",
-#        "net.peer.name": "localhost",
-#        "rpc.request.metadata.user-agent": "grpc-python/1.36.1 grpc-c/15.0.0 (linux; chttp2)",
-#        "rpc.request.body": "name: \"you\"\n",
-#        "rpc.response.metadata.tester": "tester",
-#        "rpc.response.metadata.tester2": "tester2",
-#        "rpc.response.body": "message: \"Hello, you!\"\n"
+
             assert flaskSpanAsObject['attributes']['rpc.system'] == 'grpc'
             assert flaskSpanAsObject['attributes']['rpc.method'] == 'SayHello'
             user_agent_re = re.compile(
@@ -140,6 +127,32 @@ def exit_callback():
             assert flaskSpanAsObject['attributes']['rpc.response.metadata.tester2'] == 'tester2'
             assert flaskSpanAsObject['attributes']['rpc.response.metadata.tester'] == 'tester'
             assert flaskSpanAsObject['attributes']['rpc.response.body'] == 'message: \"Hello, you!\"\n'
+            memoryExporter.clear()
+
+            stub = helloworld_pb2_grpc.GreeterStub(channel)
+            response = stub.SayHello(helloworld_pb2.HelloRequest(name='no-metadata'))
+            assert response.message == 'Hello, no-metadata!'
+            logger.info("Greeter client received: " + response.message)
+            # Get all of the in memory spans that were recorded for this iteration
+            span_list = memoryExporter.get_finished_spans()
+            # Confirm something was returned.
+            assert span_list
+
+            logger.debug('len(span_list): ' + str(len(span_list)))
+            # 1 span for server + 1 span for client
+            assert len(span_list) == 2
+            logger.debug('span_list: ' + str(span_list[0].attributes))
+            flaskSpanAsObject = json.loads(span_list[0].to_json())
+
+            assert flaskSpanAsObject['attributes']['rpc.system'] == 'grpc'
+            assert flaskSpanAsObject['attributes']['rpc.method'] == 'SayHello'
+            user_agent_re = re.compile(
+                'grpc-python/.* grpc-c/.* (.*; chttp2)')
+            assert re.match(
+                user_agent_re, flaskSpanAsObject['attributes']['rpc.request.metadata.user-agent'])
+            assert flaskSpanAsObject['attributes']['rpc.request.body'] == 'name: \"no-metadata\"\n'
+            assert flaskSpanAsObject['attributes']['rpc.grpc.status_code'] == 0
+            assert flaskSpanAsObject['attributes']['rpc.response.body'] == 'message: \"Hello, no-metadata!\"\n'
             memoryExporter.clear()
             return 0
     except:
