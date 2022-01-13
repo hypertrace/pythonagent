@@ -1,17 +1,3 @@
-opentelemetry-api==1.4.0
-opentelemetry-exporter-otlp==1.4.0
-opentelemetry-exporter-zipkin==1.4.0
-opentelemetry-instrumentation==0.23b0
-opentelemetry-instrumentation-aiohttp-client==0.23b0
-opentelemetry-instrumentation-wsgi==0.23b0
-opentelemetry-instrumentation-flask==0.23b0
-opentelemetry-instrumentation-mysql==0.23b0
-opentelemetry-instrumentation-psycopg2==0.23b0
-opentelemetry-instrumentation-requests==0.23b0
-opentelemetry-instrumentation-grpc==0.23b0
-opentelemetry-propagator-b3==1.4.0
-opentelemetry-sdk==1.4.0
-opentelemetry-util-http==0.23b0
 aiohttp
 google>=3.0.0
 pyyaml
