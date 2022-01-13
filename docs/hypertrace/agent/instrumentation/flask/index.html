@@ -39,7 +39,6 @@ from opentelemetry.instrumentation.flask import (
     _InstrumentedFlask,
     FlaskInstrumentor,
     get_default_span_name,
-    _teardown_request,
     _ENVIRON_SPAN_KEY,
 )
 from werkzeug.exceptions import Forbidden
@@ -182,7 +181,7 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
 
     # Initialize instrumentation wrapper
     @staticmethod
-    def instrument_app(app, request_hook=None, response_hook=None, tracer_provider=None):
+    def instrument_app(app, request_hook=None, response_hook=None, tracer_provider=None, excluded_urls=None):
         &#39;&#39;&#39;Initialize instrumentation&#39;&#39;&#39;
         logger.debug(&#39;Entering FlaskInstrumentorWrapper.instument_app().&#39;)
         try:
@@ -275,7 +274,7 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
 
     # Initialize instrumentation wrapper
     @staticmethod
-    def instrument_app(app, request_hook=None, response_hook=None, tracer_provider=None):
+    def instrument_app(app, request_hook=None, response_hook=None, tracer_provider=None, excluded_urls=None):
         &#39;&#39;&#39;Initialize instrumentation&#39;&#39;&#39;
         logger.debug(&#39;Entering FlaskInstrumentorWrapper.instument_app().&#39;)
         try:
@@ -321,7 +320,7 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
 <h3>Static methods</h3>
 <dl>
 <dt id="hypertrace.agent.instrumentation.flask.FlaskInstrumentorWrapper.instrument_app"><code class="name flex">
-<span>def <span class="ident">instrument_app</span></span>(<span>app, request_hook=None, response_hook=None, tracer_provider=None)</span>
+<span>def <span class="ident">instrument_app</span></span>(<span>app, request_hook=None, response_hook=None, tracer_provider=None, excluded_urls=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Initialize instrumentation</p></div>
@@ -330,7 +329,7 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
-def instrument_app(app, request_hook=None, response_hook=None, tracer_provider=None):
+def instrument_app(app, request_hook=None, response_hook=None, tracer_provider=None, excluded_urls=None):
     &#39;&#39;&#39;Initialize instrumentation&#39;&#39;&#39;
     logger.debug(&#39;Entering FlaskInstrumentorWrapper.instument_app().&#39;)
     try:
