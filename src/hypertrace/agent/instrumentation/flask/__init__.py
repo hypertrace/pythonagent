@@ -10,7 +10,6 @@ from opentelemetry.instrumentation.flask import (
     _InstrumentedFlask,
     FlaskInstrumentor,
     get_default_span_name,
-    _teardown_request,
     _ENVIRON_SPAN_KEY,
 )
 from werkzeug.exceptions import Forbidden
@@ -153,7 +152,7 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
 
     # Initialize instrumentation wrapper
     @staticmethod
-    def instrument_app(app, request_hook=None, response_hook=None, tracer_provider=None):
+    def instrument_app(app, request_hook=None, response_hook=None, tracer_provider=None, excluded_urls=None):
         '''Initialize instrumentation'''
         logger.debug('Entering FlaskInstrumentorWrapper.instument_app().')
         try:
