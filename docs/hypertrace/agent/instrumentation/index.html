@@ -148,11 +148,7 @@ class BaseInstrumentorWrapper:
                     body_str = body
 
                 request_body_str = self.grab_first_n_bytes(body_str)
-                if content_type in [&#39;application/json&#39;, &#39;application/graphql&#39;]:
-                    # why do we need to do this?
-                    span.set_attribute(body_prefix, request_body_str.replace(&#34;&#39;&#34;, &#39;&#34;&#39;))
-                else:
-                    span.set_attribute(body_prefix, request_body_str)
+                span.set_attribute(body_prefix, request_body_str)
 
         except:  # pylint: disable=W0702
             logger.debug(&#39;An error occurred in genericRequestHandler: exception=%s, stacktrace=%s&#39;,
@@ -436,11 +432,7 @@ class BaseInstrumentorWrapper:
                     body_str = body
 
                 request_body_str = self.grab_first_n_bytes(body_str)
-                if content_type in [&#39;application/json&#39;, &#39;application/graphql&#39;]:
-                    # why do we need to do this?
-                    span.set_attribute(body_prefix, request_body_str.replace(&#34;&#39;&#34;, &#39;&#34;&#39;))
-                else:
-                    span.set_attribute(body_prefix, request_body_str)
+                span.set_attribute(body_prefix, request_body_str)
 
         except:  # pylint: disable=W0702
             logger.debug(&#39;An error occurred in genericRequestHandler: exception=%s, stacktrace=%s&#39;,
