@@ -5,7 +5,7 @@ receivers:
       http:
 exporters:
   otlphttp:
-    endpoint: http://<insert_collector_ip>:4318
+    endpoint: "${COLLECTOR_ENDPOINT}"
 service:
   pipelines:
     traces:

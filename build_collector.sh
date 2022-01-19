@@ -10,7 +10,7 @@ fi
 
 if [ -z ${BUCKET_NAME} ]; then
   echo "2nd arg not provided, using default bucket name of 'collector-bucket'"
- BUCKET_NAME='collector-bucket'
+ BUCKET_NAME='collector-bucket-test-donnie'
 fi
 
 
@@ -25,3 +25,10 @@ echo Clearing cached files...
 aws s3 rm s3://${BUCKET_NAME}/collector-extension.zip
 aws s3 rb s3://${BUCKET_NAME}
 echo OpenTelemetry Collector layer published.
+
+# aws lambda add-layer-version-permission --layer-name node-sharp \
+#  --principal '*' \
+#  --action lambda:GetLayerVersion \
+#  --version-number 3
+#  --statement-id public
+#  --region us-east-1
