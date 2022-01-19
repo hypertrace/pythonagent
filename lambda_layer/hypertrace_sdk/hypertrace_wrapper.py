@@ -14,7 +14,7 @@ class HandlerError(Exception):
 
 
 a = Agent()
-a.instrument(None)
+a.instrument(None, auto_instrument=True)
 
 path = os.environ.get("ORIG_HANDLER")
 
@@ -30,4 +30,3 @@ modified_mod_name = modify_module_name(mod_name)
 handler_module = import_module(modified_mod_name)
 
 lambda_handler = getattr(handler_module, handler_name)
-

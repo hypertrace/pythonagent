@@ -70,17 +70,28 @@ class AwsLambdaInstrumentorWrapper(AwsLambdaInstrumentor, BaseInstrumentorWrappe
             ) as span:
                 if span.is_recording():
                     headers = lambda_event.get('headers', {})
+                    if span.is_recording():
+                        headers = lambda_event.get('headers', {})
+                        lambda_request_context = lambda_event.get('requestContext', {})
+                        logger.debug(lambda_request_context)
 
-                    lambda_http_context = lambda_event.get('requestContext', {}).get('http', None)
-                    if lambda_http_context:
-                        span.set_attribute(SpanAttributes.HTTP_METHOD, lambda_http_context.get('method', None))
-                        span.set_attribute(SpanAttributes.HTTP_SCHEME, lambda_http_context.get('protocol', None))
-                        span.set_attribute(SpanAttributes.HTTP_URL, lambda_http_context.get('path', None))
-                        span.set_attribute(SpanAttributes.HTTP_TARGET, lambda_http_context.get('path', None))
+                    if lambda_request_context.get('http', None):
+                        http_context = lambda_request_context.get('http')
+                        span.set_attribute(SpanAttributes.HTTP_METHOD, http_context.get('method', None))
+                        span.set_attribute(SpanAttributes.HTTP_SCHEME, http_context.get('protocol', None))
+                        span.set_attribute(SpanAttributes.HTTP_URL, http_context.get('path', None))
+                        span.set_attribute(SpanAttributes.HTTP_TARGET, http_context.get('path', None))
                         span.set_attribute(SpanAttributes.HTTP_HOST, headers.get('host', None))
+                    if lambda_request_context.get('path', None):
+                        span.set_attribute(SpanAttributes.HTTP_METHOD, lambda_request_context.get('httpMethod', None))
+                        span.set_attribute(SpanAttributes.HTTP_SCHEME, lambda_request_context.get('protocol', None))
+                        span.set_attribute(SpanAttributes.HTTP_URL, lambda_request_context.get('path', None))
+                        span.set_attribute(SpanAttributes.HTTP_TARGET, lambda_request_context.get('path', None))
+                        span.set_attribute(SpanAttributes.HTTP_HOST,
+                                           lambda_event.get('multiValueHeaders', {}).get('Host', None))
+
 
                     wrapper_instance.generic_request_handler(headers, lambda_event.get('body', None), span)
-
                     lambda_context = args[1]
                     # NOTE: The specs mention an exception here, allowing the
                     # `ResourceAttributes.FAAS_ID` attribute to be set as a span
@@ -98,17 +109,21 @@ class AwsLambdaInstrumentorWrapper(AwsLambdaInstrumentor, BaseInstrumentorWrappe
                     )
 
                 result = call_wrapped(*args, **kwargs)
+
                 result_status_code = result.get('statusCode', None)
 
                 if result_status_code:
                     span.set_attribute(SpanAttributes.HTTP_STATUS_CODE, result_status_code)
+
                 wrapper_instance.generic_response_handler(result.get('headers', {}), result.get('body', None), span)
             _tracer_provider = tracer_provider or get_tracer_provider()
             try:
                 # NOTE: `force_flush` before function quit in case of Lambda freeze.
                 # Assumes we are using the OpenTelemetry SDK implementation of the
                 # `TracerProvider`.
-                _tracer_provider.force_flush()
+                logger.info('Attempting to export spans')
+                _tracer_provider.force_flush(5000)  # max of 5 seconds to export
+                logger.info('Exported spans')
             except Exception:  # pylint: disable=broad-except
                 logger.error(
                     "TracerProvider was missing `force_flush` method. \
@@ -116,7 +131,7 @@ class AwsLambdaInstrumentorWrapper(AwsLambdaInstrumentor, BaseInstrumentorWrappe
                 )
 
             return result
-
+        logger.debug("Creating wrapped lambda_handler")
         wrap_function_wrapper(
             wrapped_module_name,
             wrapped_function_name,

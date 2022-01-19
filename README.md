@@ -120,8 +120,8 @@ In order to use the agent in an aws lambda, first publish a layer to your AWS ac
 You must have the [aws cli](https://aws.amazon.com/cli/) & [sam](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html) installed. 
 
 From the root of this repo run: 
-`./build_layer.sh <python version target> <region to deploy layer to>`
-ex: `./build_layer.sh python38 us-east-2`
+`./build_layer.sh <region to deploy layer to> <python version target>`
+ex: `./build_layer.sh us-east-2 python38`
 
 The region should match the region of the lambda you are instrumenting.
 The python version should match the version of the python runtime you are instrumenting.
@@ -152,7 +152,6 @@ ServerlessFunction:
     Environment:
         Variables:
           AWS_LAMBDA_EXEC_WRAPPER: /opt/hypertrace-instrument
-          HT_REPORTING_ENDPOINT: "http://insert-otlp-collector-ip:4317"
 ```
 
 ## Development

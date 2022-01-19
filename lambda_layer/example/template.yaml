@@ -1,0 +1,36 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: Python Sample Lambda
+Resources:
+  api:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: api
+      TracingEnabled: true
+      OpenApiVersion: 3.0.2
+  function:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: main.lambda_handler
+      Runtime: python3.8
+      CodeUri: ./build/python
+      MemorySize: 512
+      Timeout: 15
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - AWSLambda_ReadOnlyAccess
+        - AWSXrayWriteOnlyAccess
+        - AmazonS3FullAccess
+#      Environment:
+#        Variables:
+#          AWS_LAMBDA_EXEC_WRAPPER: /opt/hypertrace-instrument
+#      Layers:
+#        - arn:aws:lambda:us-east-1:286278240186:layer:collector-layer:1
+#        - arn:aws:lambda:us-east-1:286278240186:layer:hypertrace-layer-python38:2
+      Events:
+        getEndpoint:
+          Type: Api
+          Properties:
+            RestApiId: !Ref api
+            Path: /
+            Method: GET

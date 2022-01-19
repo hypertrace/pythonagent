@@ -5,4 +5,4 @@ Prerequisites:
 
 1.) Run `./build_example_lambda.sh`
 
-2.) Upload the zipped function: `build/function.zip` to AWS lambda
+2.) `sam deploy build -t ./template.yaml --stack-name hypertrace-python-example --resolve-s3 --capabilities CAPABILITY_IAM`

@@ -1,7 +1,12 @@
 #!/bin/sh
 REGION=$1         # ex: us-east-2
 PYTHON_VERSION=$2 # ex: python3.9
-PYPI_ARTIFACT="${$3:=true}"  # true/false, if true downloads artifact from pypi
+PYPI_ARTIFACT=$3  # true/false, if true downloads artifact from pypi
+
+if [ -z ${PYPI_ARTIFACT} ]; then
+  echo "Use pypi artifact not specified, defaulting to true"
+  PYPI_ARTIFACT="true"
+fi
 
 if [ -z ${REGION} ]; then
   echo "must pass 1st argument to indicate the region to deploy the layer into"
@@ -27,7 +32,9 @@ rm -rf lambda_layer/build
 
 mkdir -p lambda_layer/build
 
-if [ "true" = "$PYPI_ARTIFACT" ]; then
+if [ "false" = "$PYPI_ARTIFACT" ]; then
+  echo "Using local source build"
+  pip install build
   python3 -m build
   rm lambda_layer/hypertrace-agent-*.tar.gz
   mv dist/hypertrace-agent-*.tar.gz ./lambda_layer
