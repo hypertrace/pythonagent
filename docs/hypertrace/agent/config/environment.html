@@ -184,7 +184,14 @@ def load_config_from_env() -&gt; dict:  # pylint: disable=R0912,R0915,R0914
     if console_span_exporter:
         logger.debug(&#34;[env] Loaded ENABLE_CONSOLE_SPAN_EXPORTER from env&#34;)
         config[&#39;_use_console_span_exporter&#39;] = _is_true(console_span_exporter)
-
+    resource_attributes = get_env_value(&#39;RESOURCE_ATTRIBUTES&#39;)
+    if resource_attributes:
+        config[&#39;resource_attributes&#39;] = {}
+        logger.debug(&#39;[env] Loaded RESOURCE_ATTRIBUTES from env&#39;)
+        groups = resource_attributes.split(&#39;,&#39;)
+        for group in groups:
+            key, value = group.split(&#39;=&#39;)
+            config[&#39;resource_attributes&#39;][key] = value
     return config
 
 def _is_true(value):
@@ -355,7 +362,14 @@ def _is_true(value):
     if console_span_exporter:
         logger.debug(&#34;[env] Loaded ENABLE_CONSOLE_SPAN_EXPORTER from env&#34;)
         config[&#39;_use_console_span_exporter&#39;] = _is_true(console_span_exporter)
-
+    resource_attributes = get_env_value(&#39;RESOURCE_ATTRIBUTES&#39;)
+    if resource_attributes:
+        config[&#39;resource_attributes&#39;] = {}
+        logger.debug(&#39;[env] Loaded RESOURCE_ATTRIBUTES from env&#39;)
+        groups = resource_attributes.split(&#39;,&#39;)
+        for group in groups:
+            key, value = group.split(&#39;=&#39;)
+            config[&#39;resource_attributes&#39;][key] = value
     return config</code></pre>
 </details>
 </dd>

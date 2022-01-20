@@ -54,6 +54,7 @@ def test_env_config() -&gt; None:
     os.environ[&#34;HT_PROPAGATION_FORMATS&#34;] = &#34;B3,TRACECONTEXT&#34;
     os.environ[&#34;HT_ENABLED&#34;] = &#34;False&#34;
     os.environ[&#34;HT_ENABLE_CONSOLE_SPAN_EXPORTER&#34;] = &#34;True&#34;
+    os.environ[&#34;HT_RESOURCE_ATTRIBUTES&#34;] = &#34;1=123,b=456,d=89123&#34;
     config = load_config_from_env()
     print(config)
     assert config[&#39;service_name&#39;] == &#34;pythonagent_002&#34;
@@ -76,6 +77,10 @@ def test_env_config() -&gt; None:
     assert &#39;TRACECONTEXT&#39; in config[&#39;propagation_formats&#39;]
     assert config[&#39;enabled&#39;] is False
     assert config[&#39;_use_console_span_exporter&#39;]
+    resource_attrs = config[&#39;resource_attributes&#39;]
+    assert resource_attrs[&#39;1&#39;] == &#39;123&#39;
+    assert resource_attrs[&#39;b&#39;] == &#39;456&#39;
+    assert resource_attrs[&#39;d&#39;] == &#39;89123&#39;
     unset_env_variables()
 
 
@@ -123,6 +128,7 @@ def unset_env_variables():
     os.environ[&#34;HT_PROPAGATION_FORMATS&#34;] = &#34;B3,TRACECONTEXT&#34;
     os.environ[&#34;HT_ENABLED&#34;] = &#34;False&#34;
     os.environ[&#34;HT_ENABLE_CONSOLE_SPAN_EXPORTER&#34;] = &#34;True&#34;
+    os.environ[&#34;HT_RESOURCE_ATTRIBUTES&#34;] = &#34;1=123,b=456,d=89123&#34;
     config = load_config_from_env()
     print(config)
     assert config[&#39;service_name&#39;] == &#34;pythonagent_002&#34;
@@ -145,6 +151,10 @@ def unset_env_variables():
     assert &#39;TRACECONTEXT&#39; in config[&#39;propagation_formats&#39;]
     assert config[&#39;enabled&#39;] is False
     assert config[&#39;_use_console_span_exporter&#39;]
+    resource_attrs = config[&#39;resource_attributes&#39;]
+    assert resource_attrs[&#39;1&#39;] == &#39;123&#39;
+    assert resource_attrs[&#39;b&#39;] == &#39;456&#39;
+    assert resource_attrs[&#39;d&#39;] == &#39;89123&#39;
     unset_env_variables()</code></pre>
 </details>
 </dd>
