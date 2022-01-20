@@ -1,0 +1,39 @@
+#!/bin/bash
+export LAMBDA_LAYER_PKGS_DIR="/opt/python";
+
+# - Set Lambda Layer python packages in PYTHONPATH so `hypertrace-instrument`
+#   script can find them
+
+export PYTHONPATH="$LAMBDA_LAYER_PKGS_DIR:$PYTHONPATH";
+
+# - Set Lambda runtime python packages in PYTHONPATH so
+#   `hypertrace-instrument` script can find them during auto instrumentation
+#   and instrument them.
+
+export PYTHONPATH="$LAMBDA_RUNTIME_DIR:$PYTHONPATH";
+
+if [ -z ${HT_REPORTING_TRACE_REPORTING_TYPE} ]; then
+    export HT_REPORTING_TRACE_REPORTING_TYPE=OTLP;
+fi
+
+# when deployed with otel collector layer set default reporting to the lambdas localhost
+if [ -z ${HT_REPORTING_ENDPOINT} ]; then
+    export HT_REPORTING_ENDPOINT="0.0.0.0:4317";
+fi
+
+if [ -z ${HT_SERVICE_NAME} ]; then
+    export HT_SERVICE_NAME=$AWS_LAMBDA_FUNCTION_NAME;
+fi
+
+export LAMBDA_RESOURCE_ATTRIBUTES="cloud.region=$AWS_REGION,cloud.provider=aws,faas.name=$AWS_LAMBDA_FUNCTION_NAME,faas.version=$AWS_LAMBDA_FUNCTION_VERSION";
+
+if [ -z ${HT_RESOURCE_ATTRIBUTES} ]; then
+    export HT_RESOURCE_ATTRIBUTES=$LAMBDA_RESOURCE_ATTRIBUTES;
+else
+    export HT_RESOURCE_ATTRIBUTES="$HT_RESOURCE_ATTRIBUTES,$HT_RESOURCE_ATTRIBUTES";
+fi
+
+export ORIG_HANDLER=$_HANDLER;
+export _HANDLER="hypertrace_wrapper.lambda_handler";
+
+python3 $LAMBDA_LAYER_PKGS_DIR/bin/hypertrace-instrument "$@"

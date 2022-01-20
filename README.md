@@ -114,6 +114,46 @@ hypertrace-instrument gunicorn -w 5 -b 0.0.0.0:5000 wsgi:app <b>-c gunicorn_conf
 </pre>
 
 
+### Lambda Integration
+In order to use the agent in an aws lambda, first publish a layer to your AWS account. 
+
+You must have the [aws cli](https://aws.amazon.com/cli/) & [sam](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html) installed. 
+
+From the root of this repo run: 
+`./build_layer.sh <region to deploy layer to> <python version target>`
+ex: `./build_layer.sh us-east-2 python38`
+
+The region should match the region of the lambda you are instrumenting.
+The python version should match the version of the python runtime you are instrumenting.
+
+If you have multiple versions of python runtimes, you can publish a layer for each python version(3.6, 3.7, 3.8, 3.9)
+by running: `./build_all_layers.sh us-east-2`
+
+The script will print out the ARN for the lambda layer:
+```bash
+python3.9 Layer ARN:
+arn:aws:lambda:us-east-2:286278240186:layer:hypertrace-layer-python39:6
+```
+
+Once the layer is deployed you can add the layer to the lambda either via a SAM template, or via the Lambda UI. 
+
+If you are deploying your lambda via a SAM template, you will need to add the `Layers` key:
+ex: 
+
+```yaml
+ServerlessFunction:
+  Type: AWS::Serverless::Function
+  Properties:
+    CodeUri: .
+    Handler: your_handler
+    Runtime: Python3.7
+    Layers:
+        - Enter the copy pasted ARN here
+    Environment:
+        Variables:
+          AWS_LAMBDA_EXEC_WRAPPER: /opt/hypertrace-instrument
+```
+
 ## Development
 
 ### Releases

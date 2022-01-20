@@ -22,6 +22,7 @@ test-integration:
 	cd ${TEST_DIR}/requests; HT_LOG_LEVEL=${LOG_LEVEL} tox -e ${PY_TARGET}
 	cd ${TEST_DIR}/aiohttp; HT_LOG_LEVEL=${LOG_LEVEL} tox -e ${PY_TARGET}
 	cd ${TEST_DIR}/autoinstrumentation; HT_LOG_LEVEL=${LOG_LEVEL} tox -e ${PY_TARGET}
+	cd ${TEST_DIR}/lambda; HT_LOG_LEVEL=${LOG_LEVEL} tox -e ${PY_TARGET}
 
 .PHONY: test
 test: test-unit test-integration

@@ -1,0 +1,23 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: Hypertrace Python Lambda layer
+Parameters:
+  LayerName:
+    Type: String
+    Description: Lambda layer name to be published
+    Default: hypertrace-layer-python3.9
+  Runtime:
+    Type: String
+    Description: Python runtime version
+    Default: python3.9
+Resources:
+  HypertraceLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: !Ref LayerName
+      Description: Hypertrace python layer
+      ContentUri: './build/layer'
+      CompatibleRuntimes:
+        - !Ref Runtime
+      LicenseInfo: 'Available under the Apache-2.0 license.'
+      RetentionPolicy: Retain

@@ -25,6 +25,7 @@ def test_env_config() -> None:
     os.environ["HT_PROPAGATION_FORMATS"] = "B3,TRACECONTEXT"
     os.environ["HT_ENABLED"] = "False"
     os.environ["HT_ENABLE_CONSOLE_SPAN_EXPORTER"] = "True"
+    os.environ["HT_RESOURCE_ATTRIBUTES"] = "1=123,b=456,d=89123"
     config = load_config_from_env()
     print(config)
     assert config['service_name'] == "pythonagent_002"
@@ -47,6 +48,10 @@ def test_env_config() -> None:
     assert 'TRACECONTEXT' in config['propagation_formats']
     assert config['enabled'] is False
     assert config['_use_console_span_exporter']
+    resource_attrs = config['resource_attributes']
+    assert resource_attrs['1'] == '123'
+    assert resource_attrs['b'] == '456'
+    assert resource_attrs['d'] == '89123'
     unset_env_variables()
 
 

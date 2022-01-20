@@ -1,0 +1,8 @@
+version: "3.9"
+services:
+  prebuild-centos:
+    build:
+      dockerfile: ./prebuild/centos.Dockerfile
+      context: ../
+    volumes:
+      - ../build:/opt/app-root/src/build

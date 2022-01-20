@@ -38,6 +38,7 @@ setup(
         "opentelemetry-instrumentation-requests==0.27b0",
         "opentelemetry-instrumentation-grpc==0.27b0",
         "opentelemetry-instrumentation-django==0.27b0",
+        "opentelemetry-instrumentation-aws-lambda==0.27b0",
         "opentelemetry-propagator-b3==1.8.0",
         "opentelemetry-sdk==1.8.0",
         "opentelemetry-util-http==0.27b0",
