@@ -3,7 +3,7 @@ import json
 import logging
 import traceback
 import grpc
-from google.protobuf.json_format import MessageToJson, MessageToDict
+from google.protobuf.json_format import MessageToDict
 from opentelemetry import trace
 from opentelemetry.instrumentation.grpc import (
     GrpcInstrumentorServer,
@@ -174,9 +174,9 @@ class OpenTelemetryServerInterceptorWrapper(_server.OpenTelemetryServerIntercept
                 span = context._active_span # pylint: disable=W0212
 
                 invocation_metadata = dict(handler_call_details.invocation_metadata)
-                proto_as_json = MessageToDict(request_or_iterator)
+                req_dict = MessageToDict(request_or_iterator)
                 self._gisw.generic_rpc_request_handler(
-                    invocation_metadata, json.dumps(proto_as_json), span)
+                    invocation_metadata, json.dumps(req_dict), span)
                 try:
                     block_result = Registry().apply_filters(span,
                                                             '',
