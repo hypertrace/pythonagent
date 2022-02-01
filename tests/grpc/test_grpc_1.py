@@ -122,11 +122,11 @@ def exit_callback():
                 'grpc-python/.* grpc-c/.* (.*; chttp2)')
             assert re.match(
                 user_agent_re, flaskSpanAsObject['attributes']['rpc.request.metadata.user-agent'])
-            assert flaskSpanAsObject['attributes']['rpc.request.body'] == 'name: \"you\"\n'
+            assert flaskSpanAsObject['attributes']['rpc.request.body'] == '{"name": "you"}'
             assert flaskSpanAsObject['attributes']['rpc.grpc.status_code'] == 0
             assert flaskSpanAsObject['attributes']['rpc.response.metadata.tester2'] == 'tester2'
             assert flaskSpanAsObject['attributes']['rpc.response.metadata.tester'] == 'tester'
-            assert flaskSpanAsObject['attributes']['rpc.response.body'] == 'message: \"Hello, you!\"\n'
+            assert flaskSpanAsObject['attributes']['rpc.response.body'] == '{"message": "Hello, you!"}'
             memoryExporter.clear()
 
             stub = helloworld_pb2_grpc.GreeterStub(channel)
@@ -150,9 +150,9 @@ def exit_callback():
                 'grpc-python/.* grpc-c/.* (.*; chttp2)')
             assert re.match(
                 user_agent_re, flaskSpanAsObject['attributes']['rpc.request.metadata.user-agent'])
-            assert flaskSpanAsObject['attributes']['rpc.request.body'] == 'name: \"no-metadata\"\n'
+            assert flaskSpanAsObject['attributes']['rpc.request.body'] == '{"name": "no-metadata"}'
             assert flaskSpanAsObject['attributes']['rpc.grpc.status_code'] == 0
-            assert flaskSpanAsObject['attributes']['rpc.response.body'] == 'message: \"Hello, no-metadata!\"\n'
+            assert flaskSpanAsObject['attributes']['rpc.response.body'] == '{"message": "Hello, no-metadata!"}'
             memoryExporter.clear()
             return 0
     except:
