@@ -136,7 +136,7 @@ def exit_callback():
                 'grpc-python/.* grpc-c/.* (.*; chttp2)')
             assert re.match(
                 user_agent_re, flaskSpanAsObject['attributes']['rpc.request.metadata.user-agent'])
-            assert flaskSpanAsObject['attributes']['rpc.request.body'] == 'name: \"you\"\n'
+            assert flaskSpanAsObject['attributes']['rpc.request.body'] == '{"name": "you"}'
             assert flaskSpanAsObject['attributes']['rpc.grpc.status_code'] == 7
             memoryExporter.clear()
             return 0
