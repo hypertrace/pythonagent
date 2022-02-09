@@ -83,8 +83,6 @@ class AwsLambdaInstrumentorWrapper(AwsLambdaInstrumentor, BaseInstrumentorWrappe
                         span.set_attribute(SpanAttributes.HTTP_SCHEME, http_context.get('protocol', None))
                         host = headers.get('host', None)
                         path = http_context.get('path', '')
-                        if host:
-                            span.set_attribute(SpanAttributes.HTTP_URL, f'{host}{path}')
                         span.set_attribute(SpanAttributes.HTTP_TARGET, path)
                         span.set_attribute(SpanAttributes.HTTP_HOST, host)
                     elif lambda_request_context.get('path', None):
@@ -92,10 +90,6 @@ class AwsLambdaInstrumentorWrapper(AwsLambdaInstrumentor, BaseInstrumentorWrappe
                         span.set_attribute(SpanAttributes.HTTP_SCHEME, lambda_request_context.get('protocol', None))
                         host = headers.get('host', None) or lambda_event.get('multiValueHeaders', {}).get('Host', [None])[0] # pylint:disable=C0301
                         path = lambda_request_context.get('path', '')
-                        if host:
-                            span.set_attribute(SpanAttributes.HTTP_URL, f'{host}{path}')
-                        span.set_attribute(SpanAttributes.HTTP_TARGET, path)
-                        span.set_attribute(SpanAttributes.HTTP_HOST, host)
                         span.set_attribute(SpanAttributes.HTTP_TARGET, path)
                         span.set_attribute(SpanAttributes.HTTP_HOST, host)
 
