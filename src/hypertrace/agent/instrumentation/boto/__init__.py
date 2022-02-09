@@ -1,6 +1,6 @@
-'''Hypertrace wrapper around OTel MySQL Instrumentor''' # pylint: disable=R0801
+'''Hypertrace wrapper around OTel boto Instrumentor''' # pylint: disable=R0801
 import logging
-from opentelemetry.instrumentation.boto import BotoInstrumentor
+from opentelemetry.instrumentation.boto import BotoInstrumentor  # pylint:disable=E0611,E0401
 from hypertrace.agent.instrumentation import BaseInstrumentorWrapper
 
 
