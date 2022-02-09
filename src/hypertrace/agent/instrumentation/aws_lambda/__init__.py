@@ -31,14 +31,14 @@ class AwsLambdaInstrumentorWrapper(AwsLambdaInstrumentor, BaseInstrumentorWrappe
         super().__init__()
 
     # We need to replace default _instrument behavior to capture request/resp data
-    def _ht_instrument(self,
+    def _ht_instrument(self,  # pylint:disable=R0915
             wrapped_module_name,
             wrapped_function_name,
             event_context_extractor: Callable[[Any], Context],
             tracer_provider: TracerProvider = None,
     ):
         wrapper_instance = self
-        def _instrumented_lambda_handler_call( # pylint:disable=R0914
+        def _instrumented_lambda_handler_call( # pylint:disable=R0914,R0915
                 call_wrapped, _instance, args, kwargs
         ):
 
@@ -69,6 +69,8 @@ class AwsLambdaInstrumentorWrapper(AwsLambdaInstrumentor, BaseInstrumentorWrappe
                     kind=span_kind,
             ) as span:
                 if span.is_recording():
+                    logger.debug(lambda_event)
+
                     headers = lambda_event.get('headers', {})
                     if span.is_recording():
                         headers = lambda_event.get('headers', {})
@@ -79,16 +81,17 @@ class AwsLambdaInstrumentorWrapper(AwsLambdaInstrumentor, BaseInstrumentorWrappe
                         http_context = lambda_request_context.get('http')
                         span.set_attribute(SpanAttributes.HTTP_METHOD, http_context.get('method', None))
                         span.set_attribute(SpanAttributes.HTTP_SCHEME, http_context.get('protocol', None))
-                        span.set_attribute(SpanAttributes.HTTP_URL, http_context.get('path', None))
-                        span.set_attribute(SpanAttributes.HTTP_TARGET, http_context.get('path', None))
-                        span.set_attribute(SpanAttributes.HTTP_HOST, headers.get('host', None))
-                    if lambda_request_context.get('path', None):
+                        host = headers.get('host', None)
+                        path = http_context.get('path', '')
+                        span.set_attribute(SpanAttributes.HTTP_TARGET, path)
+                        span.set_attribute(SpanAttributes.HTTP_HOST, host)
+                    elif lambda_request_context.get('path', None):
                         span.set_attribute(SpanAttributes.HTTP_METHOD, lambda_request_context.get('httpMethod', None))
                         span.set_attribute(SpanAttributes.HTTP_SCHEME, lambda_request_context.get('protocol', None))
-                        span.set_attribute(SpanAttributes.HTTP_URL, lambda_request_context.get('path', None))
-                        span.set_attribute(SpanAttributes.HTTP_TARGET, lambda_request_context.get('path', None))
-                        span.set_attribute(SpanAttributes.HTTP_HOST,
-                                           lambda_event.get('multiValueHeaders', {}).get('Host', None))
+                        host = headers.get('host', None) or lambda_event.get('multiValueHeaders', {}).get('Host', [None])[0] # pylint:disable=C0301
+                        path = lambda_request_context.get('path', '')
+                        span.set_attribute(SpanAttributes.HTTP_TARGET, path)
+                        span.set_attribute(SpanAttributes.HTTP_HOST, host)
 
 
                     wrapper_instance.generic_request_handler(headers, lambda_event.get('body', None), span)
@@ -109,13 +112,15 @@ class AwsLambdaInstrumentorWrapper(AwsLambdaInstrumentor, BaseInstrumentorWrappe
                     )
 
                 result = call_wrapped(*args, **kwargs)
+                if result and isinstance(result, dict):
+                    result_status_code = result.get('statusCode', None)
 
-                result_status_code = result.get('statusCode', None)
+                    if result_status_code:
+                        span.set_attribute(SpanAttributes.HTTP_STATUS_CODE, result_status_code)
 
-                if result_status_code:
-                    span.set_attribute(SpanAttributes.HTTP_STATUS_CODE, result_status_code)
-
-                wrapper_instance.generic_response_handler(result.get('headers', {}), result.get('body', None), span)
+                    wrapper_instance.generic_response_handler(result.get('headers', {}), result.get('body', None), span)
+                else:
+                    logger.info("Not processing lambda response, response is not a dict")
             _tracer_provider = tracer_provider or get_tracer_provider()
             try:
                 # NOTE: `force_flush` before function quit in case of Lambda freeze.
