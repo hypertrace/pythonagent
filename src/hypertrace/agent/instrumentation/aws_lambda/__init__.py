@@ -31,14 +31,14 @@ class AwsLambdaInstrumentorWrapper(AwsLambdaInstrumentor, BaseInstrumentorWrappe
         super().__init__()
 
     # We need to replace default _instrument behavior to capture request/resp data
-    def _ht_instrument(self,
+    def _ht_instrument(self,  # pylint:disable=R0915
             wrapped_module_name,
             wrapped_function_name,
             event_context_extractor: Callable[[Any], Context],
             tracer_provider: TracerProvider = None,
     ):
         wrapper_instance = self
-        def _instrumented_lambda_handler_call( # pylint:disable=R0914
+        def _instrumented_lambda_handler_call( # pylint:disable=R0914,R0915
                 call_wrapped, _instance, args, kwargs
         ):
 
@@ -90,7 +90,7 @@ class AwsLambdaInstrumentorWrapper(AwsLambdaInstrumentor, BaseInstrumentorWrappe
                     elif lambda_request_context.get('path', None):
                         span.set_attribute(SpanAttributes.HTTP_METHOD, lambda_request_context.get('httpMethod', None))
                         span.set_attribute(SpanAttributes.HTTP_SCHEME, lambda_request_context.get('protocol', None))
-                        host = headers.get('host', None) or lambda_event.get('multiValueHeaders', {}).get('Host', [None])[0]
+                        host = headers.get('host', None) or lambda_event.get('multiValueHeaders', {}).get('Host', [None])[0] # pylint:disable=C0301
                         path = lambda_request_context.get('path', '')
                         if host:
                             span.set_attribute(SpanAttributes.HTTP_URL, f'{host}{path}')
