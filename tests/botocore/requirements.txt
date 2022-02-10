@@ -1,0 +1,6 @@
+../..
+google
+protobuf
+pyyaml
+pytest
+pytest-xdist

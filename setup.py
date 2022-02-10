@@ -31,6 +31,8 @@ setup(
         "opentelemetry-exporter-zipkin==1.8.0",
         "opentelemetry-instrumentation==0.27b0",
         "opentelemetry-instrumentation-aiohttp-client==0.27b0",
+        "opentelemetry-instrumentation-boto==0.27b0",
+        "opentelemetry-instrumentation-botocore==0.27b0",
         "opentelemetry-instrumentation-wsgi==0.27b0",
         "opentelemetry-instrumentation-flask==0.27b0",
         "opentelemetry-instrumentation-mysql==0.27b0",
