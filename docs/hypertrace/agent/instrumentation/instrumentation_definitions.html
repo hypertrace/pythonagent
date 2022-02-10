@@ -39,13 +39,15 @@ MYSQL_KEY = &#39;mysql&#39;
 REQUESTS_KEY = &#39;requests&#39;
 AIOHTTP_CLIENT_KEY = &#39;aiohttp:client&#39;
 LAMBDA = &#39;lambda&#39;
+BOTO = &#39;boto&#39;
+BOTOCORE = &#39;botocore&#39;
 
 SUPPORTED_LIBRARIES = [
     FLASK_KEY, DJANGO_KEY,
     GRPC_SERVER_KEY, GRPC_CLIENT_KEY,
     POSTGRESQL_KEY, MYSQL_KEY,
     REQUESTS_KEY, AIOHTTP_CLIENT_KEY,
-    LAMBDA
+    LAMBDA, BOTO, BOTOCORE
 ]
 
 # map of library_key =&gt; instrumentation wrapper instance
@@ -64,7 +66,7 @@ def _mark_as_instrumented(library_key, wrapper_instance):
     _INSTRUMENTATION_STATE[library_key] = wrapper_instance
 
 
-def get_instrumentation_wrapper(library_key):
+def get_instrumentation_wrapper(library_key): # pylint:disable=R0912
     &#34;&#34;&#34;load an initialize an instrumentation wrapper&#34;&#34;&#34;
     if is_already_instrumented(library_key):
         return None
@@ -97,6 +99,12 @@ def get_instrumentation_wrapper(library_key):
         elif LAMBDA == library_key:
             from hypertrace.agent.instrumentation.aws_lambda import AwsLambdaInstrumentorWrapper #pylint:disable=C0415
             wrapper_instance = AwsLambdaInstrumentorWrapper()
+        elif BOTO == library_key:
+            from hypertrace.agent.instrumentation.boto import BotoInstrumentationWrapper #pylint:disable=C0415
+            wrapper_instance = BotoInstrumentationWrapper()
+        elif BOTOCORE == library_key:
+            from hypertrace.agent.instrumentation.botocore import BotocoreInstrumentationWrapper #pylint:disable=C0415
+            wrapper_instance = BotocoreInstrumentationWrapper()
         else:
             return None
 
@@ -123,7 +131,7 @@ def get_instrumentation_wrapper(library_key):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_instrumentation_wrapper(library_key):
+<pre><code class="python">def get_instrumentation_wrapper(library_key): # pylint:disable=R0912
     &#34;&#34;&#34;load an initialize an instrumentation wrapper&#34;&#34;&#34;
     if is_already_instrumented(library_key):
         return None
@@ -156,6 +164,12 @@ def get_instrumentation_wrapper(library_key):
         elif LAMBDA == library_key:
             from hypertrace.agent.instrumentation.aws_lambda import AwsLambdaInstrumentorWrapper #pylint:disable=C0415
             wrapper_instance = AwsLambdaInstrumentorWrapper()
+        elif BOTO == library_key:
+            from hypertrace.agent.instrumentation.boto import BotoInstrumentationWrapper #pylint:disable=C0415
+            wrapper_instance = BotoInstrumentationWrapper()
+        elif BOTOCORE == library_key:
+            from hypertrace.agent.instrumentation.botocore import BotocoreInstrumentationWrapper #pylint:disable=C0415
+            wrapper_instance = BotocoreInstrumentationWrapper()
         else:
             return None
 
