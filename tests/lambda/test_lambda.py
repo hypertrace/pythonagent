@@ -59,22 +59,48 @@ def test_run():
     logger.info('Running test calls.')
     try:
         mockEventData = {'version': '2.0', 'routeKey': 'POST /test-function', 'rawPath': '/default/test-function',
-                     'rawQueryString': '',
-                     'headers': {'accept': '*/*', 'content-length': '23', 'content-type': 'application/json',
-                                 'host': 'something.foo.bar',
-                                 'user-agent': 'insomnia/2021.6.0',
-                                 'x-amzn-trace-id': 'Root=1-61bc2935-0d71070e0218146e5683cd7e',
-                                 'x-forwarded-for': '202.87.208.0, 207.255.222.177', 'x-forwarded-port': '443',
-                                 'x-forwarded-proto': 'https'},
-                     'requestContext': {'accountId': '286278240186', 'apiId': 'brz7ycf4q7',
-                                        'domainName': 'something.foo.bar',
-                                        'domainPrefix': 'brz7ycf4q7',
-                                        'http': {'method': 'POST', 'path': '/default/test-function',
-                                                 'protocol': 'HTTP/1.1', 'sourceIp': '207.255.222.177',
-                                                 'userAgent': 'insomnia/2021.6.0'}, 'requestId': 'Ketgdj-vCYcEMHw=',
-                                        'routeKey': 'POST /test-function', 'stage': 'default',
-                                        'time': '17/Dec/2021:06:07:49 +0000', 'timeEpoch': 1639721269962},
-                     'body': '{\n\t"name": "sample body data"\n}', 'isBase64Encoded': False}
+                         'rawQueryString': '',
+                         'headers': {'accept': '*/*', 'content-length': '23', 'content-type': 'application/json',
+                                     'host': 'something.foo.bar',
+                                     'user-agent': 'insomnia/2021.6.0',
+                                     'x-amzn-trace-id': 'Root=1-61bc2935-0d71070e0218146e5683cd7e',
+                                     'x-forwarded-for': '202.87.208.0, 207.255.222.177', 'x-forwarded-port': '443',
+                                     'x-forwarded-proto': 'https'},
+                         'multiValueHeaders': {
+                             'accept': [
+                                 '*/*'
+                             ],
+                             'cookie': [
+                                 'foo=bar;something=another-cookie'
+                             ],
+                             'Host': [
+                                 'something.foo.bar'
+                             ],
+                             'User-Agent': [
+                                 'insomnia/2021.7.2'
+                             ],
+                             'X-Amzn-Trace-Id': [
+                                 'Root=1-61bc2935-0d71070e0218146e5683cd7e'
+                             ],
+                             'X-Forwarded-For': [
+                                 '202.87.208.0, 207.255.222.177'
+                             ],
+                             'X-Forwarded-Port': [
+                                 '443'
+                             ],
+                             'X-Forwarded-Proto': [
+                                 'https'
+                             ]
+                         },
+                         'requestContext': {'accountId': '286278240186', 'apiId': 'brz7ycf4q7',
+                                            'domainName': 'something.foo.bar',
+                                            'domainPrefix': 'brz7ycf4q7',
+                                            'http': {'method': 'POST', 'path': '/default/test-function',
+                                                     'protocol': 'HTTP/1.1', 'sourceIp': '207.255.222.177',
+                                                     'userAgent': 'insomnia/2021.6.0'}, 'requestId': 'Ketgdj-vCYcEMHw=',
+                                            'routeKey': 'POST /test-function', 'stage': 'default',
+                                            'time': '17/Dec/2021:06:07:49 +0000', 'timeEpoch': 1639721269962},
+                         'body': '{\n\t"name": "sample body data"\n}', 'isBase64Encoded': False}
 
         cntxt = ContextStub()
         example_lambda(mockEventData, cntxt)
@@ -92,6 +118,7 @@ def test_run():
         assert span['attributes']['http.target'] == '/default/test-function'
         assert span['attributes']['http.request.header.x-forwarded-for'] == '202.87.208.0, 207.255.222.177'
         assert span['attributes']['http.request.header.x-amzn-trace-id'] == 'Root=1-61bc2935-0d71070e0218146e5683cd7e'
+        assert span['attributes']['http.request.header.cookie'] == 'foo=bar;something=another-cookie'
         assert span['attributes']['http.response.header.content-type'] == 'application/json'
         assert span['attributes']['http.request.body'] == '{\n\t"name": "sample body data"\n}'
         assert span['attributes']['http.response.body'] == '{"test_key": "test_value"}'
