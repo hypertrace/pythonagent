@@ -90,6 +90,7 @@ def test_run():
         assert span['attributes']['http.method'] == 'POST'
         assert span['attributes']['http.host'] == 'something.foo.bar'
         assert span['attributes']['http.target'] == '/default/test-function'
+        assert span['attributes']['http.scheme'] == 'https'
         assert span['attributes']['http.request.header.x-forwarded-for'] == '202.87.208.0, 207.255.222.177'
         assert span['attributes']['http.request.header.x-amzn-trace-id'] == 'Root=1-61bc2935-0d71070e0218146e5683cd7e'
         assert span['attributes']['http.response.header.content-type'] == 'application/json'
