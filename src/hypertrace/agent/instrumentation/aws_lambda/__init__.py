@@ -72,6 +72,9 @@ class AwsLambdaInstrumentorWrapper(AwsLambdaInstrumentor, BaseInstrumentorWrappe
                     logger.debug(lambda_event)
 
                     headers = lambda_event.get('headers', {})
+                    multi_value_headers = lambda_event.get('multiValueHeaders', {})
+                    for header_key in multi_value_headers:
+                        headers[header_key] = ','.join(multi_value_headers[header_key])
                     if span.is_recording():
                         headers = lambda_event.get('headers', {})
                         lambda_request_context = lambda_event.get('requestContext', {})
@@ -88,11 +91,11 @@ class AwsLambdaInstrumentorWrapper(AwsLambdaInstrumentor, BaseInstrumentorWrappe
                     elif lambda_request_context.get('path', None):
                         span.set_attribute(SpanAttributes.HTTP_METHOD, lambda_request_context.get('httpMethod', None))
                         span.set_attribute(SpanAttributes.HTTP_SCHEME, lambda_request_context.get('protocol', None))
-                        host = headers.get('host', None) or lambda_event.get('multiValueHeaders', {}).get('Host', [None])[0] # pylint:disable=C0301
+                        host = headers.get('host', None) or \
+                               lambda_event.get('multiValueHeaders', {}).get('Host', [None])[0]  # pylint:disable=C0301
                         path = lambda_request_context.get('path', '')
                         span.set_attribute(SpanAttributes.HTTP_TARGET, path)
                         span.set_attribute(SpanAttributes.HTTP_HOST, host)
-
 
                     wrapper_instance.generic_request_handler(headers, lambda_event.get('body', None), span)
                     lambda_context = args[1]
