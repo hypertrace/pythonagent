@@ -67,7 +67,7 @@ class AwsLambdaInstrumentorWrapper(AwsLambdaInstrumentor, BaseInstrumentorWrappe
             tracer_provider: TracerProvider = None,
     ):
         wrapper_instance = self
-        def _instrumented_lambda_handler_call( # pylint:disable=R0914,R0915
+        def _instrumented_lambda_handler_call( # pylint:disable=R0914,R0915,R0912
                 call_wrapped, _instance, args, kwargs
         ):
 
@@ -101,6 +101,9 @@ class AwsLambdaInstrumentorWrapper(AwsLambdaInstrumentor, BaseInstrumentorWrappe
                     logger.debug(lambda_event)
 
                     headers = lambda_event.get(&#39;headers&#39;, {})
+                    multi_value_headers = lambda_event.get(&#39;multiValueHeaders&#39;, {})
+                    for header_key in multi_value_headers:
+                        headers[header_key] = &#39;,&#39;.join(multi_value_headers[header_key])
                     if span.is_recording():
                         headers = lambda_event.get(&#39;headers&#39;, {})
                         lambda_request_context = lambda_event.get(&#39;requestContext&#39;, {})
@@ -109,7 +112,9 @@ class AwsLambdaInstrumentorWrapper(AwsLambdaInstrumentor, BaseInstrumentorWrappe
                     if lambda_request_context.get(&#39;http&#39;, None):
                         http_context = lambda_request_context.get(&#39;http&#39;)
                         span.set_attribute(SpanAttributes.HTTP_METHOD, http_context.get(&#39;method&#39;, None))
-                        span.set_attribute(SpanAttributes.HTTP_SCHEME, http_context.get(&#39;protocol&#39;, None))
+                        protocol = headers.get(&#39;x-forwarded-proto&#39;, None)
+                        if protocol:
+                            span.set_attribute(SpanAttributes.HTTP_SCHEME, protocol)
                         host = headers.get(&#39;host&#39;, None)
                         path = http_context.get(&#39;path&#39;, &#39;&#39;)
                         span.set_attribute(SpanAttributes.HTTP_TARGET, path)
@@ -117,11 +122,14 @@ class AwsLambdaInstrumentorWrapper(AwsLambdaInstrumentor, BaseInstrumentorWrappe
                     elif lambda_request_context.get(&#39;path&#39;, None):
                         span.set_attribute(SpanAttributes.HTTP_METHOD, lambda_request_context.get(&#39;httpMethod&#39;, None))
                         span.set_attribute(SpanAttributes.HTTP_SCHEME, lambda_request_context.get(&#39;protocol&#39;, None))
-                        host = headers.get(&#39;host&#39;, None) or lambda_event.get(&#39;multiValueHeaders&#39;, {}).get(&#39;Host&#39;, [None])[0] # pylint:disable=C0301
+                        protocol = headers.get(&#39;x-forwarded-proto&#39;, None)
+                        if protocol:
+                            span.set_attribute(SpanAttributes.HTTP_SCHEME, protocol)
+                        host = headers.get(&#39;host&#39;, None) or \
+                               lambda_event.get(&#39;multiValueHeaders&#39;, {}).get(&#39;Host&#39;, [None])[0]  # pylint:disable=C0301
                         path = lambda_request_context.get(&#39;path&#39;, &#39;&#39;)
                         span.set_attribute(SpanAttributes.HTTP_TARGET, path)
                         span.set_attribute(SpanAttributes.HTTP_HOST, host)
-
 
                     wrapper_instance.generic_request_handler(headers, lambda_event.get(&#39;body&#39;, None), span)
                     lambda_context = args[1]
@@ -239,7 +247,7 @@ class AwsLambdaInstrumentorWrapper(AwsLambdaInstrumentor, BaseInstrumentorWrappe
             tracer_provider: TracerProvider = None,
     ):
         wrapper_instance = self
-        def _instrumented_lambda_handler_call( # pylint:disable=R0914,R0915
+        def _instrumented_lambda_handler_call( # pylint:disable=R0914,R0915,R0912
                 call_wrapped, _instance, args, kwargs
         ):
 
@@ -273,6 +281,9 @@ class AwsLambdaInstrumentorWrapper(AwsLambdaInstrumentor, BaseInstrumentorWrappe
                     logger.debug(lambda_event)
 
                     headers = lambda_event.get(&#39;headers&#39;, {})
+                    multi_value_headers = lambda_event.get(&#39;multiValueHeaders&#39;, {})
+                    for header_key in multi_value_headers:
+                        headers[header_key] = &#39;,&#39;.join(multi_value_headers[header_key])
                     if span.is_recording():
                         headers = lambda_event.get(&#39;headers&#39;, {})
                         lambda_request_context = lambda_event.get(&#39;requestContext&#39;, {})
@@ -281,7 +292,9 @@ class AwsLambdaInstrumentorWrapper(AwsLambdaInstrumentor, BaseInstrumentorWrappe
                     if lambda_request_context.get(&#39;http&#39;, None):
                         http_context = lambda_request_context.get(&#39;http&#39;)
                         span.set_attribute(SpanAttributes.HTTP_METHOD, http_context.get(&#39;method&#39;, None))
-                        span.set_attribute(SpanAttributes.HTTP_SCHEME, http_context.get(&#39;protocol&#39;, None))
+                        protocol = headers.get(&#39;x-forwarded-proto&#39;, None)
+                        if protocol:
+                            span.set_attribute(SpanAttributes.HTTP_SCHEME, protocol)
                         host = headers.get(&#39;host&#39;, None)
                         path = http_context.get(&#39;path&#39;, &#39;&#39;)
                         span.set_attribute(SpanAttributes.HTTP_TARGET, path)
@@ -289,11 +302,14 @@ class AwsLambdaInstrumentorWrapper(AwsLambdaInstrumentor, BaseInstrumentorWrappe
                     elif lambda_request_context.get(&#39;path&#39;, None):
                         span.set_attribute(SpanAttributes.HTTP_METHOD, lambda_request_context.get(&#39;httpMethod&#39;, None))
                         span.set_attribute(SpanAttributes.HTTP_SCHEME, lambda_request_context.get(&#39;protocol&#39;, None))
-                        host = headers.get(&#39;host&#39;, None) or lambda_event.get(&#39;multiValueHeaders&#39;, {}).get(&#39;Host&#39;, [None])[0] # pylint:disable=C0301
+                        protocol = headers.get(&#39;x-forwarded-proto&#39;, None)
+                        if protocol:
+                            span.set_attribute(SpanAttributes.HTTP_SCHEME, protocol)
+                        host = headers.get(&#39;host&#39;, None) or \
+                               lambda_event.get(&#39;multiValueHeaders&#39;, {}).get(&#39;Host&#39;, [None])[0]  # pylint:disable=C0301
                         path = lambda_request_context.get(&#39;path&#39;, &#39;&#39;)
                         span.set_attribute(SpanAttributes.HTTP_TARGET, path)
                         span.set_attribute(SpanAttributes.HTTP_HOST, host)
-
 
                     wrapper_instance.generic_request_handler(headers, lambda_event.get(&#39;body&#39;, None), span)
                     lambda_context = args[1]
