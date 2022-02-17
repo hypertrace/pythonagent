@@ -38,7 +38,7 @@ class AwsLambdaInstrumentorWrapper(AwsLambdaInstrumentor, BaseInstrumentorWrappe
             tracer_provider: TracerProvider = None,
     ):
         wrapper_instance = self
-        def _instrumented_lambda_handler_call( # pylint:disable=R0914,R0915
+        def _instrumented_lambda_handler_call( # pylint:disable=R0914,R0915,R0912
                 call_wrapped, _instance, args, kwargs
         ):
 
