@@ -66,12 +66,10 @@ def test_run():
                                      'x-amzn-trace-id': 'Root=1-61bc2935-0d71070e0218146e5683cd7e',
                                      'x-forwarded-for': '202.87.208.0, 207.255.222.177', 'x-forwarded-port': '443',
                                      'x-forwarded-proto': 'https'},
+                         'cookies': ["name=123", "anothercookie=456"],
                          'multiValueHeaders': {
                              'accept': [
                                  '*/*'
-                             ],
-                             'cookie': [
-                                 'foo=bar;something=another-cookie'
                              ],
                              'Host': [
                                  'something.foo.bar'
@@ -119,7 +117,7 @@ def test_run():
         assert span['attributes']['http.scheme'] == 'https'
         assert span['attributes']['http.request.header.x-forwarded-for'] == '202.87.208.0, 207.255.222.177'
         assert span['attributes']['http.request.header.x-amzn-trace-id'] == 'Root=1-61bc2935-0d71070e0218146e5683cd7e'
-        assert span['attributes']['http.request.header.cookie'] == 'foo=bar;something=another-cookie'
+        assert span['attributes']['http.request.header.cookie'] == 'name=123;anothercookie=456'
         assert span['attributes']['http.response.header.content-type'] == 'application/json'
         assert span['attributes']['http.request.body'] == '{\n\t"name": "sample body data"\n}'
         assert span['attributes']['http.response.body'] == '{"test_key": "test_value"}'

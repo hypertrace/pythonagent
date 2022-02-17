@@ -90,6 +90,10 @@ class AwsLambdaInstrumentorWrapper(AwsLambdaInstrumentor, BaseInstrumentorWrappe
                         path = http_context.get('path', '')
                         span.set_attribute(SpanAttributes.HTTP_TARGET, path)
                         span.set_attribute(SpanAttributes.HTTP_HOST, host)
+                        cookies = lambda_event.get('cookies', [])
+                        if len(cookies) > 0:
+                            cookie_header = ';'.join(cookies)
+                            span.set_attribute('http.request.header.cookie', cookie_header)
                     elif lambda_request_context.get('path', None):
                         span.set_attribute(SpanAttributes.HTTP_METHOD, lambda_request_context.get('httpMethod', None))
                         span.set_attribute(SpanAttributes.HTTP_SCHEME, lambda_request_context.get('protocol', None))
