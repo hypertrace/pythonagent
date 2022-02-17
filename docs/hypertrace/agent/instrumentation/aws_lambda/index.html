@@ -119,6 +119,10 @@ class AwsLambdaInstrumentorWrapper(AwsLambdaInstrumentor, BaseInstrumentorWrappe
                         path = http_context.get(&#39;path&#39;, &#39;&#39;)
                         span.set_attribute(SpanAttributes.HTTP_TARGET, path)
                         span.set_attribute(SpanAttributes.HTTP_HOST, host)
+                        cookies = lambda_event.get(&#39;cookies&#39;, [])
+                        if len(cookies) &gt; 0:
+                            cookie_header = &#39;;&#39;.join(cookies)
+                            span.set_attribute(&#39;http.request.header.cookie&#39;, cookie_header)
                     elif lambda_request_context.get(&#39;path&#39;, None):
                         span.set_attribute(SpanAttributes.HTTP_METHOD, lambda_request_context.get(&#39;httpMethod&#39;, None))
                         span.set_attribute(SpanAttributes.HTTP_SCHEME, lambda_request_context.get(&#39;protocol&#39;, None))
@@ -299,6 +303,10 @@ class AwsLambdaInstrumentorWrapper(AwsLambdaInstrumentor, BaseInstrumentorWrappe
                         path = http_context.get(&#39;path&#39;, &#39;&#39;)
                         span.set_attribute(SpanAttributes.HTTP_TARGET, path)
                         span.set_attribute(SpanAttributes.HTTP_HOST, host)
+                        cookies = lambda_event.get(&#39;cookies&#39;, [])
+                        if len(cookies) &gt; 0:
+                            cookie_header = &#39;;&#39;.join(cookies)
+                            span.set_attribute(&#39;http.request.header.cookie&#39;, cookie_header)
                     elif lambda_request_context.get(&#39;path&#39;, None):
                         span.set_attribute(SpanAttributes.HTTP_METHOD, lambda_request_context.get(&#39;httpMethod&#39;, None))
                         span.set_attribute(SpanAttributes.HTTP_SCHEME, lambda_request_context.get(&#39;protocol&#39;, None))
