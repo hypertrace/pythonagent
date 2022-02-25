@@ -171,6 +171,9 @@ class AwsLambdaInstrumentorWrapper(AwsLambdaInstrumentor, BaseInstrumentorWrappe
         """
         logger.debug("in AwsLambdaInstrumentorWrapper _instrument")
         lambda_handler = os.environ.get(aws_lambda.ORIG_HANDLER, os.environ.get(aws_lambda._HANDLER))  # pylint:disable=W0212
+        if lambda_handler is None:
+            logger.debug("Lambda handler function not defined.  This is expected in non-lambda environments")
+            return
         # pylint: disable=attribute-defined-outside-init
         (
             self._wrapped_module_name,
