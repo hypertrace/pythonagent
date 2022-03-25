@@ -57,8 +57,8 @@ jobs:
       - name: Run unit tests
         run: |
           cd tests/externalServices && docker-compose up -d && cd ../../
-          python setup.py develop
-          python -m pytest tests/hypertrace
+          python3 setup.py develop
+          python3 -m pytest tests/hypertrace
           cd tests/externalServices && docker-compose down
 
       - name: Run integration tests
