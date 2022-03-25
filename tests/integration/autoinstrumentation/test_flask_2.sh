@@ -1,6 +1,6 @@
 #!/bin/bash
 PYTHON_PATH=../../src:$PYTHON_PATH
-SPAN=`HT_SKIP_MODULES="flask" HT_ENABLE_CONSOLE_SPAN_EXPORTER=True python ../../src/hypertrace/agent/autoinstrumentation/hypertrace_instrument.py python test_flask_2.py | egrep -v "INFO|DEBUG"`
+SPAN=`HT_SKIP_MODULES="flask" HT_ENABLE_CONSOLE_SPAN_EXPORTER=True python ../../../src/hypertrace/agent/autoinstrumentation/hypertrace_instrument.py python test_flask_2.py | egrep -v "INFO|DEBUG"`
 echo SPAN=${SPAN}
 TRACE_ID=`echo ${SPAN} | jq .context.trace_id | sed 's/\"//g'`
 echo TRACE_ID=$TRACE_ID

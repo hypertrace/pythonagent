@@ -4,7 +4,7 @@ services:
   flask_app1:
     container_name: flask_app1
     build:
-      context: ../..
+      context: ../../../
       dockerfile: tests/gunicorn/flask_app/Dockerfile
     environment:
       ENABLE_INSTRUMENTATION: ${ENABLE_INSTRUMENTATION}
@@ -17,7 +17,7 @@ services:
   flask_app2:
     container_name: flask_app2
     build:
-      context: ../..
+      context: ../../../
       dockerfile: tests/gunicorn/flask_app/Dockerfile
     environment:
       ENABLE_INSTRUMENTATION: ${ENABLE_INSTRUMENTATION}
@@ -28,7 +28,7 @@ services:
   flask_app3:
     container_name: flask_app3
     build:
-      context: ../..
+      context: ../../../
       dockerfile: tests/gunicorn/flask_app/Dockerfile
     environment:
       ENABLE_INSTRUMENTATION: ${ENABLE_INSTRUMENTATION}
