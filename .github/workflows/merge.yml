@@ -63,7 +63,7 @@ jobs:
 
       - name: Run integration tests
         run: |
-          make test-integration
+          make integration-test
 
 
       - name: Build package
