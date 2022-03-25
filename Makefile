@@ -8,7 +8,10 @@ LOG_LEVEL ?= INFO
 
 .PHONY: unit-test
 unit-test:
-	tox -e unit-test
+	cd tests/externalServices && docker-compose up -d && cd ../../
+	python3 setup.py develop
+	python3 -m pytest tests/hypertrace
+	cd tests/externalServices && docker-compose down
 
 .PHONY: integration-test
 integration-test:
@@ -16,7 +19,7 @@ integration-test:
 	cd ${TEST_DIR}/integration/gunicorn; HT_LOG_LEVEL=${LOG_LEVEL} tox -e ${PY_TARGET}
 
 .PHONY: test
-test: test-unit test-integration
+test: unit-test integration-test
 
 .PHONY: build-proto
 build-proto:

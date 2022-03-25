@@ -13,12 +13,10 @@ def test_load_from_file() -> None:
     cfg = config_from_file
 
     assert cfg["service_name"] == "pythonagent_001"
-    assert cfg["reporting"]["endpoint"] == "http://localhost:9411/api/v2/spans"
+    assert cfg["reporting"]["endpoint"] == "https://localhost:9411/api/v2/spans"
     assert cfg["reporting"]["trace_reporter_type"] == "ZIPKIN"
     assert cfg["reporting"]["secure"] is True
     assert cfg["reporting"]["token"] == "TestToken"
-    assert cfg["reporting"]["opa"]["poll_period_seconds"] == 50
-    assert cfg["reporting"]["opa"]["enabled"] is True
     assert not cfg["data_capture"]["http_headers"]["request"]
     assert not cfg["data_capture"]["http_headers"]["response"]
     assert not cfg["data_capture"]["http_body"]["response"]
