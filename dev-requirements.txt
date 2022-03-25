@@ -1,8 +1,7 @@
 aiohttp
 google>=3.0.0
 pyyaml
-pytest>=6.2.3
-pytest-django
+pytest==6.2.3
 protobuf>=3.15.8
 tox>=3.23.0
 pylint==2.8.2
