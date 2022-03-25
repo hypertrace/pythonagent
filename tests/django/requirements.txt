@@ -1,8 +1,0 @@
-../..
-google
-protobuf
-pyyaml
-django
-pytest
-pytest-django
-pytest-xdist

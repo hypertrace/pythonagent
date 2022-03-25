@@ -6,23 +6,14 @@ PYTHON_VERSION ?= $(shell python --version | cut -c8- | cut -d'.' -f 1-2) # e.g.
 PY_TARGET=py$(subst .,,$(PYTHON_VERSION)) # e.g. py39
 LOG_LEVEL ?= INFO
 
-.PHONY: test-unit
-test-unit:
-	tox -e test-unit
+.PHONY: unit-test
+unit-test:
+	tox -e unit-test
 
-.PHONY: test-integration
-test-integration:
-	@echo "Running integration tests over $(PY_TARGET) with LOG_LEVEL=$(LOG_LEVEL)" 
-	cd ${TEST_DIR}/flask; HT_LOG_LEVEL=${LOG_LEVEL} tox -e ${PY_TARGET}
-	cd ${TEST_DIR}/django; HT_LOG_LEVEL=${LOG_LEVEL} tox -e ${PY_TARGET}
-	cd ${TEST_DIR}/grpc; HT_LOG_LEVEL=${LOG_LEVEL} tox -e ${PY_TARGET}
-	cd ${TEST_DIR}/mysql; HT_LOG_LEVEL=${LOG_LEVEL} tox -e ${PY_TARGET}
-	cd ${TEST_DIR}/postgresql; HT_LOG_LEVEL=${LOG_LEVEL} tox -e ${PY_TARGET}
-	cd ${TEST_DIR}/gunicorn; HT_LOG_LEVEL=${LOG_LEVEL} tox -e ${PY_TARGET}
-	cd ${TEST_DIR}/requests; HT_LOG_LEVEL=${LOG_LEVEL} tox -e ${PY_TARGET}
-	cd ${TEST_DIR}/aiohttp; HT_LOG_LEVEL=${LOG_LEVEL} tox -e ${PY_TARGET}
-	cd ${TEST_DIR}/autoinstrumentation; HT_LOG_LEVEL=${LOG_LEVEL} tox -e ${PY_TARGET}
-	cd ${TEST_DIR}/lambda; HT_LOG_LEVEL=${LOG_LEVEL} tox -e ${PY_TARGET}
+.PHONY: integration-test
+integration-test:
+	cd ${TEST_DIR}/integration/autoinstrumentation; HT_LOG_LEVEL=${LOG_LEVEL} tox -e ${PY_TARGET}
+	cd ${TEST_DIR}/integration/gunicorn; HT_LOG_LEVEL=${LOG_LEVEL} tox -e ${PY_TARGET}
 
 .PHONY: test
 test: test-unit test-integration

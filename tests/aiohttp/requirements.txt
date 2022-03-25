@@ -1,9 +1,0 @@
-../..
-google
-protobuf
-pyyaml
-flask
-pytest
-pytest-xdist
-pytest-asyncio
-aiohttp

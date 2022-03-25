@@ -54,11 +54,17 @@ jobs:
           pip install --upgrade --no-input pip
           pip install --upgrade --no-input protobuf
 
-      - name: Run tests
+      - name: Run unit tests
         run: |
-          VERSION=$(${{ matrix.python-version }} | cut -c1-3)
-          echo "Version ${VERSION}"
-          PYTHON_VERSION=${VERSION} make test
+          cd tests/externalServices && docker-compose up -d && cd ../../
+          python setup.py develop
+          python -m pytest tests/hypertrace
+          cd tests/externalServices && docker-compose down
+
+      - name: Run integration tests
+        run: |
+          make test-integration
+
 
       - name: Build package
         run: make build

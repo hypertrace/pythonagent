@@ -21,6 +21,10 @@ class DjangoInstrumentationWrapper(BaseInstrumentorWrapper):
         DjangoInstrumentor().instrument(request_hook=self.request_hook,
                                         response_hook=self.response_hook)
 
+    def uninstrument(self): # pylint:disable=R0201
+        """need this to match wrapper interface for specs"""
+        return
+
     def request_hook(self, span: Span, request):
         """django request hook before request is processed by app"""
         try:

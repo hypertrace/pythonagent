@@ -1,9 +1,0 @@
-../..
-google
-protobuf
-pyyaml
-#mysql.connector
-mysql-connector-python==8.0.23
-flask
-pytest
-cryptography

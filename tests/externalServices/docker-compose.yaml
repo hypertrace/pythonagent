@@ -1,0 +1,26 @@
+version: "3.9"
+
+services:
+  mysql:
+    image: mysql:5.7
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: testhypertrace
+      MYSQL_DATABASE: hypertrace
+      MYSQL_USER: hypertrace
+      MYSQL_PASSWORD: hypertrace
+  pg:
+    image: postgres:10.5
+    ports:
+      - "5432:5432"
+    restart: always
+    environment:
+      POSTGRES_DB: hypertrace
+      POSTGRES_USER: hypertrace
+      POSTGRES_PASSWORD: hypertrace
+volumes:
+  db_data: { }
