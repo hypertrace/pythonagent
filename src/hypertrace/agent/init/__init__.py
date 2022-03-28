@@ -157,6 +157,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
 
     def _init_exporter(self, trace_reporter_type):
         exporter_type = ''
+        exporter = None
         try:
             if trace_reporter_type == config_pb2.TraceReporterType.ZIPKIN:
                 exporter_type = 'zipkin'
@@ -170,16 +171,18 @@ class AgentInit:  # pylint: disable=R0902,R0903
             elif trace_reporter_type == config_pb2.TraceReporterType.OTLP_HTTP:
                 exporter_type = 'otlp_http'
                 exporter = OTLPHttpSpanExporter(endpoint=self._config.agent_config.reporting.endpoint)
+
+            if exporter:
+                logger.info('Initialized %s exporter reporting to `%s`',
+                            exporter_type,
+                            self._config.agent_config.reporting.endpoint)
             else:
                 logger.error("Unknown exporter type `%s`", trace_reporter_type)
-                return None
 
-            logger.info('Initialized %s exporter reporting to `%s`',
-                        exporter_type,
-                        self._config.agent_config.reporting.endpoint)
             return exporter
         except Exception as err:  # pylint: disable=W0703
             logger.error('Failed to initialize %s exporter: exception=%s, stacktrace=%s',
                          exporter_type,
                          err,
                          traceback.format_exc())
+            return None
