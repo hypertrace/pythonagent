@@ -3,13 +3,6 @@ import os
 import sys
 import traceback
 
-import pytest
-
-from hypertrace.agent.instrumentation import instrumentation_definitions, logger
-
-
-
-
 os.environ['HT_ENABLE_CONSOLE_SPAN_EXPORTER'] = 'true'
 
 

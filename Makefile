@@ -10,7 +10,7 @@ LOG_LEVEL ?= INFO
 unit-test:
 	cd tests/externalServices && docker-compose up -d && cd ../../
 	python3 setup.py develop
-	python3 -m pytest tests/hypertrace
+	python3 -m pytest tests/hypertrace -x
 	cd tests/externalServices && docker-compose down
 
 .PHONY: integration-test
@@ -23,11 +23,9 @@ test: unit-test integration-test
 
 .PHONY: build-proto
 build-proto:
-	git submodule update --init --recursive
 	protoc --python_out=src/hypertrace/agent/config \
-          -Isrc/agent-config \
-          -Isrc/agent-config/tools/env-vars-generator/protobuf/src \
-          src/agent-config/config.proto
+		   --proto_path=src/agent-config/proto/hypertrace/agent/config/v1/ \
+		    ./src/agent-config/proto/hypertrace/agent/config/v1/config.proto
 
 .PHONY: build
 build: build-proto

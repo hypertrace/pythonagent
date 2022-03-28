@@ -8,7 +8,6 @@ import os
 _DEFAULT_ENV_VAR_PREFIX = 'HT'
 ENV_VAR_PREFIXES = [_DEFAULT_ENV_VAR_PREFIX]
 
-
 def get_env_value(target_key):
     """checks env for given target_key with any configured prefix"""
     for prefix in ENV_VAR_PREFIXES:

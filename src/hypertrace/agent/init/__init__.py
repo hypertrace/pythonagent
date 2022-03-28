@@ -8,7 +8,8 @@ from typing import Union
 from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider, export
 from opentelemetry.sdk.trace.export import ConsoleSpanExporter, SimpleSpanProcessor
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter as OTLPGrpcSpanExporter
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter as OTLPHttpSpanExporter
 from opentelemetry.exporter.zipkin.proto.http import ZipkinExporter
 from opentelemetry.trace import ProxyTracerProvider
 from opentelemetry.sdk.resources import Resource
@@ -89,7 +90,13 @@ class AgentInit:  # pylint: disable=R0902,R0903
     def init_exporter(self) -> None:
         """Initialize exporter"""
         reporter_type = self._config.agent_config.reporting.trace_reporter_type
-        self._init_exporter(reporter_type)
+        exporter = self._init_exporter(reporter_type)
+        if exporter is None:
+            logger.warning("Unable to initialize exporter")
+            return
+
+        span_processor = BatchSpanProcessor(exporter)
+        trace.get_tracer_provider().add_span_processor(span_processor)
 
     def init_propagation(self) -> None:
         '''Initialize requested context propagation protocols.'''
@@ -158,17 +165,19 @@ class AgentInit:  # pylint: disable=R0902,R0903
                 )
             elif trace_reporter_type == config_pb2.TraceReporterType.OTLP:
                 exporter_type = 'otlp'
-                exporter = OTLPSpanExporter(endpoint=self._config.agent_config.reporting.endpoint,
+                exporter = OTLPGrpcSpanExporter(endpoint=self._config.agent_config.reporting.endpoint,
                                             insecure= not self._config.agent_config.reporting.secure)
+            elif trace_reporter_type == config_pb2.TraceReporterType.OTLP_HTTP:
+                exporter_type = 'otlp_http'
+                exporter = OTLPHttpSpanExporter(endpoint=self._config.agent_config.reporting.endpoint)
             else:
                 logger.error("Unknown exporter type `%s`", trace_reporter_type)
-
-            span_processor = BatchSpanProcessor(exporter)
-            trace.get_tracer_provider().add_span_processor(span_processor)
+                return None
 
             logger.info('Initialized %s exporter reporting to `%s`',
                         exporter_type,
                         self._config.agent_config.reporting.endpoint)
+            return exporter
         except Exception as err:  # pylint: disable=W0703
             logger.error('Failed to initialize %s exporter: exception=%s, stacktrace=%s',
                          exporter_type,
