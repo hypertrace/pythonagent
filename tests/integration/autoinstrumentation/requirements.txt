@@ -1,0 +1,9 @@
+../../../
+google
+protobuf
+pyyaml
+flask
+pytest
+pytest-xdist
+mysql-connector-python==8.0.23
+

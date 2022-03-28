@@ -30,6 +30,9 @@ class AwsLambdaInstrumentorWrapper(AwsLambdaInstrumentor, BaseInstrumentorWrappe
         logger.debug('Entering AwsLambdaInstrumentorWrapper.__init__().')
         super().__init__()
 
+    def uninstrument(self, **kwargs):
+        pass
+
     # We need to replace default _instrument behavior to capture request/resp data
     def _ht_instrument(self,  # pylint:disable=R0915
             wrapped_module_name,

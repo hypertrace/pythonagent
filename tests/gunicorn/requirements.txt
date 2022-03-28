@@ -1,7 +1,0 @@
-../..
-google
-protobuf
-pyyaml
-mysql.connector
-flask
-pytest

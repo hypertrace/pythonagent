@@ -155,7 +155,13 @@ ServerlessFunction:
 ```
 
 ## Development
+To run tests locally:
 
+1.) `pip install -r requirements -r dev-requirements.txt`
+
+2.) `python setup.py develop`
+
+3.) `python -m pytest tests/hypertrace`
 ### Releases
 
 In order to create a new release, you can run `make release VERSION=<version-number>` and this will change the version in the code appropriately and push the tags.

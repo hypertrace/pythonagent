@@ -1,4 +1,5 @@
 '''Main entry point for Hypertrace agent module.'''
+import os
 import sys
 import threading
 import traceback
@@ -9,7 +10,7 @@ import opentelemetry.trace as ot
 
 from hypertrace.agent.instrumentation.instrumentation_definitions import SUPPORTED_LIBRARIES, \
     get_instrumentation_wrapper, REQUESTS_KEY, GRPC_CLIENT_KEY, DJANGO_KEY, MYSQL_KEY, GRPC_SERVER_KEY, \
-    POSTGRESQL_KEY, AIOHTTP_CLIENT_KEY, FLASK_KEY
+    POSTGRESQL_KEY, AIOHTTP_CLIENT_KEY, FLASK_KEY, LAMBDA, _uninstrument_all
 from hypertrace.env_var_settings import get_env_value
 from hypertrace.agent.init import AgentInit
 from hypertrace.agent.config import AgentConfig
@@ -111,6 +112,9 @@ class Agent:
             from hypertrace.agent.instrumentation.django.django_auto_instrumentation_compat import \
                 add_django_auto_instr_wrappers  # pylint: disable=C0415
             add_django_auto_instr_wrappers(self, wrapper_instance)
+            return
+
+        if library_key == LAMBDA and '_HANDLER' not in os.environ:
             return
 
         self.register_library(library_key, wrapper_instance)

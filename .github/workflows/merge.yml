@@ -54,11 +54,14 @@ jobs:
           pip install --upgrade --no-input pip
           pip install --upgrade --no-input protobuf
 
-      - name: Run tests
+      - name: Run unit tests
         run: |
-          VERSION=$(${{ matrix.python-version }} | cut -c1-3)
-          echo "Version ${VERSION}"
-          PYTHON_VERSION=${VERSION} make test
+          make unit-test
+
+      - name: Run integration tests
+        run: |
+          make integration-test
+
 
       - name: Build package
         run: make build

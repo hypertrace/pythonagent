@@ -1,0 +1,24 @@
+service_name: pythonagent_001
+reporting:
+  endpoint: https://localhost:9411/api/v2/spans
+  secure: true
+  trace_reporter_type: ZIPKIN
+  token: "TestToken"
+data_capture:
+  http_headers:
+    request: false
+    response: false
+  http_body:
+    request: false
+    response: false
+  rpc_metadata:
+    request: false
+    response: false
+  rpc_body:
+    request: false
+    response: false
+  body_max_size_bytes: 123457
+propagation_formats: ["B3"]
+_use_console_span_exporter: true
+enabled: false
+resource_attributes: { "tester01": "tester01" }

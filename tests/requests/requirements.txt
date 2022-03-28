@@ -1,7 +1,0 @@
-../..
-google
-protobuf
-pyyaml
-flask
-pytest
-pytest-xdist
