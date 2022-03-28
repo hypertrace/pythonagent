@@ -23,7 +23,7 @@ test: unit-test integration-test
 
 .PHONY: build-proto
 build-proto:
-	git submodules update --init --recursive
+	git submodule update --init --recursive
 	protoc --python_out=src/hypertrace/agent/config \
 		   --proto_path=src/agent-config/proto/hypertrace/agent/config/v1/ \
 		    ./src/agent-config/proto/hypertrace/agent/config/v1/config.proto
