@@ -1,4 +1,12 @@
+import sys
+
 from setuptools import setup, find_packages
+
+version_tuple = sys.version_info
+# install_requires doesn't always work(like if on older versions of pip)
+if sys.version_info < (3, 6):
+    print("Hypertrace is not supported on python versions before 3.6")
+    sys.exit(1)
 
 exec(open('src/hypertrace/version.py').read())
 
