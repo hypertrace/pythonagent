@@ -69,21 +69,12 @@ class AgentConfig:  # pylint: disable=R0902,R0903
         _transform_values(config_dict)
         logger.info("Config init complete - config state: %s", config_dict)
 
-        # Create Protobuf AgentConfig object
-        #
-        # Create Protobuf Opa object
-        opa = jf.Parse(jf.MessageToJson(config_pb2.Opa()), config_pb2.Opa)
-        opa.endpoint = config_dict['reporting']['opa']['endpoint']
-        opa.poll_period_seconds = config_dict['reporting']['opa']['poll_period_seconds']
-        opa.enabled = config_dict['reporting']['opa']['enabled']
-
         # Create protobuf Reporting object
         reporting = jf.Parse(jf.MessageToJson(
             config_pb2.Reporting()), config_pb2.Reporting)
         reporting.endpoint = config_dict['reporting']['endpoint']
         reporting.secure = config_dict['reporting']['secure']
         reporting.token = config_dict['reporting']['token']
-        reporting.opa = opa
 
         # Set trace_reporter_type
         if config_dict['reporting']['trace_reporter_type'] == 'OTLP':

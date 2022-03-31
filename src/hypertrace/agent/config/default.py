@@ -9,11 +9,6 @@ DEFAULT_AGENT_CONFIG = {
         'secure': False,
         'trace_reporter_type': 'OTLP',
         'token': '',
-        'opa': {
-            'endpoint': 'http://opa.traceableai:8181/',
-            'poll_period_seconds': 60,
-            'enabled': False,
-        }
     },
     'data_capture': {
         'http_headers': {

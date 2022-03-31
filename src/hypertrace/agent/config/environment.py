@@ -41,27 +41,6 @@ def load_config_from_env() -> dict:  # pylint: disable=R0912,R0915,R0914
         logger.debug("[env] Loaded REPORTING_TOKEN from env")
         config['reporting']['token'] = reporting_token
 
-    config['reporting']['opa'] = {}
-
-    reporting_opa_endpoint = get_env_value('REPORTING_OPA_ENDPOINT')
-    if reporting_opa_endpoint:
-        logger.debug("[env] Loaded REPORTING_OPA_ENDPOINT from env")
-        config['reporting']['opa']['endpoint'] = reporting_opa_endpoint
-
-    opa_poll_period = get_env_value('REPORTING_OPA_POLL_PERIOD_SECONDS')
-    if opa_poll_period:
-        logger.debug(
-            "[env] Loaded REPORTING_OPA_POLL_PERIOD_SECONDS from env")
-        config['reporting']['opa']['poll_period_seconds'] = int(opa_poll_period)
-
-    opa_enabled = get_env_value('REPORTING_OPA_ENABLED')
-    if opa_enabled:
-        logger.debug("[env] Loaded REPORTING_OPA_ENABLED from env")
-        config['reporting']['opa']['enabled'] = _is_true(opa_enabled)
-
-    if len(config['reporting']['opa']) == 0:
-        del config['reporting']['opa']
-
     if len(config['reporting']) == 0:
         del config['reporting']
 

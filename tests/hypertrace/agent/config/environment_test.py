@@ -13,9 +13,6 @@ def test_env_config() -> None:
     os.environ["HT_REPORTING_ENDPOINT"] = "http://localhost:9411/api/v2/spans2"
     os.environ["HT_REPORTING_TRACE_REPORTER_TYPE"] = "OTLP"
     os.environ["HT_REPORTING_SECURE"] = "True"
-    os.environ["HT_REPORTING_OPA_ENDPOINT"] = "https://opa.traceableai:8181/"
-    os.environ["HT_REPORTING_OPA_POLL_PERIOD_SECONDS"] = "50"
-    os.environ["HT_REPORTING_OPA_ENABLED"] = "False"
     os.environ["HT_DATA_CAPTURE_HTTP_HEADERS_REQUEST"] = "False"
     os.environ["HT_DATA_CAPTURE_HTTP_HEADERS_RESPONSE"] = "False"
     os.environ["HT_DATA_CAPTURE_HTTP_BODY_REQUEST"] = "False"
@@ -35,9 +32,6 @@ def test_env_config() -> None:
     assert config['reporting']['endpoint'] == "http://localhost:9411/api/v2/spans2"
     assert config['reporting']['trace_reporter_type'] == 'OTLP'
     assert config['reporting']['secure'] is True
-    assert config['reporting']['opa']['endpoint'] == "https://opa.traceableai:8181/"
-    assert config['reporting']['opa']['poll_period_seconds'] == 50
-    assert config['reporting']['opa']['enabled'] is False
     assert config['data_capture']['http_headers']['request'] is False
     assert config['data_capture']['http_headers']['response'] is False
     assert config['data_capture']['http_body']['request'] is False
