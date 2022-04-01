@@ -10,7 +10,7 @@ LOG_LEVEL ?= INFO
 unit-test:
 	cd tests/externalServices && docker-compose up -d && cd ../../
 	python3 setup.py develop
-	python3 -m pytest tests/hypertrace
+	python3 -m pytest tests/hypertrace --cov-report=xml --cov=hypertrace
 	cd tests/externalServices && docker-compose down
 
 .PHONY: integration-test

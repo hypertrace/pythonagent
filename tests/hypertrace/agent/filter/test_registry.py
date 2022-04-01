@@ -25,9 +25,11 @@ def test_apply_filter_with_values_can_return_true():
     registry = Registry()
     registry.register(TestFilter)
     assert registry.apply_filters(NonRecordingSpan(None), 'a_url', {'key': 'v'}, 'body_data', TYPE_HTTP)
+    registry.filters = []
 
 def test_apply_filter_returns_false_by_default():
     '''Assert that apply_filters will return false by default'''
     registry = Registry()
     registry.register(TestFilter)
     assert registry.apply_filters(NonRecordingSpan(None), None, {}, None, TYPE_HTTP) is False
+    registry.filters = []
