@@ -43,9 +43,6 @@ jobs:
           pip install build
           pip install -r requirements.txt -r dev-requirements.txt
 
-      - name: Lint files
-        run: make lint
-
       - name: Install protobuf compiler
         run: |
           sudo apt-get install -y protobuf-compiler
@@ -53,6 +50,9 @@ jobs:
           pip uninstall --yes protobuf python3-protobuf
           pip install --upgrade --no-input pip
           pip install --upgrade --no-input protobuf
+
+      - name: Lint files
+        run: make lint
 
       - name: Run unit tests
         run: |
