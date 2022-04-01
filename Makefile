@@ -41,7 +41,7 @@ docs:
 	tox -e pdoc
 
 .PHONY: lint
-lint:
+lint: build-proto
 	pylint --ignore config_pb2.py --disable R0801,W0123 src/hypertrace
 
 .PHONY: install
