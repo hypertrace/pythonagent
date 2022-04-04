@@ -4,7 +4,7 @@ environment variables, and the agent-config.yaml file.
 """
 import logging
 from google.protobuf import json_format as jf
-from google.protobuf.wrappers_pb2 import BoolValue
+from google.protobuf.wrappers_pb2 import BoolValue  # pylint:disable=E0611
 from hypertrace.agent.config import config_pb2
 from hypertrace.agent.config.default import *
 from hypertrace.env_var_settings import get_env_value
