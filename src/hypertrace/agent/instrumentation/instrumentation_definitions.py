@@ -3,6 +3,7 @@ import logging
 
 FLASK_KEY = 'flask'
 DJANGO_KEY = 'django'
+FAST_API_KEY = 'fastapi'
 GRPC_SERVER_KEY = 'grpc:server'
 GRPC_CLIENT_KEY = 'grpc:client'
 POSTGRESQL_KEY = 'postgresql'
@@ -14,7 +15,7 @@ BOTO = 'boto'
 BOTOCORE = 'botocore'
 
 SUPPORTED_LIBRARIES = [
-    FLASK_KEY, DJANGO_KEY,
+    FLASK_KEY, DJANGO_KEY, FAST_API_KEY,
     GRPC_SERVER_KEY, GRPC_CLIENT_KEY,
     POSTGRESQL_KEY, MYSQL_KEY,
     REQUESTS_KEY, AIOHTTP_CLIENT_KEY,
@@ -55,6 +56,9 @@ def get_instrumentation_wrapper(library_key): # pylint:disable=R0912
         elif FLASK_KEY == library_key:
             from hypertrace.agent.instrumentation.flask import FlaskInstrumentorWrapper #pylint:disable=C0415
             wrapper_instance = FlaskInstrumentorWrapper()
+        elif FAST_API_KEY == library_key:
+            from hypertrace.agent.instrumentation.fast_api import FastAPIInstrumentorWrapper #pylint:disable=C0415
+            wrapper_instance = FastAPIInstrumentorWrapper()
         elif GRPC_SERVER_KEY == library_key:
             from hypertrace.agent.instrumentation.grpc import GrpcInstrumentorServerWrapper #pylint:disable=C0415
             wrapper_instance = GrpcInstrumentorServerWrapper()

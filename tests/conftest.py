@@ -19,6 +19,14 @@ class SampleBlockingFilter(Filter):
         pass
 
 
+class SampleBodyBlockingFilter(Filter):
+    def evaluate_url_and_headers(self, span: Span, url: str, headers: tuple, request_type) -> bool:
+        return False
+
+    def evaluate_body(self, span: Span, body, headers: dict, request_type) -> bool:
+        return True
+
+
 @pytest.fixture
 def agent():
     # we never want to export spans to default exporter
@@ -33,7 +41,13 @@ def agent():
 
 @pytest.fixture
 def agent_with_filter(agent):
-    registry = Registry().register(SampleBlockingFilter)
+    Registry().register(SampleBlockingFilter)
+    yield agent
+    Registry().filters = []
+
+@pytest.fixture
+def agent_with_body_filter(agent):
+    Registry().register(SampleBodyBlockingFilter)
     yield agent
     Registry().filters = []
 

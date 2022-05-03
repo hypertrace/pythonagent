@@ -5,6 +5,8 @@ import inspect
 import traceback
 import json
 import logging
+
+from opentelemetry.attributes import BoundedAttributes
 from opentelemetry.trace.span import Span
 
 # Setup logger name
@@ -92,7 +94,29 @@ class BaseInstrumentorWrapper:
     def eligible_based_on_content_type(self, headers: dict):
         '''find content-type in headers'''
         content_type = headers.get("content-type")
-        return content_type if content_type in self._ALLOWED_CONTENT_TYPES else None # plyint:disable=R1710
+        return content_type in self._ALLOWED_CONTENT_TYPES
+
+    def _capture_headers(self, record_headers: bool, header_prefix: str, # pylint:disable=R0913
+                         span, headers: dict, record_body):
+        try:  # pylint: disable=R1702
+            if not span.is_recording():
+                return False
+
+            logger.debug('Span is Recording!')
+            lowercased_headers = self.lowercase_headers(headers)
+            if record_headers:
+                self.add_headers_to_span(header_prefix, span, lowercased_headers)
+
+            if record_body:
+                content_type_recordable = self.eligible_based_on_content_type(lowercased_headers)
+                return content_type_recordable
+            return False
+        except:  # pylint: disable=W0702
+            logger.debug('An error occurred in _capture_headers: exception=%s, stacktrace=%s',
+                         sys.exc_info()[0],
+                         traceback.format_exc())
+            return False
+
 
     def _generic_handler(self, record_headers: bool, header_prefix: str, # pylint:disable=R0913
                          record_body: bool, body_prefix: str,
@@ -109,7 +133,8 @@ class BaseInstrumentorWrapper:
 
             if record_body:
                 content_type = self.eligible_based_on_content_type(lowercased_headers)
-                if content_type is None:
+
+                if content_type is False:
                     return span
 
                 body_str = None
