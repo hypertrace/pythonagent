@@ -178,4 +178,5 @@ class FastAPIInstrumentorWrapper(BaseInstrumentorWrapper):
 
     def uninstrument(self):
         """Used to uninstrument fast api app"""
-        FastAPIInstrumentor.uninstrument_app(self.app)
+        if self.app:
+            FastAPIInstrumentor.uninstrument_app(self.app)
