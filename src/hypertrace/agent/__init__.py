@@ -115,7 +115,7 @@ class Agent:
             return
 
         # For FastAPI we need a handle to the user app before we can instrument fast & inject middleware
-        # to make things easier for the user always add the below instrumnetation wrappers
+        # to make things easier for the user always add the below instrumentation wrappers
         # when FastAPI calls `.setup` take the app and then add instrumentation
         if library_key == FAST_API_KEY:
             from hypertrace.agent.instrumentation.fast_api.fast_api_auto_instrumentation_compat import \
