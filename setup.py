@@ -42,6 +42,7 @@ setup(
         "opentelemetry-instrumentation-boto==0.27b0",
         "opentelemetry-instrumentation-botocore==0.27b0",
         "opentelemetry-instrumentation-wsgi==0.27b0",
+        "opentelemetry-instrumentation-fastapi==0.27b0",
         "opentelemetry-instrumentation-flask==0.27b0",
         "opentelemetry-instrumentation-mysql==0.27b0",
         "opentelemetry-instrumentation-psycopg2==0.27b0",
