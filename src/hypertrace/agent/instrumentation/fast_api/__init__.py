@@ -5,7 +5,7 @@ from functools import wraps
 from fastapi import HTTPException
 from starlette.datastructures import Headers
 from starlette.requests import Request
-from starlette.responses import JSONResponse
+from starlette.responses import PlainTextResponse
 
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.instrumentation.asgi import OpenTelemetryMiddleware, set_status_code
@@ -121,7 +121,7 @@ class FastAPIInstrumentorWrapper(BaseInstrumentorWrapper):
             try:
                 return await call_next(request)
             except HypertraceException:
-                return JSONResponse(status_code=403)
+                return PlainTextResponse(status_code=403)
 
         # configure fast api instrumentor w hooks
         FastAPIInstrumentor.instrument_app(app=self.app,
