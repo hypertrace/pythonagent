@@ -37,7 +37,8 @@ from typing import Union
 from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider, export
 from opentelemetry.sdk.trace.export import ConsoleSpanExporter, SimpleSpanProcessor
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter as OTLPGrpcSpanExporter
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter as OTLPHttpSpanExporter
 from opentelemetry.exporter.zipkin.proto.http import ZipkinExporter
 from opentelemetry.trace import ProxyTracerProvider
 from opentelemetry.sdk.resources import Resource
@@ -118,7 +119,13 @@ class AgentInit:  # pylint: disable=R0902,R0903
     def init_exporter(self) -&gt; None:
         &#34;&#34;&#34;Initialize exporter&#34;&#34;&#34;
         reporter_type = self._config.agent_config.reporting.trace_reporter_type
-        self._init_exporter(reporter_type)
+        exporter = self._init_exporter(reporter_type)
+        if exporter is None:
+            logger.warning(&#34;Unable to initialize exporter&#34;)
+            return
+
+        span_processor = BatchSpanProcessor(exporter)
+        trace.get_tracer_provider().add_span_processor(span_processor)
 
     def init_propagation(self) -&gt; None:
         &#39;&#39;&#39;Initialize requested context propagation protocols.&#39;&#39;&#39;
@@ -130,8 +137,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
                 propagator_list += [ TraceContextTextMapPropagator() ]
                 logger.debug(&#39;Adding TRACECONTEXT trace propagator to list.&#39;)
             if prop_format == config_pb2.PropagationFormat.B3:
-                from opentelemetry.propagators.b3 import B3Format  # pylint: disable=C0415
-                propagator_list += [ B3Format() ]
+                from opentelemetry.propagators.b3 import B3MultiFormat  # pylint: disable=C0415
+                propagator_list += [ B3MultiFormat() ]
                 logger.debug(&#39;Adding B3 trace propagator to list.&#39;)
 
         if len(propagator_list) == 0:
@@ -179,6 +186,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
 
     def _init_exporter(self, trace_reporter_type):
         exporter_type = &#39;&#39;
+        exporter = None
         try:
             if trace_reporter_type == config_pb2.TraceReporterType.ZIPKIN:
                 exporter_type = &#39;zipkin&#39;
@@ -187,22 +195,26 @@ class AgentInit:  # pylint: disable=R0902,R0903
                 )
             elif trace_reporter_type == config_pb2.TraceReporterType.OTLP:
                 exporter_type = &#39;otlp&#39;
-                exporter = OTLPSpanExporter(endpoint=self._config.agent_config.reporting.endpoint,
+                exporter = OTLPGrpcSpanExporter(endpoint=self._config.agent_config.reporting.endpoint,
                                             insecure= not self._config.agent_config.reporting.secure)
+            elif trace_reporter_type == config_pb2.TraceReporterType.OTLP_HTTP:
+                exporter_type = &#39;otlp_http&#39;
+                exporter = OTLPHttpSpanExporter(endpoint=self._config.agent_config.reporting.endpoint)
+
+            if exporter:
+                logger.info(&#39;Initialized %s exporter reporting to `%s`&#39;,
+                            exporter_type,
+                            self._config.agent_config.reporting.endpoint)
             else:
                 logger.error(&#34;Unknown exporter type `%s`&#34;, trace_reporter_type)
 
-            span_processor = BatchSpanProcessor(exporter)
-            trace.get_tracer_provider().add_span_processor(span_processor)
-
-            logger.info(&#39;Initialized %s exporter reporting to `%s`&#39;,
-                        exporter_type,
-                        self._config.agent_config.reporting.endpoint)
+            return exporter
         except Exception as err:  # pylint: disable=W0703
             logger.error(&#39;Failed to initialize %s exporter: exception=%s, stacktrace=%s&#39;,
                          exporter_type,
                          err,
-                         traceback.format_exc())</code></pre>
+                         traceback.format_exc())
+            return None</code></pre>
 </details>
 </section>
 <section>
@@ -294,7 +306,13 @@ class AgentInit:  # pylint: disable=R0902,R0903
     def init_exporter(self) -&gt; None:
         &#34;&#34;&#34;Initialize exporter&#34;&#34;&#34;
         reporter_type = self._config.agent_config.reporting.trace_reporter_type
-        self._init_exporter(reporter_type)
+        exporter = self._init_exporter(reporter_type)
+        if exporter is None:
+            logger.warning(&#34;Unable to initialize exporter&#34;)
+            return
+
+        span_processor = BatchSpanProcessor(exporter)
+        trace.get_tracer_provider().add_span_processor(span_processor)
 
     def init_propagation(self) -&gt; None:
         &#39;&#39;&#39;Initialize requested context propagation protocols.&#39;&#39;&#39;
@@ -306,8 +324,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
                 propagator_list += [ TraceContextTextMapPropagator() ]
                 logger.debug(&#39;Adding TRACECONTEXT trace propagator to list.&#39;)
             if prop_format == config_pb2.PropagationFormat.B3:
-                from opentelemetry.propagators.b3 import B3Format  # pylint: disable=C0415
-                propagator_list += [ B3Format() ]
+                from opentelemetry.propagators.b3 import B3MultiFormat  # pylint: disable=C0415
+                propagator_list += [ B3MultiFormat() ]
                 logger.debug(&#39;Adding B3 trace propagator to list.&#39;)
 
         if len(propagator_list) == 0:
@@ -355,6 +373,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
 
     def _init_exporter(self, trace_reporter_type):
         exporter_type = &#39;&#39;
+        exporter = None
         try:
             if trace_reporter_type == config_pb2.TraceReporterType.ZIPKIN:
                 exporter_type = &#39;zipkin&#39;
@@ -363,22 +382,26 @@ class AgentInit:  # pylint: disable=R0902,R0903
                 )
             elif trace_reporter_type == config_pb2.TraceReporterType.OTLP:
                 exporter_type = &#39;otlp&#39;
-                exporter = OTLPSpanExporter(endpoint=self._config.agent_config.reporting.endpoint,
+                exporter = OTLPGrpcSpanExporter(endpoint=self._config.agent_config.reporting.endpoint,
                                             insecure= not self._config.agent_config.reporting.secure)
+            elif trace_reporter_type == config_pb2.TraceReporterType.OTLP_HTTP:
+                exporter_type = &#39;otlp_http&#39;
+                exporter = OTLPHttpSpanExporter(endpoint=self._config.agent_config.reporting.endpoint)
+
+            if exporter:
+                logger.info(&#39;Initialized %s exporter reporting to `%s`&#39;,
+                            exporter_type,
+                            self._config.agent_config.reporting.endpoint)
             else:
                 logger.error(&#34;Unknown exporter type `%s`&#34;, trace_reporter_type)
 
-            span_processor = BatchSpanProcessor(exporter)
-            trace.get_tracer_provider().add_span_processor(span_processor)
-
-            logger.info(&#39;Initialized %s exporter reporting to `%s`&#39;,
-                        exporter_type,
-                        self._config.agent_config.reporting.endpoint)
+            return exporter
         except Exception as err:  # pylint: disable=W0703
             logger.error(&#39;Failed to initialize %s exporter: exception=%s, stacktrace=%s&#39;,
                          exporter_type,
                          err,
-                         traceback.format_exc())</code></pre>
+                         traceback.format_exc())
+            return None</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
@@ -417,7 +440,13 @@ class AgentInit:  # pylint: disable=R0902,R0903
 <pre><code class="python">def init_exporter(self) -&gt; None:
     &#34;&#34;&#34;Initialize exporter&#34;&#34;&#34;
     reporter_type = self._config.agent_config.reporting.trace_reporter_type
-    self._init_exporter(reporter_type)</code></pre>
+    exporter = self._init_exporter(reporter_type)
+    if exporter is None:
+        logger.warning(&#34;Unable to initialize exporter&#34;)
+        return
+
+    span_processor = BatchSpanProcessor(exporter)
+    trace.get_tracer_provider().add_span_processor(span_processor)</code></pre>
 </details>
 </dd>
 <dt id="hypertrace.agent.init.AgentInit.init_library_instrumentation"><code class="name flex">
@@ -461,8 +490,8 @@ class AgentInit:  # pylint: disable=R0902,R0903
             propagator_list += [ TraceContextTextMapPropagator() ]
             logger.debug(&#39;Adding TRACECONTEXT trace propagator to list.&#39;)
         if prop_format == config_pb2.PropagationFormat.B3:
-            from opentelemetry.propagators.b3 import B3Format  # pylint: disable=C0415
-            propagator_list += [ B3Format() ]
+            from opentelemetry.propagators.b3 import B3MultiFormat  # pylint: disable=C0415
+            propagator_list += [ B3MultiFormat() ]
             logger.debug(&#39;Adding B3 trace propagator to list.&#39;)
 
     if len(propagator_list) == 0:

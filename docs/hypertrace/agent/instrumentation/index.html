@@ -34,6 +34,8 @@ import inspect
 import traceback
 import json
 import logging
+
+from opentelemetry.attributes import BoundedAttributes
 from opentelemetry.trace.span import Span
 
 # Setup logger name
@@ -121,7 +123,29 @@ class BaseInstrumentorWrapper:
     def eligible_based_on_content_type(self, headers: dict):
         &#39;&#39;&#39;find content-type in headers&#39;&#39;&#39;
         content_type = headers.get(&#34;content-type&#34;)
-        return content_type if content_type in self._ALLOWED_CONTENT_TYPES else None # plyint:disable=R1710
+        return content_type in self._ALLOWED_CONTENT_TYPES
+
+    def _capture_headers(self, record_headers: bool, header_prefix: str, # pylint:disable=R0913
+                         span, headers: dict, record_body):
+        try:  # pylint: disable=R1702
+            if not span.is_recording():
+                return False
+
+            logger.debug(&#39;Span is Recording!&#39;)
+            lowercased_headers = self.lowercase_headers(headers)
+            if record_headers:
+                self.add_headers_to_span(header_prefix, span, lowercased_headers)
+
+            if record_body:
+                content_type_recordable = self.eligible_based_on_content_type(lowercased_headers)
+                return content_type_recordable
+            return False
+        except:  # pylint: disable=W0702
+            logger.debug(&#39;An error occurred in _capture_headers: exception=%s, stacktrace=%s&#39;,
+                         sys.exc_info()[0],
+                         traceback.format_exc())
+            return False
+
 
     def _generic_handler(self, record_headers: bool, header_prefix: str, # pylint:disable=R0913
                          record_body: bool, body_prefix: str,
@@ -138,7 +162,8 @@ class BaseInstrumentorWrapper:
 
             if record_body:
                 content_type = self.eligible_based_on_content_type(lowercased_headers)
-                if content_type is None:
+
+                if content_type is False:
                     return span
 
                 body_str = None
@@ -294,6 +319,10 @@ class BaseInstrumentorWrapper:
 <dd>
 <div class="desc"><p>Hypertrace django instrumentor module wrapper.</p></div>
 </dd>
+<dt><code class="name"><a title="hypertrace.agent.instrumentation.fast_api" href="fast_api/index.html">hypertrace.agent.instrumentation.fast_api</a></code></dt>
+<dd>
+<div class="desc"><p>includes a middleware.<strong>call</strong> wrapper and the fast api instrumentor implementation + hooks</p></div>
+</dd>
 <dt><code class="name"><a title="hypertrace.agent.instrumentation.flask" href="flask/index.html">hypertrace.agent.instrumentation.flask</a></code></dt>
 <dd>
 <div class="desc"><p>Hypertrace flask instrumentor module wrapper.</p></div>
@@ -417,7 +446,29 @@ class BaseInstrumentorWrapper:
     def eligible_based_on_content_type(self, headers: dict):
         &#39;&#39;&#39;find content-type in headers&#39;&#39;&#39;
         content_type = headers.get(&#34;content-type&#34;)
-        return content_type if content_type in self._ALLOWED_CONTENT_TYPES else None # plyint:disable=R1710
+        return content_type in self._ALLOWED_CONTENT_TYPES
+
+    def _capture_headers(self, record_headers: bool, header_prefix: str, # pylint:disable=R0913
+                         span, headers: dict, record_body):
+        try:  # pylint: disable=R1702
+            if not span.is_recording():
+                return False
+
+            logger.debug(&#39;Span is Recording!&#39;)
+            lowercased_headers = self.lowercase_headers(headers)
+            if record_headers:
+                self.add_headers_to_span(header_prefix, span, lowercased_headers)
+
+            if record_body:
+                content_type_recordable = self.eligible_based_on_content_type(lowercased_headers)
+                return content_type_recordable
+            return False
+        except:  # pylint: disable=W0702
+            logger.debug(&#39;An error occurred in _capture_headers: exception=%s, stacktrace=%s&#39;,
+                         sys.exc_info()[0],
+                         traceback.format_exc())
+            return False
+
 
     def _generic_handler(self, record_headers: bool, header_prefix: str, # pylint:disable=R0913
                          record_body: bool, body_prefix: str,
@@ -434,7 +485,8 @@ class BaseInstrumentorWrapper:
 
             if record_body:
                 content_type = self.eligible_based_on_content_type(lowercased_headers)
-                if content_type is None:
+
+                if content_type is False:
                     return span
 
                 body_str = None
@@ -573,6 +625,7 @@ class BaseInstrumentorWrapper:
 <li><a title="hypertrace.agent.instrumentation.boto.BotoInstrumentationWrapper" href="boto/index.html#hypertrace.agent.instrumentation.boto.BotoInstrumentationWrapper">BotoInstrumentationWrapper</a></li>
 <li><a title="hypertrace.agent.instrumentation.botocore.BotocoreInstrumentationWrapper" href="botocore/index.html#hypertrace.agent.instrumentation.botocore.BotocoreInstrumentationWrapper">BotocoreInstrumentationWrapper</a></li>
 <li><a title="hypertrace.agent.instrumentation.django.DjangoInstrumentationWrapper" href="django/index.html#hypertrace.agent.instrumentation.django.DjangoInstrumentationWrapper">DjangoInstrumentationWrapper</a></li>
+<li><a title="hypertrace.agent.instrumentation.fast_api.FastAPIInstrumentorWrapper" href="fast_api/index.html#hypertrace.agent.instrumentation.fast_api.FastAPIInstrumentorWrapper">FastAPIInstrumentorWrapper</a></li>
 <li><a title="hypertrace.agent.instrumentation.flask.FlaskInstrumentorWrapper" href="flask/index.html#hypertrace.agent.instrumentation.flask.FlaskInstrumentorWrapper">FlaskInstrumentorWrapper</a></li>
 <li>hypertrace.agent.instrumentation.flask._HypertraceInstrumentedFlask</li>
 <li><a title="hypertrace.agent.instrumentation.grpc.GrpcInstrumentorClientWrapper" href="grpc/index.html#hypertrace.agent.instrumentation.grpc.GrpcInstrumentorClientWrapper">GrpcInstrumentorClientWrapper</a></li>
@@ -666,7 +719,7 @@ class BaseInstrumentorWrapper:
 <pre><code class="python">def eligible_based_on_content_type(self, headers: dict):
     &#39;&#39;&#39;find content-type in headers&#39;&#39;&#39;
     content_type = headers.get(&#34;content-type&#34;)
-    return content_type if content_type in self._ALLOWED_CONTENT_TYPES else None # plyint:disable=R1710</code></pre>
+    return content_type in self._ALLOWED_CONTENT_TYPES</code></pre>
 </details>
 </dd>
 <dt id="hypertrace.agent.instrumentation.BaseInstrumentorWrapper.generic_request_handler"><code class="name flex">
@@ -931,6 +984,7 @@ class BaseInstrumentorWrapper:
 <li><code><a title="hypertrace.agent.instrumentation.boto" href="boto/index.html">hypertrace.agent.instrumentation.boto</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.botocore" href="botocore/index.html">hypertrace.agent.instrumentation.botocore</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.django" href="django/index.html">hypertrace.agent.instrumentation.django</a></code></li>
+<li><code><a title="hypertrace.agent.instrumentation.fast_api" href="fast_api/index.html">hypertrace.agent.instrumentation.fast_api</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.flask" href="flask/index.html">hypertrace.agent.instrumentation.flask</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.grpc" href="grpc/index.html">hypertrace.agent.instrumentation.grpc</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.instrumentation_definitions" href="instrumentation_definitions.html">hypertrace.agent.instrumentation.instrumentation_definitions</a></code></li>

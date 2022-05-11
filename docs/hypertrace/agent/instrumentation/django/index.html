@@ -50,6 +50,10 @@ class DjangoInstrumentationWrapper(BaseInstrumentorWrapper):
         DjangoInstrumentor().instrument(request_hook=self.request_hook,
                                         response_hook=self.response_hook)
 
+    def uninstrument(self): # pylint:disable=R0201
+        &#34;&#34;&#34;need this to match wrapper interface for specs&#34;&#34;&#34;
+        return
+
     def request_hook(self, span: Span, request):
         &#34;&#34;&#34;django request hook before request is processed by app&#34;&#34;&#34;
         try:
@@ -122,6 +126,10 @@ the application getters of wsgi/asgi to run our …</p></div>
         &#34;&#34;&#34;configure django instrumentor w hooks&#34;&#34;&#34;
         DjangoInstrumentor().instrument(request_hook=self.request_hook,
                                         response_hook=self.response_hook)
+
+    def uninstrument(self): # pylint:disable=R0201
+        &#34;&#34;&#34;need this to match wrapper interface for specs&#34;&#34;&#34;
+        return
 
     def request_hook(self, span: Span, request):
         &#34;&#34;&#34;django request hook before request is processed by app&#34;&#34;&#34;
@@ -239,6 +247,20 @@ the application getters of wsgi/asgi to run our …</p></div>
                      traceback.format_exc())</code></pre>
 </details>
 </dd>
+<dt id="hypertrace.agent.instrumentation.django.DjangoInstrumentationWrapper.uninstrument"><code class="name flex">
+<span>def <span class="ident">uninstrument</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>need this to match wrapper interface for specs</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def uninstrument(self): # pylint:disable=R0201
+    &#34;&#34;&#34;need this to match wrapper interface for specs&#34;&#34;&#34;
+    return</code></pre>
+</details>
+</dd>
 </dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
@@ -289,6 +311,7 @@ the application getters of wsgi/asgi to run our …</p></div>
 <li><code><a title="hypertrace.agent.instrumentation.django.DjangoInstrumentationWrapper.instrument" href="#hypertrace.agent.instrumentation.django.DjangoInstrumentationWrapper.instrument">instrument</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.django.DjangoInstrumentationWrapper.request_hook" href="#hypertrace.agent.instrumentation.django.DjangoInstrumentationWrapper.request_hook">request_hook</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.django.DjangoInstrumentationWrapper.response_hook" href="#hypertrace.agent.instrumentation.django.DjangoInstrumentationWrapper.response_hook">response_hook</a></code></li>
+<li><code><a title="hypertrace.agent.instrumentation.django.DjangoInstrumentationWrapper.uninstrument" href="#hypertrace.agent.instrumentation.django.DjangoInstrumentationWrapper.uninstrument">uninstrument</a></code></li>
 </ul>
 </li>
 </ul>

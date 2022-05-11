@@ -32,6 +32,7 @@ import logging
 
 FLASK_KEY = &#39;flask&#39;
 DJANGO_KEY = &#39;django&#39;
+FAST_API_KEY = &#39;fastapi&#39;
 GRPC_SERVER_KEY = &#39;grpc:server&#39;
 GRPC_CLIENT_KEY = &#39;grpc:client&#39;
 POSTGRESQL_KEY = &#39;postgresql&#39;
@@ -43,7 +44,7 @@ BOTO = &#39;boto&#39;
 BOTOCORE = &#39;botocore&#39;
 
 SUPPORTED_LIBRARIES = [
-    FLASK_KEY, DJANGO_KEY,
+    FLASK_KEY, DJANGO_KEY, FAST_API_KEY,
     GRPC_SERVER_KEY, GRPC_CLIENT_KEY,
     POSTGRESQL_KEY, MYSQL_KEY,
     REQUESTS_KEY, AIOHTTP_CLIENT_KEY,
@@ -55,6 +56,12 @@ _INSTRUMENTATION_STATE = {}
 
 logger = logging.getLogger(__name__)
 
+def _uninstrument_all():
+    for key in _INSTRUMENTATION_STATE:
+        logger.debug(&#34;Uninstrumenting %s&#34;, key)
+        _INSTRUMENTATION_STATE[key].uninstrument()
+
+    _INSTRUMENTATION_STATE.clear()
 
 def is_already_instrumented(library_key):
     &#34;&#34;&#34;check if an instrumentation wrapper is already registered&#34;&#34;&#34;
@@ -78,6 +85,9 @@ def get_instrumentation_wrapper(library_key): # pylint:disable=R0912
         elif FLASK_KEY == library_key:
             from hypertrace.agent.instrumentation.flask import FlaskInstrumentorWrapper #pylint:disable=C0415
             wrapper_instance = FlaskInstrumentorWrapper()
+        elif FAST_API_KEY == library_key:
+            from hypertrace.agent.instrumentation.fast_api import FastAPIInstrumentorWrapper #pylint:disable=C0415
+            wrapper_instance = FastAPIInstrumentorWrapper()
         elif GRPC_SERVER_KEY == library_key:
             from hypertrace.agent.instrumentation.grpc import GrpcInstrumentorServerWrapper #pylint:disable=C0415
             wrapper_instance = GrpcInstrumentorServerWrapper()
@@ -143,6 +153,9 @@ def get_instrumentation_wrapper(library_key): # pylint:disable=R0912
         elif FLASK_KEY == library_key:
             from hypertrace.agent.instrumentation.flask import FlaskInstrumentorWrapper #pylint:disable=C0415
             wrapper_instance = FlaskInstrumentorWrapper()
+        elif FAST_API_KEY == library_key:
+            from hypertrace.agent.instrumentation.fast_api import FastAPIInstrumentorWrapper #pylint:disable=C0415
+            wrapper_instance = FastAPIInstrumentorWrapper()
         elif GRPC_SERVER_KEY == library_key:
             from hypertrace.agent.instrumentation.grpc import GrpcInstrumentorServerWrapper #pylint:disable=C0415
             wrapper_instance = GrpcInstrumentorServerWrapper()
