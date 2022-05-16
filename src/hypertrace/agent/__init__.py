@@ -64,7 +64,7 @@ class Agent:
             # need to explicitly set this as None when modifying the config via code
             # to regenerate Trace Provider with new options
             ot._TRACER_PROVIDER = None  # pylint:disable=W0212
-            ot._TRACER_PROVIDER_SET_ONCE = _once.Once()
+            ot._TRACER_PROVIDER_SET_ONCE = _once.Once() # pylint:disable=W0212
             agent_config = self._config.agent_config
             yield agent_config
             self._config.agent_config = agent_config
