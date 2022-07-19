@@ -87,20 +87,28 @@ def test_can_block(django_client):
     r.filters.clear()
     memoryExporter.clear()
 
-def test_wsgi_is_wrapped(django_client):
+def test_asgi_wrappers(django_client):
     if _INSTRUMENTATION_STATE[DJANGO_KEY]:
         del _INSTRUMENTATION_STATE[DJANGO_KEY]
     TEST_AGENT_INSTANCE._instrument(DJANGO_KEY, auto_instrument=True)
-    from django.core import wsgi
-    # since we cant test that its a lambda just test that our function is included in the string signature
-    assert str(wsgi.get_wsgi_application).index('add_wsgi_wrapper') > 0
-
-def test_asgi_is_wrapped(django_client):
-    if _INSTRUMENTATION_STATE[DJANGO_KEY]:
-        del _INSTRUMENTATION_STATE[DJANGO_KEY]
-    TEST_AGENT_INSTANCE._instrument(DJANGO_KEY, auto_instrument=True)
-    from django.core import asgi
+    from django.core import asgi, wsgi
     # since we cant test that its a lambda just test that our function is included in the string signature
     assert str(asgi.get_asgi_application).index('add_asgi_wrapper') > 0
+    asgi.get_asgi_application()
+    assert str(asgi.get_asgi_application).index('get_asgi_application') > 0
+    # Make sure that wsgi also is unwrapped after call
+    wsgi.get_wsgi_application()
+    assert str(wsgi.get_wsgi_application).index('get_wsgi_application') > 0
 
-
+def test_wsgi_wrappers(django_client):
+    if _INSTRUMENTATION_STATE[DJANGO_KEY]:
+        del _INSTRUMENTATION_STATE[DJANGO_KEY]
+    TEST_AGENT_INSTANCE._instrument(DJANGO_KEY, auto_instrument=True)
+    from django.core import wsgi, asgi
+    # since we cant test that its a lambda just test that our function is included in the string signature
+    assert str(wsgi.get_wsgi_application).index('add_wsgi_wrapper') > 0
+    wsgi.get_wsgi_application()
+    assert str(wsgi.get_wsgi_application).index('get_wsgi_application') > 0
+    # Make sure that asgi also is unwrapped after call
+    asgi.get_asgi_application()
+    assert str(asgi.get_asgi_application).index('get_asgi_application') > 0
