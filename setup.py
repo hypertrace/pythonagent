@@ -56,7 +56,7 @@ setup(
         "deprecated==1.2.12",
         "google>=3.0.0",
         "pyyaml",
-        "protobuf>=3.15.8"
+        "protobuf<=3.20"
     ],
     entry_points = {
         'console_scripts': [
