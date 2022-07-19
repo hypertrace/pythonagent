@@ -82,4 +82,3 @@ def apply_wrapper_asgi_get_app_fn(original_fn, agent_init, instrumentation_wrapp
         return app
 
     return ht_get_application_fn()
-
