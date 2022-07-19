@@ -19,5 +19,5 @@ opentelemetry-sdk==1.8.0
 opentelemetry-util-http==0.27b0
 google>=3.0.0
 pyyaml
-protobuf<=3.20
+protobuf<=3.19.4
 deprecated==1.2.12
