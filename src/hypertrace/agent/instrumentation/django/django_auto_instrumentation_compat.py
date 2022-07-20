@@ -47,38 +47,24 @@ def add_asgi_wrapper(agent_init, instrumentation_wrapper):
     asgi.get_asgi_application = lambda: apply_wrapper_asgi_get_app_fn(original_get_asgi_application, agent_init,
                                                                      instrumentation_wrapper, asgi)
 
-def apply_wrapper_wsgi_get_app_fn(original_fn, agent_init, instrumentation_wrapper, module):
-    """wrapper function that calls original app getter and then registers django instrumentation"""
+def ht_get_application_fn(original_fn, agent_init,
+                          instrumentation_wrapper, module, method):
     # We need to run instrumentation first to inject middleware before we call the original function
     # otherwise middleware stack changes are not applied
-    def ht_get_application_fn():
-        try:
-            agent_init.register_library(DJANGO_KEY, instrumentation_wrapper)
-        except:  # pylint:disable=W0702
-            logger.error('registering django instrumentation in asgi patch failed '
-                         '- continuing without instrumenting django')
-        app = original_fn()
-        module.__dict__['get_wsgi_application'] = original_fn
+    try:
+        agent_init.register_library(DJANGO_KEY, instrumentation_wrapper)
+    except:  # pylint:disable=W0702
+        logger.error(f'registering django instrumentation in {method} patch failed '
+                     '- continuing without instrumenting django')
+    app = original_fn()
+    module.__dict__[method] = original_fn
 
-        return app
+    return app
 
-    return ht_get_application_fn()
+def apply_wrapper_wsgi_get_app_fn(original_fn, agent_init, instrumentation_wrapper, module):
+    """wrapper function that calls original app getter and then registers django instrumentation"""
+    return ht_get_application_fn(original_fn, agent_init, instrumentation_wrapper, module, 'get_wsgi_application')
 
 def apply_wrapper_asgi_get_app_fn(original_fn, agent_init, instrumentation_wrapper, module):
     """wrapper function that calls original app getter and then registers django instrumentation"""
-    # We need to run instrumentation first to inject middleware before we call the original function
-    # otherwise middleware stack changes are not applied
-    def ht_get_application_fn():
-        try:
-            agent_init.register_library(DJANGO_KEY, instrumentation_wrapper)
-        except:  # pylint:disable=W0702
-            logger.error('registering django instrumentation in asgi patch failed '
-                         '- continuing without instrumenting django')
-        app = original_fn()
-
-        # Need to reset the original to avoid re-adding middleware every call
-        module.__dict__['get_asgi_application'] = original_fn
-
-        return app
-
-    return ht_get_application_fn()
+    return ht_get_application_fn(original_fn, agent_init, instrumentation_wrapper, module, 'get_asgi_application')
