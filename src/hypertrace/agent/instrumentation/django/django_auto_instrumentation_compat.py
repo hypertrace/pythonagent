@@ -49,13 +49,13 @@ def add_asgi_wrapper(agent_init, instrumentation_wrapper):
 
 def ht_get_application_fn(original_fn, agent_init,
                           instrumentation_wrapper, module, method):
-    # We need to run instrumentation first to inject middleware before we call the original function
-    # otherwise middleware stack changes are not applied
+    """We need to run instrumentation first to inject middleware before we call the original function
+    otherwise middleware stack changes are not applied"""
     try:
         agent_init.register_library(DJANGO_KEY, instrumentation_wrapper)
     except:  # pylint:disable=W0702
-        logger.error(f'registering django instrumentation in {method} patch failed '
-                     '- continuing without instrumenting django')
+        logger.error('registering django instrumentation in %s patch failed '
+                     '- continuing without instrumenting django', method)
     app = original_fn()
     module.__dict__[method] = original_fn
 
