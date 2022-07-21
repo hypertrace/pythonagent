@@ -7,6 +7,7 @@ from contextlib import contextmanager
 
 from deprecated import deprecated
 import opentelemetry.trace as ot
+from opentelemetry.util import _once
 
 from hypertrace.agent.instrumentation.instrumentation_definitions import SUPPORTED_LIBRARIES, \
     get_instrumentation_wrapper, REQUESTS_KEY, GRPC_CLIENT_KEY, DJANGO_KEY, MYSQL_KEY, GRPC_SERVER_KEY, \
@@ -63,6 +64,7 @@ class Agent:
             # need to explicitly set this as None when modifying the config via code
             # to regenerate Trace Provider with new options
             ot._TRACER_PROVIDER = None  # pylint:disable=W0212
+            ot._TRACER_PROVIDER_SET_ONCE = _once.Once() # pylint:disable=W0212
             agent_config = self._config.agent_config
             yield agent_config
             self._config.agent_config = agent_config
