@@ -39,7 +39,6 @@ from hypertrace.agent.instrumentation.instrumentation_definitions import DJANGO_
 
 logger = logging.getLogger(__name__)
 
-
 def add_django_auto_instr_wrappers(agent_init, instrumentation_wrapper):
     &#34;&#34;&#34;attempt to add wsgi/asgi wrappers if auto instrumentation is used&#34;&#34;&#34;
     logger.debug(&#39;attempting to add wsgi + asgi wrappers for autoinstrumentation&#39;)
@@ -63,8 +62,8 @@ def add_wsgi_wrapper(agent_init, instrumentation_wrapper):
         return
 
     original_get_wsgi_application = wsgi.get_wsgi_application
-    wsgi.get_wsgi_application = lambda: apply_wrapper_get_app_fn(original_get_wsgi_application, agent_init,
-                                                                 instrumentation_wrapper)
+    wsgi.get_wsgi_application = lambda: apply_wrapper_wsgi_get_app_fn(original_get_wsgi_application, agent_init,
+                                                                 instrumentation_wrapper, wsgi)
 
 
 def add_asgi_wrapper(agent_init, instrumentation_wrapper):
@@ -76,23 +75,30 @@ def add_asgi_wrapper(agent_init, instrumentation_wrapper):
         return
 
     original_get_asgi_application = asgi.get_asgi_application
-    asgi.get_asgi_application = lambda: apply_wrapper_get_app_fn(original_get_asgi_application, agent_init,
-                                                                     instrumentation_wrapper)
+    asgi.get_asgi_application = lambda: apply_wrapper_asgi_get_app_fn(original_get_asgi_application, agent_init,
+                                                                     instrumentation_wrapper, asgi)
 
-def apply_wrapper_get_app_fn(original_fn, agent_init, instrumentation_wrapper):
+def ht_get_application_fn(original_fn, agent_init,
+                          instrumentation_wrapper, module, method):
+    &#34;&#34;&#34;We need to run instrumentation first to inject middleware before we call the original function
+    otherwise middleware stack changes are not applied&#34;&#34;&#34;
+    try:
+        agent_init.register_library(DJANGO_KEY, instrumentation_wrapper)
+    except:  # pylint:disable=W0702
+        logger.error(&#39;registering django instrumentation in %s patch failed &#39;
+                     &#39;- continuing without instrumenting django&#39;, method)
+    app = original_fn()
+    module.__dict__[method] = original_fn
+
+    return app
+
+def apply_wrapper_wsgi_get_app_fn(original_fn, agent_init, instrumentation_wrapper, module):
     &#34;&#34;&#34;wrapper function that calls original app getter and then registers django instrumentation&#34;&#34;&#34;
-    # We need to run instrumentation first to inject middleware before we call the original function
-    # otherwise middleware stack changes are not applied
-    def ht_get_application_fn():
-        try:
-            agent_init.register_library(DJANGO_KEY, instrumentation_wrapper)
-        except:  # pylint:disable=W0702
-            logger.error(&#39;registering django instrumentation in wsgi/asgi patch failed &#39;
-                         &#39;- continuing without instrumenting django&#39;)
-        app = original_fn()
-        return app
+    return ht_get_application_fn(original_fn, agent_init, instrumentation_wrapper, module, &#39;get_wsgi_application&#39;)
 
-    return ht_get_application_fn()</code></pre>
+def apply_wrapper_asgi_get_app_fn(original_fn, agent_init, instrumentation_wrapper, module):
+    &#34;&#34;&#34;wrapper function that calls original app getter and then registers django instrumentation&#34;&#34;&#34;
+    return ht_get_application_fn(original_fn, agent_init, instrumentation_wrapper, module, &#39;get_asgi_application&#39;)</code></pre>
 </details>
 </section>
 <section>
@@ -120,8 +126,8 @@ def apply_wrapper_get_app_fn(original_fn, agent_init, instrumentation_wrapper):
         return
 
     original_get_asgi_application = asgi.get_asgi_application
-    asgi.get_asgi_application = lambda: apply_wrapper_get_app_fn(original_get_asgi_application, agent_init,
-                                                                     instrumentation_wrapper)</code></pre>
+    asgi.get_asgi_application = lambda: apply_wrapper_asgi_get_app_fn(original_get_asgi_application, agent_init,
+                                                                     instrumentation_wrapper, asgi)</code></pre>
 </details>
 </dd>
 <dt id="hypertrace.agent.instrumentation.django.django_auto_instrumentation_compat.add_django_auto_instr_wrappers"><code class="name flex">
@@ -165,12 +171,12 @@ def apply_wrapper_get_app_fn(original_fn, agent_init, instrumentation_wrapper):
         return
 
     original_get_wsgi_application = wsgi.get_wsgi_application
-    wsgi.get_wsgi_application = lambda: apply_wrapper_get_app_fn(original_get_wsgi_application, agent_init,
-                                                                 instrumentation_wrapper)</code></pre>
+    wsgi.get_wsgi_application = lambda: apply_wrapper_wsgi_get_app_fn(original_get_wsgi_application, agent_init,
+                                                                 instrumentation_wrapper, wsgi)</code></pre>
 </details>
 </dd>
-<dt id="hypertrace.agent.instrumentation.django.django_auto_instrumentation_compat.apply_wrapper_get_app_fn"><code class="name flex">
-<span>def <span class="ident">apply_wrapper_get_app_fn</span></span>(<span>original_fn, agent_init, instrumentation_wrapper)</span>
+<dt id="hypertrace.agent.instrumentation.django.django_auto_instrumentation_compat.apply_wrapper_asgi_get_app_fn"><code class="name flex">
+<span>def <span class="ident">apply_wrapper_asgi_get_app_fn</span></span>(<span>original_fn, agent_init, instrumentation_wrapper, module)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>wrapper function that calls original app getter and then registers django instrumentation</p></div>
@@ -178,20 +184,48 @@ def apply_wrapper_get_app_fn(original_fn, agent_init, instrumentation_wrapper):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def apply_wrapper_get_app_fn(original_fn, agent_init, instrumentation_wrapper):
+<pre><code class="python">def apply_wrapper_asgi_get_app_fn(original_fn, agent_init, instrumentation_wrapper, module):
     &#34;&#34;&#34;wrapper function that calls original app getter and then registers django instrumentation&#34;&#34;&#34;
-    # We need to run instrumentation first to inject middleware before we call the original function
-    # otherwise middleware stack changes are not applied
-    def ht_get_application_fn():
-        try:
-            agent_init.register_library(DJANGO_KEY, instrumentation_wrapper)
-        except:  # pylint:disable=W0702
-            logger.error(&#39;registering django instrumentation in wsgi/asgi patch failed &#39;
-                         &#39;- continuing without instrumenting django&#39;)
-        app = original_fn()
-        return app
+    return ht_get_application_fn(original_fn, agent_init, instrumentation_wrapper, module, &#39;get_asgi_application&#39;)</code></pre>
+</details>
+</dd>
+<dt id="hypertrace.agent.instrumentation.django.django_auto_instrumentation_compat.apply_wrapper_wsgi_get_app_fn"><code class="name flex">
+<span>def <span class="ident">apply_wrapper_wsgi_get_app_fn</span></span>(<span>original_fn, agent_init, instrumentation_wrapper, module)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>wrapper function that calls original app getter and then registers django instrumentation</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def apply_wrapper_wsgi_get_app_fn(original_fn, agent_init, instrumentation_wrapper, module):
+    &#34;&#34;&#34;wrapper function that calls original app getter and then registers django instrumentation&#34;&#34;&#34;
+    return ht_get_application_fn(original_fn, agent_init, instrumentation_wrapper, module, &#39;get_wsgi_application&#39;)</code></pre>
+</details>
+</dd>
+<dt id="hypertrace.agent.instrumentation.django.django_auto_instrumentation_compat.ht_get_application_fn"><code class="name flex">
+<span>def <span class="ident">ht_get_application_fn</span></span>(<span>original_fn, agent_init, instrumentation_wrapper, module, method)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>We need to run instrumentation first to inject middleware before we call the original function
+otherwise middleware stack changes are not applied</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def ht_get_application_fn(original_fn, agent_init,
+                          instrumentation_wrapper, module, method):
+    &#34;&#34;&#34;We need to run instrumentation first to inject middleware before we call the original function
+    otherwise middleware stack changes are not applied&#34;&#34;&#34;
+    try:
+        agent_init.register_library(DJANGO_KEY, instrumentation_wrapper)
+    except:  # pylint:disable=W0702
+        logger.error(&#39;registering django instrumentation in %s patch failed &#39;
+                     &#39;- continuing without instrumenting django&#39;, method)
+    app = original_fn()
+    module.__dict__[method] = original_fn
 
-    return ht_get_application_fn()</code></pre>
+    return app</code></pre>
 </details>
 </dd>
 </dl>
@@ -215,7 +249,9 @@ def apply_wrapper_get_app_fn(original_fn, agent_init, instrumentation_wrapper):
 <li><code><a title="hypertrace.agent.instrumentation.django.django_auto_instrumentation_compat.add_asgi_wrapper" href="#hypertrace.agent.instrumentation.django.django_auto_instrumentation_compat.add_asgi_wrapper">add_asgi_wrapper</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.django.django_auto_instrumentation_compat.add_django_auto_instr_wrappers" href="#hypertrace.agent.instrumentation.django.django_auto_instrumentation_compat.add_django_auto_instr_wrappers">add_django_auto_instr_wrappers</a></code></li>
 <li><code><a title="hypertrace.agent.instrumentation.django.django_auto_instrumentation_compat.add_wsgi_wrapper" href="#hypertrace.agent.instrumentation.django.django_auto_instrumentation_compat.add_wsgi_wrapper">add_wsgi_wrapper</a></code></li>
-<li><code><a title="hypertrace.agent.instrumentation.django.django_auto_instrumentation_compat.apply_wrapper_get_app_fn" href="#hypertrace.agent.instrumentation.django.django_auto_instrumentation_compat.apply_wrapper_get_app_fn">apply_wrapper_get_app_fn</a></code></li>
+<li><code><a title="hypertrace.agent.instrumentation.django.django_auto_instrumentation_compat.apply_wrapper_asgi_get_app_fn" href="#hypertrace.agent.instrumentation.django.django_auto_instrumentation_compat.apply_wrapper_asgi_get_app_fn">apply_wrapper_asgi_get_app_fn</a></code></li>
+<li><code><a title="hypertrace.agent.instrumentation.django.django_auto_instrumentation_compat.apply_wrapper_wsgi_get_app_fn" href="#hypertrace.agent.instrumentation.django.django_auto_instrumentation_compat.apply_wrapper_wsgi_get_app_fn">apply_wrapper_wsgi_get_app_fn</a></code></li>
+<li><code><a title="hypertrace.agent.instrumentation.django.django_auto_instrumentation_compat.ht_get_application_fn" href="#hypertrace.agent.instrumentation.django.django_auto_instrumentation_compat.ht_get_application_fn">ht_get_application_fn</a></code></li>
 </ul>
 </li>
 </ul>

@@ -33,6 +33,7 @@
 &#34;&#34;&#34;Generated protocol buffer code.&#34;&#34;&#34;
 from google.protobuf.internal import enum_type_wrapper
 from google.protobuf import descriptor as _descriptor
+from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
@@ -44,128 +45,13 @@ _sym_db = _symbol_database.Default()
 from google.protobuf import wrappers_pb2 as google_dot_protobuf_dot_wrappers__pb2
 
 
-DESCRIPTOR = _descriptor.FileDescriptor(
-  name=&#39;config.proto&#39;,
-  package=&#39;hypertrace.agent.config.v1&#39;,
-  syntax=&#39;proto3&#39;,
-  serialized_options=b&#39;\n\036org.hypertrace.agent.config.v1Z,github.com/hypertrace/agent-config/gen/go/v1&#39;,
-  create_key=_descriptor._internal_create_key,
-  serialized_pb=b&#39;\n\x0c\x63onfig.proto\x12\x1ahypertrace.agent.config.v1\x1a\x1egoogle/protobuf/wrappers.proto\&#34;\x86\x04\n\x0b\x41gentConfig\x12\x32\n\x0cservice_name\x18\x01 \x01(\x0b\x32\x1c.google.protobuf.StringValue\x12\x38\n\treporting\x18\x02 \x01(\x0b\x32%.hypertrace.agent.config.v1.Reporting\x12=\n\x0c\x64\x61ta_capture\x18\x03 \x01(\x0b\x32\&#39;.hypertrace.agent.config.v1.DataCapture\x12J\n\x13propagation_formats\x18\x04 \x03(\x0e\x32-.hypertrace.agent.config.v1.PropagationFormat\x12+\n\x07\x65nabled\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.BoolValue\x12\x38\n\tjavaagent\x18\x06 \x01(\x0b\x32%.hypertrace.agent.config.v1.JavaAgent\x12\\\n\x13resource_attributes\x18\x07 \x03(\x0b\x32?.hypertrace.agent.config.v1.AgentConfig.ResourceAttributesEntry\x1a\x39\n\x17ResourceAttributesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\&#34;\x96\x03\n\tReporting\x12.\n\x08\x65ndpoint\x18\x01 \x01(\x0b\x32\x1c.google.protobuf.StringValue\x12*\n\x06secure\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.BoolValue\x12+\n\x05token\x18\x03 \x01(\x0b\x32\x1c.google.protobuf.StringValue\x12J\n\x13trace_reporter_type\x18\x05 \x01(\x0e\x32-.hypertrace.agent.config.v1.TraceReporterType\x12/\n\tcert_file\x18\x06 \x01(\x0b\x32\x1c.google.protobuf.StringValue\x12\x35\n\x0fmetric_endpoint\x18\x07 \x01(\x0b\x32\x1c.google.protobuf.StringValue\x12L\n\x14metric_reporter_type\x18\x08 \x01(\x0e\x32..hypertrace.agent.config.v1.MetricReporterType\&#34;d\n\x07Message\x12+\n\x07request\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.BoolValue\x12,\n\x08response\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.BoolValue\&#34;\xf1\x02\n\x0b\x44\x61taCapture\x12\x39\n\x0chttp_headers\x18\x01 \x01(\x0b\x32#.hypertrace.agent.config.v1.Message\x12\x36\n\thttp_body\x18\x02 \x01(\x0b\x32#.hypertrace.agent.config.v1.Message\x12\x39\n\x0crpc_metadata\x18\x03 \x01(\x0b\x32#.hypertrace.agent.config.v1.Message\x12\x35\n\x08rpc_body\x18\x04 \x01(\x0b\x32#.hypertrace.agent.config.v1.Message\x12\x38\n\x13\x62ody_max_size_bytes\x18\x05 \x01(\x0b\x32\x1b.google.protobuf.Int32Value\x12\x43\n\x1e\x62ody_max_processing_size_bytes\x18\x06 \x01(\x0b\x32\x1b.google.protobuf.Int32Value\&#34;C\n\tJavaAgent\x12\x36\n\x10\x66ilter_jar_paths\x18\x01 \x03(\x0b\x32\x1c.google.protobuf.StringValue*-\n\x11PropagationFormat\x12\x06\n\x02\x42\x33\x10\x00\x12\x10\n\x0cTRACECONTEXT\x10\x01*`\n\x11TraceReporterType\x12\x0f\n\x0bUNSPECIFIED\x10\x00\x12\n\n\x06ZIPKIN\x10\x01\x12\x08\n\x04OTLP\x10\x02\x12\x0b\n\x07LOGGING\x10\x03\x12\x08\n\x04NONE\x10\x04\x12\r\n\tOTLP_HTTP\x10\x05*\xbf\x01\n\x12MetricReporterType\x12$\n METRIC_REPORTER_TYPE_UNSPECIFIED\x10\x00\x12\x1d\n\x19METRIC_REPORTER_TYPE_OTLP\x10\x01\x12#\n\x1fMETRIC_REPORTER_TYPE_PROMETHEUS\x10\x02\x12 \n\x1cMETRIC_REPORTER_TYPE_LOGGING\x10\x03\x12\x1d\n\x19METRIC_REPORTER_TYPE_NONE\x10\x04\x42N\n\x1eorg.hypertrace.agent.config.v1Z,github.com/hypertrace/agent-config/gen/go/v1b\x06proto3&#39;
-  ,
-  dependencies=[google_dot_protobuf_dot_wrappers__pb2.DESCRIPTOR,])
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b&#39;\n\x0c\x63onfig.proto\x12\x1ahypertrace.agent.config.v1\x1a\x1egoogle/protobuf/wrappers.proto\&#34;\x86\x04\n\x0b\x41gentConfig\x12\x32\n\x0cservice_name\x18\x01 \x01(\x0b\x32\x1c.google.protobuf.StringValue\x12\x38\n\treporting\x18\x02 \x01(\x0b\x32%.hypertrace.agent.config.v1.Reporting\x12=\n\x0c\x64\x61ta_capture\x18\x03 \x01(\x0b\x32\&#39;.hypertrace.agent.config.v1.DataCapture\x12J\n\x13propagation_formats\x18\x04 \x03(\x0e\x32-.hypertrace.agent.config.v1.PropagationFormat\x12+\n\x07\x65nabled\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.BoolValue\x12\x38\n\tjavaagent\x18\x06 \x01(\x0b\x32%.hypertrace.agent.config.v1.JavaAgent\x12\\\n\x13resource_attributes\x18\x07 \x03(\x0b\x32?.hypertrace.agent.config.v1.AgentConfig.ResourceAttributesEntry\x1a\x39\n\x17ResourceAttributesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\&#34;\x96\x03\n\tReporting\x12.\n\x08\x65ndpoint\x18\x01 \x01(\x0b\x32\x1c.google.protobuf.StringValue\x12*\n\x06secure\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.BoolValue\x12+\n\x05token\x18\x03 \x01(\x0b\x32\x1c.google.protobuf.StringValue\x12J\n\x13trace_reporter_type\x18\x05 \x01(\x0e\x32-.hypertrace.agent.config.v1.TraceReporterType\x12/\n\tcert_file\x18\x06 \x01(\x0b\x32\x1c.google.protobuf.StringValue\x12\x35\n\x0fmetric_endpoint\x18\x07 \x01(\x0b\x32\x1c.google.protobuf.StringValue\x12L\n\x14metric_reporter_type\x18\x08 \x01(\x0e\x32..hypertrace.agent.config.v1.MetricReporterType\&#34;d\n\x07Message\x12+\n\x07request\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.BoolValue\x12,\n\x08response\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.BoolValue\&#34;\xf1\x02\n\x0b\x44\x61taCapture\x12\x39\n\x0chttp_headers\x18\x01 \x01(\x0b\x32#.hypertrace.agent.config.v1.Message\x12\x36\n\thttp_body\x18\x02 \x01(\x0b\x32#.hypertrace.agent.config.v1.Message\x12\x39\n\x0crpc_metadata\x18\x03 \x01(\x0b\x32#.hypertrace.agent.config.v1.Message\x12\x35\n\x08rpc_body\x18\x04 \x01(\x0b\x32#.hypertrace.agent.config.v1.Message\x12\x38\n\x13\x62ody_max_size_bytes\x18\x05 \x01(\x0b\x32\x1b.google.protobuf.Int32Value\x12\x43\n\x1e\x62ody_max_processing_size_bytes\x18\x06 \x01(\x0b\x32\x1b.google.protobuf.Int32Value\&#34;C\n\tJavaAgent\x12\x36\n\x10\x66ilter_jar_paths\x18\x01 \x03(\x0b\x32\x1c.google.protobuf.StringValue*-\n\x11PropagationFormat\x12\x06\n\x02\x42\x33\x10\x00\x12\x10\n\x0cTRACECONTEXT\x10\x01*`\n\x11TraceReporterType\x12\x0f\n\x0bUNSPECIFIED\x10\x00\x12\n\n\x06ZIPKIN\x10\x01\x12\x08\n\x04OTLP\x10\x02\x12\x0b\n\x07LOGGING\x10\x03\x12\x08\n\x04NONE\x10\x04\x12\r\n\tOTLP_HTTP\x10\x05*\xbf\x01\n\x12MetricReporterType\x12$\n METRIC_REPORTER_TYPE_UNSPECIFIED\x10\x00\x12\x1d\n\x19METRIC_REPORTER_TYPE_OTLP\x10\x01\x12#\n\x1fMETRIC_REPORTER_TYPE_PROMETHEUS\x10\x02\x12 \n\x1cMETRIC_REPORTER_TYPE_LOGGING\x10\x03\x12\x1d\n\x19METRIC_REPORTER_TYPE_NONE\x10\x04\x42N\n\x1eorg.hypertrace.agent.config.v1Z,github.com/hypertrace/agent-config/gen/go/v1b\x06proto3&#39;)
 
-_PROPAGATIONFORMAT = _descriptor.EnumDescriptor(
-  name=&#39;PropagationFormat&#39;,
-  full_name=&#39;hypertrace.agent.config.v1.PropagationFormat&#39;,
-  filename=None,
-  file=DESCRIPTOR,
-  create_key=_descriptor._internal_create_key,
-  values=[
-    _descriptor.EnumValueDescriptor(
-      name=&#39;B3&#39;, index=0, number=0,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name=&#39;TRACECONTEXT&#39;, index=1, number=1,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-  ],
-  containing_type=None,
-  serialized_options=None,
-  serialized_start=1549,
-  serialized_end=1594,
-)
-_sym_db.RegisterEnumDescriptor(_PROPAGATIONFORMAT)
-
+_PROPAGATIONFORMAT = DESCRIPTOR.enum_types_by_name[&#39;PropagationFormat&#39;]
 PropagationFormat = enum_type_wrapper.EnumTypeWrapper(_PROPAGATIONFORMAT)
-_TRACEREPORTERTYPE = _descriptor.EnumDescriptor(
-  name=&#39;TraceReporterType&#39;,
-  full_name=&#39;hypertrace.agent.config.v1.TraceReporterType&#39;,
-  filename=None,
-  file=DESCRIPTOR,
-  create_key=_descriptor._internal_create_key,
-  values=[
-    _descriptor.EnumValueDescriptor(
-      name=&#39;UNSPECIFIED&#39;, index=0, number=0,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name=&#39;ZIPKIN&#39;, index=1, number=1,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name=&#39;OTLP&#39;, index=2, number=2,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name=&#39;LOGGING&#39;, index=3, number=3,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name=&#39;NONE&#39;, index=4, number=4,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name=&#39;OTLP_HTTP&#39;, index=5, number=5,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-  ],
-  containing_type=None,
-  serialized_options=None,
-  serialized_start=1596,
-  serialized_end=1692,
-)
-_sym_db.RegisterEnumDescriptor(_TRACEREPORTERTYPE)
-
+_TRACEREPORTERTYPE = DESCRIPTOR.enum_types_by_name[&#39;TraceReporterType&#39;]
 TraceReporterType = enum_type_wrapper.EnumTypeWrapper(_TRACEREPORTERTYPE)
-_METRICREPORTERTYPE = _descriptor.EnumDescriptor(
-  name=&#39;MetricReporterType&#39;,
-  full_name=&#39;hypertrace.agent.config.v1.MetricReporterType&#39;,
-  filename=None,
-  file=DESCRIPTOR,
-  create_key=_descriptor._internal_create_key,
-  values=[
-    _descriptor.EnumValueDescriptor(
-      name=&#39;METRIC_REPORTER_TYPE_UNSPECIFIED&#39;, index=0, number=0,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name=&#39;METRIC_REPORTER_TYPE_OTLP&#39;, index=1, number=1,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name=&#39;METRIC_REPORTER_TYPE_PROMETHEUS&#39;, index=2, number=2,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name=&#39;METRIC_REPORTER_TYPE_LOGGING&#39;, index=3, number=3,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name=&#39;METRIC_REPORTER_TYPE_NONE&#39;, index=4, number=4,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-  ],
-  containing_type=None,
-  serialized_options=None,
-  serialized_start=1695,
-  serialized_end=1886,
-)
-_sym_db.RegisterEnumDescriptor(_METRICREPORTERTYPE)
-
+_METRICREPORTERTYPE = DESCRIPTOR.enum_types_by_name[&#39;MetricReporterType&#39;]
 MetricReporterType = enum_type_wrapper.EnumTypeWrapper(_METRICREPORTERTYPE)
 B3 = 0
 TRACECONTEXT = 1
@@ -182,364 +68,12 @@ METRIC_REPORTER_TYPE_LOGGING = 3
 METRIC_REPORTER_TYPE_NONE = 4
 
 
-
-_AGENTCONFIG_RESOURCEATTRIBUTESENTRY = _descriptor.Descriptor(
-  name=&#39;ResourceAttributesEntry&#39;,
-  full_name=&#39;hypertrace.agent.config.v1.AgentConfig.ResourceAttributesEntry&#39;,
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name=&#39;key&#39;, full_name=&#39;hypertrace.agent.config.v1.AgentConfig.ResourceAttributesEntry.key&#39;, index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b&#34;&#34;.decode(&#39;utf-8&#39;),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name=&#39;value&#39;, full_name=&#39;hypertrace.agent.config.v1.AgentConfig.ResourceAttributesEntry.value&#39;, index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b&#34;&#34;.decode(&#39;utf-8&#39;),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=b&#39;8\001&#39;,
-  is_extendable=False,
-  syntax=&#39;proto3&#39;,
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=538,
-  serialized_end=595,
-)
-
-_AGENTCONFIG = _descriptor.Descriptor(
-  name=&#39;AgentConfig&#39;,
-  full_name=&#39;hypertrace.agent.config.v1.AgentConfig&#39;,
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name=&#39;service_name&#39;, full_name=&#39;hypertrace.agent.config.v1.AgentConfig.service_name&#39;, index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name=&#39;reporting&#39;, full_name=&#39;hypertrace.agent.config.v1.AgentConfig.reporting&#39;, index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name=&#39;data_capture&#39;, full_name=&#39;hypertrace.agent.config.v1.AgentConfig.data_capture&#39;, index=2,
-      number=3, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name=&#39;propagation_formats&#39;, full_name=&#39;hypertrace.agent.config.v1.AgentConfig.propagation_formats&#39;, index=3,
-      number=4, type=14, cpp_type=8, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name=&#39;enabled&#39;, full_name=&#39;hypertrace.agent.config.v1.AgentConfig.enabled&#39;, index=4,
-      number=5, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name=&#39;javaagent&#39;, full_name=&#39;hypertrace.agent.config.v1.AgentConfig.javaagent&#39;, index=5,
-      number=6, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name=&#39;resource_attributes&#39;, full_name=&#39;hypertrace.agent.config.v1.AgentConfig.resource_attributes&#39;, index=6,
-      number=7, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[_AGENTCONFIG_RESOURCEATTRIBUTESENTRY, ],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax=&#39;proto3&#39;,
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=77,
-  serialized_end=595,
-)
-
-
-_REPORTING = _descriptor.Descriptor(
-  name=&#39;Reporting&#39;,
-  full_name=&#39;hypertrace.agent.config.v1.Reporting&#39;,
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name=&#39;endpoint&#39;, full_name=&#39;hypertrace.agent.config.v1.Reporting.endpoint&#39;, index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name=&#39;secure&#39;, full_name=&#39;hypertrace.agent.config.v1.Reporting.secure&#39;, index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name=&#39;token&#39;, full_name=&#39;hypertrace.agent.config.v1.Reporting.token&#39;, index=2,
-      number=3, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name=&#39;trace_reporter_type&#39;, full_name=&#39;hypertrace.agent.config.v1.Reporting.trace_reporter_type&#39;, index=3,
-      number=5, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name=&#39;cert_file&#39;, full_name=&#39;hypertrace.agent.config.v1.Reporting.cert_file&#39;, index=4,
-      number=6, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name=&#39;metric_endpoint&#39;, full_name=&#39;hypertrace.agent.config.v1.Reporting.metric_endpoint&#39;, index=5,
-      number=7, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name=&#39;metric_reporter_type&#39;, full_name=&#39;hypertrace.agent.config.v1.Reporting.metric_reporter_type&#39;, index=6,
-      number=8, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax=&#39;proto3&#39;,
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=598,
-  serialized_end=1004,
-)
-
-
-_MESSAGE = _descriptor.Descriptor(
-  name=&#39;Message&#39;,
-  full_name=&#39;hypertrace.agent.config.v1.Message&#39;,
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name=&#39;request&#39;, full_name=&#39;hypertrace.agent.config.v1.Message.request&#39;, index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name=&#39;response&#39;, full_name=&#39;hypertrace.agent.config.v1.Message.response&#39;, index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax=&#39;proto3&#39;,
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1006,
-  serialized_end=1106,
-)
-
-
-_DATACAPTURE = _descriptor.Descriptor(
-  name=&#39;DataCapture&#39;,
-  full_name=&#39;hypertrace.agent.config.v1.DataCapture&#39;,
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name=&#39;http_headers&#39;, full_name=&#39;hypertrace.agent.config.v1.DataCapture.http_headers&#39;, index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name=&#39;http_body&#39;, full_name=&#39;hypertrace.agent.config.v1.DataCapture.http_body&#39;, index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name=&#39;rpc_metadata&#39;, full_name=&#39;hypertrace.agent.config.v1.DataCapture.rpc_metadata&#39;, index=2,
-      number=3, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name=&#39;rpc_body&#39;, full_name=&#39;hypertrace.agent.config.v1.DataCapture.rpc_body&#39;, index=3,
-      number=4, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name=&#39;body_max_size_bytes&#39;, full_name=&#39;hypertrace.agent.config.v1.DataCapture.body_max_size_bytes&#39;, index=4,
-      number=5, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name=&#39;body_max_processing_size_bytes&#39;, full_name=&#39;hypertrace.agent.config.v1.DataCapture.body_max_processing_size_bytes&#39;, index=5,
-      number=6, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax=&#39;proto3&#39;,
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1109,
-  serialized_end=1478,
-)
-
-
-_JAVAAGENT = _descriptor.Descriptor(
-  name=&#39;JavaAgent&#39;,
-  full_name=&#39;hypertrace.agent.config.v1.JavaAgent&#39;,
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name=&#39;filter_jar_paths&#39;, full_name=&#39;hypertrace.agent.config.v1.JavaAgent.filter_jar_paths&#39;, index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax=&#39;proto3&#39;,
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1480,
-  serialized_end=1547,
-)
-
-_AGENTCONFIG_RESOURCEATTRIBUTESENTRY.containing_type = _AGENTCONFIG
-_AGENTCONFIG.fields_by_name[&#39;service_name&#39;].message_type = google_dot_protobuf_dot_wrappers__pb2._STRINGVALUE
-_AGENTCONFIG.fields_by_name[&#39;reporting&#39;].message_type = _REPORTING
-_AGENTCONFIG.fields_by_name[&#39;data_capture&#39;].message_type = _DATACAPTURE
-_AGENTCONFIG.fields_by_name[&#39;propagation_formats&#39;].enum_type = _PROPAGATIONFORMAT
-_AGENTCONFIG.fields_by_name[&#39;enabled&#39;].message_type = google_dot_protobuf_dot_wrappers__pb2._BOOLVALUE
-_AGENTCONFIG.fields_by_name[&#39;javaagent&#39;].message_type = _JAVAAGENT
-_AGENTCONFIG.fields_by_name[&#39;resource_attributes&#39;].message_type = _AGENTCONFIG_RESOURCEATTRIBUTESENTRY
-_REPORTING.fields_by_name[&#39;endpoint&#39;].message_type = google_dot_protobuf_dot_wrappers__pb2._STRINGVALUE
-_REPORTING.fields_by_name[&#39;secure&#39;].message_type = google_dot_protobuf_dot_wrappers__pb2._BOOLVALUE
-_REPORTING.fields_by_name[&#39;token&#39;].message_type = google_dot_protobuf_dot_wrappers__pb2._STRINGVALUE
-_REPORTING.fields_by_name[&#39;trace_reporter_type&#39;].enum_type = _TRACEREPORTERTYPE
-_REPORTING.fields_by_name[&#39;cert_file&#39;].message_type = google_dot_protobuf_dot_wrappers__pb2._STRINGVALUE
-_REPORTING.fields_by_name[&#39;metric_endpoint&#39;].message_type = google_dot_protobuf_dot_wrappers__pb2._STRINGVALUE
-_REPORTING.fields_by_name[&#39;metric_reporter_type&#39;].enum_type = _METRICREPORTERTYPE
-_MESSAGE.fields_by_name[&#39;request&#39;].message_type = google_dot_protobuf_dot_wrappers__pb2._BOOLVALUE
-_MESSAGE.fields_by_name[&#39;response&#39;].message_type = google_dot_protobuf_dot_wrappers__pb2._BOOLVALUE
-_DATACAPTURE.fields_by_name[&#39;http_headers&#39;].message_type = _MESSAGE
-_DATACAPTURE.fields_by_name[&#39;http_body&#39;].message_type = _MESSAGE
-_DATACAPTURE.fields_by_name[&#39;rpc_metadata&#39;].message_type = _MESSAGE
-_DATACAPTURE.fields_by_name[&#39;rpc_body&#39;].message_type = _MESSAGE
-_DATACAPTURE.fields_by_name[&#39;body_max_size_bytes&#39;].message_type = google_dot_protobuf_dot_wrappers__pb2._INT32VALUE
-_DATACAPTURE.fields_by_name[&#39;body_max_processing_size_bytes&#39;].message_type = google_dot_protobuf_dot_wrappers__pb2._INT32VALUE
-_JAVAAGENT.fields_by_name[&#39;filter_jar_paths&#39;].message_type = google_dot_protobuf_dot_wrappers__pb2._STRINGVALUE
-DESCRIPTOR.message_types_by_name[&#39;AgentConfig&#39;] = _AGENTCONFIG
-DESCRIPTOR.message_types_by_name[&#39;Reporting&#39;] = _REPORTING
-DESCRIPTOR.message_types_by_name[&#39;Message&#39;] = _MESSAGE
-DESCRIPTOR.message_types_by_name[&#39;DataCapture&#39;] = _DATACAPTURE
-DESCRIPTOR.message_types_by_name[&#39;JavaAgent&#39;] = _JAVAAGENT
-DESCRIPTOR.enum_types_by_name[&#39;PropagationFormat&#39;] = _PROPAGATIONFORMAT
-DESCRIPTOR.enum_types_by_name[&#39;TraceReporterType&#39;] = _TRACEREPORTERTYPE
-DESCRIPTOR.enum_types_by_name[&#39;MetricReporterType&#39;] = _METRICREPORTERTYPE
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
-
+_AGENTCONFIG = DESCRIPTOR.message_types_by_name[&#39;AgentConfig&#39;]
+_AGENTCONFIG_RESOURCEATTRIBUTESENTRY = _AGENTCONFIG.nested_types_by_name[&#39;ResourceAttributesEntry&#39;]
+_REPORTING = DESCRIPTOR.message_types_by_name[&#39;Reporting&#39;]
+_MESSAGE = DESCRIPTOR.message_types_by_name[&#39;Message&#39;]
+_DATACAPTURE = DESCRIPTOR.message_types_by_name[&#39;DataCapture&#39;]
+_JAVAAGENT = DESCRIPTOR.message_types_by_name[&#39;JavaAgent&#39;]
 AgentConfig = _reflection.GeneratedProtocolMessageType(&#39;AgentConfig&#39;, (_message.Message,), {
 
   &#39;ResourceAttributesEntry&#39; : _reflection.GeneratedProtocolMessageType(&#39;ResourceAttributesEntry&#39;, (_message.Message,), {
@@ -583,9 +117,30 @@ JavaAgent = _reflection.GeneratedProtocolMessageType(&#39;JavaAgent&#39;, (_mess
   })
 _sym_db.RegisterMessage(JavaAgent)
 
+if _descriptor._USE_C_DESCRIPTORS == False:
 
-DESCRIPTOR._options = None
-_AGENTCONFIG_RESOURCEATTRIBUTESENTRY._options = None
+  DESCRIPTOR._options = None
+  DESCRIPTOR._serialized_options = b&#39;\n\036org.hypertrace.agent.config.v1Z,github.com/hypertrace/agent-config/gen/go/v1&#39;
+  _AGENTCONFIG_RESOURCEATTRIBUTESENTRY._options = None
+  _AGENTCONFIG_RESOURCEATTRIBUTESENTRY._serialized_options = b&#39;8\001&#39;
+  _PROPAGATIONFORMAT._serialized_start=1549
+  _PROPAGATIONFORMAT._serialized_end=1594
+  _TRACEREPORTERTYPE._serialized_start=1596
+  _TRACEREPORTERTYPE._serialized_end=1692
+  _METRICREPORTERTYPE._serialized_start=1695
+  _METRICREPORTERTYPE._serialized_end=1886
+  _AGENTCONFIG._serialized_start=77
+  _AGENTCONFIG._serialized_end=595
+  _AGENTCONFIG_RESOURCEATTRIBUTESENTRY._serialized_start=538
+  _AGENTCONFIG_RESOURCEATTRIBUTESENTRY._serialized_end=595
+  _REPORTING._serialized_start=598
+  _REPORTING._serialized_end=1004
+  _MESSAGE._serialized_start=1006
+  _MESSAGE._serialized_end=1106
+  _DATACAPTURE._serialized_start=1109
+  _DATACAPTURE._serialized_end=1478
+  _JAVAAGENT._serialized_start=1480
+  _JAVAAGENT._serialized_end=1547
 # @@protoc_insertion_point(module_scope)</code></pre>
 </details>
 </section>
