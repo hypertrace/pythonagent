@@ -22,8 +22,9 @@ def test_basic_span_data(agent, exporter):
     app = create_instrumented_fast_app(agent)
 
     @app.post("/")
-    async def read_main():
-        return {"msg": "Hello World"}
+    async def read_main(payload):
+        data = payload.dict()
+        return {"msg": data}
 
     client = TestClient(app)
 

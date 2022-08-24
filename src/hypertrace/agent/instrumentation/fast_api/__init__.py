@@ -38,8 +38,13 @@ async def replaced_ot_middleware_call(self, scope, receive, send): # pylint:disa
     token = context.attach(extract(scope, getter=asgi_getter))
     span_name, additional_attributes = self.default_span_details(scope)
 
-    request = Request(scope, receive=receive)
-    body = await request.body()
+    messages = []
+    more_body = True
+    while more_body:
+        message = await receive()
+        messages.append(message)
+        more_body = message.get("more_body", False)
+    body = b''.join([message.get("body", b"") for message in messages])
 
     try:
         with self.tracer.start_as_current_span(
@@ -61,14 +66,14 @@ async def replaced_ot_middleware_call(self, scope, receive, send): # pylint:disa
                 with self.tracer.start_as_current_span(
                         " ".join((span_name, scope["type"], "receive"))
                 ) as receive_span:
-                    if callable(self.client_request_hook):
-                        self.client_request_hook(receive_span, scope)
-                    message = await receive()
+                    if messages:
+                        return messages.pop(0)
+                        # Once that's done we can just await any other messages.
                     if receive_span.is_recording():
                         if message["type"] == "websocket.receive":
                             set_status_code(receive_span, 200)
                         receive_span.set_attribute("type", message["type"])
-                return message
+                    return await receive()
 
             @wraps(send)
             async def wrapped_send(message):
