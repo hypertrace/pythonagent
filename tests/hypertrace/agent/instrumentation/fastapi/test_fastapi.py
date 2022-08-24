@@ -1,7 +1,7 @@
 import os
 
 import pytest
-from fastapi import FastAPI
+from fastapi import FastAPI, Body
 from fastapi.testclient import TestClient
 from starlette.responses import JSONResponse
 
@@ -23,7 +23,7 @@ def test_basic_span_data(agent, exporter):
 
     @app.post("/")
     async def read_main():
-        return {"msg": "Hello World"}
+        return {"msg": "Hello world"}
 
     client = TestClient(app)
 
@@ -44,8 +44,9 @@ def test_capture_request_data(agent, exporter):
     app = create_instrumented_fast_app(agent)
 
     @app.post("/some-endpoint")
-    async def read_main():
-        return {"msg": "Hello World"}
+    async def read_main(payload: dict = Body(...)):
+        data = payload
+        return {"msg": data}
 
     client = TestClient(app)
 
@@ -53,8 +54,8 @@ def test_capture_request_data(agent, exporter):
                            headers={"X-Some-Header": "some-value"})
     span_list = exporter.get_finished_spans()
     exporter.clear()
-    assert len(span_list) == 1
-    span = span_list[0]
+    assert len(span_list) == 2
+    span = span_list[1]
 
     assert span.name == 'POST /some-endpoint'
     attrs = span.attributes
