@@ -67,8 +67,13 @@ async def replaced_ot_middleware_call(self, scope, receive, send): # pylint:disa
     token = context.attach(extract(scope, getter=asgi_getter))
     span_name, additional_attributes = self.default_span_details(scope)
 
-    request = Request(scope, receive=receive)
-    body = await request.body()
+    messages = []
+    more_body = True
+    while more_body:
+        message = await receive()
+        messages.append(message)
+        more_body = message.get(&#34;more_body&#34;, False)
+    body = b&#39;&#39;.join([message.get(&#34;body&#34;, b&#34;&#34;) for message in messages])
 
     try:
         with self.tracer.start_as_current_span(
@@ -90,14 +95,14 @@ async def replaced_ot_middleware_call(self, scope, receive, send): # pylint:disa
                 with self.tracer.start_as_current_span(
                         &#34; &#34;.join((span_name, scope[&#34;type&#34;], &#34;receive&#34;))
                 ) as receive_span:
-                    if callable(self.client_request_hook):
-                        self.client_request_hook(receive_span, scope)
-                    message = await receive()
+                    if messages:
+                        return messages.pop(0)
+                        # Once that&#39;s done we can just await any other messages.
                     if receive_span.is_recording():
                         if message[&#34;type&#34;] == &#34;websocket.receive&#34;:
                             set_status_code(receive_span, 200)
                         receive_span.set_attribute(&#34;type&#34;, message[&#34;type&#34;])
-                return message
+                    return await receive()
 
             @wraps(send)
             async def wrapped_send(message):
@@ -262,8 +267,13 @@ the application getters of wsgi/asgi to run our …</p></div>
     token = context.attach(extract(scope, getter=asgi_getter))
     span_name, additional_attributes = self.default_span_details(scope)
 
-    request = Request(scope, receive=receive)
-    body = await request.body()
+    messages = []
+    more_body = True
+    while more_body:
+        message = await receive()
+        messages.append(message)
+        more_body = message.get(&#34;more_body&#34;, False)
+    body = b&#39;&#39;.join([message.get(&#34;body&#34;, b&#34;&#34;) for message in messages])
 
     try:
         with self.tracer.start_as_current_span(
@@ -285,14 +295,14 @@ the application getters of wsgi/asgi to run our …</p></div>
                 with self.tracer.start_as_current_span(
                         &#34; &#34;.join((span_name, scope[&#34;type&#34;], &#34;receive&#34;))
                 ) as receive_span:
-                    if callable(self.client_request_hook):
-                        self.client_request_hook(receive_span, scope)
-                    message = await receive()
+                    if messages:
+                        return messages.pop(0)
+                        # Once that&#39;s done we can just await any other messages.
                     if receive_span.is_recording():
                         if message[&#34;type&#34;] == &#34;websocket.receive&#34;:
                             set_status_code(receive_span, 200)
                         receive_span.set_attribute(&#34;type&#34;, message[&#34;type&#34;])
-                return message
+                    return await receive()
 
             @wraps(send)
             async def wrapped_send(message):
