@@ -29,7 +29,7 @@ build-proto:
 		    ./src/agent-config/proto/hypertrace/agent/config/v1/config.proto
 
 .PHONY: build
-build: build-proto
+build:
 	python -m build
 
 .PHONY: clean
