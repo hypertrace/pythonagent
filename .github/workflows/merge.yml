@@ -52,7 +52,7 @@ jobs:
           protoc --version
           pip uninstall --yes protobuf python3-protobuf
           pip install --upgrade --no-input pip
-          pip install --upgrade --no-input protobuf==3.19.4
+          pip install --upgrade --no-input protobuf==3.19.6
 
       - name: Run unit tests
         run: |
