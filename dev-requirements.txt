@@ -22,3 +22,4 @@ psycopg2
 psycopg2-binary
 pytest-postgresql
 pytest-asyncio
+httpx

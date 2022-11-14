@@ -162,6 +162,15 @@ To run tests locally:
 2.) `python setup.py develop`
 
 3.) `python -m pytest tests/hypertrace`
+
+### Generating Protobuf
+
+If you need to upgrade the agent-config submodule, & therefor need to re-generate the python protobuf files, you should use the provided `proto.sh` script.
+
+Example: 
+
+`./proto.sh <OS>`(osx, linux, win32 or win64) - this ensures that the python protobuf files are built on a consistent version of protoc
+
 ### Releases
 
 In order to create a new release, you can run `make release VERSION=<version-number>` and this will change the version in the code appropriately and push the tags.
