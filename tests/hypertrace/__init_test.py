@@ -20,7 +20,7 @@ def test_edit_config():
     err = None
     try:
         agent.instrument()
-    except Exception as e:
+    except Exception as e: # pylint: disable=W0703
         err = e
 
     assert err is None
