@@ -49,8 +49,6 @@ class Agent:
                 return
             try:
                 self._config = AgentConfig()
-                self._init = AgentInit(self._config)
-                self._initialized = True
             except Exception as err:  # pylint: disable=W0703
                 logger.error('Failed to initialize Agent: exception=%s, stacktrace=%s',
                              err,
@@ -58,19 +56,22 @@ class Agent:
 
     @contextmanager
     def edit_config(self):
-        """Used by end users to modify the config"""
-        try:
-            # need to explicitly set this as None when modifying the config via code
-            # to regenerate Trace Provider with new options
-            ot._TRACER_PROVIDER = None  # pylint:disable=W0212
-            agent_config = self._config.agent_config
-            yield agent_config
-            self._config.agent_config = agent_config
-        finally:
-            self._init.apply_config(self._config)
+        """Used by end users to modify the config, must be done before calling instrument()"""
+        agent_config = self._config.agent_config
+        yield agent_config
+        self._config.agent_config = agent_config
 
     def instrument(self, app=None, skip_libraries=None, auto_instrument=False):
         '''used to register applicable instrumentation wrappers'''
+
+        try:
+            self._init = AgentInit(self._config)
+            self._initialized = True
+        except Exception as err:
+            logger.error('Failed to initialize Agent: exception=%s, stacktrace=%s',
+                         err,
+                         traceback.format_exc())
+
         if skip_libraries is None:
             skip_libraries = []
         if not self.is_initialized():
