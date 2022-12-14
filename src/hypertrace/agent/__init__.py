@@ -65,8 +65,9 @@ class Agent:
         '''used to register applicable instrumentation wrappers'''
 
         try:
-            self._init = AgentInit(self._config)  # pylint: disable = W0201
-            self._initialized = True
+            if self._initialized is not True:
+                self._init = AgentInit(self._config)  # pylint: disable = W0201
+                self._initialized = True
         except Exception as err:  # pylint:disable = W0703
             logger.error('Failed to initialize Agent: exception=%s, stacktrace=%s',
                          err,

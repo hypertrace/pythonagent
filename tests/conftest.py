@@ -36,6 +36,7 @@ def agent():
     _uninstrument_all()
     Agent._instance = None
     agent = Agent()
+    agent.instrument()
 
     return agent
 
