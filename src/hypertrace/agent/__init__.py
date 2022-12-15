@@ -65,6 +65,8 @@ class Agent:
 
     def instrument(self, app=None, skip_libraries=None, auto_instrument=False):
         '''used to register applicable instrumentation wrappers'''
+        self._init.apply_config(self._config)
+
         if skip_libraries is None:
             skip_libraries = []
         if not self.is_initialized():
@@ -80,7 +82,6 @@ class Agent:
 
     def _instrument(self, library_key, app=None, auto_instrument=False):
         """only used to allow the deprecated register_x library methods to still work"""
-        self._init.apply_config(None)
 
         wrapper_instance = get_instrumentation_wrapper(library_key)
         if wrapper_instance is None:
