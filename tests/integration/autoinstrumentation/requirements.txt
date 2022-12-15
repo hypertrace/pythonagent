@@ -2,7 +2,7 @@
 google
 protobuf
 pyyaml
-flask==2.1.1
+flask==2.0.3
 werkzeug==2.0.3
 pytest
 psycopg2
