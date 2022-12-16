@@ -65,15 +65,6 @@ class AgentInit:  # pylint: disable=R0902,R0903
             logger.info(&#39;Registering after_in_child handler.&#39;)
             os.register_at_fork(after_in_child=self.post_fork)  # pylint:disable=E1101
 
-        try:
-            self.apply_config(None)
-
-        except Exception as err:  # pylint: disable=W0703
-            logger.error(&#39;Failed to initialize tracer: exception=%s, stacktrace=%s&#39;,
-                         err,
-                         traceback.format_exc())
-            raise sys.exc_info()[0]
-
     def post_fork(self):
         &#34;&#34;&#34;Used to reinitialize exporter &amp; processors in separate worker processes&#34;&#34;&#34;
         self.apply_config(None)  # pylint:disable=W0212
@@ -251,15 +242,6 @@ class AgentInit:  # pylint: disable=R0902,R0903
         if hasattr(os, &#39;register_at_fork&#39;):
             logger.info(&#39;Registering after_in_child handler.&#39;)
             os.register_at_fork(after_in_child=self.post_fork)  # pylint:disable=E1101
-
-        try:
-            self.apply_config(None)
-
-        except Exception as err:  # pylint: disable=W0703
-            logger.error(&#39;Failed to initialize tracer: exception=%s, stacktrace=%s&#39;,
-                         err,
-                         traceback.format_exc())
-            raise sys.exc_info()[0]
 
     def post_fork(self):
         &#34;&#34;&#34;Used to reinitialize exporter &amp; processors in separate worker processes&#34;&#34;&#34;
