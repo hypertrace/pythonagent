@@ -59,18 +59,14 @@ class Agent:
     @contextmanager
     def edit_config(self):
         """Used by end users to modify the config"""
-        try:
-            # need to explicitly set this as None when modifying the config via code
-            # to regenerate Trace Provider with new options
-            ot._TRACER_PROVIDER = None  # pylint:disable=W0212
-            agent_config = self._config.agent_config
-            yield agent_config
-            self._config.agent_config = agent_config
-        finally:
-            self._init.apply_config(self._config)
+        agent_config = self._config.agent_config
+        yield agent_config
+        self._config.agent_config = agent_config
 
     def instrument(self, app=None, skip_libraries=None, auto_instrument=False):
         '''used to register applicable instrumentation wrappers'''
+        self._init.apply_config(self._config)
+
         if skip_libraries is None:
             skip_libraries = []
         if not self.is_initialized():
@@ -86,6 +82,7 @@ class Agent:
 
     def _instrument(self, library_key, app=None, auto_instrument=False):
         """only used to allow the deprecated register_x library methods to still work"""
+
         wrapper_instance = get_instrumentation_wrapper(library_key)
         if wrapper_instance is None:
             return

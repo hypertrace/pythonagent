@@ -2,8 +2,10 @@
 google
 protobuf
 pyyaml
-flask
+flask==2.0.3
+werkzeug==2.0.3
 pytest
+psycopg2
 pytest-xdist
 mysql-connector-python==8.0.23
 

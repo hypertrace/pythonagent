@@ -3,5 +3,5 @@ google
 protobuf
 pyyaml
 mysql.connector
-flask
+flask==2.0.3
 pytest
