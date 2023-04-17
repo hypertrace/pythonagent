@@ -6,7 +6,6 @@ from opentelemetry.trace import Span
 from hypertrace.agent import Agent, _uninstrument_all
 from hypertrace.agent.filter import Filter
 from hypertrace.agent.filter.registry import Registry
-from hypertrace.agent.instrumentation import instrumentation_definitions
 from tests import configure_inmemory_span_exporter
 
 
@@ -26,7 +25,6 @@ class SampleBodyBlockingFilter(Filter):
     def evaluate_body(self, span: Span, body, headers: dict, request_type) -> bool:
         return True
 
-
 @pytest.fixture
 def agent():
     # we never want to export spans to default exporter
@@ -36,6 +34,7 @@ def agent():
     _uninstrument_all()
     Agent._instance = None
     agent = Agent()
+    agent._init.init_trace_provider()
 
     return agent
 

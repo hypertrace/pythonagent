@@ -1,11 +1,9 @@
 import json
-import socketserver
-import threading
-from concurrent.futures import thread
-from http.server import SimpleHTTPRequestHandler
 
 import flask
 import requests
+# also import this way to test that instrumentation still works
+from requests import post
 from flask import Flask
 from tests import setup_custom_logger
 from tests.hypertrace.agent.instrumentation.flask.app import FlaskServer
@@ -104,5 +102,44 @@ def test_request_propagation(agent, exporter):
         exporter.clear()
         a1 = r1.get_json()['a']
         assert a1 == 'a'
+    finally:
+        server.shutdown()
+
+def test_request_client_imported(agent, exporter):
+    try:
+        logger = setup_custom_logger(__name__)
+
+        app = Flask(__name__)
+        app.use_reloader = False
+
+        @app.route("/route1", methods=["GET", "POST"])
+        def api_example():
+            response = flask.Response(mimetype='application/json')
+            response.headers['tester3'] = 'tester3'
+            response.data = str('{ "a": "a", "xyz": "xyz" }')
+            return response
+
+        agent.instrument(app)
+        server = FlaskServer(app)
+        server.start()
+
+        url = f'http://localhost:{server.port}/route1'
+        response = post(url, json={"test": "body"})
+
+        spans = exporter.get_finished_spans()
+        assert spans
+        assert len(spans) == 2
+        client_span = json.loads(spans[1].to_json())
+
+        assert client_span['attributes']['http.method'] == 'POST'
+        assert client_span['attributes']['http.url'] == f'http://localhost:{server.port}/route1'
+        assert client_span['attributes']['http.request.header.accept'] == '*/*'
+        assert client_span['attributes']['http.request.header.content-type'] == 'application/json'
+        assert client_span['attributes']['http.request.body'] == '{"test": "body"}'
+        assert client_span['attributes'][
+                   'http.response.body'] == '{ "a": "a", "xyz": "xyz" }'
+        assert client_span['attributes']['http.status_code'] == 200
+        assert client_span['attributes']['http.response.header.tester3'] == 'tester3'
+        assert client_span['attributes']['http.request.header.traceparent']
     finally:
         server.shutdown()
