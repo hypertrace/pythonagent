@@ -22,8 +22,11 @@ def get_active_span_for_call_wrapper(requests_wrapper):
             response_content = ''
         request_content = None
         if hasattr(response.request, 'content'):
-            logger.debug('Converting request message body to string.')
+            logger.debug('Converting request message content to string.')
             request_content = response.request.content.decode()
+        elif hasattr(response.request, 'body') and hasattr(response.request.body, 'decode'):
+            logger.debug('Converting request message body to string.')
+            request_content = response.request.body.decode()
         else:
             logger.debug('No request message body. Setting to blank string.')
             request_content = ''
