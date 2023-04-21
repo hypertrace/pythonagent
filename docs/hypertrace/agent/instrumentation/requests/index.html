@@ -51,8 +51,11 @@ def get_active_span_for_call_wrapper(requests_wrapper):
             response_content = &#39;&#39;
         request_content = None
         if hasattr(response.request, &#39;content&#39;):
-            logger.debug(&#39;Converting request message body to string.&#39;)
+            logger.debug(&#39;Converting request message content to string.&#39;)
             request_content = response.request.content.decode()
+        elif hasattr(response.request, &#39;body&#39;) and hasattr(response.request.body, &#39;decode&#39;):
+            logger.debug(&#39;Converting request message body to string.&#39;)
+            request_content = response.request.body.decode()
         else:
             logger.debug(&#39;No request message body. Setting to blank string.&#39;)
             request_content = &#39;&#39;
@@ -122,8 +125,11 @@ class RequestsInstrumentorWrapper(RequestsInstrumentor, BaseInstrumentorWrapper)
             response_content = &#39;&#39;
         request_content = None
         if hasattr(response.request, &#39;content&#39;):
-            logger.debug(&#39;Converting request message body to string.&#39;)
+            logger.debug(&#39;Converting request message content to string.&#39;)
             request_content = response.request.content.decode()
+        elif hasattr(response.request, &#39;body&#39;) and hasattr(response.request.body, &#39;decode&#39;):
+            logger.debug(&#39;Converting request message body to string.&#39;)
+            request_content = response.request.body.decode()
         else:
             logger.debug(&#39;No request message body. Setting to blank string.&#39;)
             request_content = &#39;&#39;
