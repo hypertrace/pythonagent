@@ -10,7 +10,9 @@ from starlette.responses import PlainTextResponse
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.instrumentation.asgi import OpenTelemetryMiddleware, set_status_code
 from opentelemetry.instrumentation.asgi import get_host_port_url_tuple, \
-    context, extract, asgi_getter, trace, collect_request_attributes
+    context, asgi_getter, trace, collect_request_attributes
+
+from opentelemetry.propagate import extract
 
 from hypertrace.agent.filter.registry import Registry, TYPE_HTTP
 from hypertrace.agent.instrumentation import BaseInstrumentorWrapper
