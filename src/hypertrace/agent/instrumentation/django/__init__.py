@@ -29,7 +29,6 @@ class DjangoInstrumentationWrapper(BaseInstrumentorWrapper):
         """django request hook before request is processed by app"""
         try:
             body = request.body
-            span.update_name(f"{request.method} {span.name}")
             self.generic_request_handler(request.headers, body, span)
             full_url = request.build_absolute_uri()
             block_result = Registry().apply_filters(span,

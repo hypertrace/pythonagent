@@ -142,7 +142,6 @@ class FastAPIInstrumentorWrapper(BaseInstrumentorWrapper):
 
     def server_request_hook(self, span, req_data, body):
         """this function is used to capture request attributes"""
-        span.update_name(f"{req_data['method']} {span.name}")
         headers = dict(Headers(raw=req_data['headers']))
         request_url = str(Request(req_data).url)
         self.generic_request_handler(headers, body, span)

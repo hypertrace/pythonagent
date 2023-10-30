@@ -1,26 +1,6 @@
-import sys
-import os
-import logging
 import flask
-import pytest
-import traceback
 import json
-
-from opentelemetry.trace import Span
-from werkzeug.serving import make_server
-from flask import request
-import time
-import atexit
-import threading
 from flask import Flask
-# from opentelemetry.exporter.jaeger.thrift import JaegerExporter
-from opentelemetry import trace as trace_api
-from opentelemetry.sdk.trace import TracerProvider, export
-from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
-from opentelemetry.sdk.trace.export import BatchSpanProcessor, SimpleSpanProcessor
-from hypertrace.agent import Agent
-from hypertrace.agent.filter import Filter
-from hypertrace.agent.filter.registry import Registry
 from tests import setup_custom_logger
 from tests.hypertrace.agent.instrumentation.flask.app import FlaskServer
 
