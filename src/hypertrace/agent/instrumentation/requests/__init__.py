@@ -22,9 +22,11 @@ class RequestsInstrumentorWrapper(RequestsInstrumentor, BaseInstrumentorWrapper)
         )
 
     def request_hook(self, span, request_obj):
+        '''capture request data'''
         self.generic_request_handler(request_obj.headers, request_obj.body, span)
 
-    def response_hook(self, span, request_obj, response):
+    def response_hook(self, span, _, response):
+        '''capture response data'''
         self.generic_response_handler(response.headers, response.text, span)
 
     def _uninstrument(self, **kwargs) -> None:
