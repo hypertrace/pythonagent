@@ -2,7 +2,7 @@ aiohttp
 asgiref==3.4.1
 google>=3.0.0
 pyyaml
-pytest==6.2.3
+pytest==7.4.3
 pytest-cov==3.0.0
 protobuf<=3.19.4
 tox>=3.23.0
