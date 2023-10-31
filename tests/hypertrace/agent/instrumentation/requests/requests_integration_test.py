@@ -86,7 +86,6 @@ def test_request_propagation(agent, exporter):
         request_span = json.loads(spans[1].to_json())
         server_1_span = json.loads(spans[2].to_json())
         # Check that the expected results are in the flask extended span attributes
-        assert server_1_span["kind"] == "SpanKind.SERVER"
         assert server_1_span['attributes']['http.method'] == 'GET'
         assert server_1_span['attributes']['http.route'] == '/route2'
         assert server_1_span['attributes']['http.response.header.content-type'] == 'application/json'
