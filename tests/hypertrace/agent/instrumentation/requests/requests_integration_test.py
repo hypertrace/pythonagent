@@ -148,3 +148,42 @@ def test_request_client_imported(agent, exporter):
         assert client_span['attributes']['http.response.header.tester3'] == 'tester3'
     finally:
         server.shutdown()
+
+def test_invalid_unicode_character(agent, exporter):
+    try:
+        logger = setup_custom_logger(__name__)
+
+        app = Flask(__name__)
+        app.use_reloader = False
+
+        @app.route("/invalidutf8", methods=["GET", "POST"])
+        def api_example():
+            response = flask.Response(mimetype='application/json')
+            response.headers['tester3'] = 'tester3'
+            response.data = str('{ "a": "a", "xyz": "xyz" }')
+            return response
+
+        agent.instrument(app)
+        server = FlaskServer(app)
+        server.start()
+
+        url = f'http://localhost:{server.port}/invalidutf8'
+        response = post(url, data={"test": b"This is some text with an invalid byte: \x9c"})
+
+        spans = exporter.get_finished_spans()
+        assert spans
+        assert len(spans) == 2
+        client_span = json.loads(spans[1].to_json())
+
+        assert client_span['kind'] == "SpanKind.CLIENT"
+        assert client_span['attributes']['http.method'] == 'POST'
+        assert client_span['attributes']['http.url'] == f'http://localhost:{server.port}/invalidutf8'
+        assert client_span['attributes']['http.request.header.accept'] == '*/*'
+        assert client_span['attributes']['http.request.header.content-type'] == 'application/x-www-form-urlencoded'
+        assert client_span['attributes']['http.request.body'] == 'test=This+is+some+text+with+an+invalid+byte%3A+%9C'
+        assert client_span['attributes'][
+                   'http.response.body'] == '{ "a": "a", "xyz": "xyz" }'
+        assert client_span['attributes']['http.status_code'] == 200
+        assert client_span['attributes']['http.response.header.tester3'] == 'tester3'
+    finally:
+        server.shutdown()
