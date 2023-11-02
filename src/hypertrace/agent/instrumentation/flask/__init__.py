@@ -11,6 +11,8 @@ from opentelemetry.instrumentation.flask import (
     FlaskInstrumentor,
     _ENVIRON_SPAN_KEY,
 )
+_InstrumentedFlask._commenter_options = {}
+
 from werkzeug.exceptions import Forbidden
 
 from hypertrace.agent import constants  # pylint: disable=R0801
@@ -102,6 +104,7 @@ class _HypertraceInstrumentedFlask(_InstrumentedFlask, BaseInstrumentorWrapper):
 
     def __init__(self, *args, **kwargs):
         _InstrumentedFlask.__init__(self, *args, **kwargs)
+        _InstrumentedFlask._enable_commenter = False
         BaseInstrumentorWrapper.__init__(self)
         self.before_request(_hypertrace_before_request(self))
         self.after_request(_hypertrace_after_request(self))
@@ -131,21 +134,18 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
             # code based instrumentation
             before_hook = _hypertrace_before_request(self)
             after_hook = _hypertrace_after_request(self)
-            FlaskInstrumentorWrapper.instrument_app(self._app)
+            FlaskInstrumentorWrapper.instrument_app(self._app, enable_commenter=False)
             self._app.before_request(before_hook)
             self._app.after_request(after_hook)
         else:
             # auto instrumentation
-            super().instrument()
+            super().instrument(enable_commenter=False)
 
 
     def _instrument(self, **kwargs):
         '''Override OTel method that sets up global flask instrumentation'''
         self._original_flask = flask.Flask # pylint: disable = W0201
-        name_callback = kwargs.get("name_callback")
         tracer_provider = kwargs.get("tracer_provider")
-        if callable(name_callback):
-            _HypertraceInstrumentedFlask.name_callback = name_callback
         _HypertraceInstrumentedFlask._tracer_provider = tracer_provider # pylint: disable=W0212
         flask.Flask = _HypertraceInstrumentedFlask
 
@@ -157,7 +157,7 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
         try:
 
             # Call parent class's initialization
-            FlaskInstrumentor.instrument_app(app, request_hook, response_hook)
+            FlaskInstrumentor.instrument_app(app, request_hook, response_hook, enable_commenter=False)
 
         except Exception as err:  # pylint: disable=W0703
             logger.error("""An error occurred initializing flask otel
