@@ -1,17 +1,12 @@
-'''Hypertrace flask instrumentor module wrapper.''' # pylint: disable=R0401
-import sys
-import os.path
+'''Hypertrace flask instrumentor module wrapper.'''  # pylint: disable=R0401
 import logging
-import inspect
 import traceback
-import json
 import flask
 from opentelemetry.instrumentation.flask import (
     _InstrumentedFlask,
     FlaskInstrumentor,
     _ENVIRON_SPAN_KEY,
 )
-_InstrumentedFlask._commenter_options = {}
 
 from werkzeug.exceptions import Forbidden
 
@@ -21,12 +16,16 @@ from hypertrace.agent.instrumentation import BaseInstrumentorWrapper
 
 from hypertrace.agent.config import AgentConfig
 
+_InstrumentedFlask._commenter_options = {}  # pylint:disable=W0212
+
 # Initialize logger
 logger = logging.getLogger(__name__)  # pylint: disable=C0103
+
 
 # Per request pre-handler
 def _hypertrace_before_request(flask_wrapper):
     '''This function is invoked by flask to set the handler'''
+
     def hypertrace_before_request() -> None:
         '''Hypertrace before_request() method'''
         logger.debug('Entering _hypertrace_before_request().')
@@ -40,7 +39,7 @@ def _hypertrace_before_request(flask_wrapper):
             # for now, assuming single threaded mode (multiple python processes)
             request_headers = flask.request.headers
             # Pull message body
-            request_body = flask.request.data       # same
+            request_body = flask.request.data  # same
 
             span.update_name(str(flask.request.method) + ' ' + str(flask.request.url_rule))
 
@@ -65,11 +64,14 @@ def _hypertrace_before_request(flask_wrapper):
                          err,
                          traceback.format_exc())
             # Not rethrowing to avoid causing runtime errors for Flask.
+
     return hypertrace_before_request
+
 
 # Per request post-handler
 def _hypertrace_after_request(flask_wrapper) -> flask.wrappers.Response:
     '''This function is invoked by flask to set the handler'''
+
     def hypertrace_after_request(response):
         '''Hypertrace after_request method.'''
         try:
@@ -98,6 +100,7 @@ def _hypertrace_after_request(flask_wrapper) -> flask.wrappers.Response:
 
     return hypertrace_after_request
 
+
 class _HypertraceInstrumentedFlask(_InstrumentedFlask, BaseInstrumentorWrapper):
     """Hypertrace Wrapper class around OTel _InstrumentedFlask. This replaces
     the flask.Flask class definition."""
@@ -114,6 +117,7 @@ class _HypertraceInstrumentedFlask(_InstrumentedFlask, BaseInstrumentorWrapper):
         self.set_process_response_headers(config.agent_config.data_capture.http_headers.response)
         self.set_process_response_body(config.agent_config.data_capture.http_body.response)
         self.set_body_max_size(config.agent_config.data_capture.body_max_size_bytes)
+
 
 # Main Flask Instrumentor Wrapper class.
 class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
@@ -134,24 +138,23 @@ class FlaskInstrumentorWrapper(FlaskInstrumentor, BaseInstrumentorWrapper):
             # code based instrumentation
             before_hook = _hypertrace_before_request(self)
             after_hook = _hypertrace_after_request(self)
-            FlaskInstrumentorWrapper.instrument_app(self._app, enable_commenter=False)
+            FlaskInstrumentorWrapper.instrument_app(self._app)
             self._app.before_request(before_hook)
             self._app.after_request(after_hook)
         else:
             # auto instrumentation
             super().instrument(enable_commenter=False)
 
-
     def _instrument(self, **kwargs):
         '''Override OTel method that sets up global flask instrumentation'''
-        self._original_flask = flask.Flask # pylint: disable = W0201
+        self._original_flask = flask.Flask  # pylint: disable = W0201
         tracer_provider = kwargs.get("tracer_provider")
-        _HypertraceInstrumentedFlask._tracer_provider = tracer_provider # pylint: disable=W0212
+        _HypertraceInstrumentedFlask._tracer_provider = tracer_provider  # pylint: disable=W0212
         flask.Flask = _HypertraceInstrumentedFlask
 
     # Initialize instrumentation wrapper
     @staticmethod
-    def instrument_app(app, request_hook=None, response_hook=None, tracer_provider=None, excluded_urls=None):  # pylint:disable=W0221,W0613
+    def instrument_app(app, request_hook=None, response_hook=None, tracer_provider=None, excluded_urls=None, **kwargs):  # pylint:disable=W0221,W0613
         '''Initialize instrumentation'''
         logger.debug('Entering FlaskInstrumentorWrapper.instument_app().')
         try:

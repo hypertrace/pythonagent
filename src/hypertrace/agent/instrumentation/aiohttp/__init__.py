@@ -41,7 +41,6 @@ class AioHttpClientInstrumentorWrapper(AioHttpClientInstrumentor, BaseInstrument
         _instrument(
             tracer_provider=kwargs.get("tracer_provider"),
             url_filter=kwargs.get("url_filter"),
-            span_name=kwargs.get("span_name"),
             aiohttp_client_wrapper=self
         )
 
@@ -58,7 +57,6 @@ _SpanNameT = typing.Optional[  # pylint: disable=unsubscriptable-object
 
 def create_trace_config(
         url_filter: _UrlFilterT = None,
-        span_name: _SpanNameT = None,
         tracer_provider: TracerProvider = None,
         aiohttp_client_wrapper: AioHttpClientInstrumentorWrapper = None
 ) -> aiohttp.TraceConfig:
