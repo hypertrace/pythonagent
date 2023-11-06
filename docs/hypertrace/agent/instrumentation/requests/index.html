@@ -35,44 +35,6 @@ from hypertrace.agent.instrumentation import BaseInstrumentorWrapper
 # Initialize logger with local module name
 logger = logging.getLogger(__name__) # pylint: disable=C0103
 
-def get_active_span_for_call_wrapper(requests_wrapper):
-    &#39;&#39;&#39;Helper function to setup call wrapper function&#39;&#39;&#39;
-    logger.debug(&#39;Entering get_active_span_for_call_wrapper().&#39;)
-
-    def get_active_span_for_call(span, response) -&gt; None:
-        &#39;&#39;&#39;Hypertrace call wrapper function&#39;&#39;&#39;
-        logger.debug(&#39;Entering get_active_span_for_request().&#39;)
-        response_content = None
-        if hasattr(response, &#39;content&#39;):
-            logger.debug(&#39;Converting response message body to string.&#39;)
-            response_content = response.content.decode()
-        else:
-            logger.debug(&#39;No response message body. Setting to blank string.&#39;)
-            response_content = &#39;&#39;
-        request_content = None
-        if hasattr(response.request, &#39;content&#39;):
-            logger.debug(&#39;Converting request message content to string.&#39;)
-            request_content = response.request.content.decode()
-        elif hasattr(response.request, &#39;body&#39;) and hasattr(response.request.body, &#39;decode&#39;):
-            logger.debug(&#39;Converting request message body to string.&#39;)
-            request_content = response.request.body.decode()
-        else:
-            logger.debug(&#39;No request message body. Setting to blank string.&#39;)
-            request_content = &#39;&#39;
-
-        if span.is_recording():
-            logger.debug(&#39;Span is recording.&#39;)
-            requests_wrapper.generic_request_handler(
-                response.request.headers, request_content, span)
-            requests_wrapper.generic_response_handler(
-                response.headers, response_content, span)
-    return get_active_span_for_call
-
-def hypertrace_name_callback(method, url) -&gt; str:
-    &#39;&#39;&#39;generate span name&#39;&#39;&#39;
-    logger.debug(&#39;Entering hypertrace_name_callback(), method=%s, url=%s.&#39;, method, url)
-    return method + &#39; &#39; + url
-
 class RequestsInstrumentorWrapper(RequestsInstrumentor, BaseInstrumentorWrapper):
     &#39;&#39;&#39;Hypertrace wrapper around OTel requests instrumentor class&#39;&#39;&#39;
     # Constructor
@@ -84,9 +46,17 @@ class RequestsInstrumentorWrapper(RequestsInstrumentor, BaseInstrumentorWrapper)
         &#39;&#39;&#39;internal enable instrumentation&#39;&#39;&#39;
         super()._instrument(
             tracer_provider=kwargs.get(&#34;tracer_provider&#34;),
-            span_callback=get_active_span_for_call_wrapper(self),
-            name_callback=hypertrace_name_callback
+            request_hook=self.request_hook,
+            response_hook=self.response_hook,
         )
+
+    def request_hook(self, span, request_obj):
+        &#39;&#39;&#39;capture request data&#39;&#39;&#39;
+        self.generic_request_handler(request_obj.headers, request_obj.body, span)
+
+    def response_hook(self, span, _, response):
+        &#39;&#39;&#39;capture response data&#39;&#39;&#39;
+        self.generic_response_handler(response.headers, response.text, span)
 
     def _uninstrument(self, **kwargs) -&gt; None:
         &#39;&#39;&#39;internal disable instrumentation&#39;&#39;&#39;
@@ -98,67 +68,6 @@ class RequestsInstrumentorWrapper(RequestsInstrumentor, BaseInstrumentorWrapper)
 <section>
 </section>
 <section>
-<h2 class="section-title" id="header-functions">Functions</h2>
-<dl>
-<dt id="hypertrace.agent.instrumentation.requests.get_active_span_for_call_wrapper"><code class="name flex">
-<span>def <span class="ident">get_active_span_for_call_wrapper</span></span>(<span>requests_wrapper)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Helper function to setup call wrapper function</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_active_span_for_call_wrapper(requests_wrapper):
-    &#39;&#39;&#39;Helper function to setup call wrapper function&#39;&#39;&#39;
-    logger.debug(&#39;Entering get_active_span_for_call_wrapper().&#39;)
-
-    def get_active_span_for_call(span, response) -&gt; None:
-        &#39;&#39;&#39;Hypertrace call wrapper function&#39;&#39;&#39;
-        logger.debug(&#39;Entering get_active_span_for_request().&#39;)
-        response_content = None
-        if hasattr(response, &#39;content&#39;):
-            logger.debug(&#39;Converting response message body to string.&#39;)
-            response_content = response.content.decode()
-        else:
-            logger.debug(&#39;No response message body. Setting to blank string.&#39;)
-            response_content = &#39;&#39;
-        request_content = None
-        if hasattr(response.request, &#39;content&#39;):
-            logger.debug(&#39;Converting request message content to string.&#39;)
-            request_content = response.request.content.decode()
-        elif hasattr(response.request, &#39;body&#39;) and hasattr(response.request.body, &#39;decode&#39;):
-            logger.debug(&#39;Converting request message body to string.&#39;)
-            request_content = response.request.body.decode()
-        else:
-            logger.debug(&#39;No request message body. Setting to blank string.&#39;)
-            request_content = &#39;&#39;
-
-        if span.is_recording():
-            logger.debug(&#39;Span is recording.&#39;)
-            requests_wrapper.generic_request_handler(
-                response.request.headers, request_content, span)
-            requests_wrapper.generic_response_handler(
-                response.headers, response_content, span)
-    return get_active_span_for_call</code></pre>
-</details>
-</dd>
-<dt id="hypertrace.agent.instrumentation.requests.hypertrace_name_callback"><code class="name flex">
-<span>def <span class="ident">hypertrace_name_callback</span></span>(<span>method, url) ‑> str</span>
-</code></dt>
-<dd>
-<div class="desc"><p>generate span name</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def hypertrace_name_callback(method, url) -&gt; str:
-    &#39;&#39;&#39;generate span name&#39;&#39;&#39;
-    logger.debug(&#39;Entering hypertrace_name_callback(), method=%s, url=%s.&#39;, method, url)
-    return method + &#39; &#39; + url</code></pre>
-</details>
-</dd>
-</dl>
 </section>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
@@ -183,9 +92,17 @@ class RequestsInstrumentorWrapper(RequestsInstrumentor, BaseInstrumentorWrapper)
         &#39;&#39;&#39;internal enable instrumentation&#39;&#39;&#39;
         super()._instrument(
             tracer_provider=kwargs.get(&#34;tracer_provider&#34;),
-            span_callback=get_active_span_for_call_wrapper(self),
-            name_callback=hypertrace_name_callback
+            request_hook=self.request_hook,
+            response_hook=self.response_hook,
         )
+
+    def request_hook(self, span, request_obj):
+        &#39;&#39;&#39;capture request data&#39;&#39;&#39;
+        self.generic_request_handler(request_obj.headers, request_obj.body, span)
+
+    def response_hook(self, span, _, response):
+        &#39;&#39;&#39;capture response data&#39;&#39;&#39;
+        self.generic_response_handler(response.headers, response.text, span)
 
     def _uninstrument(self, **kwargs) -&gt; None:
         &#39;&#39;&#39;internal disable instrumentation&#39;&#39;&#39;
@@ -198,6 +115,37 @@ class RequestsInstrumentorWrapper(RequestsInstrumentor, BaseInstrumentorWrapper)
 <li>abc.ABC</li>
 <li><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper">BaseInstrumentorWrapper</a></li>
 </ul>
+<h3>Methods</h3>
+<dl>
+<dt id="hypertrace.agent.instrumentation.requests.RequestsInstrumentorWrapper.request_hook"><code class="name flex">
+<span>def <span class="ident">request_hook</span></span>(<span>self, span, request_obj)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>capture request data</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def request_hook(self, span, request_obj):
+    &#39;&#39;&#39;capture request data&#39;&#39;&#39;
+    self.generic_request_handler(request_obj.headers, request_obj.body, span)</code></pre>
+</details>
+</dd>
+<dt id="hypertrace.agent.instrumentation.requests.RequestsInstrumentorWrapper.response_hook"><code class="name flex">
+<span>def <span class="ident">response_hook</span></span>(<span>self, span, _, response)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>capture response data</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def response_hook(self, span, _, response):
+    &#39;&#39;&#39;capture response data&#39;&#39;&#39;
+    self.generic_response_handler(response.headers, response.text, span)</code></pre>
+</details>
+</dd>
+</dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
 <li><code><b><a title="hypertrace.agent.instrumentation.BaseInstrumentorWrapper" href="../index.html#hypertrace.agent.instrumentation.BaseInstrumentorWrapper">BaseInstrumentorWrapper</a></b></code>:
@@ -234,16 +182,14 @@ class RequestsInstrumentorWrapper(RequestsInstrumentor, BaseInstrumentorWrapper)
 <li><code><a title="hypertrace.agent.instrumentation" href="../index.html">hypertrace.agent.instrumentation</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="">
-<li><code><a title="hypertrace.agent.instrumentation.requests.get_active_span_for_call_wrapper" href="#hypertrace.agent.instrumentation.requests.get_active_span_for_call_wrapper">get_active_span_for_call_wrapper</a></code></li>
-<li><code><a title="hypertrace.agent.instrumentation.requests.hypertrace_name_callback" href="#hypertrace.agent.instrumentation.requests.hypertrace_name_callback">hypertrace_name_callback</a></code></li>
-</ul>
-</li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
 <h4><code><a title="hypertrace.agent.instrumentation.requests.RequestsInstrumentorWrapper" href="#hypertrace.agent.instrumentation.requests.RequestsInstrumentorWrapper">RequestsInstrumentorWrapper</a></code></h4>
+<ul class="">
+<li><code><a title="hypertrace.agent.instrumentation.requests.RequestsInstrumentorWrapper.request_hook" href="#hypertrace.agent.instrumentation.requests.RequestsInstrumentorWrapper.request_hook">request_hook</a></code></li>
+<li><code><a title="hypertrace.agent.instrumentation.requests.RequestsInstrumentorWrapper.response_hook" href="#hypertrace.agent.instrumentation.requests.RequestsInstrumentorWrapper.response_hook">response_hook</a></code></li>
+</ul>
 </li>
 </ul>
 </li>

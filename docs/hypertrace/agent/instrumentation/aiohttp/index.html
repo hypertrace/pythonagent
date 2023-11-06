@@ -64,15 +64,12 @@ class AioHttpClientInstrumentorWrapper(AioHttpClientInstrumentor, BaseInstrument
             &#39;Entering AioHttpClientInstrumentorWrapper._instrument().&#39;)
         # Initialize OTel instrumentor
         super()._instrument(
-            tracer_provider=kwargs.get(&#34;tracer_provider&#34;),
-            url_filter=kwargs.get(&#34;url_filter&#34;),
-            span_name=kwargs.get(&#39;span_name&#39;)
+            tracer_provider=kwargs.get(&#34;tracer_provider&#34;)
         )
         # Initialize HyperTrace instrumentor
         _instrument(
             tracer_provider=kwargs.get(&#34;tracer_provider&#34;),
             url_filter=kwargs.get(&#34;url_filter&#34;),
-            span_name=kwargs.get(&#34;span_name&#34;),
             aiohttp_client_wrapper=self
         )
 
@@ -89,7 +86,6 @@ _SpanNameT = typing.Optional[  # pylint: disable=unsubscriptable-object
 
 def create_trace_config(
         url_filter: _UrlFilterT = None,
-        span_name: _SpanNameT = None,
         tracer_provider: TracerProvider = None,
         aiohttp_client_wrapper: AioHttpClientInstrumentorWrapper = None
 ) -&gt; aiohttp.TraceConfig:
@@ -172,7 +168,6 @@ def create_trace_config(
     def _trace_config_ctx_factory(**kwargs):
         kwargs.setdefault(&#34;trace_request_ctx&#34;, {})
         return types.SimpleNamespace(
-            span_name=span_name,\
             tracer=tracer, \
             url_filter=url_filter, \
             **kwargs, \
@@ -192,7 +187,6 @@ def create_trace_config(
 def _instrument(
         tracer_provider: TracerProvider = None,
         url_filter: _UrlFilterT = None,
-        span_name: _SpanNameT = None,
         aiohttp_client_wrapper: AioHttpClientInstrumentorWrapper = None
 ) -&gt; None:
     &#39;&#39;&#39;Setup details of trace config context&#39;&#39;&#39;
@@ -204,7 +198,6 @@ def _instrument(
 
         trace_config = create_trace_config(
             url_filter=url_filter,
-            span_name=span_name,
             tracer_provider=tracer_provider,
             aiohttp_client_wrapper=aiohttp_client_wrapper
         )
@@ -226,7 +219,7 @@ def _instrument(
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="hypertrace.agent.instrumentation.aiohttp.create_trace_config"><code class="name flex">
-<span>def <span class="ident">create_trace_config</span></span>(<span>url_filter: Optional[Callable[[str], str]] = None, span_name: Union[Callable[[aiohttp.tracing.TraceRequestStartParams], str], str, NoneType] = None, tracer_provider: opentelemetry.trace.TracerProvider = None, aiohttp_client_wrapper: <a title="hypertrace.agent.instrumentation.aiohttp.AioHttpClientInstrumentorWrapper" href="#hypertrace.agent.instrumentation.aiohttp.AioHttpClientInstrumentorWrapper">AioHttpClientInstrumentorWrapper</a> = None) ‑> aiohttp.tracing.TraceConfig</span>
+<span>def <span class="ident">create_trace_config</span></span>(<span>url_filter: Optional[Callable[[str], str]] = None, tracer_provider: opentelemetry.trace.TracerProvider = None, aiohttp_client_wrapper: <a title="hypertrace.agent.instrumentation.aiohttp.AioHttpClientInstrumentorWrapper" href="#hypertrace.agent.instrumentation.aiohttp.AioHttpClientInstrumentorWrapper">AioHttpClientInstrumentorWrapper</a> = None) ‑> aiohttp.tracing.TraceConfig</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Build an aiohttp-client trace config for use with Hypertrace</p></div>
@@ -236,7 +229,6 @@ def _instrument(
 </summary>
 <pre><code class="python">def create_trace_config(
         url_filter: _UrlFilterT = None,
-        span_name: _SpanNameT = None,
         tracer_provider: TracerProvider = None,
         aiohttp_client_wrapper: AioHttpClientInstrumentorWrapper = None
 ) -&gt; aiohttp.TraceConfig:
@@ -319,7 +311,6 @@ def _instrument(
     def _trace_config_ctx_factory(**kwargs):
         kwargs.setdefault(&#34;trace_request_ctx&#34;, {})
         return types.SimpleNamespace(
-            span_name=span_name,\
             tracer=tracer, \
             url_filter=url_filter, \
             **kwargs, \
@@ -366,15 +357,12 @@ def _instrument(
             &#39;Entering AioHttpClientInstrumentorWrapper._instrument().&#39;)
         # Initialize OTel instrumentor
         super()._instrument(
-            tracer_provider=kwargs.get(&#34;tracer_provider&#34;),
-            url_filter=kwargs.get(&#34;url_filter&#34;),
-            span_name=kwargs.get(&#39;span_name&#39;)
+            tracer_provider=kwargs.get(&#34;tracer_provider&#34;)
         )
         # Initialize HyperTrace instrumentor
         _instrument(
             tracer_provider=kwargs.get(&#34;tracer_provider&#34;),
             url_filter=kwargs.get(&#34;url_filter&#34;),
-            span_name=kwargs.get(&#34;span_name&#34;),
             aiohttp_client_wrapper=self
         )</code></pre>
 </details>

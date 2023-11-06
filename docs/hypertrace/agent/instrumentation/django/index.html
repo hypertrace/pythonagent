@@ -58,7 +58,6 @@ class DjangoInstrumentationWrapper(BaseInstrumentorWrapper):
         &#34;&#34;&#34;django request hook before request is processed by app&#34;&#34;&#34;
         try:
             body = request.body
-            span.update_name(f&#34;{request.method} {span.name}&#34;)
             self.generic_request_handler(request.headers, body, span)
             full_url = request.build_absolute_uri()
             block_result = Registry().apply_filters(span,
@@ -135,7 +134,6 @@ the application getters of wsgi/asgi to run our …</p></div>
         &#34;&#34;&#34;django request hook before request is processed by app&#34;&#34;&#34;
         try:
             body = request.body
-            span.update_name(f&#34;{request.method} {span.name}&#34;)
             self.generic_request_handler(request.headers, body, span)
             full_url = request.build_absolute_uri()
             block_result = Registry().apply_filters(span,
@@ -203,7 +201,6 @@ the application getters of wsgi/asgi to run our …</p></div>
     &#34;&#34;&#34;django request hook before request is processed by app&#34;&#34;&#34;
     try:
         body = request.body
-        span.update_name(f&#34;{request.method} {span.name}&#34;)
         self.generic_request_handler(request.headers, body, span)
         full_url = request.build_absolute_uri()
         block_result = Registry().apply_filters(span,

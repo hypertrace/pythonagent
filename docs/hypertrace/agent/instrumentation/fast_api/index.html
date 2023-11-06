@@ -39,7 +39,9 @@ from starlette.responses import PlainTextResponse
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.instrumentation.asgi import OpenTelemetryMiddleware, set_status_code
 from opentelemetry.instrumentation.asgi import get_host_port_url_tuple, \
-    context, extract, asgi_getter, trace, collect_request_attributes
+    context, asgi_getter, trace, collect_request_attributes
+
+from opentelemetry.propagate import extract
 
 from hypertrace.agent.filter.registry import Registry, TYPE_HTTP
 from hypertrace.agent.instrumentation import BaseInstrumentorWrapper
@@ -169,7 +171,6 @@ class FastAPIInstrumentorWrapper(BaseInstrumentorWrapper):
 
     def server_request_hook(self, span, req_data, body):
         &#34;&#34;&#34;this function is used to capture request attributes&#34;&#34;&#34;
-        span.update_name(f&#34;{req_data[&#39;method&#39;]} {span.name}&#34;)
         headers = dict(Headers(raw=req_data[&#39;headers&#39;]))
         request_url = str(Request(req_data).url)
         self.generic_request_handler(headers, body, span)
@@ -378,7 +379,6 @@ the application getters of wsgi/asgi to run our …</p></div>
 
     def server_request_hook(self, span, req_data, body):
         &#34;&#34;&#34;this function is used to capture request attributes&#34;&#34;&#34;
-        span.update_name(f&#34;{req_data[&#39;method&#39;]} {span.name}&#34;)
         headers = dict(Headers(raw=req_data[&#39;headers&#39;]))
         request_url = str(Request(req_data).url)
         self.generic_request_handler(headers, body, span)
@@ -510,7 +510,6 @@ this function is called twice, once during each resp_phase</p></div>
 </summary>
 <pre><code class="python">def server_request_hook(self, span, req_data, body):
     &#34;&#34;&#34;this function is used to capture request attributes&#34;&#34;&#34;
-    span.update_name(f&#34;{req_data[&#39;method&#39;]} {span.name}&#34;)
     headers = dict(Headers(raw=req_data[&#39;headers&#39;]))
     request_url = str(Request(req_data).url)
     self.generic_request_handler(headers, body, span)
@@ -582,7 +581,7 @@ during fastapi.FastAPI.setup this is invoked and stored so that we can then inst
 </dd>
 <dt id="hypertrace.agent.instrumentation.fast_api.HypertraceException"><code class="flex name class">
 <span>class <span class="ident">HypertraceException</span></span>
-<span>(</span><span>status_code: int, detail: Any = None, headers: Optional[Dict[str, Any]] = None)</span>
+<span>(</span><span>status_code: int, detail: Any = None, headers: Optional[Dict[str, str]] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>An exception our middleware will raise if a filter determines to block the request</p></div>
