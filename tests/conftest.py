@@ -8,7 +8,6 @@ from hypertrace.agent.filter import Filter
 from hypertrace.agent.filter.registry import Registry
 from tests import configure_inmemory_span_exporter
 
-
 class SampleBlockingFilter(Filter):
 
     def evaluate_url_and_headers(self, span: Span, url: str, headers: tuple, request_type) -> bool:
@@ -37,6 +36,10 @@ def agent():
     agent._init.init_trace_provider()
 
     return agent
+
+@pytest.fixture(scope="function", autouse=True)
+def _dj_autoclear_mailbox() -> None:
+    pass
 
 @pytest.fixture
 def agent_with_filter(agent):

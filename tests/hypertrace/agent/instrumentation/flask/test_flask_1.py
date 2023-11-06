@@ -1,13 +1,6 @@
-import sys
 import flask
-import traceback
 import json
-from werkzeug.serving import make_server
-import threading
 from flask import Flask
-from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
-from opentelemetry.sdk.trace.export import BatchSpanProcessor, SimpleSpanProcessor
-from hypertrace.agent import Agent
 
 # Run the flask web server in a separate thread
 from tests import setup_custom_logger, find_free_port
@@ -53,7 +46,7 @@ def test_run(agent, exporter):
     logger.info('Running test calls.')
     with app.test_client() as c:
         logger.info('Making test call to /route1')
-        r1 = app.test_client().get(f'http://localhost:{server.port}/route1',
+        r1 = app.test_client().get(f'http://localhost:{server.port}/route1?foo=bar',
                                    headers={'tester1': 'tester1', 'tester2': 'tester2'})
         # Get all of the in memory spans that were recorded for this iteration
         span_list = exporter.get_finished_spans()
@@ -66,7 +59,7 @@ def test_run(agent, exporter):
         flaskSpanAsObject = json.loads(span_list[0].to_json())
         # Check that the expected results are in the flask extended span attributes
         assert flaskSpanAsObject['attributes']['http.method'] == 'GET'
-        assert flaskSpanAsObject['attributes']['http.target'] == '/route1'
+        assert flaskSpanAsObject['attributes']['http.target'] == '/route1?foo=bar'
         assert flaskSpanAsObject['attributes']['http.request.header.tester1'] == 'tester1'
         assert flaskSpanAsObject['attributes']['http.request.header.tester2'] == 'tester2'
         assert flaskSpanAsObject['attributes']['http.response.header.content-type'] == 'application/json'

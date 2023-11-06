@@ -18,6 +18,8 @@ def api1():
     logger.info('Serving request for /route1.')
     response = flask.Response(mimetype='application/graphql')
     response.headers['tester3'] = 'tester3'
+    response.set_cookie("k1", "SomeValue")
+    response.set_cookie("k2", "AnotherValue")
     response.data = str('''{
   "errors": [
     {

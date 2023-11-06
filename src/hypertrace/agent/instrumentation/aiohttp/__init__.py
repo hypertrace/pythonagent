@@ -35,15 +35,12 @@ class AioHttpClientInstrumentorWrapper(AioHttpClientInstrumentor, BaseInstrument
             'Entering AioHttpClientInstrumentorWrapper._instrument().')
         # Initialize OTel instrumentor
         super()._instrument(
-            tracer_provider=kwargs.get("tracer_provider"),
-            url_filter=kwargs.get("url_filter"),
-            span_name=kwargs.get('span_name')
+            tracer_provider=kwargs.get("tracer_provider")
         )
         # Initialize HyperTrace instrumentor
         _instrument(
             tracer_provider=kwargs.get("tracer_provider"),
             url_filter=kwargs.get("url_filter"),
-            span_name=kwargs.get("span_name"),
             aiohttp_client_wrapper=self
         )
 
@@ -60,7 +57,6 @@ _SpanNameT = typing.Optional[  # pylint: disable=unsubscriptable-object
 
 def create_trace_config(
         url_filter: _UrlFilterT = None,
-        span_name: _SpanNameT = None,
         tracer_provider: TracerProvider = None,
         aiohttp_client_wrapper: AioHttpClientInstrumentorWrapper = None
 ) -> aiohttp.TraceConfig:
@@ -143,7 +139,6 @@ def create_trace_config(
     def _trace_config_ctx_factory(**kwargs):
         kwargs.setdefault("trace_request_ctx", {})
         return types.SimpleNamespace(
-            span_name=span_name,\
             tracer=tracer, \
             url_filter=url_filter, \
             **kwargs, \
@@ -163,7 +158,6 @@ def create_trace_config(
 def _instrument(
         tracer_provider: TracerProvider = None,
         url_filter: _UrlFilterT = None,
-        span_name: _SpanNameT = None,
         aiohttp_client_wrapper: AioHttpClientInstrumentorWrapper = None
 ) -> None:
     '''Setup details of trace config context'''
@@ -175,7 +169,6 @@ def _instrument(
 
         trace_config = create_trace_config(
             url_filter=url_filter,
-            span_name=span_name,
             tracer_provider=tracer_provider,
             aiohttp_client_wrapper=aiohttp_client_wrapper
         )
