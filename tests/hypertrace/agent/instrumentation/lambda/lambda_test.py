@@ -11,6 +11,7 @@ def example_lambda(event, context):
     }
 
 
+
 class ContextStub:
     def __init__(self):
         self.invoked_function_arn = '123'
@@ -87,3 +88,19 @@ def test_run(agent, exporter):
     assert span['attributes']['http.response.body'] == '{"test_key": "test_value"}'
     assert span['attributes']['http.status_code'] == 200
     assert span['attributes']['http.response.header.content-type'] == 'application/json'
+
+
+def test_run(agent, exporter):
+    logger = setup_custom_logger(__name__)
+    os.environ['_HANDLER'] = 'tests.hypertrace.agent.instrumentation.lambda.lambda_test.example_lambda'
+    agent.instrument()
+    logger.info('Running test calls.')
+    # Even if lambda receives invalid event we should not try to capture data & instead just invoke lambda
+    # no span should be generated since we won't have a well formed event to parse.
+    mockEventData = "some string"
+
+    cntxt = ContextStub()
+    example_lambda(mockEventData, cntxt)
+    span_list = exporter.get_finished_spans()
+
+    assert len(span_list) == 0
