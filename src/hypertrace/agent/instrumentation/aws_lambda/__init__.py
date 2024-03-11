@@ -52,7 +52,7 @@ class AwsLambdaInstrumentorWrapper(AwsLambdaInstrumentor, BaseInstrumentorWrappe
             lambda_event = args[0]
             if isinstance(lambda_event, dict) is False:
                 logger.warning("Received unexpected lambda event")
-                logger.debug("Actual lambda event: {}".format(str(lambda_event)))
+                logger.debug(f"Actual lambda event: {lambda_event}")
                 return call_wrapped(*args, **kwargs)
 
 
