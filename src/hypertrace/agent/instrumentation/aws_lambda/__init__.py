@@ -50,6 +50,10 @@ class AwsLambdaInstrumentorWrapper(AwsLambdaInstrumentor, BaseInstrumentorWrappe
             )
 
             lambda_event = args[0]
+            if isinstance(lambda_event, dict) is False:
+                logger.warning("Received unexpected lambda event")
+                logger.debug("Actual lambda event: %s", lambda_event)
+                return call_wrapped(*args, **kwargs)
 
 
             parent_context = aws_lambda._determine_parent_context(  # pylint:disable=W0212
