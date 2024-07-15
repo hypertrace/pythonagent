@@ -21,3 +21,4 @@ google>=3.0.0
 pyyaml
 protobuf<=3.19.6
 deprecated==1.2.12
+setuptools>=70.0.0 # not directly required, pinned by Snyk to avoid a vulnerability
