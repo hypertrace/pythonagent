@@ -17,10 +17,10 @@ def load_config_from_file(filepath):
         'HT_CONFIG_FILE is set %s. Attempting to load the config file', filepath)
     try:
         path = os.path.abspath(filepath)
-
-        file = open(path, 'r', encoding="utf8")
-        from_file_config = yaml.safe_load(file)
-        file.close()
+        from_file_config = ""
+        with open(path, 'r', encoding="utf8") as file:
+            from_file_config = yaml.safe_load(file)
+            file.close()
 
         logger.debug('Successfully load config from %s', path)
 

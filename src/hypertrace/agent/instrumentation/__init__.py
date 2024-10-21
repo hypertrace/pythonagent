@@ -96,7 +96,7 @@ class BaseInstrumentorWrapper:
         content_type = headers.get("content-type")
         return content_type in self._ALLOWED_CONTENT_TYPES
 
-    def _capture_headers(self, record_headers: bool, header_prefix: str, # pylint:disable=R0913
+    def _capture_headers(self, record_headers: bool, header_prefix: str,  # pylint:disable=R0913,R0917
                          span, headers: dict, record_body):
         try:  # pylint: disable=R1702
             if not span.is_recording():
@@ -117,8 +117,7 @@ class BaseInstrumentorWrapper:
                          traceback.format_exc())
             return False
 
-
-    def _generic_handler(self, record_headers: bool, header_prefix: str, # pylint:disable=R0913
+    def _generic_handler(self, record_headers: bool, header_prefix: str,  # pylint:disable=R0913,R0917
                          record_body: bool, body_prefix: str,
                          span: Span, headers: dict, body):
         logger.debug('Entering BaseInstrumentationWrapper.generic_handler().')
@@ -150,8 +149,9 @@ class BaseInstrumentorWrapper:
             logger.debug('An error occurred in genericRequestHandler: exception=%s, stacktrace=%s',
                          sys.exc_info()[0],
                          traceback.format_exc())
+            return span
         finally:
-            return span  # pylint: disable=W0150
+            return span  # pylint: disable=W0150,W0134
 
     # Generic HTTP Request Handler
     def generic_request_handler(self,  # pylint: disable=R0912
@@ -206,8 +206,9 @@ class BaseInstrumentorWrapper:
                          sys.exc_info()[0],
                          traceback.format_exc())
             # Not rethrowing to avoid causing runtime errors
+            return span
         finally:
-            return span  # pylint: disable=W0150
+            return span  # pylint: disable=W0134,W0150
 
     # Generic RPC Response Handler
     def generic_rpc_response_handler(self,
@@ -226,7 +227,6 @@ class BaseInstrumentorWrapper:
             lowercased_headers = self.lowercase_headers(response_headers)
             # Log rpc metadata if requested?
             if self._process_response_headers:
-
                 logger.debug('Dumping Response Headers:')
                 self.add_headers_to_span(self.RPC_RESPONSE_METADATA_PREFIX, span, lowercased_headers)
             # Log rpc body if requested
@@ -236,6 +236,7 @@ class BaseInstrumentorWrapper:
                 response_body_str = self.grab_first_n_bytes(response_body_str)
                 span.set_attribute(
                     self.RPC_RESPONSE_BODY_PREFIX, response_body_str)
+            return span
         except:  # pylint: disable=W0702
             logger.debug('An error occurred in genericResponseHandler: exception=%s, stacktrace=%s',
                          sys.exc_info()[0],
@@ -243,7 +244,7 @@ class BaseInstrumentorWrapper:
             return span
             # Not rethrowing to avoid causing runtime errors
         finally:
-            return span  # pylint: disable=W0150
+            return span  # pylint: disable=W0134,W0150
 
     # Check body size
     def check_body_size(self, body: str) -> bool:
