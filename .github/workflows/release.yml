@@ -23,10 +23,6 @@ jobs:
           pip install build
           pip install -r requirements.txt
 
-      - name: Install protobuf compiler
-        run: |
-          sudo ./proto.sh linux
-
       - name: Build package
         run: make build
 
