@@ -4,6 +4,7 @@ import sys
 import threading
 import traceback
 from contextlib import contextmanager
+from types import MethodType
 
 from deprecated import deprecated
 import opentelemetry.trace as ot
@@ -20,7 +21,6 @@ from hypertrace.version import __version__
 # The Hypertrace Python Agent class
 
 logger = custom_logger.get_custom_logger(__name__)
-
 
 class Agent:
     '''Top-level entry point for Hypertrace agent.'''
@@ -141,7 +141,7 @@ class Agent:
             return None
         return self._init.register_processor(processor)
 
-    def is_enabled(self) -> bool:  # pylint: disable=R0201
+    def is_enabled(self) -> bool:
         '''Is agent enabled?'''
         enabled = get_env_value('ENABLED')
         if enabled:
@@ -150,7 +150,7 @@ class Agent:
                 return False
         return True
 
-    def is_initialized(self) -> bool:  # pylint: disable=R0201
+    def is_initialized(self) -> bool:
         '''Is agent initialized - if an agent fails to init we should let the app continue'''
         if not self.is_enabled():
             return False

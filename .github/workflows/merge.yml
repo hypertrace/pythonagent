@@ -21,7 +21,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: ["3.7", "3.8.9", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.8.9", "3.9", "3.10", "3.11", "3.12"]
 
     steps:
       - name: Run apt-get update
@@ -52,7 +52,6 @@ jobs:
           protoc --version
           pip uninstall --yes protobuf python3-protobuf
           pip install --upgrade --no-input pip
-          pip install --upgrade --no-input protobuf==3.19.6
 
       - name: Run unit tests
         run: |

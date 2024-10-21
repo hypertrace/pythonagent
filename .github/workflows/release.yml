@@ -29,7 +29,6 @@ jobs:
           protoc --version
           pip uninstall --yes protobuf python3-protobuf
           pip install --no-input --upgrade pip
-          pip install --no-input --upgrade protobuf==3.19.6
 
       - name: Build package
         run: make build
