@@ -28,15 +28,15 @@ _INSTRUMENTATION_STATE = {}
 logger = logging.getLogger(__name__)
 
 def _uninstrument_all():
-    for key in _INSTRUMENTATION_STATE:
+    for key, value in _INSTRUMENTATION_STATE.items():
         logger.debug("Uninstrumenting %s", key)
-        _INSTRUMENTATION_STATE[key].uninstrument()
+        value.uninstrument()
 
     _INSTRUMENTATION_STATE.clear()
 
 def is_already_instrumented(library_key):
     """check if an instrumentation wrapper is already registered"""
-    return library_key in _INSTRUMENTATION_STATE.keys()
+    return library_key in _INSTRUMENTATION_STATE
 
 
 def _mark_as_instrumented(library_key, wrapper_instance):

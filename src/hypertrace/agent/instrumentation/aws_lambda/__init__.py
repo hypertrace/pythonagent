@@ -62,6 +62,7 @@ class AwsLambdaInstrumentorWrapper(AwsLambdaInstrumentor, BaseInstrumentorWrappe
 
             # See more:
             # https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html
+            span_kind = SpanKind.SERVER
             try:
                 if lambda_event["Records"][0]["eventSource"] == "aws:sqs":
                     span_kind = SpanKind.CONSUMER

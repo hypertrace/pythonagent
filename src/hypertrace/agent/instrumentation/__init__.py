@@ -73,11 +73,11 @@ class BaseInstrumentorWrapper:
 
     # we need the headers lowercased multiple times
     # just do it once upfront
-    def lowercase_headers(self, headers): # pylint:disable=R0201
+    def lowercase_headers(self, headers):
         '''convert all headers to lowercase'''
         return {k.lower(): v for k, v in headers.items()}
 
-    def add_headers_to_span(self, prefix: str, span: Span, headers: dict): # pylint:disable=R0201
+    def add_headers_to_span(self, prefix: str, span: Span, headers: dict):
         '''set header attributes on the span'''
         for header_key, header_value in headers.items():
             span.set_attribute(f"{prefix}{header_key}", header_value)
@@ -240,6 +240,7 @@ class BaseInstrumentorWrapper:
             logger.debug('An error occurred in genericResponseHandler: exception=%s, stacktrace=%s',
                          sys.exc_info()[0],
                          traceback.format_exc())
+            return span
             # Not rethrowing to avoid causing runtime errors
         finally:
             return span  # pylint: disable=W0150

@@ -21,7 +21,7 @@ class DjangoInstrumentationWrapper(BaseInstrumentorWrapper):
         DjangoInstrumentor().instrument(request_hook=self.request_hook,
                                         response_hook=self.response_hook)
 
-    def uninstrument(self): # pylint:disable=R0201
+    def uninstrument(self):
         """need this to match wrapper interface for specs"""
         return
 

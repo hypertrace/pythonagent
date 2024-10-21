@@ -18,7 +18,7 @@ def load_config_from_file(filepath):
     try:
         path = os.path.abspath(filepath)
 
-        file = open(path, 'r') # pylint: disable=R1732
+        file = open(path, 'r', encoding="utf8")
         from_file_config = yaml.safe_load(file)
         file.close()
 
