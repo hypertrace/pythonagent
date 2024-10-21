@@ -51,8 +51,7 @@ jobs:
 
       - name: Install protobuf compiler
         run: |
-          sudo apt-get install -y protobuf-compiler
-          protoc --version
+          sudo ./proto.sh linux
           pip uninstall --yes protobuf python3-protobuf
           pip install --upgrade --no-input pip
 
