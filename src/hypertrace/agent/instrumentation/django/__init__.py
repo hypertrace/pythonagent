@@ -1,6 +1,7 @@
 '''Hypertrace django instrumentor module wrapper.''' # pylint: disable=R0401
 import logging
 import traceback
+from types import MethodType
 
 from opentelemetry.instrumentation.django import DjangoInstrumentor
 from opentelemetry.trace import Span
@@ -9,7 +10,6 @@ from django.core.exceptions import PermissionDenied  # pylint:disable=C0415
 from hypertrace.agent import constants
 from hypertrace.agent.filter.registry import Registry, TYPE_HTTP
 from hypertrace.agent.instrumentation import BaseInstrumentorWrapper
-
 
 logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -21,7 +21,7 @@ class DjangoInstrumentationWrapper(BaseInstrumentorWrapper):
         DjangoInstrumentor().instrument(request_hook=self.request_hook,
                                         response_hook=self.response_hook)
 
-    def uninstrument(self): # pylint:disable=R0201
+    def uninstrument(self):
         """need this to match wrapper interface for specs"""
         return
 

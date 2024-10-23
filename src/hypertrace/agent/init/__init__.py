@@ -10,7 +10,7 @@ from opentelemetry.sdk.trace import TracerProvider, export
 from opentelemetry.sdk.trace.export import ConsoleSpanExporter, SimpleSpanProcessor
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter as OTLPGrpcSpanExporter
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter as OTLPHttpSpanExporter
-from opentelemetry.exporter.zipkin.proto.http import ZipkinExporter
+# from opentelemetry.exporter.zipkin.proto.http import ZipkinExporter
 from opentelemetry.trace import ProxyTracerProvider
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
@@ -132,7 +132,7 @@ class AgentInit:  # pylint: disable=R0902,R0903
                          err,
                          traceback.format_exc())
 
-    def register_processor(self, processor) -> None:  # pylint:disable=R0201
+    def register_processor(self, processor) -> None:
         '''Register additional span exporter + processor'''
         logger.debug('Entering AgentInit.register_processor().')
         trace.get_tracer_provider().add_span_processor(processor)
@@ -152,9 +152,9 @@ class AgentInit:  # pylint: disable=R0902,R0903
         try:
             if trace_reporter_type == config_pb2.TraceReporterType.ZIPKIN:
                 exporter_type = 'zipkin'
-                exporter = ZipkinExporter(
-                    endpoint=self._config.agent_config.reporting.endpoint
-                )
+                #exporter = ZipkinExporter(
+                #    endpoint=self._config.agent_config.reporting.endpoint
+                #)
             elif trace_reporter_type == config_pb2.TraceReporterType.OTLP:
                 exporter_type = 'otlp'
                 exporter = OTLPGrpcSpanExporter(endpoint=self._config.agent_config.reporting.endpoint,

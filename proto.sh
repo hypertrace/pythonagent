@@ -1,5 +1,5 @@
 # /bin/sh
-PROTO_VERSION=3.13.0
+PROTO_VERSION=3.20.2
 OS=$1 #osx for local
 
 rm -rf ./protoc

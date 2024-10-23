@@ -21,7 +21,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: ["3.7", "3.8.9", "3.9", "3.10"]
+        python-version: ["3.8.9", "3.9", "3.10", "3.11", "3.12"]
 
     steps:
       - name: Run apt-get update
@@ -31,11 +31,11 @@ jobs:
         run: sudo apt-get install make
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install dependencies
         run: |
@@ -44,15 +44,10 @@ jobs:
           pip install -r requirements.txt -r dev-requirements.txt
 
       - name: Lint files
-        run: make lint
-
-      - name: Install protobuf compiler
+        if: startsWith(matrix.python-version, '3.9') || startsWith(matrix.python-version, '3.10') || startsWith(matrix.python-version, '3.11') || startsWith(matrix.python-version, '3.12')
         run: |
-          sudo apt-get install -y protobuf-compiler
-          protoc --version
-          pip uninstall --yes protobuf python3-protobuf
-          pip install --upgrade --no-input pip
-          pip install --upgrade --no-input protobuf==3.19.6
+          pip install pylint==3.3.1
+          make lint
 
       - name: Run unit tests
         run: |

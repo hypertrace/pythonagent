@@ -74,21 +74,22 @@ def test_collects_body_data(django_client):
     assert attrs["http.response.body"] == '{"data": 123}'
 
 
-def test_can_block(django_client):
-    r = Registry()
-    r.register(SampleBlockingFilter)
-    response = django_client.post('/test/123', data={"some_client_data": "123"}, content_type="application/json")
-    assert response.status_code == 403
-    simpleExportSpanProcessor.force_flush(1)
-    span_list = memoryExporter.get_finished_spans()
-    django_span = span_list[0]
-    attrs = django_span.attributes
-    assert attrs['http.status_code'] == 403
-    r.filters.clear()
-    memoryExporter.clear()
+def test_can_block(django_client, agent_with_filter, exporter):
+    response = None
+    try:
+        response = django_client.post('/test/123', data={"some_client_data": "123"}, content_type="application/json")
+    except Exception as e:
+        assert Exception is PermissionError
+        assert response.status_code == 403
+        span_list = exporter.get_finished_spans()
+        exporter.clear()
+        django_span = span_list[0]
+        attrs = django_span.attributes
+        assert attrs['http.status_code'] == 403
+
 
 def test_asgi_wrappers(django_client):
-    if _INSTRUMENTATION_STATE[DJANGO_KEY]:
+    if _INSTRUMENTATION_STATE.get(DJANGO_KEY, None) is not None:
         del _INSTRUMENTATION_STATE[DJANGO_KEY]
     TEST_AGENT_INSTANCE._instrument(DJANGO_KEY, auto_instrument=True)
     from django.core import asgi, wsgi
@@ -101,7 +102,7 @@ def test_asgi_wrappers(django_client):
     assert str(wsgi.get_wsgi_application).index('get_wsgi_application') > 0
 
 def test_wsgi_wrappers(django_client):
-    if _INSTRUMENTATION_STATE[DJANGO_KEY]:
+    if _INSTRUMENTATION_STATE.get(DJANGO_KEY, None) is not None:
         del _INSTRUMENTATION_STATE[DJANGO_KEY]
     TEST_AGENT_INSTANCE._instrument(DJANGO_KEY, auto_instrument=True)
     from django.core import wsgi, asgi

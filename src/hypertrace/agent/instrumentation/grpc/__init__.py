@@ -91,7 +91,7 @@ class GrpcInstrumentorClientWrapper(GrpcInstrumentorClient, BaseInstrumentorWrap
         super()._uninstrument(**kwargs)
 
     # Wrap function for initializing the the request handler
-    def wrapper_fn_wrapper(self, original_func, instance, args, kwargs) -> None: # pylint: disable=W0613,R0201
+    def wrapper_fn_wrapper(self, original_func, instance, args, kwargs) -> None: # pylint: disable=W0613
         '''Wrap function for initializing the the request handler'''
         channel = original_func(*args, **kwargs)
         tracer_provider = kwargs.get("tracer_provider")
