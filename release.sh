@@ -73,11 +73,6 @@ git checkout $MAIN_BRANCH
 echo "Fetching latest $MAIN_BRANCH..."
 git pull origin $MAIN_BRANCH
 
-echo "Verifying docs"
-# Makes sure docs are up to date
-tox -e pdoc
-git diff-index --quiet HEAD ./docs || commit_docs
-
 echo "Writing version file"
 write_version_file $VERSION $VERSION_FILE
 git add $VERSION_FILE
